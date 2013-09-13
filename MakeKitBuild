@@ -1,0 +1,154 @@
+PROJECT_NAME="pike"
+MODULES="core compiler program package-rpm package-deb"
+
+SUBDIRS="pike pykerb"
+
+configure()
+{
+    mk_check_program FAIL=yes python
+    mk_check_program FAIL=yes python-config
+
+    mk_check_program epydoc
+
+    mk_declare -i -e \
+        PYTHON_LIBS="`$PYTHON_CONFIG --libs | sed 's:-l::g'`" \
+        PYTHON_CPPFLAGS="`$PYTHON_CONFIG --includes`" \
+        PYTHON_EPREFIX="`$PYTHON_CONFIG --exec-prefix`" \
+        PYTHON_DIST="`$PYTHON -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib(True))'`"        
+
+    if [ "$PYTHON_EPREFIX" != "/usr" ]
+    then
+        PYTHON_LIBDIR="$PYTHON_EPREFIX/lib"
+        [ -d "$PYTHON_EPREFIX/lib64" ] && PYTHON_LIBDIR="$PYTHON_EPREFIX/lib64"
+    else
+        PYTHON_LIBDIR=""
+    fi
+
+    if [ -n "$PYTHON_LIBDIR" ]
+    then
+        MK_LDFLAGS="$MK_LDFLAGS -L$PYTHON_LIBDIR"
+        MK_RPATHFLAGS="$MK_RPATHFLAGS -Wl,-rpath,$PYTHON_LIBDIR"
+    fi
+
+    # Python.h is not strict-aliasing clean
+    MK_CFLAGS="$MK_CFLAGS -fno-strict-aliasing"
+
+    mk_check_lang c
+    mk_compiler_warnings all error
+
+    mk_config_header config.h
+
+    mk_check_headers FAIL=yes gssapi/gssapi.h gssapi/gssapi_generic.h gssapi/gssapi_krb5.h gssapi/gssapi_ext.h
+    mk_check_libraries FAIL=yes gssapi_krb5
+
+    mk_check_headers FAIL=yes CPPFLAGS="$PYTHON_CPPFLAGS" Python.h
+    mk_check_libraries FAIL=yes $PYTHON_LIBS
+
+    mk_check_functions HEADERDEPS="gssapi/gssapi.h gssapi/gssapi_ext.h" LIBDEPS="gssapi_krb5" \
+        gss_set_cred_option \
+        gssspi_set_cred_option
+
+    if mk_rpm_enabled
+    then
+        mk_declare -i -o RPM_VERSION=0.1 RPM_RELEASE=0
+    fi
+
+    if mk_deb_enabled
+    then
+        mk_declare -i -o DEB_VERSION=0.1 DEB_DATE="`date -R`"
+        mk_declare -o MK_DEBUG MK_PREFIX MK_ROOT_DIR MK_STAGE_DIR
+    fi
+}
+
+make()
+{
+    # Documentation
+    if [ -n "$EPYDOC" ]
+    then
+        mk_get_stage_targets SELECT="*.py" pike pykerb
+
+        mk_target \
+            TARGET="$HTMLDIR/pike" \
+            DEPS="$result" \
+            build_docs '$@' "*$result"
+    fi
+
+    if mk_rpm_enabled
+    then
+	mk_rpm_do \
+	    PACKAGE=python-pike \
+	    SPECFILE=rpm/python-pike.spec.in \
+	    VERSION="$RPM_VERSION"
+
+	mk_package_patterns SUBDIRS='pike pykerb' '*'
+
+	mk_rpm_done
+    fi
+
+    if mk_deb_enabled
+    then
+	mk_deb_do \
+	    PACKAGE=python-pike \
+            VERSION="$DEB_VERSION" \
+            DEBIANFILES="deb/changelog.in deb/control.in deb/rules.in deb/compat.in"
+
+	mk_package_patterns SUBDIRS='pike pykerb' '*'
+
+	mk_deb_done
+    fi
+
+    mk_phony_target NAME='test' DEPS='@all' run_tests \
+        SERVER='$(SERVER)' \
+        CREDS='$(CREDS)' \
+        SHARE='$(SHARE)' \
+        TEST='$(TEST)' \
+        TRACE='$(TRACE)' \
+        LOGLEVEL='$(LOGLEVEL)' \
+        '&test'
+}
+
+run_tests()
+{
+    mk_push_vars SERVER CREDS SHARE TEST TRACE LOGLEVEL
+    mk_parse_params
+
+    mk_msg_domain test
+
+    if [ -n "$TEST" ]
+    then
+        mk_run_or_fail env \
+            PYTHONPATH="$MK_STAGE_DIR$PYTHON_DIST:$1" \
+            PIKE_SERVER="$SERVER" \
+            PIKE_CREDS="$CREDS" \
+            PIKE_SHARE="$SHARE" \
+            PIKE_TRACE="$TRACE" \
+            PIKE_LOGLEVEL="$LOGLEVEL" \
+            $PYTHON -B -m unittest -v "$TEST"
+    else
+        mk_run_or_fail env \
+            PYTHONPATH="$MK_STAGE_DIR$PYTHON_DIST" \
+            PIKE_SERVER="$SERVER" \
+            PIKE_CREDS="$CREDS" \
+            PIKE_SHARE="$SHARE" \
+            PIKE_TRACE="$TRACE" \
+            PIKE_LOGLEVEL="$LOGLEVEL" \
+            $PYTHON -B -m unittest discover -v -s "$1" -p '*.py'
+    fi
+    
+    mk_pop_vars
+}
+
+build_docs()
+{
+    mk_msg_domain epydoc
+
+    output="$1"
+    shift
+
+    mk_pretty_path "$output"
+    mk_msg "$result"
+
+    mk_mkdirname "$output"
+    mk_run_quiet_or_fail $EPYDOC -o "$output" --no-private --simple-term --fail-on-error --fail-on-warning -v "$@"
+    mk_run_or_fail touch "$output"
+}

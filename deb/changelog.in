@@ -1,0 +1,5 @@
+python-pike (@DEB_VERSION@) none; urgency=low
+
+  * New release
+
+ -- EMC Isilon <brian.koropoff@isilon.com>  @DEB_DATE@

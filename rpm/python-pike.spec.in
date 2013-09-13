@@ -1,0 +1,11 @@
+Name: 		python-pike
+Summary: 	Python SMB2/3 test framework
+Version: 	@RPM_VERSION@
+Release: 	@RPM_RELEASE@
+License: 	2-clause BSD, Apache 2.0
+URL: 		http://www.isilon.com
+Group: 		Development
+AutoReq: no
+
+%description
+Python SMB2/3 test framework

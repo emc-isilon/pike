@@ -1,0 +1,21 @@
+digraph hierarchy {
+	rankdir = BT
+	Frame [style=dashed]
+	Command [style=dashed]
+	Request [style=dashed]
+	Response [style=dashed]
+	CreateRequestContext [style=dashed]
+	DirectoryInformation [style=dashed]
+
+	Netbios -> Frame
+	Smb2 -> Frame
+	Command -> Frame
+	Request -> Command
+	Response -> Command
+	CreateRequest -> Request
+	QueryDirectoryResponse -> Response
+	CreateRequestContext -> Frame
+	LeaseRequest -> CreateRequestContext
+	DirectoryInformation -> Frame
+	FileDirectoryInformation -> DirectoryInformation
+}

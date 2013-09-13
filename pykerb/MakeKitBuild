@@ -1,0 +1,13 @@
+make()
+{
+    mk_dlo \
+        DLO="kerberos" \
+        INSTALLDIR="$PYTHON_DIST/pike" \
+        SOURCES="base64.c kerberosbasic.c kerberos.c kerberosgss.c kerberospw.c" \
+        CPPFLAGS="$PYTHON_CPPFLAGS" \
+        HEADERDEPS="Python.h gssapi/gssapi.h" \
+        LIBDEPS="$PYTHON_LIBS gssapi_krb5" \
+        INCLUDEDIRS=". .."
+
+   mk_stage DESTDIR="$PYTHON_DIST/pike" kerberos.py
+}

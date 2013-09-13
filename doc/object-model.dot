@@ -1,0 +1,15 @@
+digraph model {
+	layout=neato
+	overlap=false
+	Client -> Connection [label="*"]
+	Client -> Future [label="*"]
+	Connection -> Session [label="*"]
+	Connection -> Future [label="*"]
+	Session -> Channel [label="*"]
+	Session -> Client
+	Channel -> {Session Connection}
+	Tree -> Session
+	Open -> {Tree Lease Future}
+	Client -> Lease [label="*"]
+	Lease -> Future
+}

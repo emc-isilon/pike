@@ -1,0 +1,7 @@
+digraph request {
+	Smb2a [label="Smb2[0]"]
+	Smb2b [label="Smb2[1]"]
+	Netbios -> {Smb2a Smb2b}
+      	Smb2a -> CreateRequest -> MaximalAccessRequest
+      	Smb2b -> CloseRequest
+}
