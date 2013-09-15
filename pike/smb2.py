@@ -1923,10 +1923,17 @@ class IoctlCode(core.ValueEnum):
     FSCTL_VALIDATE_NEGOTIATE_INFO      = 0x00140204
 
 IoctlCode.import_items(globals())
+
+class IoctlFlags(core.FlagEnum):
+    SMB2_0_IOCTL_IS_FSCTL = 0x00000001
+
+IoctlFlags.import_items(globals())
     
 class IoctlRequest(Request):
     command_id = SMB2_IOCTL
     structure_size = 57
+
+    field_blacklist = ['ioctl_input']
 
     def __init__(self, parent):
         Request.__init__(self, parent)
@@ -1940,7 +1947,7 @@ class IoctlRequest(Request):
         self.output_offset = 0
         self.output_count = 0
         self.max_output_response = 256
-        self.flags = 0x00000001
+        self.flags = 0
         self.buffer = None
         self.ioctl_input = None
 
@@ -1980,6 +1987,8 @@ class IoctlResponse(Response):
     command_id = SMB2_IOCTL
     structure_size = 49
 
+    field_blacklist = ['ioctl_output']
+
     # Set up a map so that the correct IoctlOutput frame decoder will be called,
     # based on the ioctl_ctl_code defined in the IoctlOutput
     _ioctl_ctl_code_map = {}
@@ -1987,14 +1996,14 @@ class IoctlResponse(Response):
 
     def __init__(self, parent):
         Response.__init__(self, parent)
-        self._ioctl_inputs = []
+        self._ioctl_output = None
 
-    def append(self, e):
-            self._ioctl_inputs.append(e)
+    def _children(self):
+        return [self.ioctl_output] if self.ioctl_output is not None else []
 
     def _decode(self, cur):
         self.reserved = cur.decode_uint16le()
-        self.ctl_code = cur.decode_uint32le()
+        self.ctl_code = IoctlCode(cur.decode_uint32le())
         self.file_id = (cur.decode_uint64le(), cur.decode_uint64le())
         self.input_offset = cur.decode_uint32le()
         self.input_count = cur.decode_uint32le()
@@ -2011,7 +2020,10 @@ class IoctlResponse(Response):
             ioctl(self).decode(cur)
 
 class IoctlInput(core.Frame):
-    pass
+    def __init__(self, parent):
+        super(IoctlInput, self).__init__(parent)
+        if parent is not None:
+            parent.ioctl_input = self
 
 class ValidateNegotiateInfoRequest(IoctlInput):
     ioctl_ctl_code = FSCTL_VALIDATE_NEGOTIATE_INFO
@@ -2023,7 +2035,6 @@ class ValidateNegotiateInfoRequest(IoctlInput):
         self.security_mode = None
         self.dialects_count = None
         self.dialects = None
-        parent.ioctl_input = self
 
     def  _encode(self, cur):
         cur.encode_uint32le(self.capabilities)
@@ -2040,7 +2051,10 @@ class ValidateNegotiateInfoRequest(IoctlInput):
 
 @IoctlResponse.ioctl_ctl_code
 class IoctlOutput(core.Frame):
-    pass
+    def __init__(self, parent):
+        super(IoctlOutput, self).__init__(parent)
+        if parent is not None:
+            parent.ioctl_output = self
     
 class ValidateNegotiateInfoResponse(IoctlOutput):
     ioctl_ctl_code = FSCTL_VALIDATE_NEGOTIATE_INFO
@@ -2051,11 +2065,9 @@ class ValidateNegotiateInfoResponse(IoctlOutput):
         self.guid = None
         self.security_mode = None
         self.dialect = None
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
-        self.capabilities = cur.decode_uint32le()
+        self.capabilities = GlobalCaps(cur.decode_uint32le())
         self.client_guid = cur.decode_bytes(16)
-        self.security_mode = cur.decode_uint16le()
-        self.dialect = cur.decode_uint16le()
+        self.security_mode = SecurityMode(cur.decode_uint16le())
+        self.dialect = Dialect(cur.decode_uint16le())

@@ -1029,6 +1029,7 @@ class Channel(object):
         ioctl_req = smb2.IoctlRequest(smb_req)
         vni_req = smb2.ValidateNegotiateInfoRequest(ioctl_req)
         client = self.session.client
+        ioctl_req.flags = smb2.SMB2_0_IOCTL_IS_FSCTL
         vni_req.capabilities = client.capabilities
         vni_req.client_guid = client.client_guid
         vni_req.security_mode = client.security_mode
