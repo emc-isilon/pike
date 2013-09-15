@@ -1078,6 +1078,11 @@ class CloseRequest(Request):
         cur.encode_uint64le(self.file_id[0])
         cur.encode_uint64le(self.file_id[1])
 
+class CloseFlags(core.FlagEnum):
+    SMB2_CLOSE_FLAG_POSTQUERY_ATTRIB = 0x0001
+
+CloseFlags.import_items(globals())
+
 class CloseResponse(Response):
     command_id = SMB2_CLOSE
     structure_size = 60
@@ -1094,7 +1099,7 @@ class CloseResponse(Response):
         self.file_attributes = 0
 
     def _decode(self, cur):
-        self.flags = cur.decode_uint16le()
+        self.flags = CloseFlags(cur.decode_uint16le())
         # Ignore Reserved
         cur.decode_uint32le()
         self.creation_time = nttime.NtTime(cur.decode_uint64le())
