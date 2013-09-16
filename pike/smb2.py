@@ -87,7 +87,7 @@ class Flags(core.FlagEnum):
 Flags.import_items(globals())
 
 # Command constants
-class Commands(core.ValueEnum):
+class Command(core.ValueEnum):
     SMB2_NEGOTIATE       = 0x0000
     SMB2_SESSION_SETUP   = 0x0001
     SMB2_LOGOFF          = 0x0002
@@ -106,7 +106,7 @@ class Commands(core.ValueEnum):
     SMB2_SET_INFO        = 0x0011
     SMB2_OPLOCK_BREAK    = 0x0012
 
-Commands.import_items(globals())
+Command.import_items(globals())
 
 # Share Capabilities
 class ShareCaps(core.FlagEnum):
