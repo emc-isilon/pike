@@ -67,6 +67,9 @@ trace = False
 class TimeoutError(Exception):
     pass
 
+class StateError(Exception):
+    pass
+
 class Future(object):
     """
     Result of an asynchronous operation.
@@ -796,6 +799,9 @@ class Channel(object):
         self.signing_key = signing_key
 
     def cancel(self, future):
+        if (future.response is not None):
+            raise StateError("Cannot cancel completed request")
+
         smb_req = self.request()
         cancel_req = smb2.Cancel(smb_req)
 
