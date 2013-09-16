@@ -653,7 +653,7 @@ class FlagEnum(Enum):
                 remaining &= ~flag
 
         if remaining != 0:
-            raise ValueError("Invalid %s: %x" % (cls.__name__, value))
+            raise ValueError("Invalid %s: 0x%x (remainder 0x%x)" % (cls.__name__, value, remaining))
 
     def __str__(self):
         names = [name for (name,flag) in self.items()
