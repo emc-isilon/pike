@@ -51,6 +51,7 @@ class DurableHandleTest(pike.test.PikeTest):
         self.rwh = self.rw | self.rh
 
     # Request a durable handle
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
     def test_durable(self):
         chan, tree = self.tree_connect()
 
@@ -71,6 +72,7 @@ class DurableHandleTest(pike.test.PikeTest):
         chan.close(handle1)
 
     # Reconnect a durable handle after a TCP disconnect
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
     def test_durable_reconnect(self):
         chan, tree = self.tree_connect()
 
