@@ -48,6 +48,7 @@ LEASE_RWH = LEASE_RW | LEASE_RH
 SHARE_ALL = smb2.FILE_SHARE_READ | smb2.FILE_SHARE_WRITE | smb2.FILE_SHARE_DELETE
 
 @test.RequireDialect(smb2.DIALECT_SMB3_0)
+@test.RequireCapabilities(smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES)
 class Persistent(test.PikeTest):
     def setup(self):
         self.lease_key = array.array('B',map(random.randint, [0]*16, [255]*16))
