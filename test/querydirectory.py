@@ -44,7 +44,7 @@ class QueryDirectoryTest(pike.test.PikeTest):
     def test_file_directory_info(self):
         chan, tree = self.tree_connect()
         
-        root = chan.create(tree, '', access=pike.smb2.GENERIC_READ, options=pike.smb2.FILE_DIRECTORY_FILE).result()
+        root = chan.create(tree, '', access=pike.smb2.GENERIC_READ, options=pike.smb2.FILE_DIRECTORY_FILE, share=pike.smb2.FILE_SHARE_READ).result()
         names = map(lambda info: info.file_name, chan.query_directory(root))
 
         self.assertIn('.', names)
