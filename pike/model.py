@@ -198,6 +198,7 @@ class Future(object):
     def __exit__(self, exc_type, exc_value, traceback):
         if exc_type is not None:
             self.complete(exc_value, traceback)
+            return True
 
     def __call__(self, *params, **kwparams):
         self.complete(*params, **kwparams)
