@@ -39,7 +39,7 @@ import gc
 import logging
 import sys
 import contextlib
-import smb2
+import model
 
 # Try and import backported unittest2 module in python2.6
 try:
@@ -140,15 +140,15 @@ class PikeTest(unittest.TestCase):
 
         try:
             yield o
-        except smb2.ErrorResponse as e:
+        except model.ResponseError as e:
             pass
 
         if e is None:
             raise self.failureException('No error raised when "%s" expected' % status)
-        elif e.parent.status != status:
-            raise self.failureException('"%s" raised when "%s" expected' % (e.parent.status, status))
+        elif e.response.status != status:
+            raise self.failureException('"%s" raised when "%s" expected' % (e.response.status, status))
 
-        o.response = e.parent
+        o.response = e.response
 
     def setUp(self):
         if self.loglevel != logging.NOTSET:

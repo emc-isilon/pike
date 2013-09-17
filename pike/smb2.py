@@ -313,12 +313,11 @@ class Response(Command):
 class Notification(Command):
     pass
 
-class ErrorResponse(Command, Exception):
+class ErrorResponse(Command):
     structure_size = 9
 
     def __init__(self, parent):
         Command.__init__(self, parent)
-        Exception.__init__(self, str(parent.status), parent.status)
         parent.command = self
         self.byte_count = None
         self.error_data = None

@@ -70,6 +70,11 @@ class TimeoutError(Exception):
 class StateError(Exception):
     pass
 
+class ResponseError(Exception):
+    def __init__(self, response):
+        Exception.__init__(self, str(response.status))
+        self.response = response
+
 class Future(object):
     """
     Result of an asynchronous operation.
@@ -567,7 +572,7 @@ class Connection(asyncore.dispatcher):
                 if smb_res.status == smb2.STATUS_PENDING:
                     future.interim(smb_res)
                 elif isinstance(smb_res[0], smb2.ErrorResponse):
-                    future.complete(smb_res[0])
+                    future.complete(ResponseError(smb_res))
                     del self._future_map[smb_res.message_id]
                 else:
                     future.complete(smb_res)
@@ -940,8 +945,8 @@ class Channel(object):
                 enum_req.file_information_class = file_information_class
                 for info in self.connection.transceive(smb_req.parent)[0][0]:
                     yield info
-        except smb2.ErrorResponse as e:
-            if e.parent.status == smb2.STATUS_NO_MORE_FILES:
+        except ResponseError as e:
+            if e.response.status == smb2.STATUS_NO_MORE_FILES:
                 return
             else:
                 raise
