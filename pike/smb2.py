@@ -726,6 +726,8 @@ class CreateRequest(Request):
         
         cur.align(self.parent.start, 2)
         
+        buffer_start = cur.copy()
+
         name_offset_hole(cur - self.parent.start)
         name_start = cur.copy()
         cur.encode_utf16le(self.name)
@@ -773,6 +775,10 @@ class CreateRequest(Request):
                     cur.reverseto(name_end)
 
             create_contexts_length_hole(cur - create_contexts_start)
+
+        if cur == buffer_start:
+            # Buffer must be at least 1 byte
+            cur.encode_uint8le(0)
 
     def append(self, e):
         self._create_contexts.append(e)
