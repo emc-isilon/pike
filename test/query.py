@@ -64,7 +64,6 @@ class QueryTest(pike.test.PikeTest):
     def test_query_file_standard_info(self):
         self.basic_test(pike.smb2.FILE_STANDARD_INFORMATION)
 
-    @unittest.expectedFailure
     def test_query_file_alignment_info(self):
         self.basic_test(pike.smb2.FILE_ALIGNMENT_INFORMATION)
 

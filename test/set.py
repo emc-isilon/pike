@@ -75,7 +75,6 @@ class SetTest(pike.test.PikeTest):
         self.chan.close(handle)
 
     # Set file mode with FILE_MODE_INFORMATION
-    @unittest.expectedFailure
     def test_set_file_mode_info(self):
         handle = self.open_file()
 
