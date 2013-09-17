@@ -41,129 +41,149 @@ import random
 import array
 
 class DurableHandleTest(pike.test.PikeTest):
-    def __init__(self, *args, **kwargs):
-        super(DurableHandleTest, self).__init__(*args, **kwargs)
-        self.share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
-        self.lease1 = array.array('B',map(random.randint, [0]*16, [255]*16))
-        self.r = pike.smb2.SMB2_LEASE_READ_CACHING
-        self.rw = self.r | pike.smb2.SMB2_LEASE_WRITE_CACHING
-        self.rh = self.r | pike.smb2.SMB2_LEASE_HANDLE_CACHING
-        self.rwh = self.rw | self.rh
+    share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
+    lease1 = array.array('B',map(random.randint, [0]*16, [255]*16))
+    lease2 = array.array('B',map(random.randint, [0]*16, [255]*16))
+    r = pike.smb2.SMB2_LEASE_READ_CACHING
+    rw = r | pike.smb2.SMB2_LEASE_WRITE_CACHING
+    rh = r | pike.smb2.SMB2_LEASE_HANDLE_CACHING
+    rwh = rw | rh
+                    
+    def create(self, chan, tree, durable, lease=rwh, lease_key=lease1, disposition=pike.smb2.FILE_SUPERSEDE):
+        return chan.create(tree,
+                           'durable.txt',
+                           access=pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE,
+                           share=self.share_all,
+                           disposition=disposition,
+                           oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
+                           lease_key = lease_key,
+                           lease_state = lease,
+                           durable=durable).result()
+
+    def durable_test(self, durable):
+        chan, tree = self.tree_connect()
+
+        handle1 = self.create(chan, tree, durable=durable)
+
+        self.assertEqual(handle1.lease.lease_state, self.rwh)
+
+        chan.close(handle1)
+
+    def durable_reconnect_test(self, durable):
+        chan, tree = self.tree_connect()
+
+        handle1 = self.create(chan, tree, durable=durable)
+
+        self.assertEqual(handle1.lease.lease_state, self.rwh)
+
+        # Close the connection
+        chan.connection.close()
+
+        chan2, tree2 = self.tree_connect()
+
+        # Request reconnect
+        handle2 = self.create(chan2, tree2, durable=handle1)
+    
+        self.assertEqual(handle2.lease.lease_state, self.rwh)
+
+        chan2.close(handle2)
+
+    def durable_reconnect_fails_client_guid_test(self, durable):
+        chan, tree = self.tree_connect()
+
+        handle1 = self.create(chan, tree, durable=durable)
+
+        self.assertEqual(handle1.lease.lease_state, self.rwh)
+
+        # Close the connection
+        chan.connection.close()
+
+        chan2, tree2 = self.tree_connect(client=pike.model.Client())
+
+        with self.assert_error(pike.smb2.STATUS_OBJECT_NAME_NOT_FOUND):
+            handle2 = self.create(chan2, tree2, durable=handle1)
+
+        chan2.connection.close()
+
+        chan3, tree3 = self.tree_connect()
+
+        handle3 = self.create(chan3, tree3, durable=handle1)
+
+        chan3.close(handle3)
+
+    def durable_invalidate_test(self, durable):
+        chan, tree = self.tree_connect()
+
+        handle1 = self.create(chan, tree, durable=durable, lease=self.rw)
+        self.assertEqual(handle1.lease.lease_state, self.rw)
+
+        # Close the connection
+        chan.connection.close()
+
+        chan2, tree2 = self.tree_connect(client=pike.model.Client())
+
+        # Invalidate handle from separate client
+        handle2 = self.create(chan2,
+                              tree2,
+                              durable=durable,
+                              lease=self.rw,
+                              lease_key=self.lease2,
+                              disposition=pike.smb2.FILE_OPEN)
+        self.assertEqual(handle2.lease.lease_state, self.rw)
+        chan2.close(handle2)
+
+        chan2.connection.close()
+
+        chan3, tree3 = self.tree_connect()
+
+        # Reconnect should now fail
+        with self.assert_error(pike.smb2.STATUS_OBJECT_NAME_NOT_FOUND):
+            handle3 = self.create(chan3, tree3, durable=handle1)
 
     # Request a durable handle
     @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
     def test_durable(self):
-        chan, tree = self.tree_connect()
-
-        # Request rwh lease
-        handle1 = chan.create(tree,
-                              'durable.txt',
-                              access=pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE,
-                              share=self.share_all,
-                              disposition=pike.smb2.FILE_SUPERSEDE,
-                              options=pike.smb2.FILE_DELETE_ON_CLOSE,
-                              oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
-                              lease_key = self.lease1,
-                              lease_state = self.rwh,
-                              durable=True).result()
-
-        self.assertEqual(handle1.lease.lease_state, self.rwh)
-
-        chan.close(handle1)
+        self.durable_test(True)
 
     # Reconnect a durable handle after a TCP disconnect
     @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
     def test_durable_reconnect(self):
-        chan, tree = self.tree_connect()
+        self.durable_reconnect_test(True)
 
-        # Request rwh lease
-        handle1 = chan.create(tree,
-                              'durable.txt',
-                              access=pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE,
-                              share=self.share_all,
-                              disposition=pike.smb2.FILE_SUPERSEDE,
-                              options=pike.smb2.FILE_DELETE_ON_CLOSE,
-                              oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
-                              lease_key = self.lease1,
-                              lease_state = self.rwh,
-                              durable=True).result()
+    # Reconnecting a durable handle after a TCP disconnect
+    # fails with STATUS_OBJECT_NAME_NOT_FOUND if the client
+    # guid does not match
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
+    def test_durable_reconnect_fails_client_guid(self):
+        self.durable_reconnect_fails_client_guid_test(True)
 
-        self.assertEqual(handle1.lease.lease_state, self.rwh)
-
-        # Close the connection
-        chan.connection.close()
-
-        chan2, tree2 = self.tree_connect()
-
-        # Request reconnect
-        handle2 = chan2.create(tree,
-                               'durable.txt',
-                               share=self.share_all,
-                               disposition=pike.smb2.FILE_SUPERSEDE,
-                               oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
-                               lease_key = self.lease1,
-                               lease_state = self.rwh,
-                               durable=handle1).result()
-    
-        self.assertEqual(handle2.lease.lease_state, self.rwh)
-
-        chan2.close(handle2)
+    # Breaking the lease of a disconnected durable handle
+    # (without HANDLE) invalidates it, so a subsequent
+    # reconnect will fail.
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
+    def test_durable_invalidate(self):
+        self.durable_invalidate_test(True)
 
     # Request a durable handle via V2 context structure
     @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
     def test_durable_v2(self):
-        chan, tree = self.tree_connect()
-        
-        # Request rwh lease
-        handle1 = chan.create(tree,
-                              'durable.txt',
-                              access=pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE,
-                              share=self.share_all,
-                              disposition=pike.smb2.FILE_SUPERSEDE,
-                              options=pike.smb2.FILE_DELETE_ON_CLOSE,
-                              oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
-                              lease_key = self.lease1,
-                              lease_state = self.rwh,
-                              durable=0).result()
-    
-        self.assertEqual(handle1.lease.lease_state, self.rwh)
-
-        chan.close(handle1)
+        self.durable_test(0)
 
     # Reconnect a durable handle via V2 context structure
     @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
     def test_durable_reconnect_v2(self):
-        chan, tree = self.tree_connect()
+        self.durable_reconnect_test(0)
 
-        # Request rwh lease
-        handle1 = chan.create(tree,
-                              'durable.txt',
-                              access=pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE,
-                              share=self.share_all,
-                              disposition=pike.smb2.FILE_SUPERSEDE,
-                              options=pike.smb2.FILE_DELETE_ON_CLOSE,
-                              oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
-                              lease_key = self.lease1,
-                              lease_state = self.rwh,
-                              durable=0).result()
+    # Reconnecting a durable handle (v2) after a TCP disconnect
+    # fails with STATUS_OBJECT_NAME_NOT_FOUND if the client
+    # guid does not match
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
+    def test_durable_reconnect_v2_fails_client_guid(self):
+        self.durable_reconnect_fails_client_guid_test(0)
 
-        self.assertEqual(handle1.lease.lease_state, self.rwh)
-
-        # Close the connection
-        chan.connection.close()
-
-        chan2, tree2 = self.tree_connect()
-
-        # Request reconnect
-        handle2 = chan2.create(tree,
-                               'durable.txt',
-                               share=self.share_all,
-                               disposition=pike.smb2.FILE_SUPERSEDE,
-                               oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
-                               lease_key = self.lease1,
-                               lease_state = self.rwh,
-                               durable=handle1).result()
-    
-        self.assertEqual(handle2.lease.lease_state, self.rwh)
-
-        chan2.close(handle2)
+    # Breaking the lease of a disconnected durable handle v2
+    # (without HANDLE) invalidates it, so a subsequent
+    # reconnect will fail.
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
+    def test_durable_v2_invalidate(self):
+        self.durable_invalidate_test(0)
