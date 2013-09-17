@@ -48,7 +48,6 @@ class AppInstanceIdTest(pike.test.PikeTest):
         self.share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
         self.lease1 = array.array('B',map(random.randint, [0]*16, [255]*16))
         self.app_instance_id1 = array.array('B',map(random.randint, [0]*16, [255]*16))
-        self.client_guid1 = array.array('B',map(random.randint, [0]*16, [255]*16))
         self.r = pike.smb2.SMB2_LEASE_READ_CACHING
         self.rw = self.r | pike.smb2.SMB2_LEASE_WRITE_CACHING
         self.rh = self.r | pike.smb2.SMB2_LEASE_HANDLE_CACHING
@@ -97,7 +96,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
         # Close the connection
         chan.connection.close()
 
-        chan2, tree2 = self.tree_connect()
+        chan2, tree2 = self.tree_connect(client=pike.model.Client())
 
         # Request reconnect
         handle2 = chan2.create(tree,
@@ -120,7 +119,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
     # Invalidating a disconnected persistent handle
     # with AppInstanceId fails when reusing the same client GUID
     def test_appinstanceid_reconnect_same_clientguid(self):
-        chan, tree = self.tree_connect(client_guid=self.client_guid1)
+        chan, tree = self.tree_connect()
 
         # Request rwh lease
         handle1 = chan.create(tree,
@@ -139,7 +138,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
         # Close the connection
         chan.connection.close()
 
-        chan2, tree2 = self.tree_connect(client_guid=self.client_guid1)
+        chan2, tree2 = self.tree_connect()
 
         # Request reconnect
         with self.assert_error(pike.smb2.STATUS_FILE_NOT_AVAILABLE):
@@ -159,7 +158,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
         # Close the connection
         chan2.connection.close()
 
-        chan3, tree3 = self.tree_connect()
+        chan3, tree3 = self.tree_connect(client=pike.model.Client())
 
         # Request reconnect
         handle3 = chan3.create(tree,

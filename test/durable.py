@@ -93,7 +93,7 @@ class DurableHandleTest(pike.test.PikeTest):
         # Close the connection
         chan.connection.close()
 
-        chan2, tree2 = self.tree_connect(client_guid=chan.connection.client.client_guid)
+        chan2, tree2 = self.tree_connect()
 
         # Request reconnect
         handle2 = chan2.create(tree,
@@ -152,7 +152,7 @@ class DurableHandleTest(pike.test.PikeTest):
         # Close the connection
         chan.connection.close()
 
-        chan2, tree2 = self.tree_connect(client_guid=chan.connection.client.client_guid)
+        chan2, tree2 = self.tree_connect()
 
         # Request reconnect
         handle2 = chan2.create(tree,

@@ -90,6 +90,7 @@ class PikeTest(unittest.TestCase):
         self.creds = self.option('PIKE_CREDS')
         self.share = self.option('PIKE_SHARE', 'c$')
         self._connections = []
+        self.default_client = model.Client()
 
     def debug(self, *args, **kwargs):
         self.logger.debug(*args, **kwargs)
@@ -106,12 +107,15 @@ class PikeTest(unittest.TestCase):
     def critical(self, *args, **kwargs):
         self.logger.critical(*args, **kwargs)
 
-    def tree_connect(self, client_guid=None):
+    def tree_connect(self, client=None):
         req_dialect = self.required_dialect()
         req_caps = self.required_capabilities()
         req_share_caps = self.required_share_capabilities()
 
-        conn = model.Client(client_guid=client_guid).connect(self.server, self.port).negotiate()
+        if client is None:
+            client = self.default_client
+
+        conn = client.connect(self.server, self.port).negotiate()
 
         if conn.negotiate_response.dialect_revision < req_dialect:
             self.skipTest("Dialect required: %s" % str(req_dialect))
