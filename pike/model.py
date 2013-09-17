@@ -1041,6 +1041,9 @@ class Channel(object):
         ioctl_req = smb2.IoctlRequest(smb_req)
         vni_req = smb2.ValidateNegotiateInfoRequest(ioctl_req)
         client = self.session.client
+
+        # Validate negotiate must always be signed
+        smb_req.flags |= smb2.SMB2_FLAGS_SIGNED
         ioctl_req.flags = smb2.SMB2_0_IOCTL_IS_FSCTL
         vni_req.capabilities = client.capabilities
         vni_req.client_guid = client.client_guid
