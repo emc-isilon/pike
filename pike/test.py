@@ -38,6 +38,8 @@ import os
 import gc
 import logging
 import sys
+import contextlib
+import smb2
 
 # Try and import backported unittest2 module in python2.6
 try:
@@ -127,6 +129,26 @@ class PikeTest(unittest.TestCase):
                           str(req_share_caps & ~tree.tree_connect_response.capabilities))
         self._connections.append(conn)
         return (chan,tree)
+
+    class _AssertErrorContext(object):
+        pass
+
+    @contextlib.contextmanager
+    def assert_error(self, status):
+        e = None
+        o = PikeTest._AssertErrorContext()
+
+        try:
+            yield o
+        except smb2.ErrorResponse as e:
+            pass
+
+        if e is None:
+            raise self.failureException('No error raised when "%s" expected' % status)
+        elif e.parent.status != status:
+            raise self.failureException('"%s" raised when "%s" expected' % (e.parent.status, status))
+
+        o.response = e.parent
 
     def setUp(self):
         if self.loglevel != logging.NOTSET:
