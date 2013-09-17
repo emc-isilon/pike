@@ -71,6 +71,7 @@ class Status(core.ValueEnum):
     STATUS_ACCESS_DENIED            = 0xC0000022
     STATUS_BUFFER_TOO_SMALL         = 0xC0000023
     STATUS_NO_MORE_FILES            = 0x80000006
+    STATUS_OBJECT_NAME_NOT_FOUND    = 0xC0000034
 
 Status.import_items(globals())
 
