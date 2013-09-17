@@ -82,11 +82,9 @@ class MultiChannelTest(pike.test.PikeTest):
         # Send stale write on original channel, which should fail.
         # Spec is ambiguous as to status code, but Windows Server 2012
         # seems to return STATUS_FILE_NOT_AVAILABLE
-        with self.assertRaises(pike.smb2.ErrorResponse) as em:
+        with self.assert_error(pike.smb2.STATUS_FILE_NOT_AVAILABLE):
             with chan.let(channel_sequence=0):
                 chan.write(handle, 0, data_stale)
-
-        self.assertEquals(em.exception.parent.status, pike.smb2.STATUS_FILE_NOT_AVAILABLE)
 
         # Read back data to ensure it is not stale value
         result = chan2.read(handle, len(data_fresh), 0).tostring()

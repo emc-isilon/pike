@@ -142,7 +142,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
         chan2, tree2 = self.tree_connect(client_guid=self.client_guid1)
 
         # Request reconnect
-        with self.assertRaises(pike.smb2.ErrorResponse) as cm:
+        with self.assert_error(pike.smb2.STATUS_FILE_NOT_AVAILABLE):
             handle2 = chan2.create(tree,
                                'appinstanceid.txt',
                                access=pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE,
@@ -155,7 +155,6 @@ class AppInstanceIdTest(pike.test.PikeTest):
                                durable=0,
                                persistent=True,
                                app_instance_id=self.app_instance_id1).result()
-        self.assertEquals(cm.exception.parent.status, pike.smb2.STATUS_FILE_NOT_AVAILABLE)
 
         # Close the connection
         chan2.connection.close()

@@ -94,9 +94,10 @@ class QueryTest(pike.test.PikeTest):
         query_req.output_buffer_length = 0
         query_req.file_id = handle.file_id
 
-        with self.assertRaises(pike.smb2.ErrorResponse) as cm:
+        with self.assert_error(pike.smb2.STATUS_BUFFER_TOO_SMALL) as cm:
             self.chan.connection.transceive(smb2_req.parent)
 
-        self.assertEqual(cm.exception.parent.status, pike.smb2.STATUS_BUFFER_TOO_SMALL)
-        self.assertEqual(cm.exception.byte_count, 4)
-        self.assertTrue(cm.exception.error_data > 0)
+        err = cm.response[0]
+
+        self.assertEqual(err.byte_count, 4)
+        self.assertTrue(err.error_data > 0)

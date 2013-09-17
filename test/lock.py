@@ -99,9 +99,8 @@ class LockTest(pike.test.PikeTest):
         lock_future.wait_interim()
 
         # Cancel, wait for response, verify error response
-        with self.assertRaises(pike.smb2.ErrorResponse) as cm:
+        with self.assert_error(pike.smb2.STATUS_CANCELLED):
             chan.cancel(lock_future).result()
-        self.assertEquals(cm.exception.parent.status, pike.smb2.STATUS_CANCELLED)
         
         chan.close(file1)
         chan.close(file2)

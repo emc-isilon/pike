@@ -99,7 +99,7 @@ class Persistent(test.PikeTest):
         self.channel.connection.close()
         self.channel, self.tree = self.tree_connect()
 
-        with self.assertRaises(smb2.ErrorResponse) as cm:
+        with self.assert_error(smb2.STATUS_FILE_NOT_AVAILABLE):
             # Perform a failing second open
             self.channel.create(
                 self.tree,
@@ -107,7 +107,6 @@ class Persistent(test.PikeTest):
                 access = smb2.FILE_READ_DATA,
                 share = SHARE_ALL,
                 disposition = smb2.FILE_OPEN).result()
-        self.assertEqual(cm.exception.parent.status, smb2.STATUS_FILE_NOT_AVAILABLE)
 
         # Clean up: Reconnect and close file (handle)
         self.channel.connection.close()
