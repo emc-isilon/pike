@@ -58,6 +58,14 @@ class QueryTest(pike.test.PikeTest):
         info = self.chan.query_file_info(handle, level)
         self.chan.close(handle)
 
+    def mismatch_test(self, level, size):
+        """Helper to perform a test size mismatch"""
+        handle = self.open_file()
+        
+        with self.assert_error(pike.ntstatus.STATUS_INFO_LENGTH_MISMATCH):
+            self.chan.query_file_info(handle, level, output_buffer_length = size)
+        self.chan.close(handle)
+
     # The following tests simply try each info level
     def test_query_file_basic_info(self):
         self.basic_test(pike.smb2.FILE_BASIC_INFORMATION)
@@ -82,6 +90,31 @@ class QueryTest(pike.test.PikeTest):
 
     def test_query_file_all_info(self):
         self.basic_test(pike.smb2.FILE_ALL_INFORMATION)
+
+
+    def test_mismatch_0_file_basic_info(self):
+        self.mismatch_test(pike.smb2.FILE_BASIC_INFORMATION, 0)
+
+    def test_mismatch_0_file_standard_info(self):
+        self.mismatch_test(pike.smb2.FILE_STANDARD_INFORMATION, 0)
+
+    def test_mismatch_0_file_alignment_info(self):
+        self.mismatch_test(pike.smb2.FILE_ALIGNMENT_INFORMATION, 0)
+
+    def test_mismatch_0_file_internal_info(self):
+        self.mismatch_test(pike.smb2.FILE_INTERNAL_INFORMATION, 0)
+
+    def test_mismatch_0_file_mode_info(self):
+        self.mismatch_test(pike.smb2.FILE_MODE_INFORMATION, 0)
+
+    def test_mismatch_0_file_position_info(self):
+        self.mismatch_test(pike.smb2.FILE_POSITION_INFORMATION, 0)
+
+    def test_mismatch_0_file_ea_info(self):
+        self.mismatch_test(pike.smb2.FILE_EA_INFORMATION, 0)
+
+    def test_mismatch_0_file_all_info(self):
+        self.mismatch_test(pike.smb2.FILE_ALL_INFORMATION, 0)
 
     # Querying a security descriptor with output buffer size 0 should
     # return STATUS_BUFFER_TOO_SMALL and tell us how many bytes are needed
