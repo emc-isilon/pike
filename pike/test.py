@@ -68,19 +68,19 @@ class PikeTest(unittest.TestCase):
         table = {'yes': True, 'no': False, '': False}
         return table[PikeTest.option(name, 'no')]
     
-    @classmethod
-    def init_once(cls):
-        if not cls.init_done:
-            cls.loglevel = getattr(logging, cls.option('PIKE_LOGLEVEL', 'NOTSET').upper())
-            cls.handler = logging.StreamHandler()
-            cls.handler.setLevel(cls.loglevel)
-            cls.handler.setFormatter(logging.Formatter('%(asctime)s:%(name)s:%(levelname)s: %(message)s'))
-            cls.logger = logging.getLogger('pike')
-            cls.logger.addHandler(cls.handler)
-            cls.logger.setLevel(cls.loglevel)
-            cls.trace = cls.booloption('PIKE_TRACE')
-            model.trace = cls.trace
-            cls.init_done = True
+    @staticmethod
+    def init_once():
+        if not PikeTest.init_done:
+            PikeTest.init_done = True
+            PikeTest.loglevel = getattr(logging, PikeTest.option('PIKE_LOGLEVEL', 'NOTSET').upper())
+            PikeTest.handler = logging.StreamHandler()
+            PikeTest.handler.setLevel(PikeTest.loglevel)
+            PikeTest.handler.setFormatter(logging.Formatter('%(asctime)s:%(name)s:%(levelname)s: %(message)s'))
+            PikeTest.logger = logging.getLogger('pike')
+            PikeTest.logger.addHandler(PikeTest.handler)
+            PikeTest.logger.setLevel(PikeTest.loglevel)
+            PikeTest.trace = PikeTest.booloption('PIKE_TRACE')
+            model.trace = PikeTest.trace
 
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self,*args,**kwargs)
