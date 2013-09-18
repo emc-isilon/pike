@@ -1,5 +1,5 @@
 make()
 {
     mk_stage DESTDIR="$PYTHON_DIST/pike" \
-        __init__.py core.py netbios.py smb2.py digest.py model.py nttime.py test.py
+        __init__.py core.py netbios.py smb2.py digest.py model.py nttime.py ntstatus.py test.py
 }

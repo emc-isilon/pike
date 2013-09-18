@@ -58,6 +58,7 @@ import contextlib
 import core
 import netbios
 import smb2
+import ntstatus
 import kerberos
 import digest
 
@@ -601,7 +602,7 @@ class Connection(asyncore.dispatcher):
                     raise core.BadPacket()
             elif smb_res.message_id in self._future_map:
                 future = self._future_map[smb_res.message_id]
-                if smb_res.status == smb2.STATUS_PENDING:
+                if smb_res.status == ntstatus.STATUS_PENDING:
                     future.interim(smb_res)
                 elif isinstance(smb_res[0], smb2.ErrorResponse):
                     future.complete(ResponseError(smb_res))
@@ -992,7 +993,7 @@ class Channel(object):
                                                  output_buffer_length=output_buffer_length):
                     yield info
             except ResponseError as e:
-                if e.response.status == smb2.STATUS_NO_MORE_FILES:
+                if e.response.status == ntstatus.STATUS_NO_MORE_FILES:
                     return
                 else:
                     raise

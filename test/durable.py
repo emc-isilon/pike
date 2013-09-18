@@ -37,6 +37,7 @@
 import pike.model
 import pike.smb2
 import pike.test
+import pike.ntstatus
 import random
 import array
 
@@ -101,7 +102,7 @@ class DurableHandleTest(pike.test.PikeTest):
 
         chan2, tree2 = self.tree_connect(client=pike.model.Client())
 
-        with self.assert_error(pike.smb2.STATUS_OBJECT_NAME_NOT_FOUND):
+        with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND):
             handle2 = self.create(chan2, tree2, durable=handle1)
 
         chan2.connection.close()
@@ -138,7 +139,7 @@ class DurableHandleTest(pike.test.PikeTest):
         chan3, tree3 = self.tree_connect()
 
         # Reconnect should now fail
-        with self.assert_error(pike.smb2.STATUS_OBJECT_NAME_NOT_FOUND):
+        with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND):
             handle3 = self.create(chan3, tree3, durable=handle1)
 
     # Request a durable handle

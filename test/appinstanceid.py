@@ -37,6 +37,7 @@
 import pike.model
 import pike.smb2
 import pike.test
+import pike.ntstatus
 import random
 import array
 
@@ -141,7 +142,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
         chan2, tree2 = self.tree_connect()
 
         # Request reconnect
-        with self.assert_error(pike.smb2.STATUS_FILE_NOT_AVAILABLE):
+        with self.assert_error(pike.ntstatus.STATUS_FILE_NOT_AVAILABLE):
             handle2 = chan2.create(tree,
                                'appinstanceid.txt',
                                access=pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE,

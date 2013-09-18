@@ -37,6 +37,7 @@
 import pike.model
 import pike.smb2
 import pike.test
+import pike.ntstatus
 import array
 import random
 
@@ -121,7 +122,7 @@ class ReadWriteTest(pike.test.PikeTest):
                            disposition=pike.smb2.FILE_SUPERSEDE,
                            oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_EXCLUSIVE).result()
        
-        with self.assert_error(pike.smb2.STATUS_ACCESS_DENIED):
+        with self.assert_error(pike.ntstatus.STATUS_ACCESS_DENIED):
             chan.write(file, 0, None)
         
         chan.close(file)

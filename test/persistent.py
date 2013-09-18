@@ -37,6 +37,7 @@
 import pike.model as model
 import pike.smb2 as smb2
 import pike.test as test
+import pike.ntstatus as ntstatus
 import random
 import array
 
@@ -99,7 +100,7 @@ class Persistent(test.PikeTest):
         self.channel.connection.close()
         self.channel, self.tree = self.tree_connect()
 
-        with self.assert_error(smb2.STATUS_FILE_NOT_AVAILABLE):
+        with self.assert_error(ntstatus.STATUS_FILE_NOT_AVAILABLE):
             # Perform a failing second open
             self.channel.create(
                 self.tree,

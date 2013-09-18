@@ -49,6 +49,7 @@ maintaining a clear visual distinction between values and types.
 import array
 import core
 import nttime
+import ntstatus
 
 # Dialects constants
 class Dialect(core.ValueEnum):
@@ -58,22 +59,6 @@ class Dialect(core.ValueEnum):
     DIALECT_SMB3_0        = 0x0300
 
 Dialect.import_items(globals())
-
-class Status(core.ValueEnum):
-    # We don't have all codes yet, so be permissive
-    permissive = True
-
-    STATUS_SUCCESS                  = 0x00000000
-    STATUS_PENDING                  = 0x00000103
-    STATUS_MORE_PROCESSING_REQUIRED = 0xC0000016
-    STATUS_CANCELLED                = 0xC0000120
-    STATUS_FILE_NOT_AVAILABLE       = 0xC0000467
-    STATUS_ACCESS_DENIED            = 0xC0000022
-    STATUS_BUFFER_TOO_SMALL         = 0xC0000023
-    STATUS_NO_MORE_FILES            = 0x80000006
-    STATUS_OBJECT_NAME_NOT_FOUND    = 0xC0000034
-
-Status.import_items(globals())
 
 # Flag constants
 class Flags(core.FlagEnum):
@@ -218,7 +203,7 @@ class Smb2(core.Frame):
         # Look ahead and decode flags first
         self.flags = Flags((cur + 8).decode_uint32le())
         if self.flags & SMB2_FLAGS_SERVER_TO_REDIR:
-            self.status = Status(cur.decode_uint32le())
+            self.status = ntstatus.Status(cur.decode_uint32le())
             self.channel_sequence = None
         else:
             self.channel_sequence = cur.decode_uint16le()
@@ -312,7 +297,7 @@ class Request(Command):
 
 @Smb2.response
 class Response(Command):
-    allowed_status = [STATUS_SUCCESS]
+    allowed_status = [ntstatus.STATUS_SUCCESS]
 
 @Smb2.notification
 class Notification(Command):
@@ -332,7 +317,7 @@ class ErrorResponse(Command):
         cur.decode_uint16le()
         self.byte_count = cur.decode_uint32le()
 
-        if self.parent.status == STATUS_BUFFER_TOO_SMALL and self.byte_count == 4:
+        if self.parent.status == ntstatus.STATUS_BUFFER_TOO_SMALL and self.byte_count == 4:
             # Parse required buffer size
             self.error_data = cur.decode_uint32le()
         else:
@@ -488,7 +473,7 @@ class SessionSetupRequest(Request):
 
 class SessionSetupResponse(Response):
     command_id = SMB2_SESSION_SETUP
-    allowed_status = [STATUS_SUCCESS, STATUS_MORE_PROCESSING_REQUIRED]
+    allowed_status = [ntstatus.STATUS_SUCCESS, ntstatus.STATUS_MORE_PROCESSING_REQUIRED]
     structure_size = 9
 
     def __init__(self, parent):
@@ -893,7 +878,7 @@ class MaximalAccessResponse(CreateResponseContext):
         self.maximal_access = 0
 
     def _decode(self, cur):
-        self.query_status = Status(cur.decode_uint32le())
+        self.query_status = ntstatus.Status(cur.decode_uint32le())
         self.maximal_access = Access(cur.decode_uint32le())
 
 class LeaseState(core.FlagEnum):

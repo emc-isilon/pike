@@ -37,6 +37,7 @@
 import pike.model
 import pike.smb2
 import pike.test
+import pike.ntstatus
 
 from pike.test import unittest
 
@@ -93,7 +94,7 @@ class QueryTest(pike.test.PikeTest):
         query_req.output_buffer_length = 0
         query_req.file_id = handle.file_id
 
-        with self.assert_error(pike.smb2.STATUS_BUFFER_TOO_SMALL) as cm:
+        with self.assert_error(pike.ntstatus.STATUS_BUFFER_TOO_SMALL) as cm:
             self.chan.connection.transceive(smb2_req.parent)
 
         err = cm.response[0]

@@ -37,6 +37,7 @@
 import pike.model
 import pike.smb2
 import pike.test
+import pike.ntstatus
 
 class QueryDirectoryTest(pike.test.PikeTest):
     # Enumerate directory at FILE_DIRECTORY_INFORMATION level.
@@ -73,7 +74,7 @@ class QueryDirectoryTest(pike.test.PikeTest):
 
         query1 = chan.query_directory(root, file_name=name)
 
-        with self.assert_error(pike.smb2.STATUS_NO_MORE_FILES):
+        with self.assert_error(pike.ntstatus.STATUS_NO_MORE_FILES):
             chan.query_directory(root, file_name=name)
 
         chan.close(hello)

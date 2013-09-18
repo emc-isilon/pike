@@ -37,6 +37,7 @@
 import pike.model
 import pike.smb2
 import pike.test
+import pike.ntstatus
 
 class LockTest(pike.test.PikeTest):
     # Take a basic byte-range lock
@@ -99,7 +100,7 @@ class LockTest(pike.test.PikeTest):
         lock_future.wait_interim()
 
         # Cancel, wait for response, verify error response
-        with self.assert_error(pike.smb2.STATUS_CANCELLED):
+        with self.assert_error(pike.ntstatus.STATUS_CANCELLED):
             chan.cancel(lock_future).result()
         
         chan.close(file1)

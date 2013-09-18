@@ -37,6 +37,7 @@
 import pike.model
 import pike.smb2
 import pike.test
+import pike.ntstatus
 
 @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
 @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL)
@@ -82,7 +83,7 @@ class MultiChannelTest(pike.test.PikeTest):
         # Send stale write on original channel, which should fail.
         # Spec is ambiguous as to status code, but Windows Server 2012
         # seems to return STATUS_FILE_NOT_AVAILABLE
-        with self.assert_error(pike.smb2.STATUS_FILE_NOT_AVAILABLE):
+        with self.assert_error(pike.ntstatus.STATUS_FILE_NOT_AVAILABLE):
             with chan.let(channel_sequence=0):
                 chan.write(handle, 0, data_stale)
 
