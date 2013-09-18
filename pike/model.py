@@ -1001,13 +1001,15 @@ class Channel(object):
     def query_file_info(self,
                         create_res,
                         file_information_class = smb2.FILE_BASIC_INFORMATION,
-                        info_type = smb2.SMB2_0_INFO_FILE):
+                        info_type = smb2.SMB2_0_INFO_FILE,
+                        output_buffer_length = 4096):
         smb_req = self.request(obj=create_res)
         query_req = smb2.QueryInfoRequest(smb_req)
         
         query_req.info_type = info_type
         query_req.file_information_class = file_information_class        
         query_req.file_id = create_res.file_id
+        query_req.output_buffer_length = output_buffer_length
         
         query_res = self.connection.transceive(smb_req.parent)[0][0][0]
 
