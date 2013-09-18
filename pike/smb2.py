@@ -88,7 +88,7 @@ class Flags(core.FlagEnum):
 Flags.import_items(globals())
 
 # Command constants
-class Command(core.ValueEnum):
+class CommandId(core.ValueEnum):
     SMB2_NEGOTIATE       = 0x0000
     SMB2_SESSION_SETUP   = 0x0001
     SMB2_LOGOFF          = 0x0002
@@ -107,7 +107,7 @@ class Command(core.ValueEnum):
     SMB2_SET_INFO        = 0x0011
     SMB2_OPLOCK_BREAK    = 0x0012
 
-Command.import_items(globals())
+CommandId.import_items(globals())
 
 # Share Capabilities
 class ShareCaps(core.FlagEnum):
@@ -130,27 +130,27 @@ class Smb2(core.Frame):
     request = core.Register(_request_table, 'command_id', 'structure_size')
     response = core.Register(_response_table, 'command_id', 'structure_size')
     notification = core.Register(_notification_table, 'command_id', 'structure_size')
-    field_blacklist = ['command']
 
     def __init__(self, parent, context=None):
         core.Frame.__init__(self, parent, context)
         self.credit_charge = 0
         self.channel_sequence = 0
         self.status = None
-        self.flags = SMB2_FLAGS_NONE
+        self.command = None
         self.credit_request = 0
         self.credit_response = None
+        self.flags = SMB2_FLAGS_NONE
         self.next_command = 0
         self.message_id = None
         self.async_id = None
         self.session_id = 0
         self.tree_id = 0
-        self.command = None
+        self._command = None
         if parent is not None:
             parent.append(self)
 
     def _children(self):
-        return [self.command] if self.command is not None else []
+        return [self._command] if self._command is not None else []
 
     def _encode(self, cur):
         cur.encode_bytes('\xfeSMB')
@@ -161,7 +161,11 @@ class Smb2(core.Frame):
         else:
             cur.encode_uint16le(self.channel_sequence)
             cur.encode_uint16le(0)
-        cur.encode_uint16le(self.command.command_id)
+
+        if self.command is None:
+            self.command = self._command.command_id
+        cur.encode_uint16le(self.command)
+
         if self.flags & SMB2_FLAGS_SERVER_TO_REDIR:
             cur.encode_uint16le(self.credit_response)
         else:
@@ -179,8 +183,8 @@ class Smb2(core.Frame):
         # Set Signature to 0 for now
         signature_hole = cur.hole.encode_bytes([0]*16)
 
-        # Encode command
-        self.command.encode(cur)
+        # Encode command body
+        self._command.encode(cur)
 
         # If we are not last command in chain
         if not self.is_last_child():
@@ -221,7 +225,7 @@ class Smb2(core.Frame):
             # Ignore reserved
             cur.decode_uint16le()
             self.status = None
-        command_id = cur.decode_uint16le()
+        self.command = CommandId(cur.decode_uint16le())
         if self.flags & SMB2_FLAGS_SERVER_TO_REDIR:
             self.credit_response = cur.decode_uint16le()
             self.credit_request = None
@@ -246,7 +250,7 @@ class Smb2(core.Frame):
         # Peek ahead at structure_size
         structure_size = (cur+0).decode_uint16le()
 
-        key = (command_id, structure_size)
+        key = (self.command, structure_size)
 
         if self.flags & SMB2_FLAGS_SERVER_TO_REDIR:
             # Distinguish unsoliticed response, error response, normal response
@@ -270,9 +274,9 @@ class Smb2(core.Frame):
         else:
             end = cur.upperbound
 
-        self.command = cls(self)
+        self._command = cls(self)
         with cur.bounded(cur, end):
-            self.command.decode(cur)
+            self._command.decode(cur)
 
         # Advance to next frame or end of data
         cur.advanceto(end)
@@ -291,7 +295,7 @@ class Smb2(core.Frame):
 class Command(core.Frame):
     def __init__(self, parent):
         core.Frame.__init__(self, parent)
-        parent.command = self
+        parent._command = self
 
     def _encode_pre(self, cur):
         core.Frame._encode_pre(self, cur)
@@ -318,8 +322,8 @@ class ErrorResponse(Command):
     structure_size = 9
 
     def __init__(self, parent):
-        Command.__init__(self, parent)
-        parent.command = self
+        super(ErrorResponse,self).__init__(parent)
+        parent._command = self
         self.byte_count = None
         self.error_data = None
 
