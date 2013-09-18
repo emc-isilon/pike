@@ -51,3 +51,30 @@ class QueryDirectoryTest(pike.test.PikeTest):
         self.assertIn('..', names)
 
         chan.close(root)
+
+    # Querying for a specific filename twice
+    # on the same handle succeeds the first time and
+    # fails with STATUS_NO_MORE_FILES the second.
+    def test_specific_name(self):
+        chan, tree = self.tree_connect()
+        name = 'hello.txt'
+        
+        hello = chan.create(tree,
+                            name,
+                            access=pike.smb2.GENERIC_WRITE | pike.smb2.GENERIC_READ | pike.smb2.DELETE,
+                            disposition=pike.smb2.FILE_SUPERSEDE,
+                            options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
+
+        root = chan.create(tree,
+                           '',
+                           access=pike.smb2.GENERIC_READ,
+                           options=pike.smb2.FILE_DIRECTORY_FILE,
+                           share=pike.smb2.FILE_SHARE_READ).result()
+
+        query1 = chan.query_directory(root, file_name=name)
+
+        with self.assert_error(pike.smb2.STATUS_NO_MORE_FILES):
+            chan.query_directory(root, file_name=name)
+
+        chan.close(hello)
+        chan.close(root)
