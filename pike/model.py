@@ -932,25 +932,39 @@ class Channel(object):
 
     def query_directory(self,
                         handle,
-                        file_name='*',
                         file_information_class=smb2.FILE_DIRECTORY_INFORMATION,
+                        flags = 0,
+                        file_index = 0,
+                        file_name='*',
                         output_buffer_length=8192):
+        smb_req = self.request(obj=handle)
+        enum_req = smb2.QueryDirectoryRequest(smb_req)
+        enum_req.file_id = handle.file_id
+        enum_req.file_name = file_name
+        enum_req.output_buffer_length = output_buffer_length
+        enum_req.file_information_class = file_information_class
+        enum_req.flags = flags
+        enum_req.file_index = file_index
 
-        try:
-            while True:
-                smb_req = self.request(obj=handle)
-                enum_req = smb2.QueryDirectoryRequest(smb_req)
-                enum_req.file_id = handle.file_id
-                enum_req.file_name = file_name
-                enum_req.output_buffer_length = output_buffer_length
-                enum_req.file_information_class = file_information_class
-                for info in self.connection.transceive(smb_req.parent)[0][0]:
+        return self.connection.transceive(smb_req.parent)[0][0]
+
+    def enum_directory(self,
+                       handle,
+                       file_information_class=smb2.FILE_DIRECTORY_INFORMATION,
+                       file_name = '*',
+                       output_buffer_length=8192):
+        while True:
+            try:
+                for info in self.query_directory(handle,
+                                                 file_information_class=file_information_class,
+                                                 file_name=file_name,
+                                                 output_buffer_length=output_buffer_length):
                     yield info
-        except ResponseError as e:
-            if e.response.status == smb2.STATUS_NO_MORE_FILES:
-                return
-            else:
-                raise
+            except ResponseError as e:
+                if e.response.status == smb2.STATUS_NO_MORE_FILES:
+                    return
+                else:
+                    raise
             
     def query_file_info(self,
                         create_res,
