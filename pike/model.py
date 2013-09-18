@@ -403,6 +403,8 @@ class Connection(asyncore.dispatcher):
         self.client = client
         self.server = server
         self.port = port
+        self.remote_addr = None
+        self.local_addr = None
 
         self.error = None
         self.traceback = None
@@ -435,7 +437,12 @@ class Connection(asyncore.dispatcher):
         return self._out_buffer != None or len(self._out_queue) != 0
 
     def handle_connect(self):
-        # Nothing to do here
+        self.local_addr = self.socket.getsockname()
+        self.remote_addr = self.socket.getpeername()
+
+        self.client.logger.debug('connect: %s/%s -> %s/%s',
+                                 self.local_addr[0], self.local_addr[1],
+                                 self.remote_addr[0], self.remote_addr[1])
         pass
 
     def handle_read(self):
@@ -484,7 +491,13 @@ class Connection(asyncore.dispatcher):
 
         # Run down connection
         if self.error is None:
-            self.error = EOFError()
+            self.error = EOFError("close")
+
+        if self.remote_addr is not None:
+            self.client.logger.debug("disconnect (%s/%s -> %s/%s): %s",
+                                     self.local_addr[0], self.local_addr[1],
+                                     self.remote_addr[0], self.remote_addr[1],
+                                     self.error)
 
         self.client._connections.remove(self)
 
@@ -521,7 +534,16 @@ class Connection(asyncore.dispatcher):
             if req.is_last_child():
                 # Last command in chain, ready to send packet
                 buf = req.parent.serialize()
-                if trace: self.client.logger.debug('send: %s', req.parent)
+                if trace: 
+                    self.client.logger.debug('send (%s/%s -> %s/%s): %s',
+                                             self.local_addr[0], self.local_addr[1],
+                                             self.remote_addr[0], self.remote_addr[1],
+                                             req.parent)
+                else:
+                    self.client.logger.debug('send (%s/%s -> %s/%s): %s',
+                                             self.local_addr[0], self.local_addr[1],
+                                             self.remote_addr[0], self.remote_addr[1],
+                                             ', '.join(f[0].__class__.__name__ for f in req.parent))
                 result = buf
             else:
                 # Not ready to send chain
@@ -545,7 +567,16 @@ class Connection(asyncore.dispatcher):
         return None
 
     def _dispatch_incoming(self, res):
-        if trace: self.client.logger.debug('recv: %s', res)
+        if trace:
+            self.client.logger.debug('recv (%s/%s -> %s/%s): %s',
+                                     self.remote_addr[0], self.remote_addr[1],
+                                     self.local_addr[0], self.local_addr[1],
+                                     res)
+        else:
+            self.client.logger.debug('recv (%s/%s -> %s/%s): %s',
+                                     self.remote_addr[0], self.remote_addr[1],
+                                     self.local_addr[0], self.local_addr[1],
+                                     ', '.join(f[0].__class__.__name__ for f in res))
         for smb_res in res:
             # Verify non-session-setup-response signatures
             if not isinstance(smb_res[0], smb2.SessionSetupResponse):
