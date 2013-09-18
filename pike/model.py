@@ -977,7 +977,7 @@ class Channel(object):
         query_req.file_information_class = file_information_class        
         query_req.file_id = create_res.file_id
         
-        query_res = self.connection.transceive(smb_req.parent)[0]
+        query_res = self.connection.transceive(smb_req.parent)[0][0][0]
 
         return query_res
     
