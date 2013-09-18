@@ -40,6 +40,7 @@ import pike.test
 import random
 import array
 
+@pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_LEASING)
 class DurableHandleTest(pike.test.PikeTest):
     share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
     lease1 = array.array('B',map(random.randint, [0]*16, [255]*16))
