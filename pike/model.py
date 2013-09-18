@@ -72,7 +72,7 @@ class StateError(Exception):
 
 class ResponseError(Exception):
     def __init__(self, response):
-        Exception.__init__(self, str(response.status))
+        Exception.__init__(self, response.command, response.status)
         self.response = response
 
 class Future(object):
