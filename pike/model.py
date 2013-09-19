@@ -898,6 +898,9 @@ class Channel(object):
                persistent=False,
                create_guid=None,
                app_instance_id=None):
+
+        prev_open = None
+
         smb_req = self.request(obj=tree)
         create_req = smb2.CreateRequest(smb_req)
 
@@ -920,6 +923,7 @@ class Channel(object):
             lease_req.lease_state = lease_state
 
         if isinstance(durable, Open):
+            prev_open = durable
             if durable.durable_timeout is None:
                 durable_req = smb2.DurableHandleReconnectRequest(create_req)
                 durable_req.file_id = durable.file_id
@@ -946,7 +950,7 @@ class Channel(object):
         open_future = Future(None)
 
         def finish(f):
-            with open_future: open_future(Open(tree, f.result(), create_guid=create_guid))
+            with open_future: open_future(Open(tree, f.result(), create_guid=create_guid, prev=prev_open))
             
         open_future.request_future = self.connection.submit(smb_req.parent)[0]
         open_future.request_future.then(finish)
@@ -1132,7 +1136,7 @@ class Tree(object):
         self.tree_connect_response = smb_res[0]
 
 class Open(object):
-    def __init__(self, tree, smb_res, create_guid=None):
+    def __init__(self, tree, smb_res, create_guid=None, prev=None):
         object.__init__(self)
 
         create_res = smb_res[0]
@@ -1144,6 +1148,10 @@ class Open(object):
         self.durable_timeout = None
         self.durable_flags = None
         self.create_guid = create_guid
+
+        if prev is not None:
+            self.durable_timeout = prev.durable_timeout
+            self.durable_flags = prev.durable_flags
 
         if self.oplock_level != smb2.SMB2_OPLOCK_LEVEL_NONE:
             if self.oplock_level == smb2.SMB2_OPLOCK_LEVEL_LEASE:
