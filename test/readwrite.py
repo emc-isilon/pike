@@ -148,6 +148,7 @@ class ReadWriteTest(pike.test.PikeTest):
                             disposition=pike.smb2.FILE_SUPERSEDE,
                             options=pike.smb2.FILE_DELETE_ON_CLOSE,
                             oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_II).result()
+        self.assertEqual(file2.oplock_level, pike.smb2.SMB2_OPLOCK_LEVEL_II)
 
         bytes_written = chan.write(file,
                                    0,
