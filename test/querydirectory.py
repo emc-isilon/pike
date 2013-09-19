@@ -49,7 +49,6 @@ class QueryDirectoryTest(pike.test.PikeTest):
         names = map(lambda info: info.file_name, chan.enum_directory(root))
 
         self.assertIn('.', names)
-        self.assertIn('..', names)
 
         chan.close(root)
 
