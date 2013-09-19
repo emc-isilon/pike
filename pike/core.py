@@ -537,7 +537,7 @@ class Enum(long):
         """
         Returns a list of (name,value) pairs for allowed enumeration values.
         """
-        return [(name,value) for (name,value) in cls.__dict__.iteritems() if name[0].isupper()]
+        return cls._nametoval.iteritems()
 
     @classmethod
     def names(cls):
@@ -593,9 +593,30 @@ class Enum(long):
         return str(self)
 
     class __metaclass__(type):
+        def __new__(mcs, cname, bases, idict):
+            nametoval = {}
+            valtoname = {}
+            misc = {}
+
+            for (name,val) in idict.iteritems():
+                if name[0].isupper():
+                    nametoval[name] = val
+                    valtoname[val] = name
+                else:
+                    misc[name] = val
+
+            cls = type.__new__(mcs, cname, bases, misc)
+            cls._nametoval = nametoval
+            cls._valtoname = valtoname
+
+            return cls
+
         def __getattribute__(cls, name):
-            result = type.__getattribute__(cls, name)
-            return cls(result) if name[0].isupper() else result
+            nametoval = type.__getattribute__(cls, '_nametoval')
+            if name in nametoval:
+                return cls(nametoval[name])
+            else:
+                return type.__getattribute__(cls, name)
 
 class ValueEnum(Enum):
     """
@@ -617,15 +638,14 @@ class ValueEnum(Enum):
 
     @classmethod
     def validate(cls, value):
-        if not cls.permissive and value not in cls.values():
+        if not cls.permissive and value not in cls._valtoname:
             raise ValueError("Invalid %s: %x" % (cls.__name__, value))
 
     def __str__(self):
-        for (name,value) in self.items():
-            if value == self:
-                return name
-
-        return hex(self)
+        if self in self.__class__._valtoname:
+            return self.__class__._valtoname[self]
+        else:
+            return hex(self)
 
 class FlagEnum(Enum):
     """
