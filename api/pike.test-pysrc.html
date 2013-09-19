@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>pike.test</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="pike-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="pike-module.html">Package&nbsp;pike</a> ::
+        Module&nbsp;test
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="pike.test-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="pike.test-module.html">Module pike.test</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"><tt class="py-comment"># Copyright (c) 2013, EMC Corporation</tt> </tt>
+<a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"><tt class="py-comment"># All rights reserved.</tt> </tt>
+<a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"><tt class="py-comment"># Redistribution and use in source and binary forms, with or without</tt> </tt>
+<a name="L6"></a><tt class="py-lineno">  6</tt>  <tt class="py-line"><tt class="py-comment"># modification, are permitted provided that the following conditions are met:</tt> </tt>
+<a name="L7"></a><tt class="py-lineno">  7</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L8"></a><tt class="py-lineno">  8</tt>  <tt class="py-line"><tt class="py-comment"># 1. Redistributions of source code must retain the above copyright notice,</tt> </tt>
+<a name="L9"></a><tt class="py-lineno">  9</tt>  <tt class="py-line"><tt class="py-comment"># this list of conditions and the following disclaimer.</tt> </tt>
+<a name="L10"></a><tt class="py-lineno"> 10</tt>  <tt class="py-line"><tt class="py-comment"># 2. Redistributions in binary form must reproduce the above copyright notice,</tt> </tt>
+<a name="L11"></a><tt class="py-lineno"> 11</tt>  <tt class="py-line"><tt class="py-comment"># this list of conditions and the following disclaimer in the documentation</tt> </tt>
+<a name="L12"></a><tt class="py-lineno"> 12</tt>  <tt class="py-line"><tt class="py-comment"># and/or other materials provided with the distribution.</tt> </tt>
+<a name="L13"></a><tt class="py-lineno"> 13</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L14"></a><tt class="py-lineno"> 14</tt>  <tt class="py-line"><tt class="py-comment"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"</tt> </tt>
+<a name="L15"></a><tt class="py-lineno"> 15</tt>  <tt class="py-line"><tt class="py-comment"># AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</tt> </tt>
+<a name="L16"></a><tt class="py-lineno"> 16</tt>  <tt class="py-line"><tt class="py-comment"># IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</tt> </tt>
+<a name="L17"></a><tt class="py-lineno"> 17</tt>  <tt class="py-line"><tt class="py-comment"># ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE</tt> </tt>
+<a name="L18"></a><tt class="py-lineno"> 18</tt>  <tt class="py-line"><tt class="py-comment"># LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</tt> </tt>
+<a name="L19"></a><tt class="py-lineno"> 19</tt>  <tt class="py-line"><tt class="py-comment"># CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</tt> </tt>
+<a name="L20"></a><tt class="py-lineno"> 20</tt>  <tt class="py-line"><tt class="py-comment"># SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</tt> </tt>
+<a name="L21"></a><tt class="py-lineno"> 21</tt>  <tt class="py-line"><tt class="py-comment"># INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</tt> </tt>
+<a name="L22"></a><tt class="py-lineno"> 22</tt>  <tt class="py-line"><tt class="py-comment"># CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</tt> </tt>
+<a name="L23"></a><tt class="py-lineno"> 23</tt>  <tt class="py-line"><tt class="py-comment"># ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</tt> </tt>
+<a name="L24"></a><tt class="py-lineno"> 24</tt>  <tt class="py-line"><tt class="py-comment"># POSSIBILITY OF SUCH DAMAGE.</tt> </tt>
+<a name="L25"></a><tt class="py-lineno"> 25</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line"><tt class="py-comment"># Module Name:</tt> </tt>
+<a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L28"></a><tt class="py-lineno"> 28</tt>  <tt class="py-line"><tt class="py-comment">#        test.py</tt> </tt>
+<a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line"><tt class="py-comment"># Abstract:</tt> </tt>
+<a name="L31"></a><tt class="py-lineno"> 31</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line"><tt class="py-comment">#        Test infrastructure</tt> </tt>
+<a name="L33"></a><tt class="py-lineno"> 33</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L34"></a><tt class="py-lineno"> 34</tt>  <tt class="py-line"><tt class="py-comment"># Authors: Brian Koropoff (brian.koropoff@emc.com)</tt> </tt>
+<a name="L35"></a><tt class="py-lineno"> 35</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L36"></a><tt class="py-lineno"> 36</tt>  <tt class="py-line"> </tt>
+<a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">os</tt> </tt>
+<a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">gc</tt> </tt>
+<a name="L39"></a><tt class="py-lineno"> 39</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">logging</tt> </tt>
+<a name="L40"></a><tt class="py-lineno"> 40</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">sys</tt> </tt>
+<a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">contextlib</tt> </tt>
+<a name="L42"></a><tt class="py-lineno"> 42</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-0" class="py-name" targets="Module pike.model=pike.model-module.html"><a title="pike.model" class="py-name" href="#" onclick="return doclink('link-0', 'model', 'link-0');">model</a></tt> </tt>
+<a name="L43"></a><tt class="py-lineno"> 43</tt>  <tt class="py-line"> </tt>
+<a name="L44"></a><tt class="py-lineno"> 44</tt>  <tt class="py-line"><tt class="py-comment"># Try and import backported unittest2 module in python2.6</tt> </tt>
+<a name="L45"></a><tt class="py-lineno"> 45</tt>  <tt class="py-line"><tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L46"></a><tt class="py-lineno"> 46</tt>  <tt class="py-line">    <tt class="py-keyword">import</tt> <tt class="py-name">unittest2</tt> <tt class="py-keyword">as</tt> <tt class="py-name">unittest</tt> </tt>
+<a name="L47"></a><tt class="py-lineno"> 47</tt>  <tt class="py-line"><tt class="py-keyword">except</tt> <tt class="py-name">ImportError</tt><tt class="py-op">:</tt> </tt>
+<a name="L48"></a><tt class="py-lineno"> 48</tt>  <tt class="py-line">    <tt class="py-keyword">import</tt> <tt class="py-name">unittest</tt> </tt>
+<a name="L49"></a><tt class="py-lineno"> 49</tt>  <tt class="py-line"> </tt>
+<a name="L50"></a><tt class="py-lineno"> 50</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-1" class="py-name"><a title="pike.model" class="py-name" href="#" onclick="return doclink('link-1', 'model', 'link-0');">model</a></tt> </tt>
+<a name="PikeTest"></a><div id="PikeTest-def"><a name="L51"></a><tt class="py-lineno"> 51</tt>  <tt class="py-line"> </tt>
+<a name="L52"></a><tt class="py-lineno"> 52</tt> <a class="py-toggle" href="#" id="PikeTest-toggle" onclick="return toggle('PikeTest');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html">PikeTest</a><tt class="py-op">(</tt><tt class="py-base-class">unittest</tt><tt class="py-op">.</tt><tt class="py-base-class">TestCase</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="PikeTest-expanded"><a name="L53"></a><tt class="py-lineno"> 53</tt>  <tt class="py-line">    <tt id="link-2" class="py-name" targets="Variable pike.test.PikeTest.init_done=pike.test.PikeTest-class.html#init_done"><a title="pike.test.PikeTest.init_done" class="py-name" href="#" onclick="return doclink('link-2', 'init_done', 'link-2');">init_done</a></tt> <tt class="py-op">=</tt> <tt class="py-name">False</tt> </tt>
+<a name="L54"></a><tt class="py-lineno"> 54</tt>  <tt class="py-line"> </tt>
+<a name="L55"></a><tt class="py-lineno"> 55</tt>  <tt class="py-line">    <tt class="py-decorator">@</tt><tt class="py-decorator">staticmethod</tt> </tt>
+<a name="PikeTest.option"></a><div id="PikeTest.option-def"><a name="L56"></a><tt class="py-lineno"> 56</tt> <a class="py-toggle" href="#" id="PikeTest.option-toggle" onclick="return toggle('PikeTest.option');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#option">option</a><tt class="py-op">(</tt><tt class="py-param">name</tt><tt class="py-op">,</tt> <tt class="py-param">default</tt> <tt class="py-op">=</tt> <tt class="py-name">None</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest.option-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest.option-expanded"><a name="L57"></a><tt class="py-lineno"> 57</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt id="link-3" class="py-name" targets="Variable pike.smb2.AppInstanceIdRequest.name=pike.smb2.AppInstanceIdRequest-class.html#name,Variable pike.smb2.DurableHandleReconnectRequest.name=pike.smb2.DurableHandleReconnectRequest-class.html#name,Variable pike.smb2.DurableHandleReconnectV2Request.name=pike.smb2.DurableHandleReconnectV2Request-class.html#name,Variable pike.smb2.DurableHandleRequest.name=pike.smb2.DurableHandleRequest-class.html#name,Variable pike.smb2.DurableHandleResponse.name=pike.smb2.DurableHandleResponse-class.html#name,Variable pike.smb2.DurableHandleV2Request.name=pike.smb2.DurableHandleV2Request-class.html#name,Variable pike.smb2.DurableHandleV2Response.name=pike.smb2.DurableHandleV2Response-class.html#name,Variable pike.smb2.LeaseRequest.name=pike.smb2.LeaseRequest-class.html#name,Variable pike.smb2.LeaseResponse.name=pike.smb2.LeaseResponse-class.html#name,Variable pike.smb2.MaximalAccessRequest.name=pike.smb2.MaximalAccessRequest-class.html#name,Variable pike.smb2.MaximalAccessResponse.name=pike.smb2.MaximalAccessResponse-class.html#name"><a title="pike.smb2.AppInstanceIdRequest.name
+pike.smb2.DurableHandleReconnectRequest.name
+pike.smb2.DurableHandleReconnectV2Request.name
+pike.smb2.DurableHandleRequest.name
+pike.smb2.DurableHandleResponse.name
+pike.smb2.DurableHandleV2Request.name
+pike.smb2.DurableHandleV2Response.name
+pike.smb2.LeaseRequest.name
+pike.smb2.LeaseResponse.name
+pike.smb2.MaximalAccessRequest.name
+pike.smb2.MaximalAccessResponse.name" class="py-name" href="#" onclick="return doclink('link-3', 'name', 'link-3');">name</a></tt> <tt class="py-keyword">in</tt> <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">environ</tt><tt class="py-op">:</tt> </tt>
+<a name="L58"></a><tt class="py-lineno"> 58</tt>  <tt class="py-line">            <tt class="py-name">value</tt> <tt class="py-op">=</tt> <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">environ</tt><tt class="py-op">[</tt><tt id="link-4" class="py-name"><a title="pike.smb2.AppInstanceIdRequest.name
+pike.smb2.DurableHandleReconnectRequest.name
+pike.smb2.DurableHandleReconnectV2Request.name
+pike.smb2.DurableHandleRequest.name
+pike.smb2.DurableHandleResponse.name
+pike.smb2.DurableHandleV2Request.name
+pike.smb2.DurableHandleV2Response.name
+pike.smb2.LeaseRequest.name
+pike.smb2.LeaseResponse.name
+pike.smb2.MaximalAccessRequest.name
+pike.smb2.MaximalAccessResponse.name" class="py-name" href="#" onclick="return doclink('link-4', 'name', 'link-3');">name</a></tt><tt class="py-op">]</tt> </tt>
+<a name="L59"></a><tt class="py-lineno"> 59</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">value</tt><tt class="py-op">)</tt> <tt class="py-op">==</tt> <tt class="py-number">0</tt><tt class="py-op">:</tt> </tt>
+<a name="L60"></a><tt class="py-lineno"> 60</tt>  <tt class="py-line">                <tt class="py-name">value</tt> <tt class="py-op">=</tt> <tt class="py-name">default</tt> </tt>
+<a name="L61"></a><tt class="py-lineno"> 61</tt>  <tt class="py-line">        <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L62"></a><tt class="py-lineno"> 62</tt>  <tt class="py-line">            <tt class="py-name">value</tt> <tt class="py-op">=</tt> <tt class="py-name">default</tt> </tt>
+<a name="L63"></a><tt class="py-lineno"> 63</tt>  <tt class="py-line"> </tt>
+<a name="L64"></a><tt class="py-lineno"> 64</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">value</tt> </tt>
+</div><a name="L65"></a><tt class="py-lineno"> 65</tt>  <tt class="py-line"> </tt>
+<a name="L66"></a><tt class="py-lineno"> 66</tt>  <tt class="py-line">    <tt class="py-decorator">@</tt><tt class="py-decorator">staticmethod</tt> </tt>
+<a name="PikeTest.booloption"></a><div id="PikeTest.booloption-def"><a name="L67"></a><tt class="py-lineno"> 67</tt> <a class="py-toggle" href="#" id="PikeTest.booloption-toggle" onclick="return toggle('PikeTest.booloption');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#booloption">booloption</a><tt class="py-op">(</tt><tt class="py-param">name</tt><tt class="py-op">,</tt> <tt class="py-param">default</tt> <tt class="py-op">=</tt> <tt class="py-string">'no'</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest.booloption-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest.booloption-expanded"><a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line">        <tt class="py-name">table</tt> <tt class="py-op">=</tt> <tt class="py-op">{</tt><tt class="py-string">'yes'</tt><tt class="py-op">:</tt> <tt class="py-name">True</tt><tt class="py-op">,</tt> <tt class="py-string">'no'</tt><tt class="py-op">:</tt> <tt class="py-name">False</tt><tt class="py-op">,</tt> <tt class="py-string">''</tt><tt class="py-op">:</tt> <tt class="py-name">False</tt><tt class="py-op">}</tt> </tt>
+<a name="L69"></a><tt class="py-lineno"> 69</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">table</tt><tt class="py-op">[</tt><tt id="link-5" class="py-name" targets="Class pike.test.PikeTest=pike.test.PikeTest-class.html"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-5', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt id="link-6" class="py-name" targets="Static Method pike.test.PikeTest.option()=pike.test.PikeTest-class.html#option"><a title="pike.test.PikeTest.option" class="py-name" href="#" onclick="return doclink('link-6', 'option', 'link-6');">option</a></tt><tt class="py-op">(</tt><tt id="link-7" class="py-name"><a title="pike.smb2.AppInstanceIdRequest.name
+pike.smb2.DurableHandleReconnectRequest.name
+pike.smb2.DurableHandleReconnectV2Request.name
+pike.smb2.DurableHandleRequest.name
+pike.smb2.DurableHandleResponse.name
+pike.smb2.DurableHandleV2Request.name
+pike.smb2.DurableHandleV2Response.name
+pike.smb2.LeaseRequest.name
+pike.smb2.LeaseResponse.name
+pike.smb2.MaximalAccessRequest.name
+pike.smb2.MaximalAccessResponse.name" class="py-name" href="#" onclick="return doclink('link-7', 'name', 'link-3');">name</a></tt><tt class="py-op">,</tt> <tt class="py-string">'no'</tt><tt class="py-op">)</tt><tt class="py-op">]</tt> </tt>
+</div><a name="L70"></a><tt class="py-lineno"> 70</tt>  <tt class="py-line">     </tt>
+<a name="L71"></a><tt class="py-lineno"> 71</tt>  <tt class="py-line">    <tt class="py-decorator">@</tt><tt class="py-decorator">staticmethod</tt> </tt>
+<a name="PikeTest.init_once"></a><div id="PikeTest.init_once-def"><a name="L72"></a><tt class="py-lineno"> 72</tt> <a class="py-toggle" href="#" id="PikeTest.init_once-toggle" onclick="return toggle('PikeTest.init_once');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#init_once">init_once</a><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest.init_once-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest.init_once-expanded"><a name="L73"></a><tt class="py-lineno"> 73</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-keyword">not</tt> <tt id="link-8" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-8', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt id="link-9" class="py-name"><a title="pike.test.PikeTest.init_done" class="py-name" href="#" onclick="return doclink('link-9', 'init_done', 'link-2');">init_done</a></tt><tt class="py-op">:</tt> </tt>
+<a name="L74"></a><tt class="py-lineno"> 74</tt>  <tt class="py-line">            <tt id="link-10" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-10', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt id="link-11" class="py-name"><a title="pike.test.PikeTest.init_done" class="py-name" href="#" onclick="return doclink('link-11', 'init_done', 'link-2');">init_done</a></tt> <tt class="py-op">=</tt> <tt class="py-name">True</tt> </tt>
+<a name="L75"></a><tt class="py-lineno"> 75</tt>  <tt class="py-line">            <tt id="link-12" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-12', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt class="py-name">loglevel</tt> <tt class="py-op">=</tt> <tt class="py-name">getattr</tt><tt class="py-op">(</tt><tt class="py-name">logging</tt><tt class="py-op">,</tt> <tt id="link-13" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-13', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt id="link-14" class="py-name"><a title="pike.test.PikeTest.option" class="py-name" href="#" onclick="return doclink('link-14', 'option', 'link-6');">option</a></tt><tt class="py-op">(</tt><tt class="py-string">'PIKE_LOGLEVEL'</tt><tt class="py-op">,</tt> <tt class="py-string">'NOTSET'</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt class="py-name">upper</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L76"></a><tt class="py-lineno"> 76</tt>  <tt class="py-line">            <tt id="link-15" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-15', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt class="py-name">handler</tt> <tt class="py-op">=</tt> <tt class="py-name">logging</tt><tt class="py-op">.</tt><tt class="py-name">StreamHandler</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L77"></a><tt class="py-lineno"> 77</tt>  <tt class="py-line">            <tt id="link-16" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-16', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt class="py-name">handler</tt><tt class="py-op">.</tt><tt class="py-name">setLevel</tt><tt class="py-op">(</tt><tt id="link-17" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-17', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt class="py-name">loglevel</tt><tt class="py-op">)</tt> </tt>
+<a name="L78"></a><tt class="py-lineno"> 78</tt>  <tt class="py-line">            <tt id="link-18" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-18', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt class="py-name">handler</tt><tt class="py-op">.</tt><tt class="py-name">setFormatter</tt><tt class="py-op">(</tt><tt class="py-name">logging</tt><tt class="py-op">.</tt><tt class="py-name">Formatter</tt><tt class="py-op">(</tt><tt class="py-string">'%(asctime)s:%(name)s:%(levelname)s: %(message)s'</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line">            <tt id="link-19" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-19', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt class="py-name">logger</tt> <tt class="py-op">=</tt> <tt class="py-name">logging</tt><tt class="py-op">.</tt><tt class="py-name">getLogger</tt><tt class="py-op">(</tt><tt class="py-string">'pike'</tt><tt class="py-op">)</tt> </tt>
+<a name="L80"></a><tt class="py-lineno"> 80</tt>  <tt class="py-line">            <tt id="link-20" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-20', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt class="py-name">logger</tt><tt class="py-op">.</tt><tt class="py-name">addHandler</tt><tt class="py-op">(</tt><tt id="link-21" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-21', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt class="py-name">handler</tt><tt class="py-op">)</tt> </tt>
+<a name="L81"></a><tt class="py-lineno"> 81</tt>  <tt class="py-line">            <tt id="link-22" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-22', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt class="py-name">logger</tt><tt class="py-op">.</tt><tt class="py-name">setLevel</tt><tt class="py-op">(</tt><tt id="link-23" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-23', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt class="py-name">loglevel</tt><tt class="py-op">)</tt> </tt>
+<a name="L82"></a><tt class="py-lineno"> 82</tt>  <tt class="py-line">            <tt id="link-24" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-24', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt id="link-25" class="py-name" targets="Variable pike.model.trace=pike.model-module.html#trace"><a title="pike.model.trace" class="py-name" href="#" onclick="return doclink('link-25', 'trace', 'link-25');">trace</a></tt> <tt class="py-op">=</tt> <tt id="link-26" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-26', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt id="link-27" class="py-name" targets="Static Method pike.test.PikeTest.booloption()=pike.test.PikeTest-class.html#booloption"><a title="pike.test.PikeTest.booloption" class="py-name" href="#" onclick="return doclink('link-27', 'booloption', 'link-27');">booloption</a></tt><tt class="py-op">(</tt><tt class="py-string">'PIKE_TRACE'</tt><tt class="py-op">)</tt> </tt>
+<a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line">            <tt id="link-28" class="py-name"><a title="pike.model" class="py-name" href="#" onclick="return doclink('link-28', 'model', 'link-0');">model</a></tt><tt class="py-op">.</tt><tt id="link-29" class="py-name"><a title="pike.model.trace" class="py-name" href="#" onclick="return doclink('link-29', 'trace', 'link-25');">trace</a></tt> <tt class="py-op">=</tt> <tt id="link-30" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-30', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt id="link-31" class="py-name"><a title="pike.model.trace" class="py-name" href="#" onclick="return doclink('link-31', 'trace', 'link-25');">trace</a></tt> </tt>
+</div><a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line"> </tt>
+<a name="PikeTest.__init__"></a><div id="PikeTest.__init__-def"><a name="L85"></a><tt class="py-lineno"> 85</tt> <a class="py-toggle" href="#" id="PikeTest.__init__-toggle" onclick="return toggle('PikeTest.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-op">*</tt><tt class="py-param">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-param">kwargs</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest.__init__-expanded"><a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line">        <tt class="py-name">unittest</tt><tt class="py-op">.</tt><tt class="py-name">TestCase</tt><tt class="py-op">.</tt><tt id="link-32" class="py-name" targets="Method pike.core.Cursor.Bounds.__init__()=pike.core.Cursor.Bounds-class.html#__init__,Method pike.core.Cursor.Hole.__init__()=pike.core.Cursor.Hole-class.html#__init__,Method pike.core.Cursor.__init__()=pike.core.Cursor-class.html#__init__,Method pike.core.Frame.__init__()=pike.core.Frame-class.html#__init__,Method pike.core.Register.__init__()=pike.core.Register-class.html#__init__,Method pike.model.Channel.__init__()=pike.model.Channel-class.html#__init__,Method pike.model.Client.__init__()=pike.model.Client-class.html#__init__,Method pike.model.Connection.__init__()=pike.model.Connection-class.html#__init__,Method pike.model.Future.__init__()=pike.model.Future-class.html#__init__,Method pike.model.Lease.__init__()=pike.model.Lease-class.html#__init__,Method pike.model.Open.__init__()=pike.model.Open-class.html#__init__,Method pike.model.ResponseError.__init__()=pike.model.ResponseError-class.html#__init__,Method pike.model.Session.__init__()=pike.model.Session-class.html#__init__,Method pike.model.Tree.__init__()=pike.model.Tree-class.html#__init__,Method pike.netbios.Netbios.__init__()=pike.netbios.Netbios-class.html#__init__,Method pike.smb2.AppInstanceIdRequest.__init__()=pike.smb2.AppInstanceIdRequest-class.html#__init__,Method pike.smb2.CloseRequest.__init__()=pike.smb2.CloseRequest-class.html#__init__,Method pike.smb2.CloseResponse.__init__()=pike.smb2.CloseResponse-class.html#__init__,Method pike.smb2.Command.__init__()=pike.smb2.Command-class.html#__init__,Method pike.smb2.CreateRequest.__init__()=pike.smb2.CreateRequest-class.html#__init__,Method pike.smb2.CreateRequestContext.__init__()=pike.smb2.CreateRequestContext-class.html#__init__,Method pike.smb2.CreateResponse.__init__()=pike.smb2.CreateResponse-class.html#__init__,Method pike.smb2.CreateResponseContext.__init__()=pike.smb2.CreateResponseContext-class.html#__init__,Method pike.smb2.DurableHandleReconnectRequest.__init__()=pike.smb2.DurableHandleReconnectRequest-class.html#__init__,Method pike.smb2.DurableHandleReconnectV2Request.__init__()=pike.smb2.DurableHandleReconnectV2Request-class.html#__init__,Method pike.smb2.DurableHandleRequest.__init__()=pike.smb2.DurableHandleRequest-class.html#__init__,Method pike.smb2.DurableHandleResponse.__init__()=pike.smb2.DurableHandleResponse-class.html#__init__,Method pike.smb2.DurableHandleV2Request.__init__()=pike.smb2.DurableHandleV2Request-class.html#__init__,Method pike.smb2.DurableHandleV2Response.__init__()=pike.smb2.DurableHandleV2Response-class.html#__init__,Method pike.smb2.EchoRequest.__init__()=pike.smb2.EchoRequest-class.html#__init__,Method pike.smb2.EchoResponse.__init__()=pike.smb2.EchoResponse-class.html#__init__,Method pike.smb2.ErrorResponse.__init__()=pike.smb2.ErrorResponse-class.html#__init__,Method pike.smb2.FileAccessInformation.__init__()=pike.smb2.FileAccessInformation-class.html#__init__,Method pike.smb2.FileAlignmentInformation.__init__()=pike.smb2.FileAlignmentInformation-class.html#__init__,Method pike.smb2.FileAllInformation.__init__()=pike.smb2.FileAllInformation-class.html#__init__,Method pike.smb2.FileBasicInformation.__init__()=pike.smb2.FileBasicInformation-class.html#__init__,Method pike.smb2.FileDirectoryInformation.__init__()=pike.smb2.FileDirectoryInformation-class.html#__init__,Method pike.smb2.FileEaInformation.__init__()=pike.smb2.FileEaInformation-class.html#__init__,Method pike.smb2.FileInternalInformation.__init__()=pike.smb2.FileInternalInformation-class.html#__init__,Method pike.smb2.FileModeInformation.__init__()=pike.smb2.FileModeInformation-class.html#__init__,Method pike.smb2.FileNameInformation.__init__()=pike.smb2.FileNameInformation-class.html#__init__,Method pike.smb2.FileNamesInformation.__init__()=pike.smb2.FileNamesInformation-class.html#__init__,Method pike.smb2.FilePositionInformation.__init__()=pike.smb2.FilePositionInformation-class.html#__init__,Method pike.smb2.FileStandardInformation.__init__()=pike.smb2.FileStandardInformation-class.html#__init__,Method pike.smb2.IoctlInput.__init__()=pike.smb2.IoctlInput-class.html#__init__,Method pike.smb2.IoctlOutput.__init__()=pike.smb2.IoctlOutput-class.html#__init__,Method pike.smb2.IoctlRequest.__init__()=pike.smb2.IoctlRequest-class.html#__init__,Method pike.smb2.IoctlResponse.__init__()=pike.smb2.IoctlResponse-class.html#__init__,Method pike.smb2.LeaseBreakAcknowledgement.__init__()=pike.smb2.LeaseBreakAcknowledgement-class.html#__init__,Method pike.smb2.LeaseBreakNotification.__init__()=pike.smb2.LeaseBreakNotification-class.html#__init__,Method pike.smb2.LeaseBreakResponse.__init__()=pike.smb2.LeaseBreakResponse-class.html#__init__,Method pike.smb2.LeaseRequest.__init__()=pike.smb2.LeaseRequest-class.html#__init__,Method pike.smb2.LeaseResponse.__init__()=pike.smb2.LeaseResponse-class.html#__init__,Method pike.smb2.LockRequest.__init__()=pike.smb2.LockRequest-class.html#__init__,Method pike.smb2.LockResponse.__init__()=pike.smb2.LockResponse-class.html#__init__,Method pike.smb2.LogoffRequest.__init__()=pike.smb2.LogoffRequest-class.html#__init__,Method pike.smb2.LogoffResponse.__init__()=pike.smb2.LogoffResponse-class.html#__init__,Method pike.smb2.MaximalAccessRequest.__init__()=pike.smb2.MaximalAccessRequest-class.html#__init__,Method pike.smb2.MaximalAccessResponse.__init__()=pike.smb2.MaximalAccessResponse-class.html#__init__,Method pike.smb2.NegotiateRequest.__init__()=pike.smb2.NegotiateRequest-class.html#__init__,Method pike.smb2.NegotiateResponse.__init__()=pike.smb2.NegotiateResponse-class.html#__init__,Method pike.smb2.OplockBreakAcknowledgement.__init__()=pike.smb2.OplockBreakAcknowledgement-class.html#__init__,Method pike.smb2.OplockBreakNotification.__init__()=pike.smb2.OplockBreakNotification-class.html#__init__,Method pike.smb2.OplockBreakResponse.__init__()=pike.smb2.OplockBreakResponse-class.html#__init__,Method pike.smb2.QueryDirectoryRequest.__init__()=pike.smb2.QueryDirectoryRequest-class.html#__init__,Method pike.smb2.QueryDirectoryResponse.__init__()=pike.smb2.QueryDirectoryResponse-class.html#__init__,Method pike.smb2.QueryInfoRequest.__init__()=pike.smb2.QueryInfoRequest-class.html#__init__,Method pike.smb2.QueryInfoResponse.__init__()=pike.smb2.QueryInfoResponse-class.html#__init__,Method pike.smb2.ReadRequest.__init__()=pike.smb2.ReadRequest-class.html#__init__,Method pike.smb2.ReadResponse.__init__()=pike.smb2.ReadResponse-class.html#__init__,Method pike.smb2.SessionSetupRequest.__init__()=pike.smb2.SessionSetupRequest-class.html#__init__,Method pike.smb2.SessionSetupResponse.__init__()=pike.smb2.SessionSetupResponse-class.html#__init__,Method pike.smb2.SetInfoRequest.__init__()=pike.smb2.SetInfoRequest-class.html#__init__,Method pike.smb2.SetInfoResponse.__init__()=pike.smb2.SetInfoResponse-class.html#__init__,Method pike.smb2.Smb2.__init__()=pike.smb2.Smb2-class.html#__init__,Method pike.smb2.TreeConnectRequest.__init__()=pike.smb2.TreeConnectRequest-class.html#__init__,Method pike.smb2.TreeConnectResponse.__init__()=pike.smb2.TreeConnectResponse-class.html#__init__,Method pike.smb2.TreeDisconnectRequest.__init__()=pike.smb2.TreeDisconnectRequest-class.html#__init__,Method pike.smb2.TreeDisconnectResponse.__init__()=pike.smb2.TreeDisconnectResponse-class.html#__init__,Method pike.smb2.ValidateNegotiateInfoRequest.__init__()=pike.smb2.ValidateNegotiateInfoRequest-class.html#__init__,Method pike.smb2.ValidateNegotiateInfoResponse.__init__()=pike.smb2.ValidateNegotiateInfoResponse-class.html#__init__,Method pike.smb2.WriteRequest.__init__()=pike.smb2.WriteRequest-class.html#__init__,Method pike.smb2.WriteResponse.__init__()=pike.smb2.WriteResponse-class.html#__init__,Method pike.test.PikeTest.__init__()=pike.test.PikeTest-class.html#__init__"><a title="pike.core.Cursor.Bounds.__init__
+pike.core.Cursor.Hole.__init__
+pike.core.Cursor.__init__
+pike.core.Frame.__init__
+pike.core.Register.__init__
+pike.model.Channel.__init__
+pike.model.Client.__init__
+pike.model.Connection.__init__
+pike.model.Future.__init__
+pike.model.Lease.__init__
+pike.model.Open.__init__
+pike.model.ResponseError.__init__
+pike.model.Session.__init__
+pike.model.Tree.__init__
+pike.netbios.Netbios.__init__
+pike.smb2.AppInstanceIdRequest.__init__
+pike.smb2.CloseRequest.__init__
+pike.smb2.CloseResponse.__init__
+pike.smb2.Command.__init__
+pike.smb2.CreateRequest.__init__
+pike.smb2.CreateRequestContext.__init__
+pike.smb2.CreateResponse.__init__
+pike.smb2.CreateResponseContext.__init__
+pike.smb2.DurableHandleReconnectRequest.__init__
+pike.smb2.DurableHandleReconnectV2Request.__init__
+pike.smb2.DurableHandleRequest.__init__
+pike.smb2.DurableHandleResponse.__init__
+pike.smb2.DurableHandleV2Request.__init__
+pike.smb2.DurableHandleV2Response.__init__
+pike.smb2.EchoRequest.__init__
+pike.smb2.EchoResponse.__init__
+pike.smb2.ErrorResponse.__init__
+pike.smb2.FileAccessInformation.__init__
+pike.smb2.FileAlignmentInformation.__init__
+pike.smb2.FileAllInformation.__init__
+pike.smb2.FileBasicInformation.__init__
+pike.smb2.FileDirectoryInformation.__init__
+pike.smb2.FileEaInformation.__init__
+pike.smb2.FileInternalInformation.__init__
+pike.smb2.FileModeInformation.__init__
+pike.smb2.FileNameInformation.__init__
+pike.smb2.FileNamesInformation.__init__
+pike.smb2.FilePositionInformation.__init__
+pike.smb2.FileStandardInformation.__init__
+pike.smb2.IoctlInput.__init__
+pike.smb2.IoctlOutput.__init__
+pike.smb2.IoctlRequest.__init__
+pike.smb2.IoctlResponse.__init__
+pike.smb2.LeaseBreakAcknowledgement.__init__
+pike.smb2.LeaseBreakNotification.__init__
+pike.smb2.LeaseBreakResponse.__init__
+pike.smb2.LeaseRequest.__init__
+pike.smb2.LeaseResponse.__init__
+pike.smb2.LockRequest.__init__
+pike.smb2.LockResponse.__init__
+pike.smb2.LogoffRequest.__init__
+pike.smb2.LogoffResponse.__init__
+pike.smb2.MaximalAccessRequest.__init__
+pike.smb2.MaximalAccessResponse.__init__
+pike.smb2.NegotiateRequest.__init__
+pike.smb2.NegotiateResponse.__init__
+pike.smb2.OplockBreakAcknowledgement.__init__
+pike.smb2.OplockBreakNotification.__init__
+pike.smb2.OplockBreakResponse.__init__
+pike.smb2.QueryDirectoryRequest.__init__
+pike.smb2.QueryDirectoryResponse.__init__
+pike.smb2.QueryInfoRequest.__init__
+pike.smb2.QueryInfoResponse.__init__
+pike.smb2.ReadRequest.__init__
+pike.smb2.ReadResponse.__init__
+pike.smb2.SessionSetupRequest.__init__
+pike.smb2.SessionSetupResponse.__init__
+pike.smb2.SetInfoRequest.__init__
+pike.smb2.SetInfoResponse.__init__
+pike.smb2.Smb2.__init__
+pike.smb2.TreeConnectRequest.__init__
+pike.smb2.TreeConnectResponse.__init__
+pike.smb2.TreeDisconnectRequest.__init__
+pike.smb2.TreeDisconnectResponse.__init__
+pike.smb2.ValidateNegotiateInfoRequest.__init__
+pike.smb2.ValidateNegotiateInfoResponse.__init__
+pike.smb2.WriteRequest.__init__
+pike.smb2.WriteResponse.__init__
+pike.test.PikeTest.__init__" class="py-name" href="#" onclick="return doclink('link-32', '__init__', 'link-32');">__init__</a></tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">,</tt><tt class="py-op">*</tt><tt class="py-name">args</tt><tt class="py-op">,</tt><tt class="py-op">**</tt><tt class="py-name">kwargs</tt><tt class="py-op">)</tt> </tt>
+<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-33" class="py-name" targets="Static Method pike.test.PikeTest.init_once()=pike.test.PikeTest-class.html#init_once"><a title="pike.test.PikeTest.init_once" class="py-name" href="#" onclick="return doclink('link-33', 'init_once', 'link-33');">init_once</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">server</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-34" class="py-name"><a title="pike.test.PikeTest.option" class="py-name" href="#" onclick="return doclink('link-34', 'option', 'link-6');">option</a></tt><tt class="py-op">(</tt><tt class="py-string">'PIKE_SERVER'</tt><tt class="py-op">)</tt> </tt>
+<a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">port</tt> <tt class="py-op">=</tt> <tt class="py-name">int</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-35" class="py-name"><a title="pike.test.PikeTest.option" class="py-name" href="#" onclick="return doclink('link-35', 'option', 'link-6');">option</a></tt><tt class="py-op">(</tt><tt class="py-string">'PIKE_PORT'</tt><tt class="py-op">,</tt> <tt class="py-string">'445'</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">creds</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-36" class="py-name"><a title="pike.test.PikeTest.option" class="py-name" href="#" onclick="return doclink('link-36', 'option', 'link-6');">option</a></tt><tt class="py-op">(</tt><tt class="py-string">'PIKE_CREDS'</tt><tt class="py-op">)</tt> </tt>
+<a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">share</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-37" class="py-name"><a title="pike.test.PikeTest.option" class="py-name" href="#" onclick="return doclink('link-37', 'option', 'link-6');">option</a></tt><tt class="py-op">(</tt><tt class="py-string">'PIKE_SHARE'</tt><tt class="py-op">,</tt> <tt class="py-string">'c$'</tt><tt class="py-op">)</tt> </tt>
+<a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_connections</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
+<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">default_client</tt> <tt class="py-op">=</tt> <tt id="link-38" class="py-name"><a title="pike.model" class="py-name" href="#" onclick="return doclink('link-38', 'model', 'link-0');">model</a></tt><tt class="py-op">.</tt><tt id="link-39" class="py-name" targets="Class pike.model.Client=pike.model.Client-class.html"><a title="pike.model.Client" class="py-name" href="#" onclick="return doclink('link-39', 'Client', 'link-39');">Client</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line"> </tt>
+<a name="PikeTest.debug"></a><div id="PikeTest.debug-def"><a name="L95"></a><tt class="py-lineno"> 95</tt> <a class="py-toggle" href="#" id="PikeTest.debug-toggle" onclick="return toggle('PikeTest.debug');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#debug">debug</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-op">*</tt><tt class="py-param">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-param">kwargs</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest.debug-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest.debug-expanded"><a name="L96"></a><tt class="py-lineno"> 96</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">logger</tt><tt class="py-op">.</tt><tt id="link-40" class="py-name" targets="Method pike.test.PikeTest.debug()=pike.test.PikeTest-class.html#debug"><a title="pike.test.PikeTest.debug" class="py-name" href="#" onclick="return doclink('link-40', 'debug', 'link-40');">debug</a></tt><tt class="py-op">(</tt><tt class="py-op">*</tt><tt class="py-name">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-name">kwargs</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line"> </tt>
+<a name="PikeTest.info"></a><div id="PikeTest.info-def"><a name="L98"></a><tt class="py-lineno"> 98</tt> <a class="py-toggle" href="#" id="PikeTest.info-toggle" onclick="return toggle('PikeTest.info');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#info">info</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-op">*</tt><tt class="py-param">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-param">kwargs</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest.info-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest.info-expanded"><a name="L99"></a><tt class="py-lineno"> 99</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">logger</tt><tt class="py-op">.</tt><tt id="link-41" class="py-name" targets="Method pike.test.PikeTest.info()=pike.test.PikeTest-class.html#info"><a title="pike.test.PikeTest.info" class="py-name" href="#" onclick="return doclink('link-41', 'info', 'link-41');">info</a></tt><tt class="py-op">(</tt><tt class="py-op">*</tt><tt class="py-name">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-name">kwargs</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L100"></a><tt class="py-lineno">100</tt>  <tt class="py-line"> </tt>
+<a name="PikeTest.warn"></a><div id="PikeTest.warn-def"><a name="L101"></a><tt class="py-lineno">101</tt> <a class="py-toggle" href="#" id="PikeTest.warn-toggle" onclick="return toggle('PikeTest.warn');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#warn">warn</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-op">*</tt><tt class="py-param">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-param">kwargs</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest.warn-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest.warn-expanded"><a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">logger</tt><tt class="py-op">.</tt><tt id="link-42" class="py-name" targets="Method pike.test.PikeTest.warn()=pike.test.PikeTest-class.html#warn"><a title="pike.test.PikeTest.warn" class="py-name" href="#" onclick="return doclink('link-42', 'warn', 'link-42');">warn</a></tt><tt class="py-op">(</tt><tt class="py-op">*</tt><tt class="py-name">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-name">kwargs</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L103"></a><tt class="py-lineno">103</tt>  <tt class="py-line"> </tt>
+<a name="PikeTest.error"></a><div id="PikeTest.error-def"><a name="L104"></a><tt class="py-lineno">104</tt> <a class="py-toggle" href="#" id="PikeTest.error-toggle" onclick="return toggle('PikeTest.error');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#error">error</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-op">*</tt><tt class="py-param">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-param">kwargs</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest.error-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest.error-expanded"><a name="L105"></a><tt class="py-lineno">105</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">logger</tt><tt class="py-op">.</tt><tt id="link-43" class="py-name" targets="Method pike.test.PikeTest.error()=pike.test.PikeTest-class.html#error"><a title="pike.test.PikeTest.error" class="py-name" href="#" onclick="return doclink('link-43', 'error', 'link-43');">error</a></tt><tt class="py-op">(</tt><tt class="py-op">*</tt><tt class="py-name">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-name">kwargs</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L106"></a><tt class="py-lineno">106</tt>  <tt class="py-line"> </tt>
+<a name="PikeTest.critical"></a><div id="PikeTest.critical-def"><a name="L107"></a><tt class="py-lineno">107</tt> <a class="py-toggle" href="#" id="PikeTest.critical-toggle" onclick="return toggle('PikeTest.critical');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#critical">critical</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-op">*</tt><tt class="py-param">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-param">kwargs</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest.critical-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest.critical-expanded"><a name="L108"></a><tt class="py-lineno">108</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">logger</tt><tt class="py-op">.</tt><tt id="link-44" class="py-name" targets="Method pike.test.PikeTest.critical()=pike.test.PikeTest-class.html#critical"><a title="pike.test.PikeTest.critical" class="py-name" href="#" onclick="return doclink('link-44', 'critical', 'link-44');">critical</a></tt><tt class="py-op">(</tt><tt class="py-op">*</tt><tt class="py-name">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-name">kwargs</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L109"></a><tt class="py-lineno">109</tt>  <tt class="py-line"> </tt>
+<a name="PikeTest.tree_connect"></a><div id="PikeTest.tree_connect-def"><a name="L110"></a><tt class="py-lineno">110</tt> <a class="py-toggle" href="#" id="PikeTest.tree_connect-toggle" onclick="return toggle('PikeTest.tree_connect');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#tree_connect">tree_connect</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">client</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest.tree_connect-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest.tree_connect-expanded"><a name="L111"></a><tt class="py-lineno">111</tt>  <tt class="py-line">        <tt class="py-name">req_dialect</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-45" class="py-name" targets="Method pike.test.PikeTest.required_dialect()=pike.test.PikeTest-class.html#required_dialect"><a title="pike.test.PikeTest.required_dialect" class="py-name" href="#" onclick="return doclink('link-45', 'required_dialect', 'link-45');">required_dialect</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L112"></a><tt class="py-lineno">112</tt>  <tt class="py-line">        <tt class="py-name">req_caps</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-46" class="py-name" targets="Method pike.test.PikeTest.required_capabilities()=pike.test.PikeTest-class.html#required_capabilities"><a title="pike.test.PikeTest.required_capabilities" class="py-name" href="#" onclick="return doclink('link-46', 'required_capabilities', 'link-46');">required_capabilities</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L113"></a><tt class="py-lineno">113</tt>  <tt class="py-line">        <tt class="py-name">req_share_caps</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-47" class="py-name" targets="Method pike.test.PikeTest.required_share_capabilities()=pike.test.PikeTest-class.html#required_share_capabilities"><a title="pike.test.PikeTest.required_share_capabilities" class="py-name" href="#" onclick="return doclink('link-47', 'required_share_capabilities', 'link-47');">required_share_capabilities</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L114"></a><tt class="py-lineno">114</tt>  <tt class="py-line"> </tt>
+<a name="L115"></a><tt class="py-lineno">115</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">client</tt> <tt class="py-keyword">is</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L116"></a><tt class="py-lineno">116</tt>  <tt class="py-line">            <tt class="py-name">client</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">default_client</tt> </tt>
+<a name="L117"></a><tt class="py-lineno">117</tt>  <tt class="py-line"> </tt>
+<a name="L118"></a><tt class="py-lineno">118</tt>  <tt class="py-line">        <tt class="py-name">conn</tt> <tt class="py-op">=</tt> <tt class="py-name">client</tt><tt class="py-op">.</tt><tt id="link-48" class="py-name" targets="Method pike.model.Client.connect()=pike.model.Client-class.html#connect"><a title="pike.model.Client.connect" class="py-name" href="#" onclick="return doclink('link-48', 'connect', 'link-48');">connect</a></tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">server</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">port</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-49" class="py-name" targets="Method pike.model.Connection.negotiate()=pike.model.Connection-class.html#negotiate"><a title="pike.model.Connection.negotiate" class="py-name" href="#" onclick="return doclink('link-49', 'negotiate', 'link-49');">negotiate</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L119"></a><tt class="py-lineno">119</tt>  <tt class="py-line"> </tt>
+<a name="L120"></a><tt class="py-lineno">120</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">conn</tt><tt class="py-op">.</tt><tt class="py-name">negotiate_response</tt><tt class="py-op">.</tt><tt class="py-name">dialect_revision</tt> <tt class="py-op">&lt;</tt> <tt class="py-name">req_dialect</tt><tt class="py-op">:</tt> </tt>
+<a name="L121"></a><tt class="py-lineno">121</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">skipTest</tt><tt class="py-op">(</tt><tt class="py-string">"Dialect required: %s"</tt> <tt class="py-op">%</tt> <tt class="py-name">str</tt><tt class="py-op">(</tt><tt class="py-name">req_dialect</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L122"></a><tt class="py-lineno">122</tt>  <tt class="py-line"> </tt>
+<a name="L123"></a><tt class="py-lineno">123</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">conn</tt><tt class="py-op">.</tt><tt class="py-name">negotiate_response</tt><tt class="py-op">.</tt><tt class="py-name">capabilities</tt> <tt class="py-op">&amp;</tt> <tt class="py-name">req_caps</tt> <tt class="py-op">!=</tt> <tt class="py-name">req_caps</tt><tt class="py-op">:</tt> </tt>
+<a name="L124"></a><tt class="py-lineno">124</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">skipTest</tt><tt class="py-op">(</tt><tt class="py-string">"Capabilities missing: %s "</tt> <tt class="py-op">%</tt> </tt>
+<a name="L125"></a><tt class="py-lineno">125</tt>  <tt class="py-line">                          <tt class="py-name">str</tt><tt class="py-op">(</tt><tt class="py-name">req_caps</tt> <tt class="py-op">&amp;</tt> <tt class="py-op">~</tt><tt class="py-name">conn</tt><tt class="py-op">.</tt><tt class="py-name">negotiate_response</tt><tt class="py-op">.</tt><tt class="py-name">capabilities</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L126"></a><tt class="py-lineno">126</tt>  <tt class="py-line"> </tt>
+<a name="L127"></a><tt class="py-lineno">127</tt>  <tt class="py-line">        <tt class="py-name">chan</tt> <tt class="py-op">=</tt> <tt class="py-name">conn</tt><tt class="py-op">.</tt><tt id="link-50" class="py-name" targets="Method pike.model.Connection.session_setup()=pike.model.Connection-class.html#session_setup"><a title="pike.model.Connection.session_setup" class="py-name" href="#" onclick="return doclink('link-50', 'session_setup', 'link-50');">session_setup</a></tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">creds</tt><tt class="py-op">)</tt> </tt>
+<a name="L128"></a><tt class="py-lineno">128</tt>  <tt class="py-line"> </tt>
+<a name="L129"></a><tt class="py-lineno">129</tt>  <tt class="py-line">        <tt class="py-name">tree</tt> <tt class="py-op">=</tt> <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt id="link-51" class="py-name" targets="Method pike.model.Channel.tree_connect()=pike.model.Channel-class.html#tree_connect,Method pike.test.PikeTest.tree_connect()=pike.test.PikeTest-class.html#tree_connect"><a title="pike.model.Channel.tree_connect
+pike.test.PikeTest.tree_connect" class="py-name" href="#" onclick="return doclink('link-51', 'tree_connect', 'link-51');">tree_connect</a></tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">share</tt><tt class="py-op">)</tt> </tt>
+<a name="L130"></a><tt class="py-lineno">130</tt>  <tt class="py-line"> </tt>
+<a name="L131"></a><tt class="py-lineno">131</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">tree</tt><tt class="py-op">.</tt><tt class="py-name">tree_connect_response</tt><tt class="py-op">.</tt><tt class="py-name">capabilities</tt> <tt class="py-op">&amp;</tt> <tt class="py-name">req_share_caps</tt> <tt class="py-op">!=</tt> <tt class="py-name">req_share_caps</tt><tt class="py-op">:</tt> </tt>
+<a name="L132"></a><tt class="py-lineno">132</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">skipTest</tt><tt class="py-op">(</tt><tt class="py-string">"Share capabilities missing: %s"</tt> <tt class="py-op">%</tt> </tt>
+<a name="L133"></a><tt class="py-lineno">133</tt>  <tt class="py-line">                          <tt class="py-name">str</tt><tt class="py-op">(</tt><tt class="py-name">req_share_caps</tt> <tt class="py-op">&amp;</tt> <tt class="py-op">~</tt><tt class="py-name">tree</tt><tt class="py-op">.</tt><tt class="py-name">tree_connect_response</tt><tt class="py-op">.</tt><tt class="py-name">capabilities</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L134"></a><tt class="py-lineno">134</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_connections</tt><tt class="py-op">.</tt><tt id="link-52" class="py-name" targets="Method pike.netbios.Netbios.append()=pike.netbios.Netbios-class.html#append,Method pike.smb2.CreateRequest.append()=pike.smb2.CreateRequest-class.html#append,Method pike.smb2.CreateResponse.append()=pike.smb2.CreateResponse-class.html#append,Method pike.smb2.QueryDirectoryResponse.append()=pike.smb2.QueryDirectoryResponse-class.html#append,Method pike.smb2.QueryInfoResponse.append()=pike.smb2.QueryInfoResponse-class.html#append,Method pike.smb2.SetInfoRequest.append()=pike.smb2.SetInfoRequest-class.html#append"><a title="pike.netbios.Netbios.append
+pike.smb2.CreateRequest.append
+pike.smb2.CreateResponse.append
+pike.smb2.QueryDirectoryResponse.append
+pike.smb2.QueryInfoResponse.append
+pike.smb2.SetInfoRequest.append" class="py-name" href="#" onclick="return doclink('link-52', 'append', 'link-52');">append</a></tt><tt class="py-op">(</tt><tt class="py-name">conn</tt><tt class="py-op">)</tt> </tt>
+<a name="L135"></a><tt class="py-lineno">135</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-op">(</tt><tt class="py-name">chan</tt><tt class="py-op">,</tt><tt class="py-name">tree</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L136"></a><tt class="py-lineno">136</tt>  <tt class="py-line"> </tt>
+<a name="PikeTest._AssertErrorContext"></a><div id="PikeTest._AssertErrorContext-def"><a name="L137"></a><tt class="py-lineno">137</tt> <a class="py-toggle" href="#" id="PikeTest._AssertErrorContext-toggle" onclick="return toggle('PikeTest._AssertErrorContext');">-</a><tt class="py-line">    <tt class="py-keyword">class</tt> <a class="py-def-name" href="pike.test.PikeTest._AssertErrorContext-class.html">_AssertErrorContext</a><tt class="py-op">(</tt><tt class="py-base-class">object</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest._AssertErrorContext-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest._AssertErrorContext-expanded"><a name="L138"></a><tt class="py-lineno">138</tt>  <tt class="py-line">        <tt class="py-keyword">pass</tt> </tt>
+</div><a name="L139"></a><tt class="py-lineno">139</tt>  <tt class="py-line"> </tt>
+<a name="L140"></a><tt class="py-lineno">140</tt>  <tt class="py-line">    <tt class="py-decorator">@</tt><tt class="py-decorator">contextlib</tt><tt class="py-op">.</tt><tt class="py-name">contextmanager</tt> </tt>
+<a name="PikeTest.assert_error"></a><div id="PikeTest.assert_error-def"><a name="L141"></a><tt class="py-lineno">141</tt> <a class="py-toggle" href="#" id="PikeTest.assert_error-toggle" onclick="return toggle('PikeTest.assert_error');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#assert_error">assert_error</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">status</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest.assert_error-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest.assert_error-expanded"><a name="L142"></a><tt class="py-lineno">142</tt>  <tt class="py-line">        <tt class="py-name">e</tt> <tt class="py-op">=</tt> <tt class="py-name">None</tt> </tt>
+<a name="L143"></a><tt class="py-lineno">143</tt>  <tt class="py-line">        <tt class="py-name">o</tt> <tt class="py-op">=</tt> <tt id="link-53" class="py-name"><a title="pike.test.PikeTest" class="py-name" href="#" onclick="return doclink('link-53', 'PikeTest', 'link-5');">PikeTest</a></tt><tt class="py-op">.</tt><tt class="py-name">_AssertErrorContext</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L144"></a><tt class="py-lineno">144</tt>  <tt class="py-line"> </tt>
+<a name="L145"></a><tt class="py-lineno">145</tt>  <tt class="py-line">        <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L146"></a><tt class="py-lineno">146</tt>  <tt class="py-line">            <tt class="py-keyword">yield</tt> <tt class="py-name">o</tt> </tt>
+<a name="L147"></a><tt class="py-lineno">147</tt>  <tt class="py-line">        <tt class="py-keyword">except</tt> <tt id="link-54" class="py-name"><a title="pike.model" class="py-name" href="#" onclick="return doclink('link-54', 'model', 'link-0');">model</a></tt><tt class="py-op">.</tt><tt id="link-55" class="py-name" targets="Class pike.model.ResponseError=pike.model.ResponseError-class.html"><a title="pike.model.ResponseError" class="py-name" href="#" onclick="return doclink('link-55', 'ResponseError', 'link-55');">ResponseError</a></tt> <tt class="py-keyword">as</tt> <tt class="py-name">e</tt><tt class="py-op">:</tt> </tt>
+<a name="L148"></a><tt class="py-lineno">148</tt>  <tt class="py-line">            <tt class="py-keyword">pass</tt> </tt>
+<a name="L149"></a><tt class="py-lineno">149</tt>  <tt class="py-line"> </tt>
+<a name="L150"></a><tt class="py-lineno">150</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">e</tt> <tt class="py-keyword">is</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L151"></a><tt class="py-lineno">151</tt>  <tt class="py-line">            <tt class="py-keyword">raise</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">failureException</tt><tt class="py-op">(</tt><tt class="py-string">'No error raised when "%s" expected'</tt> <tt class="py-op">%</tt> <tt class="py-name">status</tt><tt class="py-op">)</tt> </tt>
+<a name="L152"></a><tt class="py-lineno">152</tt>  <tt class="py-line">        <tt class="py-keyword">elif</tt> <tt class="py-name">e</tt><tt class="py-op">.</tt><tt id="link-56" class="py-name" targets="Variable pike.smb2.Smb2.response=pike.smb2.Smb2-class.html#response"><a title="pike.smb2.Smb2.response" class="py-name" href="#" onclick="return doclink('link-56', 'response', 'link-56');">response</a></tt><tt class="py-op">.</tt><tt class="py-name">status</tt> <tt class="py-op">!=</tt> <tt class="py-name">status</tt><tt class="py-op">:</tt> </tt>
+<a name="L153"></a><tt class="py-lineno">153</tt>  <tt class="py-line">            <tt class="py-keyword">raise</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">failureException</tt><tt class="py-op">(</tt><tt class="py-string">'"%s" raised when "%s" expected'</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt class="py-name">e</tt><tt class="py-op">.</tt><tt id="link-57" class="py-name"><a title="pike.smb2.Smb2.response" class="py-name" href="#" onclick="return doclink('link-57', 'response', 'link-56');">response</a></tt><tt class="py-op">.</tt><tt class="py-name">status</tt><tt class="py-op">,</tt> <tt class="py-name">status</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L154"></a><tt class="py-lineno">154</tt>  <tt class="py-line"> </tt>
+<a name="L155"></a><tt class="py-lineno">155</tt>  <tt class="py-line">        <tt class="py-name">o</tt><tt class="py-op">.</tt><tt id="link-58" class="py-name"><a title="pike.smb2.Smb2.response" class="py-name" href="#" onclick="return doclink('link-58', 'response', 'link-56');">response</a></tt> <tt class="py-op">=</tt> <tt class="py-name">e</tt><tt class="py-op">.</tt><tt id="link-59" class="py-name"><a title="pike.smb2.Smb2.response" class="py-name" href="#" onclick="return doclink('link-59', 'response', 'link-56');">response</a></tt> </tt>
+</div><a name="L156"></a><tt class="py-lineno">156</tt>  <tt class="py-line"> </tt>
+<a name="PikeTest.setUp"></a><div id="PikeTest.setUp-def"><a name="L157"></a><tt class="py-lineno">157</tt> <a class="py-toggle" href="#" id="PikeTest.setUp-toggle" onclick="return toggle('PikeTest.setUp');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#setUp">setUp</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest.setUp-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest.setUp-expanded"><a name="L158"></a><tt class="py-lineno">158</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">loglevel</tt> <tt class="py-op">!=</tt> <tt class="py-name">logging</tt><tt class="py-op">.</tt><tt class="py-name">NOTSET</tt><tt class="py-op">:</tt> </tt>
+<a name="L159"></a><tt class="py-lineno">159</tt>  <tt class="py-line">            <tt class="py-keyword">print</tt> <tt class="py-op">&gt;&gt;</tt><tt class="py-name">sys</tt><tt class="py-op">.</tt><tt class="py-name">stderr</tt> </tt>
+<a name="L160"></a><tt class="py-lineno">160</tt>  <tt class="py-line"> </tt>
+<a name="L161"></a><tt class="py-lineno">161</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">hasattr</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">,</tt> <tt class="py-string">'setup'</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L162"></a><tt class="py-lineno">162</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">setup</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L163"></a><tt class="py-lineno">163</tt>  <tt class="py-line"> </tt>
+<a name="PikeTest.tearDown"></a><div id="PikeTest.tearDown-def"><a name="L164"></a><tt class="py-lineno">164</tt> <a class="py-toggle" href="#" id="PikeTest.tearDown-toggle" onclick="return toggle('PikeTest.tearDown');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#tearDown">tearDown</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest.tearDown-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest.tearDown-expanded"><a name="L165"></a><tt class="py-lineno">165</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">hasattr</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">,</tt> <tt class="py-string">'teardown'</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L166"></a><tt class="py-lineno">166</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">teardown</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L167"></a><tt class="py-lineno">167</tt>  <tt class="py-line"> </tt>
+<a name="L168"></a><tt class="py-lineno">168</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">conn</tt> <tt class="py-keyword">in</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_connections</tt><tt class="py-op">:</tt> </tt>
+<a name="L169"></a><tt class="py-lineno">169</tt>  <tt class="py-line">            <tt class="py-name">conn</tt><tt class="py-op">.</tt><tt id="link-60" class="py-name" targets="Method pike.model.Channel.close()=pike.model.Channel-class.html#close,Method pike.model.Connection.close()=pike.model.Connection-class.html#close"><a title="pike.model.Channel.close
+pike.model.Connection.close" class="py-name" href="#" onclick="return doclink('link-60', 'close', 'link-60');">close</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L170"></a><tt class="py-lineno">170</tt>  <tt class="py-line">        <tt class="py-keyword">del</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_connections</tt><tt class="py-op">[</tt><tt class="py-op">:</tt><tt class="py-op">]</tt> </tt>
+<a name="L171"></a><tt class="py-lineno">171</tt>  <tt class="py-line">        <tt class="py-comment"># Reference cycles are common in pike. so garbage collect aggressively</tt> </tt>
+<a name="L172"></a><tt class="py-lineno">172</tt>  <tt class="py-line">        <tt class="py-name">gc</tt><tt class="py-op">.</tt><tt class="py-name">collect</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L173"></a><tt class="py-lineno">173</tt>  <tt class="py-line"> </tt>
+<a name="PikeTest._get_decorator_attr"></a><div id="PikeTest._get_decorator_attr-def"><a name="L174"></a><tt class="py-lineno">174</tt> <a class="py-toggle" href="#" id="PikeTest._get_decorator_attr-toggle" onclick="return toggle('PikeTest._get_decorator_attr');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#_get_decorator_attr">_get_decorator_attr</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">name</tt><tt class="py-op">,</tt> <tt class="py-param">default</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest._get_decorator_attr-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest._get_decorator_attr-expanded"><a name="L175"></a><tt class="py-lineno">175</tt>  <tt class="py-line">        <tt id="link-61" class="py-name"><a title="pike.smb2.AppInstanceIdRequest.name
+pike.smb2.DurableHandleReconnectRequest.name
+pike.smb2.DurableHandleReconnectV2Request.name
+pike.smb2.DurableHandleRequest.name
+pike.smb2.DurableHandleResponse.name
+pike.smb2.DurableHandleV2Request.name
+pike.smb2.DurableHandleV2Response.name
+pike.smb2.LeaseRequest.name
+pike.smb2.LeaseResponse.name
+pike.smb2.MaximalAccessRequest.name
+pike.smb2.MaximalAccessResponse.name" class="py-name" href="#" onclick="return doclink('link-61', 'name', 'link-3');">name</a></tt> <tt class="py-op">=</tt> <tt class="py-string">'__pike_test_'</tt> <tt class="py-op">+</tt> <tt id="link-62" class="py-name"><a title="pike.smb2.AppInstanceIdRequest.name
+pike.smb2.DurableHandleReconnectRequest.name
+pike.smb2.DurableHandleReconnectV2Request.name
+pike.smb2.DurableHandleRequest.name
+pike.smb2.DurableHandleResponse.name
+pike.smb2.DurableHandleV2Request.name
+pike.smb2.DurableHandleV2Response.name
+pike.smb2.LeaseRequest.name
+pike.smb2.LeaseResponse.name
+pike.smb2.MaximalAccessRequest.name
+pike.smb2.MaximalAccessResponse.name" class="py-name" href="#" onclick="return doclink('link-62', 'name', 'link-3');">name</a></tt> </tt>
+<a name="L176"></a><tt class="py-lineno">176</tt>  <tt class="py-line">        <tt class="py-name">test_method</tt> <tt class="py-op">=</tt> <tt class="py-name">getattr</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_testMethodName</tt><tt class="py-op">)</tt> </tt>
+<a name="L177"></a><tt class="py-lineno">177</tt>  <tt class="py-line"> </tt>
+<a name="L178"></a><tt class="py-lineno">178</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">hasattr</tt><tt class="py-op">(</tt><tt class="py-name">test_method</tt><tt class="py-op">,</tt> <tt id="link-63" class="py-name"><a title="pike.smb2.AppInstanceIdRequest.name
+pike.smb2.DurableHandleReconnectRequest.name
+pike.smb2.DurableHandleReconnectV2Request.name
+pike.smb2.DurableHandleRequest.name
+pike.smb2.DurableHandleResponse.name
+pike.smb2.DurableHandleV2Request.name
+pike.smb2.DurableHandleV2Response.name
+pike.smb2.LeaseRequest.name
+pike.smb2.LeaseResponse.name
+pike.smb2.MaximalAccessRequest.name
+pike.smb2.MaximalAccessResponse.name" class="py-name" href="#" onclick="return doclink('link-63', 'name', 'link-3');">name</a></tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L179"></a><tt class="py-lineno">179</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> <tt class="py-name">getattr</tt><tt class="py-op">(</tt><tt class="py-name">test_method</tt><tt class="py-op">,</tt> <tt id="link-64" class="py-name"><a title="pike.smb2.AppInstanceIdRequest.name
+pike.smb2.DurableHandleReconnectRequest.name
+pike.smb2.DurableHandleReconnectV2Request.name
+pike.smb2.DurableHandleRequest.name
+pike.smb2.DurableHandleResponse.name
+pike.smb2.DurableHandleV2Request.name
+pike.smb2.DurableHandleV2Response.name
+pike.smb2.LeaseRequest.name
+pike.smb2.LeaseResponse.name
+pike.smb2.MaximalAccessRequest.name
+pike.smb2.MaximalAccessResponse.name" class="py-name" href="#" onclick="return doclink('link-64', 'name', 'link-3');">name</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L180"></a><tt class="py-lineno">180</tt>  <tt class="py-line">        <tt class="py-keyword">elif</tt> <tt class="py-name">hasattr</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__class__</tt><tt class="py-op">,</tt> <tt id="link-65" class="py-name"><a title="pike.smb2.AppInstanceIdRequest.name
+pike.smb2.DurableHandleReconnectRequest.name
+pike.smb2.DurableHandleReconnectV2Request.name
+pike.smb2.DurableHandleRequest.name
+pike.smb2.DurableHandleResponse.name
+pike.smb2.DurableHandleV2Request.name
+pike.smb2.DurableHandleV2Response.name
+pike.smb2.LeaseRequest.name
+pike.smb2.LeaseResponse.name
+pike.smb2.MaximalAccessRequest.name
+pike.smb2.MaximalAccessResponse.name" class="py-name" href="#" onclick="return doclink('link-65', 'name', 'link-3');">name</a></tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L181"></a><tt class="py-lineno">181</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> <tt class="py-name">getattr</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__class__</tt><tt class="py-op">,</tt> <tt id="link-66" class="py-name"><a title="pike.smb2.AppInstanceIdRequest.name
+pike.smb2.DurableHandleReconnectRequest.name
+pike.smb2.DurableHandleReconnectV2Request.name
+pike.smb2.DurableHandleRequest.name
+pike.smb2.DurableHandleResponse.name
+pike.smb2.DurableHandleV2Request.name
+pike.smb2.DurableHandleV2Response.name
+pike.smb2.LeaseRequest.name
+pike.smb2.LeaseResponse.name
+pike.smb2.MaximalAccessRequest.name
+pike.smb2.MaximalAccessResponse.name" class="py-name" href="#" onclick="return doclink('link-66', 'name', 'link-3');">name</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L182"></a><tt class="py-lineno">182</tt>  <tt class="py-line">        <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L183"></a><tt class="py-lineno">183</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> <tt class="py-name">default</tt> </tt>
+</div><a name="L184"></a><tt class="py-lineno">184</tt>  <tt class="py-line"> </tt>
+<a name="PikeTest.required_dialect"></a><div id="PikeTest.required_dialect-def"><a name="L185"></a><tt class="py-lineno">185</tt> <a class="py-toggle" href="#" id="PikeTest.required_dialect-toggle" onclick="return toggle('PikeTest.required_dialect');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#required_dialect">required_dialect</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest.required_dialect-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest.required_dialect-expanded"><a name="L186"></a><tt class="py-lineno">186</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_get_decorator_attr</tt><tt class="py-op">(</tt><tt class="py-string">'RequireDialect'</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L187"></a><tt class="py-lineno">187</tt>  <tt class="py-line"> </tt>
+<a name="PikeTest.required_capabilities"></a><div id="PikeTest.required_capabilities-def"><a name="L188"></a><tt class="py-lineno">188</tt> <a class="py-toggle" href="#" id="PikeTest.required_capabilities-toggle" onclick="return toggle('PikeTest.required_capabilities');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#required_capabilities">required_capabilities</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest.required_capabilities-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest.required_capabilities-expanded"><a name="L189"></a><tt class="py-lineno">189</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_get_decorator_attr</tt><tt class="py-op">(</tt><tt class="py-string">'RequireCapabilities'</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L190"></a><tt class="py-lineno">190</tt>  <tt class="py-line"> </tt>
+<a name="PikeTest.required_share_capabilities"></a><div id="PikeTest.required_share_capabilities-def"><a name="L191"></a><tt class="py-lineno">191</tt> <a class="py-toggle" href="#" id="PikeTest.required_share_capabilities-toggle" onclick="return toggle('PikeTest.required_share_capabilities');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.PikeTest-class.html#required_share_capabilities">required_share_capabilities</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PikeTest.required_share_capabilities-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PikeTest.required_share_capabilities-expanded"><a name="L192"></a><tt class="py-lineno">192</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_get_decorator_attr</tt><tt class="py-op">(</tt><tt class="py-string">'RequireShareCapabilities'</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L193"></a><tt class="py-lineno">193</tt>  <tt class="py-line">         </tt>
+<a name="_Decorator"></a><div id="_Decorator-def"><a name="L194"></a><tt class="py-lineno">194</tt> <a class="py-toggle" href="#" id="_Decorator-toggle" onclick="return toggle('_Decorator');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="pike.test._Decorator-class.html">_Decorator</a><tt class="py-op">(</tt><tt class="py-base-class">object</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="_Decorator-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="_Decorator-expanded"><a name="_Decorator.__init__"></a><div id="_Decorator.__init__-def"><a name="L195"></a><tt class="py-lineno">195</tt> <a class="py-toggle" href="#" id="_Decorator.__init__-toggle" onclick="return toggle('_Decorator.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test._Decorator-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">value</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="_Decorator.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="_Decorator.__init__-expanded"><a name="L196"></a><tt class="py-lineno">196</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">value</tt> <tt class="py-op">=</tt> <tt class="py-name">value</tt> </tt>
+</div><a name="L197"></a><tt class="py-lineno">197</tt>  <tt class="py-line"> </tt>
+<a name="_Decorator.__call__"></a><div id="_Decorator.__call__-def"><a name="L198"></a><tt class="py-lineno">198</tt> <a class="py-toggle" href="#" id="_Decorator.__call__-toggle" onclick="return toggle('_Decorator.__call__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test._Decorator-class.html#__call__">__call__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">thing</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="_Decorator.__call__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="_Decorator.__call__-expanded"><a name="L199"></a><tt class="py-lineno">199</tt>  <tt class="py-line">        <tt class="py-name">setattr</tt><tt class="py-op">(</tt><tt class="py-name">thing</tt><tt class="py-op">,</tt> <tt class="py-string">'__pike_test_'</tt> <tt class="py-op">+</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__class__</tt><tt class="py-op">.</tt><tt class="py-name">__name__</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">value</tt><tt class="py-op">)</tt> </tt>
+<a name="L200"></a><tt class="py-lineno">200</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">thing</tt> </tt>
+</div></div><a name="L201"></a><tt class="py-lineno">201</tt>  <tt class="py-line"> </tt>
+<a name="RequireDialect"></a><div id="RequireDialect-def"><a name="L202"></a><tt class="py-lineno">202</tt> <a class="py-toggle" href="#" id="RequireDialect-toggle" onclick="return toggle('RequireDialect');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="pike.test.RequireDialect-class.html">RequireDialect</a><tt class="py-op">(</tt><tt class="py-base-class">_Decorator</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> <tt class="py-keyword">pass</tt> </tt>
+</div><a name="RequireCapabilities"></a><div id="RequireCapabilities-def"><a name="L203"></a><tt class="py-lineno">203</tt> <a class="py-toggle" href="#" id="RequireCapabilities-toggle" onclick="return toggle('RequireCapabilities');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="pike.test.RequireCapabilities-class.html">RequireCapabilities</a><tt class="py-op">(</tt><tt class="py-base-class">_Decorator</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> <tt class="py-keyword">pass</tt> </tt>
+</div><a name="RequireShareCapabilities"></a><div id="RequireShareCapabilities-def"><a name="L204"></a><tt class="py-lineno">204</tt> <a class="py-toggle" href="#" id="RequireShareCapabilities-toggle" onclick="return toggle('RequireShareCapabilities');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="pike.test.RequireShareCapabilities-class.html">RequireShareCapabilities</a><tt class="py-op">(</tt><tt class="py-base-class">_Decorator</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> <tt class="py-keyword">pass</tt> </tt>
+</div><a name="L205"></a><tt class="py-lineno">205</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="pike-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Thu Sep 19 09:27:46 2013
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

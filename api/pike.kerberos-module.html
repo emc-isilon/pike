@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>pike.kerberos</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="pike-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="pike-module.html">Package&nbsp;pike</a> ::
+        Module&nbsp;kerberos
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="pike.kerberos-module.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== MODULE DESCRIPTION ==================== -->
+<h1 class="epydoc">Module kerberos</h1><p class="nomargin-top"><span class="codelink"><a href="pike.kerberos-pysrc.html">source&nbsp;code</a></span></p>
+<p>PyKerberos Function Description.</p>
+
+<!-- ==================== FUNCTIONS ==================== -->
+<a name="section-Functions"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td align="left" colspan="2" class="table-header">
+    <span class="table-header">Functions</span></td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="checkPassword"></a><span class="summary-sig-name">checkPassword</span>(<span class="summary-sig-arg">user</span>,
+        <span class="summary-sig-arg">pswd</span>,
+        <span class="summary-sig-arg">service</span>,
+        <span class="summary-sig-arg">default_realm</span>)</span><br />
+      Check the supplied user/password against Kerberos KDC.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#checkPassword">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="changePassword"></a><span class="summary-sig-name">changePassword</span>(<span class="summary-sig-arg">user</span>,
+        <span class="summary-sig-arg">oldpswd</span>,
+        <span class="summary-sig-arg">newpswd</span>)</span><br />
+      Change the user password.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#changePassword">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="getServerPrincipalDetails"></a><span class="summary-sig-name">getServerPrincipalDetails</span>(<span class="summary-sig-arg">service</span>,
+        <span class="summary-sig-arg">hostname</span>)</span><br />
+      Return the service principal for a given service and hostname.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#getServerPrincipalDetails">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="authGSSClientInit"></a><span class="summary-sig-name">authGSSClientInit</span>(<span class="summary-sig-arg">service</span>,
+        <span class="summary-sig-arg">gssflags</span>=<span class="summary-sig-default">GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG | GSS_C_CONF_FLAG | GSS_<code class="variable-ellipsis">...</code></span>)</span><br />
+      Initialize client-side GSSAPI operations.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#authGSSClientInit">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="authGSSClientClean"></a><span class="summary-sig-name">authGSSClientClean</span>(<span class="summary-sig-arg">context</span>)</span><br />
+      Terminate client-side GSSAPI operations.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#authGSSClientClean">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="authGSSClientStep"></a><span class="summary-sig-name">authGSSClientStep</span>(<span class="summary-sig-arg">context</span>,
+        <span class="summary-sig-arg">challenge</span>)</span><br />
+      Do a client-side GSSAPI step.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#authGSSClientStep">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="authGSSClientResponse"></a><span class="summary-sig-name">authGSSClientResponse</span>(<span class="summary-sig-arg">context</span>)</span><br />
+      Get the response from the last client-side GSSAPI step.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#authGSSClientResponse">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="authGSSClientUserName"></a><span class="summary-sig-name">authGSSClientUserName</span>(<span class="summary-sig-arg">context</span>)</span><br />
+      Get the user name from the last client-side GSSAPI step.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#authGSSClientUserName">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="authGSSClientUnwrap"></a><span class="summary-sig-name">authGSSClientUnwrap</span>(<span class="summary-sig-arg">context</span>,
+        <span class="summary-sig-arg">challenge</span>)</span><br />
+      Do a GSSAPI unwrap.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#authGSSClientUnwrap">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="authGSSClientWrap"></a><span class="summary-sig-name">authGSSClientWrap</span>(<span class="summary-sig-arg">context</span>,
+        <span class="summary-sig-arg">data</span>,
+        <span class="summary-sig-arg">user</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Do a GSSAPI wrap.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#authGSSClientWrap">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="authGSSClientSessionKey"></a><span class="summary-sig-name">authGSSClientSessionKey</span>(<span class="summary-sig-arg">context</span>)</span><br />
+      Get the client session key.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#authGSSClientSessionKey">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="authGSSServerInit"></a><span class="summary-sig-name">authGSSServerInit</span>(<span class="summary-sig-arg">service</span>)</span><br />
+      Initialize server-side GSSAPI operations.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#authGSSServerInit">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="authGSSServerClean"></a><span class="summary-sig-name">authGSSServerClean</span>(<span class="summary-sig-arg">context</span>)</span><br />
+      Terminate server-side GSSAPI operations.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#authGSSServerClean">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="authGSSServerStep"></a><span class="summary-sig-name">authGSSServerStep</span>(<span class="summary-sig-arg">context</span>,
+        <span class="summary-sig-arg">challenge</span>)</span><br />
+      Do a server-side GSSAPI step.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#authGSSServerStep">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="authGSSServerResponse"></a><span class="summary-sig-name">authGSSServerResponse</span>(<span class="summary-sig-arg">context</span>)</span><br />
+      Get the response from the last server-side GSSAPI step.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#authGSSServerResponse">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="authGSSServerUserName"></a><span class="summary-sig-name">authGSSServerUserName</span>(<span class="summary-sig-arg">context</span>)</span><br />
+      Get the user name from the last server-side GSSAPI step.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#authGSSServerUserName">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="authGSSServerTargetName"></a><span class="summary-sig-name">authGSSServerTargetName</span>(<span class="summary-sig-arg">context</span>)</span><br />
+      Get the target name from the last server-side GSSAPI step.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.kerberos-pysrc.html#authGSSServerTargetName">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+</table>
+<!-- ==================== VARIABLES ==================== -->
+<a name="section-Variables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td align="left" colspan="2" class="table-header">
+    <span class="table-header">Variables</span></td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="AUTH_GSS_CONTINUE"></a><span class="summary-name">AUTH_GSS_CONTINUE</span> = <code title="0">0</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="AUTH_GSS_COMPLETE"></a><span class="summary-name">AUTH_GSS_COMPLETE</span> = <code title="1">1</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="GSS_C_DELEG_FLAG"></a><span class="summary-name">GSS_C_DELEG_FLAG</span> = <code title="1">1</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="GSS_C_MUTUAL_FLAG"></a><span class="summary-name">GSS_C_MUTUAL_FLAG</span> = <code title="2">2</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="GSS_C_REPLAY_FLAG"></a><span class="summary-name">GSS_C_REPLAY_FLAG</span> = <code title="4">4</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="GSS_C_SEQUENCE_FLAG"></a><span class="summary-name">GSS_C_SEQUENCE_FLAG</span> = <code title="8">8</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="GSS_C_CONF_FLAG"></a><span class="summary-name">GSS_C_CONF_FLAG</span> = <code title="16">16</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="GSS_C_INTEG_FLAG"></a><span class="summary-name">GSS_C_INTEG_FLAG</span> = <code title="32">32</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="GSS_C_ANON_FLAG"></a><span class="summary-name">GSS_C_ANON_FLAG</span> = <code title="64">64</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="GSS_C_PROT_READY_FLAG"></a><span class="summary-name">GSS_C_PROT_READY_FLAG</span> = <code title="128">128</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="GSS_C_TRANS_FLAG"></a><span class="summary-name">GSS_C_TRANS_FLAG</span> = <code title="256">256</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="AUTH_GSS_M_DEFAULT"></a><span class="summary-name">AUTH_GSS_M_DEFAULT</span> = <code title="0">0</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="AUTH_GSS_M_KERBEROS"></a><span class="summary-name">AUTH_GSS_M_KERBEROS</span> = <code title="1">1</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="AUTH_GSS_M_NTLM"></a><span class="summary-name">AUTH_GSS_M_NTLM</span> = <code title="2">2</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="__package__"></a><span class="summary-name">__package__</span> = <code title="None">None</code>
+    </td>
+  </tr>
+</table>
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="pike-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Thu Sep 19 09:27:42 2013
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

@@ -1,0 +1,1110 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>pike.core.Cursor</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="pike-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="pike-module.html">Package&nbsp;pike</a> ::
+        <a href="pike.core-module.html">Module&nbsp;core</a> ::
+        Class&nbsp;Cursor
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="pike.core.Cursor-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class Cursor</h1><p class="nomargin-top"><span class="codelink"><a href="pike.core-pysrc.html#Cursor">source&nbsp;code</a></span></p>
+<pre class="base-tree">
+object --+
+         |
+        <strong class="uidshort">Cursor</strong>
+</pre>
+
+<hr />
+<p>Byte array cursor</p>
+  <p>Represents a position within a byte array.</p>
+  <p>encode_* operations write data at the current position and advance it 
+  by the number of bytes written.</p>
+  <p>decode_* operations read data at the current position, advance it by 
+  the number of bytes read, and return the result.</p>
+  <p>Cursors support in-place addition and subtraction (+=,-=) of integer 
+  values to manually adjust position, as well as ordinary addition and 
+  subtraction, which return a new cursor without modifiying the 
+  original.</p>
+  <p>Ordinary subtraction of two cursors will yield the difference between 
+  their positions as an integer. ==, !=, &lt;, &lt;=, &gt;, and &gt;= 
+  operators will also work to compare positions.  The results will only be 
+  meaningful for cursors referencing the same underlying array.</p>
+  <p>For a given cursor, cursor.hole.encode_* will perform the same 
+  operation as cursor.encode_*, but will return a hole object.  Calling 
+  this hole object with the same type of arguments as the original encode 
+  method will overwrite the original value.  This mechanism is useful for 
+  backpatching values into fields that aren't known until later, such as 
+  internal packet lengths and offsets or checksum fields.  For example:</p>
+<pre class="literalblock">
+   hole = cursor.hole.encode_uint32le(0)
+   # Encode rest of packet
+   ...
+   # Overwrite value with calculated checksum
+   hole(sum)
+</pre>
+  <p>Cursors support slicing to extract sections of the underlying array.  
+  For example:</p>
+<pre class="literalblock">
+   # Extract array slice between cur1 and cur2
+   subarray = cur1[:cur2]
+</pre>
+  <p>Cursors also support establishing boundaries outside of which decoding
+  will raise exceptions:</p>
+<pre class="literalblock">
+   with cur.bounded(startcur, endcur):
+       # Within this block, attempts to decode data outside of
+       # the range starting with startcur (inclusive) and ending
+       # with endcur (exclusive) will raise BufferOverrun().
+       # If the start and end paremeters are numbers rather than
+       # other cursors, they will be taken to be relative to
+       # cur itself.
+       ...
+</pre>
+
+<!-- ==================== NESTED CLASSES ==================== -->
+<a name="section-NestedClasses"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td align="left" colspan="2" class="table-header">
+    <span class="table-header">Nested Classes</span></td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.core.Cursor.Hole-class.html" class="summary-name">Hole</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.core.Cursor.Bounds-class.html" class="summary-name">Bounds</a>
+    </td>
+  </tr>
+</table>
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td align="left" colspan="2" class="table-header">
+    <span class="table-header">Instance Methods</span></td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="pike.core.Cursor-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">arr</span>,
+        <span class="summary-sig-arg">offset</span>,
+        <span class="summary-sig-arg">bounds</span>=<span class="summary-sig-default"><code class="variable-group">(</code>None<code class="variable-op">, </code>None<code class="variable-group">)</code></span>)</span><br />
+      Create a <a href="pike.core.Cursor-class.html" 
+      class="link">Cursor</a> for the given array at the given offset.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__eq__"></a><span class="summary-sig-name">__eq__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">o</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.__eq__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__ne__"></a><span class="summary-sig-name">__ne__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">o</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.__ne__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__lt__"></a><span class="summary-sig-name">__lt__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">o</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.__lt__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__gt__"></a><span class="summary-sig-name">__gt__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">o</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.__gt__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__le__"></a><span class="summary-sig-name">__le__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">o</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.__le__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__ge__"></a><span class="summary-sig-name">__ge__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">o</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.__ge__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__add__"></a><span class="summary-sig-name">__add__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">o</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.__add__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__sub__"></a><span class="summary-sig-name">__sub__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">o</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.__sub__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__iadd__"></a><span class="summary-sig-name">__iadd__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">o</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.__iadd__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__isub__"></a><span class="summary-sig-name">__isub__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">o</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.__isub__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__getitem__"></a><span class="summary-sig-name">__getitem__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">index</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.__getitem__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="pike.core.Cursor-class.html#__repr__" class="summary-sig-name">__repr__</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      repr(x)</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.__repr__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="copy"></a><span class="summary-sig-name">copy</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Create copy of cursor.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.copy">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="pike.core.Cursor-class.html#encode_bytes" class="summary-sig-name">encode_bytes</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">val</span>)</span><br />
+      Encode bytes.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.encode_bytes">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="encode_struct"></a><span class="summary-sig-name">encode_struct</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">fmt</span>,
+        <span class="summary-sig-arg">*args</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.encode_struct">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="encode_uint8be"></a><span class="summary-sig-name">encode_uint8be</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">val</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.encode_uint8be">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="encode_uint16be"></a><span class="summary-sig-name">encode_uint16be</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">val</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.encode_uint16be">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="encode_uint32be"></a><span class="summary-sig-name">encode_uint32be</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">val</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.encode_uint32be">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="encode_uint64be"></a><span class="summary-sig-name">encode_uint64be</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">val</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.encode_uint64be">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="encode_uint8le"></a><span class="summary-sig-name">encode_uint8le</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">val</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.encode_uint8le">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="encode_uint16le"></a><span class="summary-sig-name">encode_uint16le</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">val</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.encode_uint16le">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="encode_uint32le"></a><span class="summary-sig-name">encode_uint32le</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">val</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.encode_uint32le">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="encode_uint64le"></a><span class="summary-sig-name">encode_uint64le</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">val</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.encode_uint64le">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="encode_utf16le"></a><span class="summary-sig-name">encode_utf16le</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">val</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.encode_utf16le">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="trunc"></a><span class="summary-sig-name">trunc</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.trunc">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="decode_bytes"></a><span class="summary-sig-name">decode_bytes</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">size</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.decode_bytes">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="decode_struct"></a><span class="summary-sig-name">decode_struct</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">fmt</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.decode_struct">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="decode_uint8be"></a><span class="summary-sig-name">decode_uint8be</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.decode_uint8be">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="decode_uint16be"></a><span class="summary-sig-name">decode_uint16be</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.decode_uint16be">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="decode_uint32be"></a><span class="summary-sig-name">decode_uint32be</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.decode_uint32be">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="decode_uint64be"></a><span class="summary-sig-name">decode_uint64be</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.decode_uint64be">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="decode_uint8le"></a><span class="summary-sig-name">decode_uint8le</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.decode_uint8le">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="decode_uint16le"></a><span class="summary-sig-name">decode_uint16le</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.decode_uint16le">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="decode_uint32le"></a><span class="summary-sig-name">decode_uint32le</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.decode_uint32le">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="decode_uint64le"></a><span class="summary-sig-name">decode_uint64le</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.decode_uint64le">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="decode_utf16le"></a><span class="summary-sig-name">decode_utf16le</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">size</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.decode_utf16le">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="align"></a><span class="summary-sig-name">align</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">base</span>,
+        <span class="summary-sig-arg">val</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.align">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="seekto"></a><span class="summary-sig-name">seekto</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">o</span>,
+        <span class="summary-sig-arg">lowerbound</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">upperbound</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.seekto">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="advanceto"></a><span class="summary-sig-name">advanceto</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">o</span>,
+        <span class="summary-sig-arg">bound</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.advanceto">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="reverseto"></a><span class="summary-sig-name">reverseto</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">o</span>,
+        <span class="summary-sig-arg">bound</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.reverseto">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="bounded"></a><span class="summary-sig-name">bounded</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">lower</span>,
+        <span class="summary-sig-arg">upper</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Cursor.bounded">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__format__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__setattr__</code>,
+      <code>__sizeof__</code>,
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== INSTANCE VARIABLES ==================== -->
+<a name="section-InstanceVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td align="left" colspan="2" class="table-header">
+    <span class="table-header">Instance Variables</span></td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="array"></a><span class="summary-name">array</span><br />
+      Array referenced by cursor
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="bounds"></a><span class="summary-name">bounds</span><br />
+      Pair of lower and upper bound on offset
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="offset"></a><span class="summary-name">offset</span><br />
+      Offset within the array
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td align="left" colspan="2" class="table-header">
+    <span class="table-header">Properties</span></td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.core.Cursor-class.html#lowerbound" class="summary-name">lowerbound</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.core.Cursor-class.html#upperbound" class="summary-name">upperbound</a>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td align="left" colspan="2" class="table-header">
+    <span class="table-header">Method Details</span></td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">arr</span>,
+        <span class="sig-arg">offset</span>,
+        <span class="sig-arg">bounds</span>=<span class="sig-default"><code class="variable-group">(</code>None<code class="variable-op">, </code>None<code class="variable-group">)</code></span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pike.core-pysrc.html#Cursor.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Create a <a href="pike.core.Cursor-class.html" class="link">Cursor</a>
+  for the given array at the given offset.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>arr</code></strong> (array.array('B', ...)) - The array</li>
+        <li><strong class="pname"><code>offset</code></strong> (number) - The offset from the start of the array</li>
+        <li><strong class="pname"><code>bounds</code></strong> - A pair of a lower and upper bound on valid offsets</li>
+    </ul></dd>
+    <dt>Overrides:
+        object.__init__
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="__repr__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__repr__</span>(<span class="sig-arg">self</span>)</span>
+    <br /><em class="fname">(Representation operator)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pike.core-pysrc.html#Cursor.__repr__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>repr(x)</p>
+  <dl class="fields">
+    <dt>Overrides:
+        object.__repr__
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="encode_bytes"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">encode_bytes</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">val</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pike.core-pysrc.html#Cursor.encode_bytes">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Encode bytes.  Accepts byte arrays, strings, and integer lists.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== PROPERTY DETAILS ==================== -->
+<a name="section-PropertyDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td align="left" colspan="2" class="table-header">
+    <span class="table-header">Property Details</span></td>
+</tr>
+</table>
+<a name="lowerbound"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">lowerbound</h3>
+  
+  <dl class="fields">
+    <dt>Get Method:</dt>
+    <dd class="value"><span class="summary-sig"><i>unreachable</i>.lowerbound(<span class="summary-sig-arg">self</span>)</span>
+    </dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="upperbound"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">upperbound</h3>
+  
+  <dl class="fields">
+    <dt>Get Method:</dt>
+    <dd class="value"><span class="summary-sig"><i>unreachable</i>.upperbound(<span class="summary-sig-arg">self</span>)</span>
+    </dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="pike-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Thu Sep 19 09:27:43 2013
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>
