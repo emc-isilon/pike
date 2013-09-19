@@ -43,6 +43,7 @@ import array
 
 @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
 @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES)
+@pike.test.RequireShareCapabilities(pike.smb2.SMB2_SHARE_CAP_CONTINUOUS_AVAILABILITY)
 class AppInstanceIdTest(pike.test.PikeTest):
     def __init__(self, *args, **kwargs):
         super(AppInstanceIdTest, self).__init__(*args, **kwargs)
@@ -63,7 +64,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
                               'appinstanceid.txt',
                               access=pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE,
                               share=self.share_all,
-                              disposition=pike.smb2.FILE_SUPERSEDE,
+                              disposition=pike.smb2.FILE_OPEN_IF,
                               options=pike.smb2.FILE_DELETE_ON_CLOSE,
                               oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
                               lease_key = self.lease1,
@@ -72,6 +73,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
                               persistent=True,
                               app_instance_id=self.app_instance_id1).result()
     
+        self.assertEqual(handle1.durable_flags, pike.smb2.SMB2_DHANDLE_FLAG_PERSISTENT)
         self.assertEqual(handle1.lease.lease_state, self.rwh)
 
         chan.close(handle1)
@@ -84,7 +86,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
         handle1 = chan.create(tree,
                               'appinstanceid.txt',
                               share=self.share_all,
-                              disposition=pike.smb2.FILE_SUPERSEDE,
+                              disposition=pike.smb2.FILE_OPEN_IF,
                               oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
                               lease_key = self.lease1,
                               lease_state = self.rwh,
@@ -92,6 +94,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
                               persistent=True,
                               app_instance_id=self.app_instance_id1).result()
 
+        self.assertEqual(handle1.durable_flags, pike.smb2.SMB2_DHANDLE_FLAG_PERSISTENT)
         self.assertEqual(handle1.lease.lease_state, self.rwh)
 
         # Close the connection
@@ -104,7 +107,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
                                'appinstanceid.txt',
                                access=pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE,
                                share=self.share_all,
-                               disposition=pike.smb2.FILE_SUPERSEDE,
+                               disposition=pike.smb2.FILE_OPEN_IF,
                                options=pike.smb2.FILE_DELETE_ON_CLOSE,
                                oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
                                lease_key = self.lease1,
@@ -113,6 +116,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
                                persistent=True,
                                app_instance_id=self.app_instance_id1).result()
     
+        self.assertEqual(handle2.durable_flags, pike.smb2.SMB2_DHANDLE_FLAG_PERSISTENT)
         self.assertEqual(handle2.lease.lease_state, self.rwh)
 
         chan2.close(handle2)
@@ -126,7 +130,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
         handle1 = chan.create(tree,
                               'appinstanceid.txt',
                               share=self.share_all,
-                              disposition=pike.smb2.FILE_SUPERSEDE,
+                              disposition=pike.smb2.FILE_OPEN_IF,
                               oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
                               lease_key = self.lease1,
                               lease_state = self.rwh,
@@ -134,6 +138,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
                               persistent=True,
                               app_instance_id=self.app_instance_id1).result()
 
+        self.assertEqual(handle1.durable_flags, pike.smb2.SMB2_DHANDLE_FLAG_PERSISTENT)
         self.assertEqual(handle1.lease.lease_state, self.rwh)
 
         # Close the connection
@@ -147,7 +152,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
                                'appinstanceid.txt',
                                access=pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE,
                                share=self.share_all,
-                               disposition=pike.smb2.FILE_SUPERSEDE,
+                               disposition=pike.smb2.FILE_OPEN_IF,
                                options=pike.smb2.FILE_DELETE_ON_CLOSE,
                                oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
                                lease_key = self.lease1,
@@ -166,7 +171,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
                                'appinstanceid.txt',
                                access=pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE,
                                share=self.share_all,
-                               disposition=pike.smb2.FILE_SUPERSEDE,
+                               disposition=pike.smb2.FILE_OPEN_IF,
                                options=pike.smb2.FILE_DELETE_ON_CLOSE,
                                oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
                                lease_key = self.lease1,
@@ -175,6 +180,7 @@ class AppInstanceIdTest(pike.test.PikeTest):
                                persistent=True,
                                app_instance_id=self.app_instance_id1).result()
     
+        self.assertEqual(handle3.durable_flags, pike.smb2.SMB2_DHANDLE_FLAG_PERSISTENT)
         self.assertEqual(handle3.lease.lease_state, self.rwh)
 
         chan3.close(handle3)

@@ -50,6 +50,7 @@ SHARE_ALL = smb2.FILE_SHARE_READ | smb2.FILE_SHARE_WRITE | smb2.FILE_SHARE_DELET
 
 @test.RequireDialect(smb2.DIALECT_SMB3_0)
 @test.RequireCapabilities(smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES)
+@test.RequireShareCapabilities(smb2.SMB2_SHARE_CAP_CONTINUOUS_AVAILABILITY)
 class Persistent(test.PikeTest):
     def setup(self):
         self.lease_key = array.array('B',map(random.randint, [0]*16, [255]*16))
@@ -57,12 +58,12 @@ class Persistent(test.PikeTest):
 
     def create_persistent(self, prev_handle = 0):
         """Helper to create a persistent handle, optionally reconnecting an old one"""
-        return self.channel.create(
+        handle = self.channel.create(
             self.tree,
             "persistent.txt",
             access = smb2.FILE_READ_DATA | smb2.FILE_WRITE_DATA | smb2.DELETE,
             share = SHARE_ALL,
-            disposition = smb2.FILE_SUPERSEDE,
+            disposition = smb2.FILE_OPEN_IF,
             options = smb2.FILE_DELETE_ON_CLOSE,
             oplock_level = smb2.SMB2_OPLOCK_LEVEL_LEASE,
             lease_key = self.lease_key,
@@ -70,11 +71,13 @@ class Persistent(test.PikeTest):
             durable = prev_handle,
             persistent = True
             ).result()
+        self.assertEqual(handle.durable_flags, smb2.SMB2_DHANDLE_FLAG_PERSISTENT)
+        
+        return handle
 
     # Opening a persistent handle grants persistent flag
     def test_create(self):
         handle = self.create_persistent()
-        self.assertEqual(handle.durable_flags, smb2.SMB2_DHANDLE_FLAG_PERSISTENT)
 
         self.channel.close(handle)
 
