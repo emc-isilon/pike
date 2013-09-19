@@ -914,7 +914,7 @@ class LeaseRequest(CreateRequestContext):
         cur.encode_uint32le(self.lease_state)
         if (self.lease_flags is not None):
             # V2 variant
-            cur.encode_uint32le(self.flags)
+            cur.encode_uint32le(self.lease_flags)
             # LeaseDuration is reserved
             cur.encode_uint64le(0)
             cur.encode_bytes(self.parent_lease_key)
