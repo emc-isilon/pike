@@ -179,7 +179,7 @@ class DurableHandleTest(pike.test.PikeTest):
     # Reconnecting a durable handle (v2) after a TCP disconnect
     # fails with STATUS_OBJECT_NAME_NOT_FOUND if the client
     # guid does not match
-    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
     def test_durable_reconnect_v2_fails_client_guid(self):
         self.durable_reconnect_fails_client_guid_test(0)
 
