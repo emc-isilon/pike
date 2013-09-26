@@ -7,6 +7,7 @@ make()
         CPPFLAGS="$PYTHON_CPPFLAGS" \
         HEADERDEPS="Python.h gssapi/gssapi.h" \
         LIBDEPS="$PYTHON_LIBS gssapi_krb5" \
+        LDFLAGS="$PYTHON_LDFLAGS" \
         INCLUDEDIRS=". .."
 
    mk_stage DESTDIR="$PYTHON_DIST/pike" kerberos.py

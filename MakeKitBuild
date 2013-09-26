@@ -11,10 +11,18 @@ configure()
     mk_check_program epydoc
 
     mk_declare -i -e \
-        PYTHON_LIBS="`$PYTHON_CONFIG --libs | sed 's:-l::g'`" \
+        PYTHON_LIBS PYTHON_LDFLAGS \
         PYTHON_CPPFLAGS="`$PYTHON_CONFIG --includes`" \
         PYTHON_EPREFIX="`$PYTHON_CONFIG --exec-prefix`" \
         PYTHON_DIST="`$PYTHON -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib(True))'`"        
+
+    for arg in `$PYTHON_CONFIG --libs`
+    do
+        case "$arg" in
+            -l*) PYTHON_LIBS="$PYTHON_LIBS ${arg#-l}" ;;
+            *)   PYTHON_LDFLAGS="$PYTHON_LDFLAGS $arg" ;;
+        esac
+    done
 
     if [ "$PYTHON_EPREFIX" != "/usr" ]
     then
