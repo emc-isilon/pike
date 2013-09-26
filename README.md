@@ -31,6 +31,49 @@ build them with:
 
 You will then find the packages in output/package
 
+Building on OS X
+----------------
+
+As of 10.8, OS X still ships with versions of python and MIT krb5 that are
+too old for Pike to work.  The following instructions are one way of getting
+it to build and run successfully:
+
+Download and install python 2.7: http://python.org/ftp/python/2.7.5/python-2.7.5-macosx10.6.dmg
+
+Download and unpack PyCrypto: https://ftp.dlitz.net/pub/dlitz/crypto/pycrypto/pycrypto-2.6.tar.gz
+
+In the resulting directory, run:
+
+    $ python2.7 setup.py build && python2.7 setup.py install
+    
+Download and unpack MIT krb5: http://web.mit.edu/kerberos/dist/krb5/1.11/krb5-1.11.3-signed.tar
+
+Unpack krb5-1.11.3.tar.gz
+
+We will install it to ${HOME}/.local, but you can choose another prefix if you wish.
+
+    $ cd krb5-1.11.3/src
+    $ ./configure --prefix=${HOME}/.local
+    $ make -j8 && make install
+    
+Now, you can configure Pike as follows:
+
+    $ ../configure CPPFLAGS="-I${HOME}/.local/include" LDFLAGS="-L${HOME}/.local/lib" \
+                   PYTHON=python2.7 PYTHON_CONFIG=python2.7-config --host-isas=x86_64                    
+
+You should now be able to build as usual.  Before attempting to run, you will need to
+create ${HOME}/.local/etc/krb5.conf as follows:
+
+    [libdefaults]
+            dns_lookup_kdc = true
+            
+You should now be able to acquire credentials with:
+
+    $ ~/.local/bin/kinit <user>@<domain>
+    
+If you installed krb5 to a different prefix, you will need to adjust the above
+commands accordingly.
+
 Running tests
 =============
 
