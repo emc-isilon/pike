@@ -553,7 +553,7 @@ option()
     case "$_default_MK_BUILD_OS" in
         darwin)
             case `uname -m` in
-                i386)
+                i386|x86_64)
                     if [ "`sysctl -n hw.optional.x86_64 2>/dev/null`" = "1" ]
                     then
                         _default_MK_BUILD_ARCH="x86_64"

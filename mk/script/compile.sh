@@ -104,7 +104,7 @@ do_compile()
         -o "$_object" \
         -c "$_source"
 
-    if [ -n "$DEP_FILE" ]
+    if [ -n "$DEP_FILE" -a -f "$DEP_FILE.new" ]
     then
         if diff -q -- "$DEP_FILE" "$DEP_FILE.new" >/dev/null 2>&1
         then

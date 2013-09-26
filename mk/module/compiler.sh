@@ -3099,6 +3099,11 @@ mk_compiler_warnings()
     for flag
     do
         case "$flag" in
+            all)
+                MK_CFLAGS="$MK_CFLAGS $MK_WARN_ALL_FLAGS"
+                MK_CXXFLAGS="$MK_CXXFLAGS $MK_WARN_ALL_FLAGS"
+                continue
+                ;;
             error)
                 [ "$MK_ALLOW_WERROR" = "no" ] && continue
                 ;;
@@ -3122,6 +3127,13 @@ option()
     else
         _default_OPTFLAGS="-O2 -g"
     fi
+
+    mk_option \
+        OPTION="warn-all-flags" \
+        VAR="MK_WARN_ALL_FLAGS" \
+        PARAM="flags" \
+        DEFAULT="-Wall" \
+        HELP="Compiler flags to enable all warnings"
 
     mk_option \
         OPTION="allow-werror" \
