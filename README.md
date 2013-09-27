@@ -2,7 +2,9 @@ Pike
 ====
 
 Pike is a (nearly) pure-Python framework for writing SMB2/3 protocol correctness tests.
-See LICENSE for licensing information.
+See [LICENSE](LICENSE) for licensing information.
+
+There is also [API documentation from epydoc](http://emc-isilon.github.io/pike/api/index.html).
 
 Prerequisites
 =============
