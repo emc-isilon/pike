@@ -103,3 +103,8 @@ with TEST=, e.g.:
 
 Your current Kerberos credentials will be used to authenticate.  Use
 kinit if you need to acquire a ticket.
+
+Note that you will probably need to specify the server by fully-qualified
+hostname in order for Kerberos to figure out which ticket to use.  If you
+get errors during session setup when using an IP address, this is probably
+the reason.
