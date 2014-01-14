@@ -138,3 +138,34 @@ class LeaseTest(pike.test.PikeTest):
         
         chan.close(handle1)
         chan.close(handle3)
+
+    # Test that a lease can be shared across connections
+    def test_lease_multiple_connections(self):
+        chan, tree = self.tree_connect()
+
+        # Request rwh lease
+        handle1 = chan.create(tree,
+                              'lease.txt',
+                              share=self.share_all,
+                              oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
+                              lease_key = self.lease1,
+                              lease_state = self.rwh).result()
+        self.assertEqual(handle1.lease.lease_state, self.rwh)
+
+        chan2, tree2 = self.tree_connect()
+
+        # Request rwh lease to same file on separate connection,
+        # which we should get
+        handle2 = chan2.create(tree2,
+                               'lease.txt',
+                               share=self.share_all,
+                               oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
+                               lease_key = self.lease1,
+                               lease_state = self.rwh).result()
+        self.assertEqual(handle2.lease.lease_state, self.rwh)
+
+        # Leases should be the same object
+        self.assertEqual(handle1.lease, handle2.lease)
+
+        chan2.close(handle2)
+        chan.close(handle1)
