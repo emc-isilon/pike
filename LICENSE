@@ -46,4 +46,4 @@ are from the MakeKit build system (http://mkbuild.sf.net).
 None of these files are incorporated into the final build
 output.  The license (3-clause BSD) is viewable at the following URL:
 
-http://sourceforge.net/p/mkbuild/makekit/ci/master/tree/COPYING
+https://github.com/bkoropoff/makekit/blob/master/COPYING
