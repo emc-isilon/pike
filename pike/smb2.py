@@ -49,6 +49,7 @@ maintaining a clear visual distinction between values and types.
 import array
 import core
 import nttime
+import re
 import ntstatus
 
 # Dialects constants
@@ -81,6 +82,7 @@ class CommandId(core.ValueEnum):
     SMB2_TREE_DISCONNECT = 0x0004
     SMB2_CREATE          = 0x0005
     SMB2_CLOSE           = 0x0006
+    SMB2_FLUSH           = 0x0007
     SMB2_READ            = 0x0008
     SMB2_WRITE           = 0x0009
     SMB2_LOCK            = 0x000a
@@ -118,7 +120,7 @@ class Smb2(core.Frame):
 
     def __init__(self, parent, context=None):
         core.Frame.__init__(self, parent, context)
-        self.credit_charge = 0
+        self.credit_charge = None
         self.channel_sequence = 0
         self.status = None
         self.command = None
@@ -427,15 +429,48 @@ class EchoRequest(Request):
 
     def __init__(self, parent):
         Request.__init__(self, parent)
+        self.reserved = 0
 
     def _encode(self, cur):
         # Reserved
-        cur.encode_uint16le(0)
+        cur.encode_uint16le(self.reserved)
 
 # SMB2_ECHO_RESPONSE definition
 class EchoResponse(Response):
     # Expect response whenever SMB2_ECHO_REQUEST sent
     command_id = SMB2_ECHO
+    structure_size = 4
+
+    def __init__(self, parent):
+        Response.__init__(self, parent)
+
+    def _decode(self, cur):
+        # Reserved
+        cur.decode_uint16le()
+
+# SMB2_FLUSH_REQUEST definition
+class FlushRequest(Request):
+    command_id = SMB2_FLUSH
+    structure_size = 24
+
+    def __init__(self, parent):
+        Request.__init__(self, parent)
+        self.reserved1 = 0
+        self.reserved2 = 0
+        self.file_id = None
+
+    def _encode(self, cur):
+        # Reserved1
+        cur.encode_uint16le(self.reserved1)
+        # Reserved2
+        cur.encode_uint32le(self.reserved2)
+        cur.encode_uint64le(self.file_id[0])
+        cur.encode_uint64le(self.file_id[1])
+
+# SMB2_FLUSH_RESPONSE definition
+class FlushResponse(Response):
+    # Expect response whenever SMB2_FLUSH_REQUEST sent
+    command_id = SMB2_FLUSH
     structure_size = 4
 
     def __init__(self, parent):
