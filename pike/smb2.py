@@ -1456,6 +1456,10 @@ class SetInfoResponse(Response):
 class FileInformation(core.Frame):
     pass
 
+@QueryInfoResponse.file_information
+class FileSystemInformation(core.Frame):
+    pass
+
 class FileAccessInformation(FileInformation):
     file_information_class = FILE_ACCESS_INFORMATION
     
@@ -1554,6 +1558,86 @@ class FileDirectoryInformation(FileInformation):
             cur.advanceto(cur.upperbound)
             
 
+class FileFullDirectoryInformation(FileInformation):
+    file_information_class = FILE_FULL_DIRECTORY_INFORMATION
+
+    def __init__(self, parent = None):
+        FileInformation.__init__(self, parent)
+        self.file_index = 0
+        self.creation_time = 0
+        self.last_access_time = 0
+        self.last_write_time = 0
+        self.change_time = 0
+        self.end_of_file = 0
+        self.allocation_size = 0
+        self.file_attributes = 0
+        self.ea_size = 0
+        self.file_name = None
+        if parent is not None:
+            parent.append(self)
+
+    def _decode(self, cur):
+        next_offset = cur.decode_uint32le()
+        self.file_index = cur.decode_uint32le()
+        self.creation_time = nttime.NtTime(cur.decode_uint64le())
+        self.last_access_time = nttime.NtTime(cur.decode_uint64le())
+        self.last_write_time = nttime.NtTime(cur.decode_uint64le())
+        self.change_time = nttime.NtTime(cur.decode_uint64le())
+        self.end_of_file = cur.decode_uint64le()
+        self.allocation_size = cur.decode_uint64le()
+        self.file_attributes = FileAttributes(cur.decode_uint32le())
+        file_name_length = cur.decode_uint32le()
+        self.ea_size = cur.decode_uint32le()
+
+        self.file_name = cur.decode_utf16le(file_name_length)
+        if next_offset:
+            cur.advanceto(self.start + next_offset)
+        else:
+            cur.advanceto(cur.upperbound)
+
+
+class FileIdFullDirectoryInformation(FileInformation):
+    file_information_class = FILE_ID_FULL_DIR_INFORMATION
+
+    def __init__(self, parent = None):
+        FileInformation.__init__(self, parent)
+        self.file_index = 0
+        self.creation_time = 0
+        self.last_access_time = 0
+        self.last_write_time = 0
+        self.change_time = 0
+        self.end_of_file = 0
+        self.allocation_size = 0
+        self.file_attributes = 0
+        self.ea_size = 0
+        self.reserved = 0
+        self.file_id = 0
+        self.file_name = None
+        if parent is not None:
+            parent.append(self)
+
+    def _decode(self, cur):
+        next_offset = cur.decode_uint32le()
+        self.file_index = cur.decode_uint32le()
+        self.creation_time = nttime.NtTime(cur.decode_uint64le())
+        self.last_access_time = nttime.NtTime(cur.decode_uint64le())
+        self.last_write_time = nttime.NtTime(cur.decode_uint64le())
+        self.change_time = nttime.NtTime(cur.decode_uint64le())
+        self.end_of_file = cur.decode_uint64le()
+        self.allocation_size = cur.decode_uint64le()
+        self.file_attributes = FileAttributes(cur.decode_uint32le())
+        file_name_length = cur.decode_uint32le()
+        self.ea_size = cur.decode_uint32le()
+        self.reserved = cur.decode_uint32le()
+        self.file_id = cur.decode_uint64le()
+
+        self.file_name = cur.decode_utf16le(file_name_length)
+        if next_offset:
+            cur.advanceto(self.start + next_offset)
+        else:
+            cur.advanceto(cur.upperbound)
+
+
 class FileBasicInformation(FileInformation):
     file_information_class = FILE_BASIC_INFORMATION
     
@@ -1584,6 +1668,102 @@ class FileBasicInformation(FileInformation):
         cur.encode_uint32le(self.file_attributes)
         # Ignore the 4-byte reserved field
         cur.encode_uint32le(0)
+
+
+class FileNetworkOpenInformation(FileInformation):
+    file_information_class = FILE_NETWORK_OPEN_INFORMATION
+
+    def __init__(self, parent = None):
+        FileInformation.__init__(self, parent)
+        self.creation_time = 0
+        self.last_access_time = 0
+        self.last_write_time = 0
+        self.change_time = 0
+        self.allocation_size = 0
+        self.end_of_file = 0
+        self.file_attributes = 0
+        if parent is not None:
+            parent.append(self)
+
+    def _decode(self, cur):
+        self.creation_time = nttime.NtTime(cur.decode_uint64le())
+        self.last_access_time = nttime.NtTime(cur.decode_uint64le())
+        self.last_write_time = nttime.NtTime(cur.decode_uint64le())
+        self.change_time = nttime.NtTime(cur.decode_uint64le())
+        self.allocation_size = cur.decode_int64le()
+        self.end_of_file = cur.decode_int64le()
+        self.file_attributes = FileAttributes(cur.decode_uint32le())
+        # Ignore the 4-byte reserved field
+        cur.decode_uint32le()
+
+
+class FileAttributeTagInformation(FileInformation):
+    file_information_class = FILE_ATTRIBUTE_TAG_INFORMATION
+
+    def __init__(self, parent = None):
+        FileInformation.__init__(self, parent)
+        self.file_attributes = 0
+        self.reparse_tag = 0
+        if parent is not None:
+            parent.append(self)
+
+    def _decode(self, cur):
+        self.file_attributes = FileAttributes(cur.decode_uint32le())
+        self.reparse_tag = cur.decode_uint32le()
+
+
+class FileStreamInformation(FileInformation):
+    file_information_class = FILE_STREAM_INFORMATION
+
+    def __init__(self, parent = None):
+        FileInformation.__init__(self, parent)
+        self.next_entry_offset = 0
+        self.stream_name_length = 0
+        self.stream_size = 0
+        self.stream_allocation_size = 0
+        self.stream_name = None
+        if parent is not None:
+            parent.append(self)
+
+    def _decode(self, cur):
+        self.next_entry_offset = cur.decode_uint32le()
+        self.stream_name_length = cur.decode_uint32le()
+        self.stream_size = cur.decode_int64le()
+        self.stream_allocation_size = cur.decode_int64le()
+        self.stream_name = cur.decode_utf16le(self.stream_name_length)
+
+
+# Compression Format
+class CompressionFormat(core.ValueEnum):
+    COMPRESSION_FORMAT_NONE = 0x0000
+    COMPRESSION_FORMAT_LZNT1 = 0x0002
+
+CompressionFormat.import_items(globals())
+
+
+class FileCompressionInformation(FileInformation):
+    file_information_class = FILE_COMPRESSION_INFORMATION
+
+    def __init__(self, parent = None):
+        FileInformation.__init__(self, parent)
+        self.compressed_file_size = 0
+        self.compression_format = 0
+        self.compression_unit_shift = 0
+        self.chunk_shift = 0
+        self.cluster_shift = None
+        self.reserved = 0
+        if parent is not None:
+            parent.append(self)
+
+    def _decode(self, cur):
+        self.compressed_file_size = cur.decode_int64le()
+        self.compression_format = CompressionFormat(cur.decode_uint16le())
+        self.compression_unit_shift = cur.decode_uint8le()
+        self.chunk_shift = cur.decode_uint8le()
+        self.cluster_shift = cur.decode_uint8le()
+
+        # This is a single reserved field of 3 bytes.
+        self.reserved = cur.decode_uint8le() | (cur.decode_uint8le() << 8) | (cur.decode_uint8le() << 16)
 
 class FileInternalInformation(FileInformation):
     file_information_class = FILE_INTERNAL_INFORMATION
@@ -1763,6 +1943,221 @@ class FileEaInformation(FileInformation):
     
     def _decode(self, cur):
         self.ea_size = cur.decode_uint32le()
+
+
+class FileFsSizeInformation(FileSystemInformation):
+    file_information_class = FILE_FS_SIZE_INFORMATION
+
+    def __init__(self, parent = None):
+        FileSystemInformation.__init__(self, parent)
+        self.total_allocation_units = 0
+        self.available_allocation_units = 0
+        self.sectors_per_allocation_unit = 0
+        self.bytes_per_sector = 0
+        if parent is not None:
+            parent.append(self)
+
+    def _decode(self, cur):
+        self.total_allocation_units = cur.decode_int64le()
+        self.available_allocation_units = cur.decode_int64le()
+        self.sectors_per_allocation_unit = cur.decode_uint32le()
+        self.bytes_per_sector = cur.decode_uint32le()
+
+
+class FileFsFullSizeInformation(FileSystemInformation):
+    file_information_class = FILE_FS_FULL_SIZE_INFORMATION
+
+    def __init__(self, parent = None):
+        FileSystemInformation.__init__(self, parent)
+        self.total_allocation_units = 0
+        self.caller_available_allocation_units = 0
+        self.actual_available_allocation_units = 0
+        self.sectors_per_allocation_unit = 0
+        self.bytes_per_sector = 0
+        if parent is not None:
+            parent.append(self)
+
+    def _decode(self, cur):
+        self.total_allocation_units = cur.decode_uint64le()
+        self.caller_available_allocation_units = cur.decode_uint64le()
+        self.actual_available_allocation_units = cur.decode_uint64le()
+        self.sectors_per_allocation_unit = cur.decode_uint32le()
+        self.bytes_per_sector = cur.decode_uint32le()
+
+
+# DeviceType
+class DeviceType(core.ValueEnum):
+    FILE_DEVICE_CD_ROM  = 0x00000002
+    FILE_DEVICE_DISK    = 0x00000007
+
+DeviceType.import_items(globals())
+
+
+# Volume Characteristics
+class Characteristics(core.FlagEnum):
+    FILE_REMOVABLE_MEDIA                     = 0x00000001
+    FILE_READ_ONLY_DEVICE                    = 0x00000002
+    FILE_FLOPPY_DISKETTE                     = 0x00000004
+    FILE_WRITE_ONCE_MEDIA                    = 0x00000008
+    FILE_REMOTE_DEVICE                       = 0x00000010
+    FILE_DEVICE_IS_MOUNTED                   = 0x00000020
+    FILE_VIRTUAL_VOLUME                      = 0x00000040
+    FILE_DEVICE_SECURE_OPEN                  = 0x00000100
+    FILE_CHARACTERISTIC_TS_DEVICE            = 0x00001000
+    FILE_CHARACTERISTIC_WEBDAV_DEVICE        = 0x00002000
+    FILE_DEVICE_ALLOW_APPCONTAINER_TRAVERSAL = 0x00020000
+
+Characteristics.import_items(globals())
+
+
+class FileFsDeviceInformation(FileSystemInformation):
+    file_information_class = FILE_FS_DEVICE_INFORMATION
+
+    def __init__(self, parent = None):
+        FileSystemInformation.__init__(self, parent)
+        self.device_type = 0
+        self.characteristics = 0
+        if parent is not None:
+            parent.append(self)
+
+    def _decode(self, cur):
+        self.device_type = DeviceType(cur.decode_uint32le())
+        self.characteristics = Characteristics(cur.decode_uint32le())
+
+
+# File System Attributes
+class FileSystemAtrribute(core.FlagEnum):
+    FILE_CASE_SENSITIVE_SEARCH        = 0x00000001
+    FILE_CASE_PRESERVED_NAMES         = 0x00000002
+    FILE_UNICODE_ON_DISK              = 0x00000004
+    FILE_PERSISTENT_ACLS              = 0x00000008
+    FILE_FILE_COMPRESSION             = 0x00000010
+    FILE_VOLUME_QUOTAS                = 0x00000020
+    FILE_SUPPORTS_SPARSE_FILES        = 0x00000040
+    FILE_SUPPORTS_REPARSE_POINTS      = 0x00000080
+    FILE_SUPPORTS_REMOTE_STORAGE      = 0x00000100
+    FILE_VOLUME_IS_COMPRESSED         = 0x00008000
+    FILE_SUPPORTS_OBJECT_IDS          = 0x00010000
+    FILE_SUPPORTS_ENCRYPTION          = 0x00020000
+    FILE_NAMED_STREAMS                = 0x00040000
+    FILE_READ_ONLY_VOLUME             = 0x00080000
+    FILE_SEQUENTIAL_WRITE_ONCE        = 0x00100000
+    FILE_SUPPORTS_TRANSACTIONS        = 0x00200000
+    FILE_SUPPORTS_HARD_LINKS          = 0x00400000
+    FILE_SUPPORTS_EXTENDED_ATTRIBUTES = 0x00800000
+    FILE_SUPPORTS_OPEN_BY_FILE_ID     = 0x01000000
+    FILE_SUPPORTS_USN_JOURNAL         = 0x02000000
+    FILE_SUPPORT_INTEGRITY_STREAMS    = 0x04000000
+
+FileSystemAtrribute.import_items(globals())
+
+
+class FileFsAttributeInformation(FileSystemInformation):
+    file_information_class = FILE_FS_ATTRIBUTE_INFORMATION
+
+    def __init__(self, parent = None):
+        FileSystemInformation.__init__(self, parent)
+        self.file_system_attibutes = 0
+        self.maximum_component_name_length = 0
+        self.file_system_name_length = 0
+        self.file_system_name = 0
+        if parent is not None:
+            parent.append(self)
+
+    def _decode(self, cur):
+        self.file_system_attibutes = cur.decode_uint32le()
+        self.maximum_component_name_length = cur.decode_int32le()
+        self.file_system_name_length = cur.decode_uint32le()
+        self.file_system_name  = cur.decode_utf16le(self.file_system_name_length)
+
+
+class FileFsVolumeInformation(FileSystemInformation):
+    file_information_class = FILE_FS_VOLUME_INFORMATION
+
+    def __init__(self, parent = None):
+        FileSystemInformation.__init__(self, parent)
+        self.volume_creation_time = 0
+        self.volume_serial_number = 0
+        self.volume_label_length = 0
+        self.supports_objects = 0
+        self.reserved = 0
+        self.volume_label = None
+        if parent is not None:
+            parent.append(self)
+
+    def _decode(self, cur):
+        self.volume_creation_time  = nttime.NtTime(cur.decode_uint64le())
+        self.volume_serial_number = cur.decode_uint32le()
+        self.volume_label_length = cur.decode_uint32le()
+        self.supports_objects = cur.decode_uint8le()
+        cur.decode_uint8le()
+        self.volume_label  = cur.decode_utf16le(self.volume_label_length)
+
+
+# File System Control Flags
+class FileSystemControlFlags(core.FlagEnum):
+    FILE_VC_QUOTA_TRACK            = 0x00000001
+    FILE_VC_QUOTA_ENFORCE          = 0x00000002
+    FILE_VC_CONTENT_INDEX_DISABLED = 0x00000008
+    FILE_VC_LOG_QUOTA_THRESHOLD    = 0x00000010
+    FILE_VC_LOG_QUOTA_LIMIT        = 0x00000020
+    FILE_VC_LOG_VOLUME_THRESHOLD   = 0x00000040
+    FILE_VC_LOG_VOLUME_LIMIT       = 0x00000080
+    FILE_VC_QUOTAS_INCOMPLETE      = 0x00000100
+    FILE_VC_QUOTAS_REBUILDING      = 0x00000200
+
+FileSystemControlFlags.import_items(globals())
+
+
+class FileFsControlInformation(FileSystemInformation):
+    file_information_class = FILE_FS_CONTROL_INFORMATION
+
+    def __init__(self, parent = None):
+        FileSystemInformation.__init__(self, parent)
+        self.free_space_start_filtering = 0
+        self.free_space_threshold = 0
+        self.free_space_stop_filtering = 0
+        self.default_quota_threshold = 0
+        self.default_quota_limit = 0
+        self.file_system_control_flags = None
+        self.padding = 0
+        if parent is not None:
+            parent.append(self)
+
+    def _encode(self, cur):
+        cur.encode_int64le(self.free_space_start_filtering)
+        cur.encode_int64le(self.free_space_threshold)
+        cur.encode_int64le(self.free_space_stop_filtering)
+        cur.encode_uint64le(self.default_quota_threshold)
+        cur.encode_uint64le(self.default_quota_limit)
+        cur.encode_uint32le(self.file_system_control_flags)
+        cur.encode_uint32le(self.padding)
+
+    def _decode(self, cur):
+        self.free_space_start_filtering = cur.decode_int64le()
+        self.free_space_threshold = cur.decode_int64le()
+        self.free_space_stop_filtering = cur.decode_int64le()
+        self.default_quota_threshold = cur.decode_uint64le()
+        self.default_quota_limit = cur.decode_uint64le()
+        self.file_system_control_flags = FileSystemControlFlags(cur.decode_uint32le())
+        self.padding = cur.decode_uint32le()
+
+
+class FileFsObjectIdInformation(FileSystemInformation):
+    file_information_class = FILE_FS_OBJECTID_INFORMATION
+
+    def __init__(self, parent = None):
+        FileSystemInformation.__init__(self, parent)
+        self.objectid = ""
+        self.extended_info = ""
+        if parent is not None:
+            parent.append(self)
+
+    def _decode(self, cur):
+        for count in xrange(2):
+            self.objectid += str(cur.decode_uint64le())
+        for count in xrange(6):
+            self.extended_info += str(cur.decode_uint64le())
 
 class BreakLeaseFlags(core.FlagEnum):
     SMB2_NOTIFY_BREAK_LEASE_FLAG_NONE         = 0x00
@@ -1957,27 +2352,40 @@ class WriteRequest(Request):
         self.remaining_bytes = 0
         self.flags = 0
         self.buffer = None
+        self.data_offset = None
+        self.length = None
+        self.channel = 0
+        self.write_channel_info_offset = 0
+        self.write_channel_info_length = 0
 
     def _encode(self, cur):
         # Encode 0 for buffer offset for now
         buf_ofs = cur.hole.encode_uint16le(0)
-        if self.buffer:
+        if self.length == None and self.buffer != None:
             cur.encode_uint32le(len(self.buffer))
-        else:
+        elif self.buffer == None:
             cur.encode_uint32le(0)
+        else:
+            cur.encode_uint32le(self.length)
         cur.encode_uint64le(self.offset)
         cur.encode_uint64le(self.file_id[0])
         cur.encode_uint64le(self.file_id[1])
         # Channel
-        cur.encode_uint32le(0)
+        cur.encode_uint32le(self.channel)
+        # RemainingBytes
         cur.encode_uint32le(self.remaining_bytes)
         # WriteChannelInfoOffset
-        cur.encode_uint16le(0)
-        # WriteChannelInfoLength
-        cur.encode_uint16le(0)
+        cur.encode_uint16le(self.write_channel_info_offset)
+        # WriteChannelInfoLength:
+        cur.encode_uint16le(self.write_channel_info_length)
+        # Flags
         cur.encode_uint32le(self.flags)
         # Go back and set buffer offset
-        buf_ofs(cur - self.parent.start)
+
+        if self.data_offset is None:
+            self.data_offset = cur - self.parent.start
+        buf_ofs(self.data_offset)
+
         if self.buffer:
             cur.encode_bytes(self.buffer)
 
