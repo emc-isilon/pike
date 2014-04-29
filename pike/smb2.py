@@ -531,19 +531,31 @@ class TreeConnectRequest(Request):
 
     def __init__(self, parent):
         Request.__init__(self, parent)
+        self.reserved = 0
+        self.path_offset = None
+        self.path_length = None
         self.path = None
 
     def _encode(self, cur):
-        cur.encode_uint16le(0)
-        # Set path offset and length to 0 for now
-        path_offset = cur.hole.encode_uint16le(0)
-        path_len = cur.hole.encode_uint16le(0)
-        # Now set correct path offset
-        path_offset(cur - self.parent.start)
+        # Reserved
+        cur.encode_uint16le(self.reserved)
+        # Path Offset
+        path_offset_hole = cur.hole.encode_uint16le(0)
+        # Path Length
+        path_lenght_hole = cur.hole.encode_uint16le(0)
+
+        if self.path_offset is None:
+            self.path_offset = cur - self.parent.start
+        path_offset_hole(self.path_offset)
+
         path_start = cur.copy()
+        # Path
         cur.encode_utf16le(self.path)
-        # Now set correct path length
-        path_len(cur - path_start)
+
+        if self.path_length is None:
+            self.path_length = cur - path_start
+        path_lenght_hole(self.path_length)
+
 
 class TreeConnectResponse(Response):
     command_id = SMB2_TREE_CONNECT
@@ -916,6 +928,41 @@ class MaximalAccessResponse(CreateResponseContext):
         self.query_status = ntstatus.Status(cur.decode_uint32le())
         self.maximal_access = Access(cur.decode_uint32le())
 
+class AllocationSizeRequest(CreateRequestContext):
+    name = 'AlSi'
+
+    def __init__(self, parent):
+        CreateRequestContext.__init__(self, parent)
+        self.allocation_size = 0
+
+    def _encode(self, cur):
+        cur.encode_uint64le(self.allocation_size)
+
+
+class ExtendedAttributeRequest(CreateRequestContext):
+    name = 'ExtA'
+
+    def __init__(self,parent):
+        CreateRequestContext.__init__(self,parent)
+        self.next_entry_offset = 0
+        self.flags = 0x00000000
+        self.ea_name_length = 0
+        self.ea_value_length = 0
+        self.ea_name = None
+        self.ea_value = None
+
+    def _encode(self,cur):
+        cur.encode_uint32le(self.next_entry_offset)
+        cur.encode_uint8le(self.flags)
+        if self.ea_name is not None:
+            self.ea_name = array.array('B',self.ea_name)
+            self.ea_name.append(00)
+            self.ea_value = array.array('B',self.ea_value)
+            cur.encode_uint8le(self.ea_name_length)
+            cur.encode_uint16le(self.ea_value_length)
+            cur.encode_bytes(self.ea_name)
+            cur.encode_bytes(self.ea_value)
+
 class LeaseState(core.FlagEnum):
     SMB2_LEASE_NONE           = 0x00
     SMB2_LEASE_READ_CACHING   = 0x01
@@ -1142,6 +1189,7 @@ class CloseResponse(Response):
 
 class FileInformationClass(core.ValueEnum):
     FILE_DIRECTORY_INFORMATION = 1
+    FILE_FULL_DIRECTORY_INFORMATION = 2
     FILE_BASIC_INFORMATION = 4
     FILE_STANDARD_INFORMATION = 5
     FILE_INTERNAL_INFORMATION = 6
@@ -1149,10 +1197,19 @@ class FileInformationClass(core.ValueEnum):
     FILE_ACCESS_INFORMATION = 8
     FILE_NAME_INFORMATION = 9
     FILE_NAMES_INFORMATION = 12
+    FILE_DISPOSITION_INFORMATION = 13
     FILE_POSITION_INFORMATION = 14
     FILE_MODE_INFORMATION = 16
     FILE_ALIGNMENT_INFORMATION = 17
     FILE_ALL_INFORMATION = 18
+    FILE_ALLOCATION_INFORMATION = 19
+    FILE_END_OF_FILE_INFORMATION = 20
+    FILE_STREAM_INFORMATION = 22
+    FILE_COMPRESSION_INFORMATION = 28
+    FILE_NETWORK_OPEN_INFORMATION = 34
+    FILE_ATTRIBUTE_TAG_INFORMATION = 35
+    FILE_ID_FULL_DIR_INFORMATION = 38
+    FILE_VALID_DATA_LENGTH_INFORMATION = 39
 
 FileInformationClass.import_items(globals())
 
@@ -1570,6 +1627,62 @@ class FileNameInformation(FileInformation):
         file_name_length = cur.decode_uint32le()
         self.file_name = cur.decode_utf16le(file_name_length)
                 
+
+class FileAllocationInformation(FileInformation):
+    file_information_class = FILE_ALLOCATION_INFORMATION
+
+    def __init__(self, parent = None):
+        FileInformation.__init__(self,parent)
+        self.allocation_size = 0
+
+        if parent is not None:
+            parent.append(self)
+
+    def _encode(self, cur):
+        cur.encode_int64le(self.allocation_size)
+
+
+class FileDispositionInformation(FileInformation):
+   file_information_class = FILE_DISPOSITION_INFORMATION
+
+   def __init__(self, parent = None):
+        FileInformation.__init__(self,parent)
+        self.delete_pending = 0
+
+        if parent is not None:
+            parent.append(self)
+
+   def _encode(self, cur):
+        cur.encode_uint8le(self.delete_pending)
+
+
+class FileEndOfFileInformation(FileInformation):
+   file_information_class = FILE_END_OF_FILE_INFORMATION
+
+   def __init__(self, parent = None):
+        FileInformation.__init__(self, parent)
+        self.endoffile = 0
+
+        if parent is not None:
+            parent.append(self)
+
+   def _encode(self, cur):
+       cur.encode_int64le(self.endoffile)
+
+
+class FileValidDataLengthInformation(FileInformation):
+   file_information_class = FILE_VALID_DATA_LENGTH_INFORMATION
+
+   def __init__(self, parent = None):
+        FileInformation.__init__(self, parent)
+        self.valid_data_length = 0
+
+        if parent is not None:
+           parent.append(self)
+
+   def _encode(self, cur):
+        cur.encode_int64le(self.valid_data_length)
+
 class FileNamesInformation(FileInformation):
     file_information_class = FILE_NAMES_INFORMATION
     
