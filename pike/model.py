@@ -171,7 +171,7 @@ class Future(object):
 
         @param timeout: The time in seconds before giving up and raising TimeoutError
         """
-        self.wait(timeout=default_timeout)
+        self.wait(timeout)
         
         if isinstance(self.response, BaseException):
             traceback = self.traceback
@@ -530,7 +530,9 @@ class Connection(asyncore.dispatcher):
             if req.message_id is None:
                 req.message_id = self.next_mid()
             req.credit_request = 10
-            req.credit_charge = 1
+
+            if req.credit_charge == None:
+                req.credit_charge = 1
 
             if req.is_last_child():
                 # Last command in chain, ready to send packet
@@ -1036,6 +1038,14 @@ class Channel(object):
         # Get response  first [0] = first response, 2nd [0] = echo response
         # frame
         self.connection.transceive(smb_req.parent)[0][0]
+
+    def flush(self,
+              file):
+        smb_req = self.request(obj=file)
+        flush_req = pike.smb2.FlushRequest(smb_req)
+        flush_req.file_id = file.file_id
+
+        self.connection.transceive(smb_req.parent)
 
     def read(self,
              file,
