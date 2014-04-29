@@ -991,6 +991,214 @@ class LeaseFlags(core.FlagEnum):
 
 LeaseFlags.import_items(globals())
 
+class AceType(core.ValueEnum):
+    ACCESS_ALLOWED_ACE_TYPE                  = 0x00
+    ACCESS_DENIED_ACE_TYPE                   = 0x01
+    SYSTEM_AUDIT_ACE_TYPE                    = 0x02
+    SYSTEM_ALARM_ACE_TYPE                    = 0x03
+    ACCESS_ALLOWED_COMPOUND_ACE_TYPE         = 0x04
+    ACCESS_ALLOWED_OBJECT_ACE_TYPE           = 0x05
+    ACCESS_DENIED_OBJECT_ACE_TYPE            = 0x06
+    SYSTEM_AUDIT_OBJECT_ACE_TYPE             = 0x07
+    SYSTEM_ALARM_OBJECT_ACE_TYPE             = 0x08
+    ACCESS_ALLOWED_CALLBACK_ACE_TYPE         = 0x09
+    ACCESS_DENIED_CALLBACK_ACE_TYPE          = 0x0A
+    ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE  = 0x0B
+    ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE   = 0x0C
+    SYSTEM_AUDIT_CALLBACK_ACE_TYPE           = 0x0D
+    SYSTEM_ALARM_CALLBACK_ACE_TYPE           = 0x0E
+    SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE    = 0x0F
+    SYSTEM_ALARM_CALLBACK_OBJECT_ACE_TYPE    = 0x10
+    SYSTEM_MANDATORY_LABEL_ACE_TYPE          = 0x11
+    SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE       = 0x12
+    SYSTEM_SCOPED_POLICY_ID_ACE_TYPE         = 0x13
+
+AceType.import_items(globals())
+
+class AceFlags(core.FlagEnum):
+    OBJECT_INHERIT_ACE         = 0x01
+    CONTAINER_INHERIT_ACE      = 0x02
+    NO_PROPAGATE_INHERIT_ACE   = 0x04
+    INHERIT_ONLY_ACE           = 0x08
+    INHERITED_ACE              = 0x10
+    SUCCESSFUL_ACCESS_ACE_FLAG = 0x40
+    FAILED_ACCESS_ACE_FLAG     = 0x80
+
+AceFlags.import_items(globals())
+
+class AclRevision(core.ValueEnum):
+    ACL_REVISION    = 0x02
+    ACL_REVISION_DS = 0x04
+
+AclRevision.import_items(globals())
+
+class SecurityDescriptorRequest(CreateRequestContext):
+    name = 'SecD'
+
+    def __init__(self,parent):
+        CreateRequestContext.__init__(self,parent)
+        self.revision = 1
+        self.sbz1 = 0
+        self.control = None
+        self.owner_sid = None
+        self.group_sid = None
+        self.sacl = None
+        self.dacl = None
+        self.sacl_aces = None
+        self.dacl_aces = None
+
+    def _encode(self,cur):
+        self.offset_owner,self.offset_group,self.offset_sacl,self.offset_dacl=\
+                    self._get_offset(owner_sid = self.owner_sid ,group_sid=\
+                    self.group_sid ,sacl = self.sacl_aces ,dacl = self.dacl_aces)
+        cur.encode_uint8le(self.revision)
+        cur.encode_uint8le(self.sbz1)
+        cur.encode_uint16le(self.control)
+        cur.encode_uint32le(self.offset_owner)
+        cur.encode_uint32le(self.offset_group)
+        cur.encode_uint32le(self.offset_sacl)
+        cur.encode_uint32le(self.offset_dacl)
+
+        if self.offset_owner != 0:
+            id_auth, sub_auth = self._get_sid(self.owner_sid)
+            self._encode_sid(cur,id_auth,sub_auth)
+
+        if self.offset_group != 0:
+            id_auth, sub_auth = self._get_sid(self.group_sid)
+            self._encode_sid(cur,id_auth,sub_auth)
+
+        if self.offset_sacl!= 0:
+            # Acl Revision
+            cur.encode_uint8le(self.sacl)
+            # sbz1
+            cur.encode_uint8le(0)
+            # Acl Size
+            sid_size,ace_size,acl_size = self._get_size(acl=self.sacl_aces)
+            cur.encode_uint16le(acl_size)
+            # Ace Count
+            cur.encode_uint16le(len(self.sacl_aces))
+            # sbz2
+            cur.encode_uint16le(0)
+            for ace in self.sacl_aces:
+                # Ace Type
+                cur.encode_uint8le(ace[0])
+                # Ace flags
+                cur.encode_uint8le(ace[1])
+                # Ace Size
+                sid_size,ace_size,acl_size = self._get_size(ace_val=ace)
+                cur.encode_uint16le(ace_size)
+                # Ace Mask
+                cur.encode_uint32le(ace[2])
+                id_auth, sub_auth = self._get_sid(ace[3])
+                self._encode_sid(cur,id_auth,sub_auth)
+        if self.offset_dacl!= 0:
+            # Acl Revision
+            cur.encode_uint8le(self.dacl)
+            # sbz1
+            cur.encode_uint8le(0)
+            # Acl Size
+            sid_size,ace_size,acl_size = self._get_size(acl=self.dacl_aces)
+            cur.encode_uint16le(acl_size)
+            # Ace Count
+            cur.encode_uint16le(len(self.dacl_aces))
+            # sbz2
+            cur.encode_uint16le(0)
+            for ace in self.dacl_aces:
+                # Ace Type
+                cur.encode_uint8le(ace[0])
+                # Ace flags
+                cur.encode_uint8le(ace[1])
+                # Ace Size
+                sid_size,ace_size,acl_size = self._get_size(ace_val=ace)
+                cur.encode_uint16le(ace_size)
+                # Ace Mask
+                cur.encode_uint32le(ace[2])
+                id_auth, sub_auth = self._get_sid(ace[3])
+                self._encode_sid(cur,id_auth,sub_auth)
+
+    def _encode_sid(self,cur,id_auth,sub_auth):
+        sub_auth = [int(i) for i in sub_auth]
+        # Revision
+        cur.encode_uint8le(0x01)
+        # Sub Authrty Count
+        cur.encode_uint8le(len(sub_auth))
+        # Identifier Authority
+        tmp_id_auth = array.array('B',[0x00,0x00,0x00,0x00,0x00])
+        tmp_id_auth.append(int(id_auth))
+        for tmp in tmp_id_auth :
+            cur.encode_uint8le(tmp)
+        # Sub Authority
+        for tmp_sub_auth in sub_auth:
+            cur.encode_uint32le(tmp_sub_auth)
+
+    def _get_sid(self,sid):
+        pat = r'S-1-(\d)-(.*)'
+        match = re.search(pat,sid)
+        id_auth= match.group(1)
+        sub_auth = (match.group(2)).split('-')
+        return id_auth,sub_auth
+
+    def _get_size(self,sid = None,ace_val = None,acl = None):
+        sid_size=0
+        ace_size=0
+        acl_size=0
+        # All Sizes are in Bytes
+        sbz1                  = 1
+        sbz2                  = 2
+        revision_size         = 1
+        ace_type_size         = 1
+        ace_flags_size        = 1
+        ace_size_param        = 2
+        ace_mask_size         = 4
+        acl_revision_size     = 1
+        acl_size_param        = 2
+        ace_count_size        = 2
+        sub_auth_count_size   = 1
+        identifier_auth_size  = 6
+        sub_auth_size         = 0
+        if sid != None:
+            id_auth, sub_auth = self._get_sid(sid)
+            sub_auth_size+= len(sub_auth) * 4
+            sid_size =revision_size + sub_auth_count_size+\
+                      identifier_auth_size + sub_auth_size
+        elif ace_val != None:
+            sub_auth_size = 0
+            id_auth, sub_auth = self._get_sid(ace_val[3])
+            sub_auth_size+= len(sub_auth) * 4
+            sid_size = revision_size + sub_auth_count_size+\
+                       identifier_auth_size + sub_auth_size
+            ace_size = ace_type_size + ace_flags_size +\
+                       ace_size_param + ace_mask_size + sid_size
+        elif acl != None:
+            tmp_acl_size=0
+            for aces in acl:
+               sub_auth_size = 0
+               id_auth, sub_auth = self._get_sid(aces[3])
+               sub_auth_size+= len(sub_auth) * 4
+               sid_size = revision_size + sub_auth_count_size +\
+                          identifier_auth_size + sub_auth_size
+               ace_size = ace_type_size + ace_flags_size + \
+                          ace_size_param + ace_mask_size + sid_size
+               tmp_acl_size += ace_size
+               acl_size = acl_revision_size + sbz1 + acl_size_param + \
+                          ace_count_size + sbz2  + tmp_acl_size
+        return sid_size,ace_size,acl_size
+
+    def _get_offset(self,owner_sid=None,group_sid=None,sacl=None,dacl=None):
+        default_offset = 20
+        owner_sid_size = self._get_size(sid = owner_sid)
+        off_owner = 0 if owner_sid_size[0] == 0 else default_offset
+        group_sid_size = self._get_size(sid = group_sid)
+        off_group = 0 if group_sid_size[0] == 0 else  default_offset +\
+                                                owner_sid_size[0]
+        sacl_size = self._get_size(acl = sacl)
+        off_sacl = 0 if sacl_size[2] == 0  else default_offset +\
+                            owner_sid_size[0] + group_sid_size[0]
+        dacl_size = self._get_size(acl = dacl)
+        off_dacl = 0 if dacl_size[2] == 0  else default_offset +\
+                        owner_sid_size[0] + group_sid_size[0] + sacl_size[2]
+        return off_owner,off_group,off_sacl,off_dacl
+
 class LeaseRequest(CreateRequestContext):
     name = 'RqLs'
     # This class handles V2 requests as well.  Set
@@ -1226,6 +1434,20 @@ class FileInformationClass(core.ValueEnum):
     FILE_VALID_DATA_LENGTH_INFORMATION = 39
 
 FileInformationClass.import_items(globals())
+
+
+class FileSystemInformationClass(core.ValueEnum):
+    FILE_FS_VOLUME_INFORMATION = 1
+    FILE_FS_SIZE_INFORMATION = 3
+    FILE_FS_DEVICE_INFORMATION = 4
+    FILE_FS_ATTRIBUTE_INFORMATION = 5
+    FILE_FS_CONTROL_INFORMATION  = 6
+    FILE_FS_FULL_SIZE_INFORMATION = 7
+    FILE_FS_OBJECTID_INFORMATION = 8
+    FILE_FS_SECTOR_SIZE_INFORMATION = 11
+
+FileSystemInformationClass.import_items(globals())
+
 
 class QueryDirectoryRequest(Request):
     command_id = SMB2_QUERY_DIRECTORY
