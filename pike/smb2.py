@@ -726,14 +726,21 @@ class CreateRequest(Request):
     
     def __init__(self, parent):
         Request.__init__(self, parent)
+        self.security_flags = 0
         self.requested_oplock_level = SMB2_OPLOCK_LEVEL_NONE
         self.impersonation_level = 0
+        self.smb_create_flags = 0
+        self.reserved = 0
         self.desired_access = 0
         self.file_attributes = 0
         self.share_access = 0
         self.create_disposition = 0
         self.create_options = 0
         self.name = None
+        self.name_offset = None
+        self.name_length = None
+        self.create_contexts_offset = 0
+        self.create_contexts_length = 0
         self._create_contexts = []
 
     def _children(self):
@@ -741,13 +748,13 @@ class CreateRequest(Request):
 
     def _encode(self, cur):
         # SecurityFlags, must be 0
-        cur.encode_uint8le(0)
+        cur.encode_uint8le(self.security_flags)
         cur.encode_uint8le(self.requested_oplock_level)
         cur.encode_uint32le(self.impersonation_level)
         # SmbCreateFlags, must be 0
-        cur.encode_uint64le(0)
+        cur.encode_uint64le(self.smb_create_flags)
         # Reserved
-        cur.encode_uint64le(0)
+        cur.encode_uint64le(self.reserved)
         cur.encode_uint32le(self.desired_access)
         cur.encode_uint32le(self.file_attributes)
         cur.encode_uint32le(self.share_access)
@@ -764,10 +771,17 @@ class CreateRequest(Request):
         
         buffer_start = cur.copy()
 
-        name_offset_hole(cur - self.parent.start)
+
+        if  self.name_offset is None:
+            self.name_offset = cur - self.parent.start
+        name_offset_hole(self.name_offset)
+
         name_start = cur.copy()
         cur.encode_utf16le(self.name)
-        name_length_hole(cur - name_start)
+
+        if  self.name_length is None:
+            self.name_length = cur - name_start
+        name_length_hole(self.name_length)
 
         if len(self._create_contexts) != 0:
             # Next field of previous context to fill in
@@ -2292,25 +2306,41 @@ class ReadRequest(Request):
         self.remaining_bytes = 0
         self.file_id = None
 
+        self.padding = 0
+        self.reserved = 0
+        self.channel = 0
+        self.read_channel_info_offset = None
+        self.read_channel_info_length = None
+        self.buffer = 0
+
     def _encode(self, cur):
         # Padding
-        cur.encode_uint8le(16)
+        cur.encode_uint8le(self.padding)
         # Reserved
-        cur.encode_uint8le(0)
+        cur.encode_uint8le(self.reserved)
         cur.encode_uint32le(self.length)
         cur.encode_uint64le(self.offset)
         cur.encode_uint64le(self.file_id[0])
         cur.encode_uint64le(self.file_id[1])
         cur.encode_uint32le(self.minimum_count)
         # Channel
-        cur.encode_uint32le(0)
+        cur.encode_uint32le(self.channel)
+
         cur.encode_uint32le(self.remaining_bytes)
-        # ReadChannelInfoOffset
-        cur.encode_uint16le(0)
+
         # ReadChannelInfoLength
-        cur.encode_uint16le(0)
+        if self.read_channel_info_offset is None:
+            self.read_channel_info_offset = 0
+        cur.encode_uint16le(self.read_channel_info_offset)
+
+        # ReadChannelInfoLength
+        if self.read_channel_info_length is None:
+            self.read_channel_info_length = 0
+        cur.encode_uint16le(self.read_channel_info_length)
+
         # Buffer
-        cur.encode_uint8le(0)
+        cur.encode_uint8le(self.buffer)
+
 
 class ReadResponse(Response):
     command_id = SMB2_READ
@@ -2428,9 +2458,12 @@ class LockRequest(Request):
         self.file_id = None
         self.lock_sequence = 0
         self.locks = []
+        self.lock_count = None
 
     def _encode(self, cur):
-        cur.encode_uint16le(len(self.locks))
+        if self.lock_count == None:
+            self.lock_count = len(self.locks)
+        cur.encode_uint16le(self.lock_count)
         cur.encode_uint32le(self.lock_sequence)
         cur.encode_uint64le(self.file_id[0])
         cur.encode_uint64le(self.file_id[1])
