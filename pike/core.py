@@ -235,6 +235,9 @@ class Cursor(object):
     def encode_uint64le(self, val):
         self.encode_struct('<Q', val)
 
+    def encode_int64le(self, val):
+        self.encode_struct('<q', val)
+
     def encode_utf16le(self, val):
         self.encode_bytes(unicode(val).encode('utf-16le'))
     
@@ -283,8 +286,14 @@ class Cursor(object):
     def decode_uint32le(self):
         return self.decode_struct('<L')[0]
 
+    def decode_int32le(self):
+        return self.decode_struct('<l')[0]
+
     def decode_uint64le(self):
         return self.decode_struct('<Q')[0]
+
+    def decode_int64le(self):
+        return self.decode_struct('<q')[0]
 
     def decode_utf16le(self, size):
         return self.decode_bytes(size).tostring().decode('utf-16le')
