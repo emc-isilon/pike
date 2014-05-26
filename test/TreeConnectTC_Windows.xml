@@ -1,0 +1,3048 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<SMB>
+	<TC>
+		<Desc>TreeTC001 - This test case is to verify the server behaviour when Structure Size = 9</Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>34</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_SUCCESS</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC002 - This test case is to verify the server behaviour when Structure Size less than 9 </Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>34</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_INVALID_PARAMETER</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC003 - This test case is to verify the server behaviour when Structure Size greater than 9 </Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>29</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>34</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_INVALID_PARAMETER</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC004 - This test case is to verify the server behaviour when Structure Size equal to  0 </Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>0</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>34</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_INVALID_PARAMETER</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<!--
+	<TC>
+		<Desc>TreeTC005 - This test case is to verify the server behaviour when Structure Size less than 0 </Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>-30</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>34</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_INVALID_PARAMETER</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	-->
+	<TC>
+		<Desc>TreeTC006 - This test case is to verify the server behaviour when Reserved Field equal to  0 </Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>34</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_SUCCESS</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<!--
+	<TC>
+		<Desc>TreeTC007 - This test case is to verify the server behaviour when Reserved Field is less than  0 </Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>-10</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>34</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_SUCCESS</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	-->
+	<TC>
+		<Desc>TreeTC008 - This test case is to verify the server behaviour when Reserved Field is greater than  0 </Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>10</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>34</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_SUCCESS</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC009 - This test case is to verify the server behaviour when PathOffset greater than 0 and less than Actual Value  </Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>64</PathOffset>
+				<PathLength>34</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_INVALID_PARAMETER</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC010 - This test case is to verify the server behaviour when PathOffset is equal to 0  </Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>0</PathOffset>
+				<PathLength>34</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_INVALID_PARAMETER</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC011 - This test case is to verify the server behaviour when PathOffset is equal to Actual Value  </Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>34</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_SUCCESS</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC012 - This test case is to verify the server behaviour when PathLength is greater than Correct Path Length  </Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>39</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_INVALID_PARAMETER</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC013 - This test case is to verify the server behaviour when PathLength is equal to 0  </Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>0</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_INVALID_PARAMETER</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<!--
+	<TC>
+		<Desc>TreeTC014 - This test case is to verify the server behaviour when PathLength is equal to Negative Value  </Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>-10</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_INVALID_PARAMETER</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	-->
+	<TC>
+		<Desc>TreeTC015 - This test case is to verify the server behaviour when PathLength is less than Actual Value  </Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>17</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_INVALID_PARAMETER</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC016 - This test case is to verify the server behaviour when PathLength is equal to  Correct Value  </Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>34</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_SUCCESS</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+<!--	<TC>
+		<Desc>TreeTC017 - This test case is to verify the server behaviour when Buffer(Server Component) less than 256 characters </Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer> </Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>52</PathLength>
+				<Buffer>\\AD.neverfaillab.com\abcd</Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_SUCCESS</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	
+	<TC>
+		<Desc>TreeTC018 - This test case is to verify the server behaviour when Buffer(Server Component) 1 character would be either Japanese or Hindi or Chinese.</Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer></Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>52</PathLength>
+				<Buffer>\\abÆd.neverfaillab.com\c$</Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_SUCCESS</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	
+	<TC>
+		<Desc>TreeTC019 - This test case is to verify the server behaviour when Buffer(Server Component) is greater than 256 characters.</Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer></Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength> </PathLength>
+				<Buffer>\\abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz\C$</Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_INVALID_PARAMETER</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC020 - This test case is to verify the server behaviour when Buffer(Server Component) is equal to 0 characters.</Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer></Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>10</PathLength>
+				<Buffer>\\\C$</Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_INVALID_PARAMETER</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC021 - This test case is to verify the server behaviour when Buffer(Server Component) is equal to valid IPv4.</Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer></Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>34</PathLength>
+				<Buffer> </Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_SUCCESS</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC022 - This test case is to verify the server behaviour when Buffer(Server Component) is equal to valid IPv6.</Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer></Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>64</PathLength>
+				<Buffer>\\fe80::eda6:5fbb:ec6b:3a5a%11\C$</Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_SUCCESS</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC023 - This test case is to verify the server behaviour when Buffer(Server Component) is equal to valid FQDN.</Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer></Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>48</PathLength>
+				<Buffer>\\AD.neverfaillab.com\C$</Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_SUCCESS</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC024 - This test case is to verify the server behaviour when Buffer(Server Component) is equal to Invalid IPv4.</Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer></Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>32</PathLength>
+				<Buffer>\\19.123.10.9\C$</Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_INVALID_PARAMETER</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC025 - This test case is to verify the server behaviour when Buffer(Server Component) is equal to Invalid IPv6.</Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer></Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength> </PathLength>
+				<Buffer>\\fe80::eda6:5fbb:ess\C$</Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_INVALID_PARAMETER</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC026 - This test case is to verify the server behaviour when Buffer(Server Component) is equal to Invalid FQDN.</Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer></Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength> </PathLength>
+				<Buffer>\\abcd.abcd\C$</Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_INVALID_PARAMETER</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>-->
+	<TC>
+		<Desc>TreeTC027 - This test case is to verify the server behaviour when Buffer(Share Component) is equal to 80 Characters.</Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer></Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>184</PathLength>
+				<Buffer>\\172.17.54.12\abcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopq</Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_SUCCESS</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC028 - This test case is to verify the server behaviour when Buffer(Share Component) is less than 80 Characters and greater than 0.</Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer></Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>70</PathLength>
+				<Buffer>\\172.17.54.12\abcdefghijklmnopqrst</Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_SUCCESS</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC029 - This test case is to verify the server behaviour when Buffer(Share Component) is greater than 80 characters.</Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer></Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>230</PathLength>
+				<Buffer>\\172.17.54.12\abcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrst</Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_BAD_NETWORK_NAME</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC030 - This test case is to verify the server behaviour when Buffer(Share Component) is equal to unicode characters.</Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer></Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>34</PathLength>
+				<Buffer>\\172.17.54.12\राम</Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_SUCCESS</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>
+	<TC>
+		<Desc>TreeTC031 - This test case is to verify the server behaviour when path length of Tree connect with multiple folders shared inside single shared folder is greater than 0 and  less than or equal to 80 characters..</Desc>
+		<SMB2Negotiate>
+			<NegotiateRequest>
+				<StructureSize>36</StructureSize>
+				<DialectCount> </DialectCount>
+				<SecurityMode> </SecurityMode>
+				<Reserved> </Reserved>
+				<Capabilities></Capabilities>
+				<ClientGuid> </ClientGuid>
+				<ClientStartTime> </ClientStartTime>
+				<Dialects> </Dialects>
+			</NegotiateRequest>
+			<NegotiateResponse>
+				<StructureSize>65</StructureSize>
+				<SecurityMode> </SecurityMode>
+				<DialectRevision>DIALECT_SMB2_002</DialectRevision>
+				<Reserved> </Reserved>
+				<ServerGuid> </ServerGuid>
+				<Capabilities></Capabilities>
+				<MaxTransactSize> </MaxTransactSize>
+				<MaxReadSize> </MaxReadSize>
+				<MaxWriteSize> </MaxWriteSize>
+				<SystemTime> </SystemTime>
+				<ServerStartTime> </ServerStartTime>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Reserved2> </Reserved2>
+				<Buffer> </Buffer>
+			</NegotiateResponse>
+		</SMB2Negotiate>
+	
+		<SMB2SessionSetup>
+			<SessionSetupRequest>
+				<StructureSize>25</StructureSize>
+				<Flags> </Flags>
+				<SecurityMode>0x01</SecurityMode>
+				<Capabilities></Capabilities>
+				<Channel> </Channel>
+				<SecurityBufferOffset></SecurityBufferOffset>
+				<SecurityBufferLength></SecurityBufferLength>
+				<PreviousSessionId> </PreviousSessionId>
+				<Buffer></Buffer>
+			</SessionSetupRequest>
+			<SessionSetupResponse>
+				<StructureSize>9</StructureSize>
+				<SessionFlags>0x0001</SessionFlags>
+				<SecurityBufferOffset> </SecurityBufferOffset>
+				<SecurityBufferLength> </SecurityBufferLength>
+				<Buffer> </Buffer>
+			</SessionSetupResponse>
+		</SMB2SessionSetup>	
+	
+		<SMB2TreeConnect>	
+			<TreeConnectRequest>
+				<StructureSize>9</StructureSize>
+				<Reserved>0</Reserved>
+				<PathOffset>72</PathOffset>
+				<PathLength>166</PathLength>
+				<Buffer>\\172.17.54.12\test27abcdefghijklmnopqrst\abcdefghijklmnopqrst\abcdefghijklmnopqrst</Buffer>
+			</TreeConnectRequest>
+			<TreeConnectResponse>
+				<StructureSize>16</StructureSize>
+				<ShareType>0x01</ShareType>
+				<Reserved>0</Reserved>
+				<ShareFlags>0x00000000</ShareFlags>
+				<Capabilities>0x00000008</Capabilities>
+				<MaximalAccess> </MaximalAccess>
+			</TreeConnectResponse>
+		</SMB2TreeConnect>
+		
+		<SMB2TreeDisconnect>
+			<TreeDisconnectRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectRequest>
+			<TreeDisconnectResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</TreeDisconnectResponse>
+		</SMB2TreeDisconnect>	
+	
+		<SMB2LOGOFF>	
+			<LOGOFFRequest>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFRequest>
+			<LOGOFFResponse>
+				<StructureSize>4</StructureSize>
+				<Reserved> </Reserved>
+			</LOGOFFResponse>
+		</SMB2LOGOFF>
+		<Result>
+			<Cmd>Tree_Connect</Cmd>
+			<ReturnStatus>STATUS_SUCCESS</ReturnStatus>
+			<ValidationMechanism></ValidationMechanism>
+		</Result>
+	</TC>	
+	
+</SMB>
+
