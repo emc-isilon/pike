@@ -1,0 +1,310 @@
+README:
+
+Please find the following in this tar file -
+a. Working Source code, ready for code review - in the pike directory.
+b. Execution logs and wireshark traces (for Flush, Query Info, Query Direectory, Set Info execution logs for both Windows 2K8R2 and OneFS server, wireshark traces)
+
+Build and run  the source code.
+1)  Unzip this tar file on your local machine.
+2)  Create the output directory in the pike folder and complete the configurations as given below
+    mkdir output ; cd output
+     ../configure PYTHON=/opt/python2.7/bin/python PYTHON_CONFIG=/opt/python2.7/bin/python-config
+    make -j8
+	
+Command needed if Windows server is used
+    make test SERVER='<Server-ip>' CREDS='<Server-ip>\username%password' TEST=runner LOGLEVEL=debug TRACE=yes>err 2>&1
+
+Command needed if OneFS server is used
+    PYTHONPATH="../test" \
+    PIKE_SERVER="<address>" \
+    PIKE_CREDS="<domain>\\<user>%<passwprd>" \
+    unit2 -v runner.suite
+
+For various commands, different configurations and test beds has to be created. Details of each are given below.
+
+=============== FLUSH ===============
+Test file name : 
+    flush_test.py
+
+Prerequisite: 
+    NA	
+
+Execution:
+    Make test SERVER='<Server-ip>' CREDS='<Server-ip>\username%password' TEST=flush_test LOGLEVEL=debug TRACE=yes>flush_output 2>&1
+
+Differences observed when executed against OneFS and Windows 2K8R2:
+1. TC "test_flush_STATUS_FILE_CLOSED_for_tree_disconnect"
+	This test case fails against OneFS by throwing STATUS_NETWORK_NAME_DELETED wherein windows the error is STATUS_FILE_CLOSED.But, we feel OneFS is behaving correctly in this case because when we perform flush after 'TREE DISCONNECT'
+error should give as STATUS_NETWORK_NAME_DELETED which is happening in case of OneFS but not in case of Windows.
+
+2. TC "test_flush_STATUS_FILE_CLOSED_for_session_logoff"
+	This test case fails against OneFS by throwing STATUS_USER_SESSION_DELETED wherein windows the error is STATUS_FILE_CLOSED.But, we feel OneFS is behaving correctly in this case because when we perform flush after 'SESSION LOGOFF'
+error should give as STATUS_USER_SESSION_DELETED which is happening in case of OneFS but not in case of Windows.
+
+3. TC "test_flush_for_STATUS_NETWORK_NAME_DELETED"
+     This test case fails against OneFS by throwing STATUS_BAD_NETWORK_NAME wherein windows the error is STATUS_NETWORK_NAME_DELETED.But, we feel OneFS is behaving correctly in this case because when we perform flush without providing tree name error should give as STATUS_BAD_NETWORK_NAME which is happening in case of OneFS but not in case of Windows.
+
+Pending/Uncovered Items:
+    NA
+
+=============== Query Info ==============
+Test file name : 
+    query_info.py
+
+Prerequisite: 
+    NA
+
+Execution:
+    Make test SERVER='<Server-ip>' CREDS='<Server-ip>\username%password' TEST=flush_test LOGLEVEL=debug TRACE=yes>query_info 2>&1
+
+Differences observed when executed against OneFS and Windows 2K8R2:
+1. TC "test_query_file_compression_info"
+	This test case fails against OneFS by throwing "0xC0000002" i.e (STATUS_NOT_IMPLEMENTED) while querying the compression info of the file wherein windows server gives the valid output.
+
+2. TC "test_query_file_fs_ctrl_info_for_FILE_READ_ATTRIBUTES" &
+      "test_query_file_fs_ctrl_info_for_GENERIC_WRITE" &
+      "test_query_file_fs_ctrl_info_for_READ_CONTROL"
+      "test_query_file_fs_ctrl_info"
+	These test cases fails against OneFS by throwing "0xc00000bb" i.e (STATUS_NOT_SUPPORTED) while querying the FILE_FS_CONTROL_INFORMATION wherein windows server gives the valid output.
+
+3. TC "test_query_file_fs_objectid_info"
+     This test case fails against OneFS by throwing "0xc00000bb" i.e (STATUS_NOT_SUPPORTED) while querying the FILE_FS_OBJECTID_INFORMATION wherein windows server gives the valid output.
+
+4. TC "test_query_file_fs_device_info"
+     This test case fails against OneFS by throwing "0xc00000bb" i.e (STATUS_NOT_SUPPORTED) while querying the FILE_FS_DEVICE_INFORMATION wherein windows server gives the valid output.
+
+5.TC "test_query_file_network_open_info_for_FILE_READ_DATA"
+     "test_query_file_network_open_info_for_READ_CONTROL"
+     "test_query_file_network_open_info_for_GENERIC_WRITE"
+     These TC's are passing in oneFS while we querying network open info of file, which is not expected.Whereas the above TC's are failing with proper against windows error "STATUS_ACCESS_DENIED".
+
+6.TC "test_query_file_attribute_tag_info_for_FILE_READ_DATA"
+     "test_query_file_attribute_tag_info_for_READ_CONTROL"
+     "test_query_file_attribute_tag_info_for_GENERIC_WRITE"
+     These TC's are passing in oneFS while we querying attribute tag info of file, which is not expected.Whereas the above TC's are failing with proper against windows error "STATUS_ACCESS_DENIED".
+
+
+Not Implemented:
+    1. Class FileFsSectorSizeInformation not implemented due to windows throwing an STATUS_INVALID_INFO_CLASS when we are querying the file fs sector size information.
+    2. Class FileAlternateNameInformation not implemented because packet structure not available in MS-SMB specification document.
+
+=============== Query Directory =============== 
+Test file name : 
+    querydirectory_test.py
+
+Prerequisite:
+    Create a shared directory with name, QueryDirectory on the server.
+
+Execution:
+    Make test SERVER='<Server-ip>' CREDS='<Server-ip>\username%password' TEST=querydirectory_test LOGLEVEL=debug TRACE=yes>query_directory 2>&1
+
+Differences observed when executed against OneFS and Windows 2K8R2:
+    NA
+
+Pending/Uncovered Items:
+1. Class FILE_BOTH_DIRECTORY_INFORMATION not checked in current version because in the wireshark traces,"ShortName" and "reserved" fields are not visible.   
+2. Class FILE_ID_BOTH_DIRECTORY_INFORMATION not checked in current version because wireshark traces,"ShortName", "Reserved1", and "Reserved2" fields are not visible.
+
+
+=============== Set Info =============== 
+Test file name : 
+    set_info_test.py
+
+Prerequisite:
+    NA
+
+Execution:
+    Make test SERVER='<Server-ip>' CREDS='<Server-ip>\username%password' TEST=querydirectory_test LOGLEVEL=debug TRACE=yes>set_info_test 2>&1
+
+Differences observed when executed against OneFS and Windows 2K8R2:
+1. TC "TC 01 - test_set_alloc_size" 
+    Fails against OneFS while setting the allocation size of file i.e (Allocation Size doesn't get set though it gives STATUS SUCCESS). This works fine against wondows2K8R2.
+
+2. TC "TC 04 - test_set_valid_data"
+     Fails against OneFS while write request and get malformed packet as write response and gives error "STATUS_NOT_SUPPORTED" while windows2K8R2 gives valid output as "STATUS_SUCCESS".
+	 
+3. TC "TC 05 - test_set_invalid_data_len"
+     Fails against OneFS with error "STATUS_NOT_SUPPORTED" while windows2K8R2 throws "STATUS_INVALID_PARAMETER".
+
+4. TC "TC 06 - test_set_valid_data_write_protected"
+      Fails against OneFS with error "STATUS_NOT_SUPPORTED" while windows2K8R2 throws "STATUS_ACCESS_DENIED".
+	  
+5. TC "TC 07 - test_set_zero_data_len"
+      Fails against OneFS with error "STATUS_NOT_SUPPORTED" while windows2K8R2 throws "STATUS_INVALID_PARAMETER". 
+	  
+6. TC "TC 08 - test_set_allocsize_without_writeperm"
+      Fails against OneFS with error "STATUS_SUCCESS" while windows2K8R2 throws "STATUS_ACCESS_DENIED".
+
+7. TC "TC 09 - test_set_allocsize_directory"
+      Fails against OneFS with error "STATUS_NOT_SUPPORTED" while windows2K8R2 throws "STATUS_INVALID_PARAMETER".	  
+	  
+8. TC "TC 10 - test_set_disposition_info_without_delete"
+      Fails against OneFS with error "STATUS_SUCCESS" while windows2K8R2 throws "STATUS_ACCESS_DENIED".
+
+9. TC "TC 11 - test_set_endoffile_directory"
+      Fails against OneFS with error "STATUS_ACCESS_DENIED" while windows2K8R2 throws "STATUS_INVALID_PARAMETER". 
+	  
+Not Implemented:
+1. FileRenameInformation : Windows server 2K8R2 responds with 'STATUS_ACCESS_DENIED' when trying to rename the file. It might be because the file handle is open, but we are not sure how to send this request otherwise.
+2. FileLinkInformation : Encoding issue
+3. FileShortNameInformation :  Encoding issue
+
+=============== Echo =============== 
+Test file names :
+   echo_test.py
+
+Prerequisite:
+   NA
+
+Execution: 
+   make test SERVER='<Server IP>' CREDS='<Server IP>\<UserID>%<Passwd>' TEST=echo_test
+
+=============== Create ==============
+Note1: For all create test cases and testbeds dependent on xml, the tree connect specific changes are needed in the xml files. (See Tree Connect section c)
+
+Test file names : 
+    XMLs to execute with runner.py:
+       Create_File.xml
+       Create_Directory.xml
+       Create_Open_File.xml
+       Create_Open_Directory.xml
+    AdditionalTest cases other than XMLs: 
+       create_file_additional.py
+       create_open_file_additional.py
+       create_dir_additional.py
+       create_open_dir_additional.py
+    
+Prerequisite:
+   1. For Create File test cases, testbed is not needed, user needs to add Create_File.xml in tc.config file in test folder.
+   2. For Create Directory test cases, testbed is not needed, user needs to add Create_Directory.xml in tc.config file in test folder.
+   3. For Create Open Directory test cases, testbed is needed. 
+      User needs to make changes in Create_Open_Directory_Testbed.xml file specific to treeconnect(as given above in tree connect section 3).
+      Run the test script create_open_dir_testbed.py, before running the actual tests.
+      After the testbed is done, user needs to add Create_Open_Directory.xml in tc.config file in test folder and run the tests for runner.suite.   
+   4. For CREATE_OPEN_FILE test bed creation, we have used the Windows API through python 'ctypes' module for setting file attributes.
+      Due to this, before executing test cases, one needs to map the share on Windows and then execute the test bed creation script - 'FileOpenTestbed.py'.
+      This script takes xml file - 'FileOpenTestbed.xml' - as input. So, once the share is mapped, one needs to copy both files and then execute the script.
+      Currently, these both files are present in /tools directory in PIKE.
+      After the testbed is done, user needs to add Create_Open_File.xml in tc.config file in test folder and run the tests for runner.suite.
+	 5. Create a shared directories CreateFile,OpenFile,CreateDirectory,OpenDirectory on server	before executing the scripts.
+	  
+Execution: 
+     1. All *_additional.py test cases to be run independent of xml as:
+          make test SERVER='<Server IP>' CREDS='<Server IP>\<UserID>%<Passwd>' TEST=_additional
+     2. All XML test cases to be run with adding .xml file entry to ../test/tc.config and then executing runner.py as a suite with- 
+          make test SERVER='<Server IP>' CREDS='<Server IP>\<UserID>%<Passwd>' TEST=runner.suite
+      
+
+=============== Tree Connect ==============
+Test file names :
+XMLs to execute with runner.py
+  TreeConnectTC_OneFS.xml (for OneFS)
+	TreeConnectTC_Windows.xml (for Windows Server)
+
+Steps to satisfy pre-requisite and execute Tree Connect test cases:
+1. Create a directory '/ifs/smb_share' and then create its alias with 'isi smb shares create smb_share /ifs/smb_share' 
+2. There are two TreeConnect test case XMLs for Windows and OneFS -  a) TreeConnectTC_Windows.xml b) TreeConnectTC_OneFS.xml and   for these two test cases there are different testbed scripts in Tools directory namely a)Tree_Setup_TestBed_Windows.py and   b)Tree_Setup_TestBed_OneFS.py.
+3. In Pike framework in test.py file ,in class PikeTest, def __init__, we have an entry as - self.share = self.option('PIKE_SHARE', 'smb_share') and when you call smb_share in OneFS it points to directory /ifs/smb_share/ because smb_share is an alias for /ifs/smb_share/
+   Therefore in XML test cases wherever in TreeConnect Command, parameter Buffer is not defined by default it assumes smb_share directory i.e //<IP Address>/smb_share/.
+4. In XML TreeConnect Command, We calculate the parameter PathLength according to IP Address and Share folder.
+		Eg: <Buffer>\\127.0.0.1\abcdefghijklmnopqrst</Buffer> 
+		Then PathLength will be 64. The length of "\\127.0.0.1\abcdefghijklmnopqrst" is 32 & multiply that with 2 is the PathLength.
+5. So, we have to change PathLength in two scenarios i.e 
+		(a)Wherever Buffer is not defined in XML, there pathl ength will be same considering you have to calculate once "\\<IPAddress>\Sharename\" length .
+            Eg : Buffer is  "\\127.0.0.1\smb_share"  then its Pathlength = 2 * len(\\127.0.0.1\smb_share)
+			
+		(b)Wherever Buffer is defined in XML, there PathLength need to be calculated according to Buffer in every testcase.
+			Eg : Buffer is "\\127.0.0.1\abcdefghijklmnopqrst" then its PathLength = 2 * len(\\127.0.0.1\abcdefghijklmnopqrst)
+			  
+6. Testbed : Both testbed scripts should be run on Parent Directory i.e in OneFS "/ifs/smb_share/"  Folder.
+		a) Tree_Setup_TestBed_Windows.py :
+			-> This scripts create six test directories required for different tests and share them.
+			-> Limitations : 
+			a) Directory no 5 is getting created but not getting shared as it has more than 80 characters. So manually we have to share it.
+			b) Unicode Folder i.e Directory 4 is created but it is not getting shared permissions so manually we have to give share permissions.
+			c) Directory 6 :We need to create directory inside directory manually and share it . Parent Directory is getting created and shared but sub directory need to be created manually and shared. Format (test27abcdefghijklmnopqrst\abcdefghijklmnopqrst\abcdefghijklmnopqrst)
+
+		b) Tree_Setup_TestBed_OneFS.py
+			-> This scripts create five test directories required for different tests and share them. It takes two parameters alias and path.
+			Format : ShareFile(alias,pathname)
+			Eg : Suppose we want to share /ifs/smb_share/. So go in /ifs/ folder and run this script. It will create smb_share folder first and then create share name by alias but when you call this alias it will redirect you to /ifs/smb_share/.
+	  
+Execution: 
+    Add TreeConnectTC.xml entry to ../test/tc.config file and then execute runner.py as a suite with-
+        make test SERVER='<Server IP>' CREDS='<Server IP>\<UserID>%<Passwd>' TEST=runner.suite
+
+=============== Write ==============
+Test file names :
+    XMLs to execute with runner.py
+        WriteTC.xml
+
+Prerequisite:
+   1. Run the Write_Setup_TestBed_Client.py script from tools directory to create the testbed on client side
+   2. Copy WriteSetup_Testbed_Server.py script from tools directory to your server and run the script to create the testbed on server side
+
+Execution: 
+    Add WriteTC.xml entry to ../test/tc.config file and then execute runner.py as a suite with-
+        make test SERVER='<Server IP>' CREDS='<Server IP>\<UserID>%<Passwd>' TEST=runner.suite
+		
+	Write TC's 23, 25 and 28 fail on OneFS , while using Arbitrarily Large File.
+
+=============== Read ==============
+Test file names :
+    XMLs to execute with runner.py
+        ReadTC.xml
+
+Prerequisite:
+   1. Run the Read_Setup_TestBed_Client.py script from tools directory to create the testbed on client side
+   2. Copy Read_Setup_TestBed_Server.py script from tools directory to your server and run the script to create the testbed on server side
+
+Execution: 
+    Add ReadTC.xml entry to ../test/tc.config file and then execute runner.py as a suite with-
+        make test SERVER='<Server IP>' CREDS='<Server IP>\<UserID>%<Passwd>' TEST=runner.suite
+
+	
+=============== Lock, Oplock and Lease ==============				
+				
+Please find the following in this tar file -
+
+a. Working Source code, ready for code review - in the Pike directory.
+b. Execution logs and Wireshark traces for Lock, Lease and Oplock components. Below are the scripts and XML file names that are added newly since the previous drop.
+    ByteRangeLockTC.xml
+    lease_additional.py
+    Oplock.xml
+    byterange_test.py
+    lease_byte_range.py
+    lease_desired_access.py
+    lease_oplock_test.py
+    lease_test.py
+    multiple_lease_key_test.py
+    oplock_lease_test.py
+
+Here are the steps to build and run the source code.
+On Windows 2008 R2 Server:
+--------------------------  
+1. Use the following command line to configure Pike.
+     mkdir output ; cd output
+     ../configure PYTHON=/opt/python2.7/bin/python PYTHON_CONFIG=/opt/python2.7/bin/python-config
+     make -j8
+2. Ensure that Windows Server has python installed on it.
+3. Run Write Test bed before running these tests. 
+4. Create a shared directory with the name 'Lock' on server.
+5. Execution command:
+    make test SERVER='<Server-ip>' CREDS='<Server-ip>\username%password' TEST=<test_name> LOGLEVEL=debug TRACE=yes><logfilename>.log 2>&1
+   
+On OneFS Server:
+----------------  
+1. Create a share named 'smb_share' in /ifs directory.
+2. Create a shared directory with the name 'Lock' inside '/ifs/smb_share'. 
+3. Ensure that OneFS Server has Python installed on it.
+4. Run Write Test bed before running these tests. 
+5. Run this command:
+    PYTHONPATH="../test" PIKE_SERVER="<Server-ip>" PIKE_CREDS="<Server-ip>\username%password" unit2 -v <test_name> > <logfilename>.log 2>&1
+	
+Execution for XML and .py scripts.
+     1. All *.py test cases to be run independent of xml as:
+          make test SERVER='<Server IP>' CREDS='<Server IP>\<UserID>%<Passwd>' TEST=<test_name>.py
+     2. All XML test cases to be run with adding .xml file entry to ../test/tc.config and then executing runner.py as a suite with- 
+          make test SERVER='<Server IP>' CREDS='<Server IP>\<UserID>%<Passwd>' TEST=runner.suite			
+		
+						
