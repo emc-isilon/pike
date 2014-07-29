@@ -1586,6 +1586,9 @@ class QueryInfoResponse(Response):
     
     _file_info_map = {}
     file_information = core.Register(_file_info_map, "file_information_class")
+
+    _fs_info_map = {}
+    fs_information = core.Register(_fs_info_map, "file_information_class")
     
     def __init__(self, parent):
         Response.__init__(self, parent)
@@ -1616,9 +1619,17 @@ class QueryInfoResponse(Response):
         end = cur + output_buffer_length
         
         if self._file_information_class is not None:
-            cls = self._file_info_map[self._file_information_class]
-            with cur.bounded(cur, end):
-                cls(self).decode(cur)
+            if self._info_type == SMB2_0_INFO_FILE:
+                table = self._file_info_map
+            elif self._info_type == SMB2_0_INFO_FILESYSTEM:
+                table = self._fs_info_map
+            else:
+                table = None
+
+            if table is not None and self._file_information_class in table:
+                cls = self._file_info_map[self._file_information_class]
+                with cur.bounded(cur, end):
+                    cls(self).decode(cur)
         else:
             cur.advanceto(end)
         
@@ -1692,7 +1703,7 @@ class SetInfoResponse(Response):
 class FileInformation(core.Frame):
     pass
 
-@QueryInfoResponse.file_information
+@QueryInfoResponse.fs_information
 class FileSystemInformation(core.Frame):
     pass
 
