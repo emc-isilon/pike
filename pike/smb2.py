@@ -1627,7 +1627,7 @@ class QueryInfoResponse(Response):
                 table = None
 
             if table is not None and self._file_information_class in table:
-                cls = self._file_info_map[self._file_information_class]
+                cls = table[self._file_information_class]
                 with cur.bounded(cur, end):
                     cls(self).decode(cur)
         else:
