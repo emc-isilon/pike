@@ -1418,6 +1418,7 @@ class FileInformationClass(core.ValueEnum):
     FILE_EA_INFORMATION = 7
     FILE_ACCESS_INFORMATION = 8
     FILE_NAME_INFORMATION = 9
+    FILE_RENAME_INFORMATION = 10
     FILE_NAMES_INFORMATION = 12
     FILE_DISPOSITION_INFORMATION = 13
     FILE_POSITION_INFORMATION = 14
@@ -2053,7 +2054,30 @@ class FileNameInformation(FileInformation):
     def _decode(self, cur):
         file_name_length = cur.decode_uint32le()
         self.file_name = cur.decode_utf16le(file_name_length)
-                
+
+class FileRenameInformation(FileInformation):
+    file_information_class = FILE_RENAME_INFORMATION
+
+    def __init__(self, parent = None):
+        FileInformation.__init__(self, parent)
+        self.replace_if_exists = 0
+        self.root_directory = (0,0)
+        self.file_name = None
+
+        if parent is not None:
+            parent.append(self)
+
+    def _encode(self, cur):
+        cur.encode_uint8le(self.replace_if_exists)
+        cur.encode_uint8le(0)       # reserved
+        cur.encode_uint16le(0)      # reserved
+        cur.encode_uint32le(0)      # reserved
+        cur.encode_uint32le(self.root_directory[0])
+        cur.encode_uint32le(self.root_directory[1])
+        file_name_length_hole = cur.hole.encode_uint32le(0)
+        file_name_start = cur.copy()
+        cur.encode_utf16le(self.file_name)
+        file_name_length_hole(cur - file_name_start)
 
 class FileAllocationInformation(FileInformation):
     file_information_class = FILE_ALLOCATION_INFORMATION
