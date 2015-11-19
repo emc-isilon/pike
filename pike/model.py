@@ -410,7 +410,10 @@ class Connection(asyncore.dispatcher):
         self.error = None
         self.traceback = None
     
-        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+        for result in socket.getaddrinfo(server,None):
+            family, socktype, proto, canonname, sockaddr = result
+
+        self.create_socket(family, socket.SOCK_STREAM)
         self.connect((server,port))
         self.client._connections.append(self)
 
