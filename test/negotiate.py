@@ -61,6 +61,13 @@ class CapTest(test.PikeTest):
 
         return self.conn
 
+    def positive_cap(self, dialect, req_caps=0, exp_caps=None)
+        """Test that cap is advertised by the server if the client advertises it"""
+        if exp_caps is None:
+            exp_caps = req_caps
+        conn = self.negotiate(dialect, caps)
+        self.assertEqual(conn.negotiate_response.capabilities & exp_caps, exp_caps)
+
     def negative_cap(self, dialect, cap):
         """Test that cap is not advertised if we don't advertise it"""
         conn = self.negotiate(dialect, 0)
@@ -72,6 +79,21 @@ class CapTest(test.PikeTest):
         self.assertEqual(conn.negotiate_response.capabilities & cap, 0)
 
 class CapPersistent(CapTest):
+    # persistent cap is advertised if we ask for it
+    def test_smb3(self):
+        self.positive_cap(smb2.DIALECT_SMB3_0, smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES)
+
+    # persistent cap is advertised if we ask for lots of caps
+    def test_smb3_many_capabilities(self):
+        advertise_caps = \
+                smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL | \
+                smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES | \
+                smb2.SMB2_GLOBAL_CAP_DIRECTORY_LEASING | \
+                smb2.SMB2_GLOBAL_CAP_ENCRYPTION 
+        self.positive_cap(smb2.DIALECT_SMB3_0,
+                          advertise_caps,
+                          smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES)
+
     # persistent cap is not advertised if we don't advertise it
     def test_smb3_no_advert(self):
         self.negative_cap(smb2.DIALECT_SMB3_0, smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES)
@@ -85,6 +107,21 @@ class CapPersistent(CapTest):
         self.downlevel_cap(smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES)
 
 class CapMultichannel(CapTest):
+    # multichannel cap is advertised if we ask for it
+    def test_smb3(self):
+        self.positive_cap(smb2.DIALECT_SMB3_0, smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL)
+
+    # multichannel cap is advertised if we ask for lots of caps
+    def test_smb3_many_capabilities(self):
+        advertise_caps = \
+                smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL | \
+                smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES | \
+                smb2.SMB2_GLOBAL_CAP_DIRECTORY_LEASING | \
+                smb2.SMB2_GLOBAL_CAP_ENCRYPTION 
+        self.positive_cap(smb2.DIALECT_SMB3_0,
+                          advertise_caps,
+                          smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL)
+
     # multichannel cap is not advertised if we don't advertise it
     def test_smb3_no_advert(self):
         self.negative_cap(smb2.DIALECT_SMB3_0, smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL)
@@ -98,6 +135,25 @@ class CapMultichannel(CapTest):
         self.downlevel_cap(smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL)
 
 class CapMulticredit(CapTest):
+    # largemtu cap is advertised if we ask for it
+    def test_smb3(self):
+        self.positive_cap(smb2.DIALECT_SMB3_0, smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
+
+    # largemtu cap is advertised if we ask for lots of caps
+    def test_smb3_many_capabilities(self):
+        advertise_caps = \
+                smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL | \
+                smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES | \
+                smb2.SMB2_GLOBAL_CAP_LARGE_MTU | \
+                smb2.SMB2_GLOBAL_CAP_ENCRYPTION 
+        self.positive_cap(smb2.DIALECT_SMB3_0,
+                          advertise_caps,
+                          smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
+
+    # largemtu cap is advertised if we ask for it
+    def test_smb21(self):
+        self.positive_cap(smb2.DIALECT_SMB2_1, smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
+
     # multicredit cap is not advertised to downlevel client
     def test_downlevel(self):
         self.downlevel_cap(smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
