@@ -409,9 +409,11 @@ class Connection(asyncore.dispatcher):
 
         self.error = None
         self.traceback = None
+
+        gai_results = socket.getaddrinfo(server, port, 0, socket.SOCK_STREAM)
     
-        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connect((server,port))
+        self.create_socket(gai_results[0][0], gai_results[0][1])
+        self.connect(gai_results[0][4])
         self.client._connections.append(self)
 
     def next_mid(self):
