@@ -61,11 +61,11 @@ class CapTest(test.PikeTest):
 
         return self.conn
 
-    def positive_cap(self, dialect, req_caps=0, exp_caps=None)
+    def positive_cap(self, dialect, req_caps=0, exp_caps=None):
         """Test that cap is advertised by the server if the client advertises it"""
         if exp_caps is None:
             exp_caps = req_caps
-        conn = self.negotiate(dialect, caps)
+        conn = self.negotiate(dialect, req_caps)
         self.assertEqual(conn.negotiate_response.capabilities & exp_caps, exp_caps)
 
     def negative_cap(self, dialect, cap):
