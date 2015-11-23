@@ -46,6 +46,7 @@ share_all = pike.smb2.FILE_SHARE_READ | \
 access_rwd = pike.smb2.GENERIC_READ | \
              pike.smb2.GENERIC_WRITE | \
              pike.smb2.DELETE
+null_fid = array.array('B', [0]*32)
 
 class TestQueryOnDiskID(pike.test.PikeTest):
     test_files = [ "qfid_file.bin", "qfid_same_file.bin",
@@ -87,7 +88,7 @@ class TestQueryOnDiskID(pike.test.PikeTest):
         fh = open_future.result()
         fid = self.extract_file_id(open_future.request_future.result())
         self.assertNotEqual(fid,
-                            array.array('B', [0]*32),
+                            null_fid,
                             "On disk file_id was null")
 
     def test_qfid_same_file(self):
@@ -115,7 +116,7 @@ class TestQueryOnDiskID(pike.test.PikeTest):
         fh2 = open_future2.result()
         fid2 = self.extract_file_id(open_future2.request_future.result())
         self.assertNotEqual(fid1,
-                            array.array('B', [0]*32),
+                            null_fid,
                             "On disk file_id was null")
         self.assertEqual(fid1, fid2,
                          "On disk file_id for same file didn't match")
@@ -145,7 +146,7 @@ class TestQueryOnDiskID(pike.test.PikeTest):
         fh2 = open_future2.result()
         fid2 = self.extract_file_id(open_future2.request_future.result())
         self.assertNotEqual(fid1,
-                            array.array('B', [0]*32),
+                            null_fid,
                             "On disk file_id was null")
         self.assertNotEqual(fid1, fid2,
                             "On disk file_id for different files was the same")
@@ -165,7 +166,7 @@ class TestQueryOnDiskID(pike.test.PikeTest):
         fh = open_future.result()
         fid = self.extract_file_id(open_future.request_future.result())
         self.assertNotEqual(fid,
-                            array.array('B', [0]*32),
+                            null_fid,
                             "On disk file_id was null")
         first_fid = fid
         chan.close(fh)
@@ -179,7 +180,7 @@ class TestQueryOnDiskID(pike.test.PikeTest):
         fh = open_future.result()
         fid = self.extract_file_id(open_future.request_future.result())
         self.assertNotEqual(fid,
-                            array.array('B', [0]*32),
+                            null_fid,
                             "On disk file_id was null")
         self.assertEqual(fid, first_fid,
                          "Subsequent open returns different file id")
@@ -200,7 +201,7 @@ class TestQueryOnDiskID(pike.test.PikeTest):
         fh = open_future.result()
         fid = self.extract_file_id(open_future.request_future.result())
         self.assertNotEqual(fid,
-                            array.array('B', [0]*32),
+                            null_fid,
                             "On disk file_id was null")
         first_fid = fid
         chan.close(fh)
@@ -214,7 +215,7 @@ class TestQueryOnDiskID(pike.test.PikeTest):
         fh = open_future.result()
         fid = self.extract_file_id(open_future.request_future.result())
         self.assertNotEqual(fid,
-                            array.array('B', [0]*32),
+                            null_fid,
                             "On disk file_id was null")
         self.assertNotEqual(fid, first_fid,
                             "Subsequent open after delete returns same file id")
