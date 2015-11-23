@@ -51,12 +51,6 @@ class TestQueryOnDiskID(pike.test.PikeTest):
     test_files = [ "qfid_file.bin", "qfid_same_file.bin",
                    "qfid_diff_file1.bin", "qfid_diff_file2.bin" ]
 
-    def setUp(self):
-        """
-        make sure that the test files being used do not exist
-        """
-        chan, tree = self.tree_connect()
-
     def extract_file_id(self, response):
         """
         Pull out the Query On Disk ID file_id field and return it
