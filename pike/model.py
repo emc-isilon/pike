@@ -899,7 +899,8 @@ class Channel(object):
                durable=False,
                persistent=False,
                create_guid=None,
-               app_instance_id=None):
+               app_instance_id=None,
+               query_on_disk_id=False):
 
         prev_open = None
 
@@ -948,6 +949,9 @@ class Channel(object):
         if app_instance_id:
             app_instance_id_req = smb2.AppInstanceIdRequest(create_req)
             app_instance_id_req.app_instance_id = app_instance_id
+
+        if query_on_disk_id:
+            query_on_disk_id_req = smb2.QueryOnDiskIDRequest(create_req)
 
         open_future = Future(None)
 
