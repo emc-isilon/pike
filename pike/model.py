@@ -606,7 +606,8 @@ class Connection(asyncore.dispatcher):
                 future = self._future_map[smb_res.message_id]
                 if smb_res.status == ntstatus.STATUS_PENDING:
                     future.interim(smb_res)
-                elif isinstance(smb_res[0], smb2.ErrorResponse):
+                elif isinstance(smb_res[0], smb2.ErrorResponse) or \
+                     smb_res.status not in smb_res[0].allowed_status:
                     future.complete(ResponseError(smb_res))
                     del self._future_map[smb_res.message_id]
                 else:

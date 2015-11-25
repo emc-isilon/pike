@@ -249,7 +249,8 @@ class Smb2(core.Frame):
                     raise core.BadPacket()
             elif key in Smb2._response_table:
                 cls = Smb2._response_table[key]
-                if self.status not in cls.allowed_status:
+                if self.status not in cls.allowed_status and \
+                   structure_size == ErrorResponse.structure_size:
                     cls = ErrorResponse
             else:
                 cls = ErrorResponse
