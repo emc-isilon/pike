@@ -329,3 +329,121 @@ class TestServerSideCopy(pike.test.PikeTest):
         num_of_chunks = 15
         overlap = 4096
         self.generic_ssc_overlap_test_case(block, num_of_chunks, overlap)
+
+    def generic_ssc_negative_test_case(self, src_access=None, dst_access=None,
+                                             src_disp=None, dst_disp=None,
+                                             src_options=None, dst_options=None,
+                                             src_brl=None, dst_brl=None,
+                                       exp_error=None):
+        block = "Hello"
+        total_len = len(block)
+        src_filename = "src_negative.txt"
+        dst_filename = "dst_negative.txt"
+        self._create_and_write(src_filename, block)
+
+        fh_src, fh_dst = self._open_src_dst(src_filename, dst_filename,
+                                            src_access=src_access,
+                                            src_disp=src_disp,
+                                            src_options=src_options,
+                                            dst_access=dst_access,
+                                            dst_disp=dst_disp,
+                                            dst_options=dst_options)
+        close_handles = []
+        if src_brl or dst_brl:
+            chan2, tree2 = self.tree_connect()
+            if src_brl:
+                fh_src_other = chan2.create(tree2,
+                                            src_filename,
+                                            access=access_rwd,
+                                            share=share_all).result()
+                chan2.lock(fh_src_other,
+                           [( 0, 2, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK )]).result()
+                close_handles.append((chan2, fh_src_other))
+            if dst_brl:
+                fh_dst_other = chan2.create(tree2,
+                                            dst_filename,
+                                            access=access_rwd,
+                                            share=share_all).result()
+                chan2.lock(fh_dst_other,
+                           [( 3, 2, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK )]).result()
+                close_handles.append((chan2, fh_dst_other))
+        if exp_error is None:
+            exp_error = pike.ntstatus.STATUS_SUCCESS
+        try:
+            with self.assert_error(exp_error):
+                result = self.chan.copychunk(fh_src, fh_dst, [(0,0,5)])
+        finally:
+            for chan, fh in close_handles:
+                chan.close(fh)
+            self.chan.close(fh_src)
+            self.chan.close(fh_dst)
+
+    def test_neg_src_exc_brl(self):
+        """
+        Initiate copychunk when another handle has an exclusive BRL on the
+        source file
+        """
+        self.generic_ssc_negative_test_case(src_brl=True,
+                                            exp_error=pike.ntstatus.STATUS_FILE_LOCK_CONFLICT)
+
+    def test_neg_dst_exc_brl(self):
+        """
+        Initiate copychunk when another handle has an exclusive BRL on the
+        destination file
+        """
+        self.generic_ssc_negative_test_case(dst_brl=True,
+                                            exp_error=pike.ntstatus.STATUS_FILE_LOCK_CONFLICT)
+
+    def test_neg_src_no_read(self):
+        """
+        Try to copychunk with no read access on the source file
+        """
+        self.generic_ssc_negative_test_case(src_access=pike.smb2.FILE_WRITE_DATA | \
+                                                       pike.smb2.DELETE,
+                                            exp_error=pike.ntstatus.STATUS_ACCESS_DENIED)
+        
+    def test_neg_dst_no_read(self):
+        """
+        Try to copychunk with no read access on the destination file
+        """
+        self.generic_ssc_negative_test_case(dst_access=pike.smb2.FILE_WRITE_DATA | \
+                                                       pike.smb2.DELETE,
+                                            exp_error=pike.ntstatus.STATUS_ACCESS_DENIED)
+
+    def test_neg_dst_no_write(self):
+        """
+        Try to copychunk with no write access on the destination file
+        """
+        self.generic_ssc_negative_test_case(dst_access=pike.smb2.FILE_READ_DATA | \
+                                                       pike.smb2.DELETE,
+                                            exp_error=pike.ntstatus.STATUS_ACCESS_DENIED)
+
+    def test_neg_dst_is_a_dir(self):
+        """
+        Try to copychunk with destination file being a directory
+        """
+        self.generic_ssc_negative_test_case(dst_options=pike.smb2.FILE_DIRECTORY_FILE | \
+                                                        pike.smb2.FILE_DELETE_ON_CLOSE,
+                                            dst_disp=pike.smb2.FILE_OPEN_IF,
+                                            exp_error=pike.ntstatus.STATUS_INVALID_DEVICE_REQUEST)
+
+    def _test_dst_no_read_copychunk_write(self):
+        """
+        Initiate copychunk_write with no read access on the destination file
+        """
+        pass
+    def _test_neg_named_pipe(self):
+        """
+        Try to copychunk against a named pipe.
+        """
+        pass
+    def _test_neg_different_session(self):
+        """
+        Try to copy chunk across sessions
+        """
+        pass
+    def _test_neg_different_tree(self):
+        """
+        Try to copy chunk across shares
+        """
+        pass
