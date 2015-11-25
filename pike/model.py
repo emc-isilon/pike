@@ -1123,6 +1123,7 @@ class Channel(object):
         resumekey_req = smb2.RequestResumeKeyRequest(ioctl_req)
 
         ioctl_req.file_id = file.file_id
+        ioctl_req.flags |= smb2.SMB2_0_IOCTL_IS_FSCTL
 
         return self.connection.transceive(smb_req.parent)[0]
 
@@ -1140,6 +1141,7 @@ class Channel(object):
 
         ioctl_req.max_output_response = 16384
         ioctl_req.file_id = target_file.file_id
+        ioctl_req.flags |= smb2.SMB2_0_IOCTL_IS_FSCTL
         copychunk_req.source_key = resume_key
         copychunk_req.chunk_count = len(chunks)
 
