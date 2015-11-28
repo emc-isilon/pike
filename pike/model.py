@@ -1116,6 +1116,33 @@ class Channel(object):
 
         return res
 
+    def set_symlink(self, file, target_name, flags):
+        smb_req = self.request(obj=file.tree)
+        ioctl_req = smb2.IoctlRequest(smb_req)
+        set_reparse_req = smb2.SetReparsePointRequest(ioctl_req)
+        symlink_buffer = smb2.SymbolicLinkReparseBuffer(set_reparse_req)
+
+        ioctl_req.max_output_response = 0
+        ioctl_req.file_id = file.file_id
+        ioctl_req.flags |= smb2.SMB2_0_IOCTL_IS_FSCTL
+        symlink_buffer.substitute_name = target_name
+        symlink_buffer.flags = flags
+
+        res = self.connection.transceive(smb_req.parent)[0]
+
+        return res
+
+    def get_symlink(self, file):
+        smb_req = self.request(obj=file.tree)
+        ioctl_req = smb2.IoctlRequest(smb_req)
+        set_reparse_req = smb2.GetReparsePointRequest(ioctl_req)
+
+        ioctl_req.file_id = file.file_id
+        ioctl_req.flags |= smb2.SMB2_0_IOCTL_IS_FSCTL
+        res = self.connection.transceive(smb_req.parent)[0]
+
+        return res
+
     def frame(self):
         return self.connection.frame()
 
