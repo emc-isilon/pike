@@ -828,12 +828,13 @@ class Connection(asyncore.dispatcher):
                 smb_res.verify(self.signing_digest(), self._binding_key)
 
             return session_res.security_buffer, smb_res
+
         auth = ntlm.NtlmProvider(domain, user, password)
 
-        result = send_session_setup(auth.negotiate())
-        challenge = auth.parse_challenge(result[0])
-        result = send_session_setup(auth.authenticate(challenge), result[1])
-        session_key = auth.session_base_key
+        sec_buf, smb_res = send_session_setup(auth.negotiate())
+        auth.challenge(sec_buf)
+        sec_buf, smb_res = send_session_setup(auth.authenticate(), smb_res)
+        session_key = auth.exported_session_key.tostring()
 
         if self.negotiate_response.dialect_revision >= 0x300:
             signing_key = digest.derive_key(session_key, 'SMB2AESCMAC', 'SmbSign')[:16]
