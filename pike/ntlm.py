@@ -38,7 +38,7 @@ import array
 import random
 import hmac
 from socket import gethostname
-import Crypto.Cipher.DES as DES
+import Crypto.Cipher.DES
 import Crypto.Cipher.ARC4 as RC4
 import Crypto.Hash.HMAC as HMAC
 import Crypto.Hash.MD4 as MD4
@@ -58,11 +58,12 @@ def des_key_64(K):
         out_key.append(chr( ((ord(in_key[ix-1]) << (8-ix)) & 0xFF) | (ord(in_key[ix]) >> ix)) )
     return "".join(out_key)
 
+def DES(K, D):
+    d1 = Crypto.Cipher.DES.new(des_key_64(K))
+    return d1.encrypt(D)
+
 def DESL(K, D):
-    d1 = DES.new(des_key_64(K[:7]))
-    d2 = DES.new(des_key_64(K[7:14]))
-    d3 = DES.new(des_key_64(K[14:16] + "\0"*5))
-    return d1.encrypt(D) + d2.encrypt(D) + d3.encrypt(D)
+    return DES(K[:7], D) + DES(K[7:14], D) + DES(K[14:16] + "\0"*5, D)
 
 def nonce(length):
     return array.array("B", [random.getrandbits(8) for x in xrange(length) ])
@@ -436,6 +437,54 @@ class NtlmVersion(core.ValueEnum):
 
 NtlmVersion.import_items(globals())
 
+########################
+## NTLMv1 Implementation
+########################
+
+def LMOWFv1(password):
+    lm_passwd = (password.upper() + "\0"*14)
+    magic = "KGS!@#$%"
+    return DES(lm_passwd[:7], magic) + \
+           DES(lm_passwd[7:14], magic)
+
+def NTOWFv1(password):
+    nt_passwd = password.encode("utf-16-le")
+    return MD4.new(nt_passwd).digest()
+
+def ComputeResponsev1(NegFlg, ResponseKeyNT, ResponseKeyLM, ServerChallenge,
+                      ClientChallenge, Time=None, ServerName=None):
+    if NegFlg & NTLMSSP_NEGOTIATE_EXTENDED_SESSIONSECURITY:
+        NtChallengeResponse = DESL(ResponseKeyNT,
+                                   MD5.new(ServerChallenge + \
+                                           ClientChallenge).digest()[:8])
+        LmChallengeResponse = ClientChallenge + "\0"*16
+    else:
+        NtChallengeResponse = DESL(ResponseKeyNT, ServerChallenge)
+        LmChallengeResponse = DESL(ResponseKeyLM, ServerChallenge)
+    SessionBaseKey = MD4.new(ResponseKeyNT).digest()
+    return NtChallengeResponse, LmChallengeResponse, SessionBaseKey
+
+def KXKEY(NegFlg, SessionBaseKey, LmChallengeResponse,
+          ServerChallenge, ResponseKeyLM):
+    if NegFlg & NTLMSSP_NEGOTIATE_EXTENDED_SESSIONSECURITY:
+        hm = HMAC.new(SessionBaseKey,
+                      ServerChallenge +\
+                      LmChallengeResponse[:8],
+                      MD5)
+        KeyExchangeKey = hm.digest()
+    else:
+        LMOWF = ResponseKeyLM
+        if NegFlg & NTLMSSP_NEGOTIATE_LMKEY:
+            data = LmChallengeResponse[:8]
+            KeyExchangeKey = DES(LMOWF[:7], data) + \
+                             DES(LMOWF[8] + "\xbd"*6, data)
+        else:
+            if NegFlg & NTLMSSP_REQUEST_NON_NT_SESSION_KEY:
+                KeyExchangeKey = LMOWF[:8] + "\0"*8
+            else:
+                KeyExchangeKey = SessionBaseKey
+    return KeyExchangeKey
+
 class NtlmProvider(object):
     """
     State machine for conducting ntlm authentication
@@ -480,71 +529,29 @@ class NtlmProvider(object):
         self.challenge_message = None
         self.authenticate_message = None
 
-    def lm_hash_v1(self):
-        lm_passwd = (self.password.upper() + "\0"*14)
-        magic = "KGS!@#$%"
-        d1 = DES.new(des_key_64(lm_passwd[:7]))
-        d2 = DES.new(des_key_64(lm_passwd[7:14]))
-        self.lmowf = d1.encrypt(magic) + d2.encrypt(magic)
-        return self.lmowf
+    def ntlmv1(self):
+        self.lm_hash = LMOWFv1(self.password)
+        self.nt_hash = NTOWFv1(self.password)
+        (self.nt_challenge_response,
+         self.lm_challenge_response,
+         self.session_base_key) = ComputeResponsev1(self.auth_flags,
+                                                    self.nt_hash,
+                                                    self.lm_hash,
+                                                    self.server_challenge.tostring(),
+                                                    self.client_challenge.tostring())
+        self.key_exchange_key = KXKEY(self.auth_flags, 
+                                      self.session_base_key,
+                                      self.lm_challenge_response,
+                                      self.server_challenge.tostring(),
+                                      self.lm_hash)
 
-    def nt_hash_v1(self):
-        nt_passwd = self.password.encode("utf-16-le")
-        self.ntowf = MD4.new(nt_passwd).digest()
-        return self.ntowf
-
-    def compute_response(self, server_challenge):
-        if self.ntlm_version == NTLMv1:
-            return self.compute_response_v1(server_challenge)
-        elif self.ntlm_version == NTLMv2:
-            raise NotImplementedError("NTLMv2 not supported at this time")
+    def session_key(self):
+        if self.auth_flags & NTLMSSP_NEGOTIATE_KEY_EXCH:
+            r = RC4.new(self.key_exchange_key)
+            self.exported_session_key = nonce(16)
+            return r.encrypt(self.exported_session_key)
         else:
-            raise ValueError("Unknown NTLM version requested")
-
-    def kxkey(self):
-        if self.ntlm_version == NTLMv1:
-            return self.kxkey_v1()
-        elif self.ntlm_version == NTLMv2:
-            raise NotImplementedError("NTLMv2 not supported at this time")
-        else:
-            raise ValueError("Unknown NTLM version requested")
-
-    def kxkey_v1(self):
-        if self.auth_flags & NTLMSSP_NEGOTIATE_EXTENDED_SESSIONSECURITY:
-            hm = HMAC.new(self.session_base_key,
-                          self.server_challenge.tostring() +\
-                          self.lm_challenge_response[:8],
-                          MD5)
-            self.key_exchange_key = hm.digest()
-        else:
-            if self.auth_flags & NTLMSSP_NEGOTIATE_LMKEY:
-                d1 = DES.new(des_key_64(self.lmowf[:7]))
-                d2 = DES.new(des_key_64(self.lmowf[8] + "\xbd" * 6))
-                data = self.lm_challenge_response[:8]
-                self.key_exchange_key = d1.encrypt(data) +\
-                                        d2.encrypt(data)
-            else:
-                if self.auth_flags & NTLMSSP_REQUEST_NON_NT_SESSION_KEY:
-                    self.key_exchange_key = self.lmowf[:8] + "\0"*8
-                else:
-                    self.key_exchange_key = self.session_base_key
-        return self.key_exchange_key
-
-    def compute_response_v1(self, server_challenge):
-        response_key_nt = self.nt_hash_v1()
-        response_key_lm = self.lm_hash_v1()
-        if self.auth_flags & NTLMSSP_NEGOTIATE_EXTENDED_SESSIONSECURITY:
-            nt_challenge_response = DESL(response_key_nt,
-                                         MD5.new(server_challenge.tostring() + \
-                                                 self.client_challenge.tostring()).digest()[:8])
-            lm_challenge_response = self.client_challenge.tostring() + "\0"*16
-        else:
-            nt_challenge_response = DESL(response_key_nt, server_challenge.tostring())
-            lm_challenge_response = DESL(response_key_lm, server_challenge.tostring())
-        self.session_base_key = MD4.new(response_key_nt).digest()
-        self.nt_challenge_response = nt_challenge_response
-        self.lm_challenge_response = lm_challenge_response
-        return nt_challenge_response, lm_challenge_response
+            self.exported_session_key = self.key_exchange_key
 
     def negotiate(self):
         ntlm = Ntlm()
@@ -554,39 +561,41 @@ class NtlmProvider(object):
         neg.version = self.version
         buffer = array.array('B')
         ntlm.encode(core.Cursor(buffer, 0))
-        self.neg_message = ntlm
+        self.negotiate_message = ntlm
         self.messages.append(buffer.tostring())
         return buffer
 
-    def challenge(self, sec_buf):
-        self.messages.append(sec_buf.tostring())
-        ntlm = Ntlm()
-        ntlm.decode(core.Cursor(sec_buf, 0))
-        self.server_challenge = ntlm.message.server_challenge
-        self.challenge_message = ntlm
-        return ntlm
+    def authenticate(self, challenge_buf):
+        # parse the challenge message
+        self.messages.append(challenge_buf.tostring())
+        ntlm_challenge = Ntlm()
+        ntlm_challenge.decode(core.Cursor(challenge_buf, 0))
+        self.server_challenge = ntlm_challenge.message.server_challenge
+        self.challenge_message = ntlm_challenge
 
-    def authenticate(self):
-        if self.challenge_message is None:
-            raise model.StateError("Challenge not received")
+        # build the auth message
         ntlm = Ntlm()
         auth = NtLmAuthenticateMessage(ntlm)
         auth.negotiate_flags = self.auth_flags
         auth.version = self.version
         auth.domain_name = self.domain
         auth.user_name = self.username
-        nt_resp, lm_resp = self.compute_response(self.server_challenge)
-        auth.nt_challenge_response = nt_resp
-        auth.lm_challenge_response = lm_resp
-        key_exchange_key = self.kxkey()
-        if self.auth_flags & NTLMSSP_NEGOTIATE_KEY_EXCH:
-            r = RC4.new(key_exchange_key)
-            self.exported_session_key = nonce(16)
-            auth.encrypted_random_session_key = r.encrypt(self.exported_session_key)
-        else:
-            self.exported_session_key = key_exchange_key
+
+        # perform the NTLM
+        if self.ntlm_version == NTLMv1:
+            self.ntlmv1()
+
+        # fill in the challenge responses
+        auth.nt_challenge_response = self.nt_challenge_response
+        auth.lm_challenge_response = self.lm_challenge_response
+
+        # generate the session key if requested
+        session_key = self.session_key()
+        if session_key is not None:
+            auth.encrypted_random_session_key = session_key
+
         buffer = array.array('B')
         ntlm.encode(core.Cursor(buffer, 0))
-        self.auth_message = ntlm
+        self.authenticate_message = ntlm
         self.messages.append(buffer)
         return buffer

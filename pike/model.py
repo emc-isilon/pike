@@ -823,17 +823,15 @@ class Connection(asyncore.dispatcher):
             smb_res = self.transceive(smb_req.parent)[0]
             session_res = smb_res[0]
 
-            if bind and result == 0:
+            if bind and smb_res.status != ntstatus.STATUS_SUCCESS:
                 # Need to verify intermediate signatures
                 smb_res.verify(self.signing_digest(), self._binding_key)
 
             return session_res.security_buffer, smb_res
 
         auth = ntlm.NtlmProvider(domain, user, password)
-
         sec_buf, smb_res = send_session_setup(auth.negotiate())
-        auth.challenge(sec_buf)
-        sec_buf, smb_res = send_session_setup(auth.authenticate(), smb_res)
+        sec_buf, smb_res = send_session_setup(auth.authenticate(sec_buf), smb_res)
         session_key = auth.exported_session_key.tostring()
 
         if self.negotiate_response.dialect_revision >= 0x300:
