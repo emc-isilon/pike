@@ -45,6 +45,7 @@ import Crypto.Hash.MD4 as MD4
 import Crypto.Hash.MD5 as MD5
 import core
 import model
+import nttime
 
 def des_key_64(K):
     """
@@ -67,6 +68,12 @@ def DESL(K, D):
 
 def nonce(length):
     return array.array("B", [random.getrandbits(8) for x in xrange(length) ])
+
+def encode_frame(frame):
+    buffer = array.array('B')
+    frame.encode(core.Cursor(buffer, 0))
+    return buffer
+
 
 NTLM_SIGNATURE = "NTLMSSP\x00"
 
@@ -253,6 +260,18 @@ class AvPair(core.Frame):
             parent.target_info.append(self)
         self.av_id = None
         self.value = None
+
+    def _encode(self, cur):
+        cur.encode_uint16le(self.av_id)
+        av_len_hole = cur.hole.encode_uint16le(0)
+        av_start = cur.copy()
+        if self.value is not None:
+            if self.av_id in self.text_fields:
+                cur.encode_utf16le(self.value)
+            else:
+                cur.encode_bytes(self.value)
+        av_len_hole(cur - av_start)
+
     def _decode(self, cur):
         self.av_id = AvId(cur.decode_uint16le())
         av_len = cur.decode_uint16le()
@@ -261,6 +280,11 @@ class AvPair(core.Frame):
                 self.value = cur.decode_utf16le(av_len)
             else:
                 self.value = cur.decode_bytes(av_len)
+
+def extract_pair(av_pairs, av_id):
+    for p in av_pairs:
+        if p.av_id == av_id:
+            return p
 
 class NtLmChallengeMessage(core.Frame):
     message_type = NtLmChallenge
@@ -485,6 +509,92 @@ def KXKEY(NegFlg, SessionBaseKey, LmChallengeResponse,
                 KeyExchangeKey = SessionBaseKey
     return KeyExchangeKey
 
+########################
+## NTLMv2 Implementation
+########################
+
+class NTLMv2Response(core.Frame):
+    def __init__(self, parent=None):
+        core.Frame.__init__(self, parent)
+        self.response = None
+        self.challenge = None
+    def _encode(self, cur):
+        cur.encode_bytes(self.response)
+        self.challenge.encode(cur)
+
+class NTLMv2ClientChallenge(core.Frame):
+    def __init__(self, parent=None):
+        core.Frame.__init__(self, parent)
+        if parent is not None:
+            parent.challenge = self
+        self.time_stamp = array.array("B", "\0"*8)
+        self.challenge_from_client = array.array("B", "\0"*8)
+        self.av_pairs = []
+    def _encode(self, cur):
+        cur.encode_uint8le(1)       # RespType
+        cur.encode_uint8le(1)       # HiRespType
+        cur.encode_uint16le(0)      # Reserved
+        cur.encode_uint32le(0)      # Reserved
+        cur.encode_uint64le(self.time_stamp)
+        cur.encode_bytes(self.challenge_from_client)
+        cur.encode_uint32le(0)      # Reserved
+        for p in self.av_pairs:
+            p.encode(cur)
+
+def NTOWFv2(password, user, userdom):
+    nt_passwd = password.encode("utf-16-le")
+    return HMAC.new(MD4.new(nt_passwd).digest(),
+                    (user + userdom).upper(),
+                    MD5).digest()
+
+def ComputeResponsev2(NegFlg, ResponseKeyNT, ResponseKeyLM, ServerChallenge,
+                      ClientChallenge, Time=None, ServerName=None, av_pairs=None):
+    if Time is None:
+        Time = nttime.NtTime(nttime.datetime.now())
+    if ServerName is None:
+        ServerName = "SERVER"
+    ServerName = ServerName.encode("utf-16-le")
+
+    TimeBuf = array.array("B")
+    cur = core.Cursor(TimeBuf,0)
+    cur.encode_uint64le(Time)
+
+    Responseversion = "\x01"
+    HiResponseversion = "\x01"
+
+    ntlmv2_client_challenge = NTLMv2ClientChallenge()
+    ntlmv2_client_challenge.time_stamp = Time
+    ntlmv2_client_challenge.challenge_from_client = ClientChallenge
+    if av_pairs is not None:
+        ntlmv2_client_challenge.av_pairs = av_pairs
+    client_challenge = encode_frame(ntlmv2_client_challenge).tostring()
+    temp = Responseversion + HiResponseversion + "\0"*6 + \
+           TimeBuf.tostring() + ClientChallenge + "\0"*4 + \
+           ServerName + "\0"*4
+    NTProofStr = HMAC.new(ResponseKeyNT,
+                          ServerChallenge + temp,
+                          MD5).digest()
+    NtChallengeResponse = NTProofStr + client_challenge
+    LmChallengeResponse = HMAC.new(ResponseKeyLM,
+                                   ServerChallenge + ClientChallenge,
+                                   MD5).digest() +\
+                          ClientChallenge
+    SessionBaseKey = HMAC.new(ResponseKeyNT, NTProofStr, MD5).digest()
+    return NtChallengeResponse, LmChallengeResponse, SessionBaseKey
+# Else
+#     Set temp to ConcatenationOf(Responserversion, HiResponserversion,
+#     Z(6), Time, ClientChallenge, Z(4), ServerName, Z(4))
+#     Set NTProofStr to HMAC_MD5(ResponseKeyNT, 
+#     ConcatenationOf(CHALLENGE_MESSAGE.ServerChallenge,temp))
+#     Set NtChallengeResponse to ConcatenationOf(NTProofStr, temp)
+#     Set LmChallengeResponse to ConcatenationOf(HMAC_MD5(ResponseKeyLM, 
+#     ConcatenationOf(CHALLENGE_MESSAGE.ServerChallenge, ClientChallenge)),
+#     ClientChallenge )
+# EndIf
+#  
+# Set SessionBaseKey to HMAC_MD5(ResponseKeyNT, NTProofStr)
+# EndDefine
+
 class NtlmProvider(object):
     """
     State machine for conducting ntlm authentication
@@ -520,7 +630,7 @@ class NtlmProvider(object):
         self.password = password
         self.version = Version()
         self.version.product_build = 9999
-        self.ntlm_version = NTLMv1
+        self.ntlm_version = NTLMv2
 
         self.client_challenge = nonce(8)
         self.session_base_key = nonce(16)
@@ -539,11 +649,47 @@ class NtlmProvider(object):
                                                     self.lm_hash,
                                                     self.server_challenge.tostring(),
                                                     self.client_challenge.tostring())
-        self.key_exchange_key = KXKEY(self.auth_flags, 
+        self.key_exchange_key = KXKEY(self.auth_flags,
                                       self.session_base_key,
                                       self.lm_challenge_response,
                                       self.server_challenge.tostring(),
                                       self.lm_hash)
+
+    def ntlmv2(self):
+        ctarget_info = self.challenge_message.message.target_info
+        server_time = extract_pair(ctarget_info, MsvAvTimestamp)
+        if server_time is not None:
+            time = struct.unpack("<Q", server_time.value)
+        else:
+            time = nttime.NtTime(nttime.datetime.now())
+        server_name = extract_pair(ctarget_info,
+                                   MsvAvNbComputerName)
+        if server_name is not None:
+            server_name = server_name.value
+
+        self.nt_hash = NTOWFv2(self.password, self.username, self.domain)
+        (self.nt_challenge_response,
+         self.lm_challenge_response,
+         self.session_base_key) = ComputeResponsev2(self.auth_flags,
+                                                    self.nt_hash,
+                                                    self.nt_hash,
+                                                    self.server_challenge.tostring(),
+                                                    self.client_challenge.tostring(),
+                                                    time,
+                                                    server_name,
+                                                    ctarget_info)
+        self.key_exchange_key = self.session_base_key
+
+#        # build the special NTLMv2 Response
+#        ntlmv2_resp = NTLMv2Response()
+#        ntlmv2_resp.response = nt_challenge_response
+#        ntlmv2_client_challenge = NTLMv2ClientChallenge(ntlmv2_resp)
+#        ntlmv2_client_challenge.time_stamp = time
+#        ntlmv2_client_challenge.challenge_from_client = self.client_challenge
+#        ntlmv2_client_challenge.av_pairs = self.challenge_message.message.target_info[:]
+#        self.nt_challenge_response = encode_frame(ntlmv2_resp)
+        if extract_pair(ctarget_info, MsvAvTimestamp) is not None:
+            self.lm_challenge_response = "\0"*24
 
     def session_key(self):
         if self.auth_flags & NTLMSSP_NEGOTIATE_KEY_EXCH:
@@ -584,6 +730,10 @@ class NtlmProvider(object):
         # perform the NTLM
         if self.ntlm_version == NTLMv1:
             self.ntlmv1()
+        elif self.ntlm_version == NTLMv2:
+            self.ntlmv2()
+        else:
+            raise NotImplementedError("Unknown NTLM version {0}".format(self.ntlm_version))
 
         # fill in the challenge responses
         auth.nt_challenge_response = self.nt_challenge_response
