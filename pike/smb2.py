@@ -90,6 +90,7 @@ class CommandId(core.ValueEnum):
     SMB2_CANCEL          = 0x000c
     SMB2_ECHO            = 0x000d
     SMB2_QUERY_DIRECTORY = 0x000e
+    SMB2_CHANGE_NOTIFY   = 0x000f
     SMB2_QUERY_INFO      = 0x0010
     SMB2_SET_INFO        = 0x0011
     SMB2_OPLOCK_BREAK    = 0x0012
@@ -1418,6 +1419,7 @@ class FileInformationClass(core.ValueEnum):
     FILE_EA_INFORMATION = 7
     FILE_ACCESS_INFORMATION = 8
     FILE_NAME_INFORMATION = 9
+    FILE_RENAME_INFORMATION = 10
     FILE_NAMES_INFORMATION = 12
     FILE_DISPOSITION_INFORMATION = 13
     FILE_POSITION_INFORMATION = 14
@@ -1627,7 +1629,7 @@ class QueryInfoResponse(Response):
                 table = None
 
             if table is not None and self._file_information_class in table:
-                cls = self._file_info_map[self._file_information_class]
+                cls = table[self._file_information_class]
                 with cur.bounded(cur, end):
                     cls(self).decode(cur)
         else:
@@ -2053,7 +2055,30 @@ class FileNameInformation(FileInformation):
     def _decode(self, cur):
         file_name_length = cur.decode_uint32le()
         self.file_name = cur.decode_utf16le(file_name_length)
-                
+
+class FileRenameInformation(FileInformation):
+    file_information_class = FILE_RENAME_INFORMATION
+
+    def __init__(self, parent = None):
+        FileInformation.__init__(self, parent)
+        self.replace_if_exists = 0
+        self.root_directory = (0,0)
+        self.file_name = None
+
+        if parent is not None:
+            parent.append(self)
+
+    def _encode(self, cur):
+        cur.encode_uint8le(self.replace_if_exists)
+        cur.encode_uint8le(0)       # reserved
+        cur.encode_uint16le(0)      # reserved
+        cur.encode_uint32le(0)      # reserved
+        cur.encode_uint32le(self.root_directory[0])
+        cur.encode_uint32le(self.root_directory[1])
+        file_name_length_hole = cur.hole.encode_uint32le(0)
+        file_name_start = cur.copy()
+        cur.encode_utf16le(self.file_name)
+        file_name_length_hole(cur - file_name_start)
 
 class FileAllocationInformation(FileInformation):
     file_information_class = FILE_ALLOCATION_INFORMATION
@@ -2405,6 +2430,101 @@ class FileFsObjectIdInformation(FileSystemInformation):
             self.objectid += str(cur.decode_uint64le())
         for count in xrange(6):
             self.extended_info += str(cur.decode_uint64le())
+
+class CompletionFilter(core.FlagEnum):
+    SMB2_NOTIFY_CHANGE_FILE_NAME    = 0x001
+    SMB2_NOTIFY_CHANGE_DIR_NAME     = 0x002
+    SMB2_NOTIFY_CHANGE_ATTRIBUTES   = 0x004
+    SMB2_NOTIFY_CHANGE_SIZE         = 0x008
+    SMB2_NOTIFY_CHANGE_LAST_WRITE   = 0x010
+    SMB2_NOTIFY_CHANGE_LAST_ACCESS  = 0x020
+    SMB2_NOTIFY_CHANGE_CREATION     = 0x040
+    SMB2_NOTIFY_CHANGE_EA           = 0x080
+    SMB2_NOTIFY_CHANGE_SECURITY     = 0x100
+    SMB2_NOTIFY_CHANGE_STREAM_NAME  = 0x200
+    SMB2_NOTIFY_CHANGE_STREAM_SIZE  = 0x400
+    SMB2_NOTIFY_CHANGE_STREAM_WRITE = 0x800
+
+CompletionFilter.import_items(globals())
+
+class ChangeNotifyFlags(core.FlagEnum):
+    SMB2_WATCH_TREE     = 0x01
+
+ChangeNotifyFlags.import_items(globals())
+
+class FileNotifyInfoAction(core.ValueEnum):
+    SMB2_ACTION_ADDED               = 0x001
+    SMB2_ACTION_REMOVED             = 0x002
+    SMB2_ACTION_MODIFIED            = 0x003
+    SMB2_ACTION_RENAMED_OLD_NAME    = 0x004
+    SMB2_ACTION_RENAMED_NEW_NAME    = 0x005
+    SMB2_ACTION_ADDED_STREAM        = 0x006
+    SMB2_ACTION_REMOVED_STREAM      = 0x007
+    SMB2_ACTION_MODIFIED_STREAM     = 0x008
+    SMB2_ACTION_REMOVED_BY_DELETE   = 0x009
+
+FileNotifyInfoAction.import_items(globals())
+
+class FileNotifyInformation(core.Frame):
+    def __init__(self, parent = None):
+        core.Frame.__init__(self, parent)
+        self.action = 0
+        self.filename = None
+        if parent is not None:
+            parent.append(self)
+
+    def _decode(self, cur):
+        startoffset = cur.offset
+        neo = cur.decode_uint32le()
+        self.action = FileNotifyInfoAction(cur.decode_uint32le())
+        filenamelength = cur.decode_uint32le()
+        self.filename = cur.decode_utf16le(filenamelength)
+        cur.offset = startoffset + neo
+        return neo
+    def __repr__(self):
+        return "<{0} {1} '{2}'>".format(self.__class__.__name__,
+                                        self.action,
+                                        self.filename)
+
+class ChangeNotifyResponse(Response):
+    command_id = SMB2_CHANGE_NOTIFY
+    structure_size = 9
+
+    def __init__(self, parent):
+        Response.__init__(self, parent)
+        self.notifications = []
+
+    def append(self, child):
+        self.notifications.append(child)
+
+    def _decode(self, cur):
+        offset = cur.decode_uint16le()
+        buffer_length = cur.decode_uint32le()
+        if buffer_length > 0:
+            while True:
+                neo = FileNotifyInformation(self)._decode(cur)
+                if neo == 0:
+                    break
+
+class ChangeNotifyRequest(Request):
+    command_id = SMB2_CHANGE_NOTIFY
+    structure_size = 32
+
+    def __init__(self, parent):
+        Request.__init__(self, parent)
+        self.flags = 0
+        self.file_id = None
+        self.buffer_length = 4096
+        self.completion_filter = 0
+
+    def _encode(self, cur):
+        cur.encode_uint16le(self.flags)
+        cur.encode_uint32le(self.buffer_length)
+        cur.encode_uint64le(self.file_id[0])
+        cur.encode_uint64le(self.file_id[1])
+        cur.encode_uint32le(self.completion_filter)
+        # Reserved
+        cur.encode_uint32le(0)
 
 class BreakLeaseFlags(core.FlagEnum):
     SMB2_NOTIFY_BREAK_LEASE_FLAG_NONE         = 0x00

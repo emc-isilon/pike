@@ -82,3 +82,24 @@ class SetTest(pike.test.PikeTest):
             file_info.mode = pike.smb2.FILE_SEQUENTIAL_ONLY
 
         self.chan.close(handle)
+
+    # Set file name with FILE_RENAME_INFORMATION
+    def test_set_file_name(self):
+        self.chan, self.tree = self.tree_connect()
+        handle = self.chan.create(self.tree, "test.txt",
+                                  disposition=pike.smb2.FILE_SUPERSEDE,
+                                  access=pike.smb2.DELETE).result()
+
+        with self.chan.set_file_info(handle, pike.smb2.FileRenameInformation) as file_info:
+            file_info.replace_if_exists = 1
+            file_info.file_name = "renamed.txt"
+
+        self.chan.close(handle)
+
+        # open the renamed file for delete and ensure that it exists
+        handle2 = self.chan.create(self.tree, "renamed.txt",
+                                   disposition=pike.smb2.FILE_OPEN,     # fail if doesn't exist
+                                   access=pike.smb2.DELETE,
+                                   options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
+        self.chan.close(handle2)
+
