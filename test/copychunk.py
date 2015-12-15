@@ -378,18 +378,20 @@ class TestServerSideCopy(pike.test.PikeTest):
             self.chan.close(fh_src)
             self.chan.close(fh_dst)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
     def test_neg_src_exc_brl(self):
         """
         Initiate copychunk when another handle has an exclusive BRL on the
-        source file
+        source file (win 8 / 2012)
         """
         self.generic_ssc_negative_test_case(src_brl=True,
                                             exp_error=pike.ntstatus.STATUS_FILE_LOCK_CONFLICT)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
     def test_neg_dst_exc_brl(self):
         """
         Initiate copychunk when another handle has an exclusive BRL on the
-        destination file
+        destination file (win 8 / 2012)
         """
         self.generic_ssc_negative_test_case(dst_brl=True,
                                             exp_error=pike.ntstatus.STATUS_FILE_LOCK_CONFLICT)
@@ -426,24 +428,3 @@ class TestServerSideCopy(pike.test.PikeTest):
                                                         pike.smb2.FILE_DELETE_ON_CLOSE,
                                             dst_disp=pike.smb2.FILE_OPEN_IF,
                                             exp_error=pike.ntstatus.STATUS_INVALID_DEVICE_REQUEST)
-
-    def _test_dst_no_read_copychunk_write(self):
-        """
-        Initiate copychunk_write with no read access on the destination file
-        """
-        pass
-    def _test_neg_named_pipe(self):
-        """
-        Try to copychunk against a named pipe.
-        """
-        pass
-    def _test_neg_different_session(self):
-        """
-        Try to copy chunk across sessions
-        """
-        pass
-    def _test_neg_different_tree(self):
-        """
-        Try to copy chunk across shares
-        """
-        pass
