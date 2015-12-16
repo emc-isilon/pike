@@ -44,6 +44,14 @@ import array
 
 class CapTest(test.PikeTest):
     def setup(self):
+        # determine max capability and apply Required decorators
+        self.chan, self.tree = self.tree_connect()
+        self.max_dialect = self.chan.connection.negotiate_response.dialect_revision
+        self.capabilities = self.chan.connection.negotiate_response.capabilities
+        self.share_caps = self.tree.tree_connect_response.capabilities
+        self.chan.logoff()
+        self.chan.connection.close()
+
         self.conn = model.Client().connect(self.server, self.port)
         self.client = self.conn.client
 
@@ -55,9 +63,6 @@ class CapTest(test.PikeTest):
         self.client.dialects = [dialect, smb2.DIALECT_SMB2_002]
         self.client.capabilities = caps
         self.conn.negotiate()
-
-        if self.conn.negotiate_response.dialect_revision != dialect:
-            self.skipTest("Dialect required: %s" % dialect)
 
         return self.conn
 
@@ -80,10 +85,14 @@ class CapTest(test.PikeTest):
 
 class CapPersistent(CapTest):
     # persistent cap is advertised if we ask for it
+    @test.RequireDialect(smb2.DIALECT_SMB3_0)
+    @test.RequireShareCapabilities(smb2.SMB2_SHARE_CAP_CONTINUOUS_AVAILABILITY)
     def test_smb3(self):
         self.positive_cap(smb2.DIALECT_SMB3_0, smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES)
 
     # persistent cap is advertised if we ask for lots of caps
+    @test.RequireDialect(smb2.DIALECT_SMB3_0)
+    @test.RequireShareCapabilities(smb2.SMB2_SHARE_CAP_CONTINUOUS_AVAILABILITY)
     def test_smb3_many_capabilities(self):
         advertise_caps = \
                 smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL | \
@@ -108,10 +117,12 @@ class CapPersistent(CapTest):
 
 class CapMultichannel(CapTest):
     # multichannel cap is advertised if we ask for it
+    @test.RequireDialect(smb2.DIALECT_SMB3_0)
     def test_smb3(self):
         self.positive_cap(smb2.DIALECT_SMB3_0, smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL)
 
     # multichannel cap is advertised if we ask for lots of caps
+    @test.RequireDialect(smb2.DIALECT_SMB3_0)
     def test_smb3_many_capabilities(self):
         advertise_caps = \
                 smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL | \
@@ -136,10 +147,12 @@ class CapMultichannel(CapTest):
 
 class CapMulticredit(CapTest):
     # largemtu cap is advertised if we ask for it
+    @test.RequireDialect(smb2.DIALECT_SMB3_0)
     def test_smb3(self):
         self.positive_cap(smb2.DIALECT_SMB3_0, smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
 
     # largemtu cap is advertised if we ask for lots of caps
+    @test.RequireDialect(smb2.DIALECT_SMB3_0)
     def test_smb3_many_capabilities(self):
         advertise_caps = \
                 smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL | \
