@@ -612,7 +612,8 @@ class Connection(asyncore.dispatcher):
                 future = self._future_map[smb_res.message_id]
                 if smb_res.status == ntstatus.STATUS_PENDING:
                     future.interim(smb_res)
-                elif isinstance(smb_res[0], smb2.ErrorResponse):
+                elif isinstance(smb_res[0], smb2.ErrorResponse) or \
+                     smb_res.status not in smb_res[0].allowed_status:
                     future.complete(ResponseError(smb_res))
                     del self._future_map[smb_res.message_id]
                 else:
@@ -1125,6 +1126,42 @@ class Channel(object):
         res = self.connection.transceive(smb_req.parent)[0]
 
         return res
+
+    def resume_key(self, file):
+        smb_req = self.request(obj=file.tree)
+        ioctl_req = smb2.IoctlRequest(smb_req)
+        resumekey_req = smb2.RequestResumeKeyRequest(ioctl_req)
+
+        ioctl_req.file_id = file.file_id
+        ioctl_req.flags |= smb2.SMB2_0_IOCTL_IS_FSCTL
+
+        return self.connection.transceive(smb_req.parent)[0]
+
+    def copychunk(self, source_file, target_file, chunks):
+        """
+        @param source_file: L{Open}
+        @param target_file: L{Open}
+        @param chunks: sequence of tuples (source_offset, target_offset, length)
+        """
+        resume_key = self.resume_key(source_file)[0][0].resume_key
+
+        smb_req = self.request(obj=target_file.tree)
+        ioctl_req = smb2.IoctlRequest(smb_req)
+        copychunk_req = smb2.CopyChunkCopyRequest(ioctl_req)
+
+        ioctl_req.max_output_response = 16384
+        ioctl_req.file_id = target_file.file_id
+        ioctl_req.flags |= smb2.SMB2_0_IOCTL_IS_FSCTL
+        copychunk_req.source_key = resume_key
+        copychunk_req.chunk_count = len(chunks)
+
+        for source_offset, target_offset, length in chunks:
+            chunk = smb2.CopyChunk(copychunk_req)
+            chunk.source_offset = source_offset
+            chunk.target_offset = target_offset
+            chunk.length = length
+
+        return self.connection.transceive(smb_req.parent)[0]
 
     def frame(self):
         return self.connection.frame()

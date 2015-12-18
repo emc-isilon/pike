@@ -249,7 +249,8 @@ class Smb2(core.Frame):
                     raise core.BadPacket()
             elif key in Smb2._response_table:
                 cls = Smb2._response_table[key]
-                if self.status not in cls.allowed_status:
+                if self.status not in cls.allowed_status and \
+                   structure_size == ErrorResponse.structure_size:
                     cls = ErrorResponse
             else:
                 cls = ErrorResponse
@@ -3051,6 +3052,50 @@ class ValidateNegotiateInfoRequest(IoctlInput):
         for dialect in self.dialects:
             cur.encode_uint16le(dialect)
 
+class RequestResumeKeyRequest(IoctlInput):
+    ioctl_ctl_code = FSCTL_SRV_REQUEST_RESUME_KEY
+
+    def __init__(self, parent):
+        IoctlInput.__init__(self, parent)
+        parent.ioctl_input = self
+
+    def  _encode(self, cur):
+        pass
+
+class CopyChunkCopyRequest(IoctlInput):
+    ioctl_ctl_code = FSCTL_SRV_COPYCHUNK
+
+    def __init__(self, parent):
+        IoctlInput.__init__(self, parent)
+        self.source_key = 0
+        self.chunk_count = 0
+        self._children = []
+
+    def append(self, child):
+        self._children.append(child)
+
+    def  _encode(self, cur):
+        cur.encode_bytes(self.source_key)
+        cur.encode_uint32le(self.chunk_count)
+        cur.encode_uint32le(0)                          # reserved
+        #encode the chunks
+        for chunk in self._children:
+            chunk.encode(cur)
+
+class CopyChunk(core.Frame):
+    def __init__(self, parent):
+        core.Frame.__init__(self, parent)
+        parent.append(self)
+        self.source_offset = 0
+        self.target_offset = 0
+        self.length = 0
+
+    def _encode(self, cur):
+        cur.encode_uint64le(self.source_offset)
+        cur.encode_uint64le(self.target_offset)
+        cur.encode_uint32le(self.length)
+        cur.encode_uint32le(0)
+
 @IoctlResponse.ioctl_ctl_code
 class IoctlOutput(core.Frame):
     def __init__(self, parent):
@@ -3073,3 +3118,29 @@ class ValidateNegotiateInfoResponse(IoctlOutput):
         self.client_guid = cur.decode_bytes(16)
         self.security_mode = SecurityMode(cur.decode_uint16le())
         self.dialect = Dialect(cur.decode_uint16le())
+
+class RequestResumeKeyResponse(IoctlOutput):
+   ioctl_ctl_code = FSCTL_SRV_REQUEST_RESUME_KEY
+
+   def __init__(self, parent):
+        IoctlOutput.__init__(self, parent)
+        self.resume_key = array.array('B',[0]*24)
+        self.context_length = 0
+
+   def _decode(self, cur):
+        self.resume_key = cur.decode_bytes(24)
+        self.context_length = cur.decode_uint32le()
+
+class CopyChunkCopyResponse(IoctlOutput):
+   ioctl_ctl_code = FSCTL_SRV_COPYCHUNK
+
+   def __init__(self, parent):
+        IoctlOutput.__init__(self, parent)
+        self.chunks_written = 0
+        self.chunk_bytes_written = 0
+        self.total_bytes_written = 0
+
+   def _decode(self, cur):
+        self.chunks_written = cur.decode_uint32le()
+        self.chunk_bytes_written = cur.decode_uint32le()
+        self.total_bytes_written = cur.decode_uint32le()
