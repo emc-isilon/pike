@@ -71,7 +71,6 @@ class PikeTest(unittest.TestCase):
     @staticmethod
     def init_once():
         if not PikeTest.init_done:
-            PikeTest.init_done = True
             PikeTest.loglevel = getattr(logging, PikeTest.option('PIKE_LOGLEVEL', 'NOTSET').upper())
             PikeTest.handler = logging.StreamHandler()
             PikeTest.handler.setLevel(PikeTest.loglevel)
@@ -81,6 +80,7 @@ class PikeTest(unittest.TestCase):
             PikeTest.logger.setLevel(PikeTest.loglevel)
             PikeTest.trace = PikeTest.booloption('PIKE_TRACE')
             model.trace = PikeTest.trace
+            PikeTest.init_done = True
 
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self,*args,**kwargs)

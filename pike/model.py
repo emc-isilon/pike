@@ -410,8 +410,14 @@ class Connection(asyncore.dispatcher):
         self.error = None
         self.traceback = None
     
-        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connect((server,port))
+        for result in socket.getaddrinfo(server, port,
+                                         0,
+                                         socket.SOCK_STREAM,
+                                         socket.IPPROTO_TCP):
+            family, socktype, proto, canonname, sockaddr = result
+            break
+        self.create_socket(family, socktype)
+        self.connect(sockaddr)
         self.client._connections.append(self)
 
     def next_mid(self):
