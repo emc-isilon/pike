@@ -1451,6 +1451,7 @@ class FileInformationClass(core.ValueEnum):
     FILE_COMPRESSION_INFORMATION = 28
     FILE_NETWORK_OPEN_INFORMATION = 34
     FILE_ATTRIBUTE_TAG_INFORMATION = 35
+    FILE_ID_BOTH_DIR_INFORMATION = 37
     FILE_ID_FULL_DIR_INFORMATION = 38
     FILE_VALID_DATA_LENGTH_INFORMATION = 39
 
@@ -1863,7 +1864,6 @@ class FileFullDirectoryInformation(FileInformation):
         else:
             cur.advanceto(cur.upperbound)
 
-
 class FileIdFullDirectoryInformation(FileInformation):
     file_information_class = FILE_ID_FULL_DIR_INFORMATION
 
@@ -1900,6 +1900,52 @@ class FileIdFullDirectoryInformation(FileInformation):
         self.file_id = cur.decode_uint64le()
 
         self.file_name = cur.decode_utf16le(file_name_length)
+        if next_offset:
+            cur.advanceto(self.start + next_offset)
+        else:
+            cur.advanceto(cur.upperbound)
+
+
+class FileIdBothDirectoryInformation(FileInformation):
+    file_information_class = FILE_ID_BOTH_DIR_INFORMATION
+
+    def __init__(self, parent = None):
+        FileInformation.__init__(self, parent)
+        self.file_index = 0
+        self.creation_time = 0
+        self.last_access_time = 0
+        self.last_write_time = 0
+        self.change_time = 0
+        self.end_of_file = 0
+        self.allocation_size = 0
+        self.file_attributes = 0
+        self.ea_size = 0
+        self.file_id = 0
+        self.short_name = None
+        self.file_name = None
+        if parent is not None:
+            parent.append(self)
+
+    def _decode(self, cur):
+        next_offset = cur.decode_uint32le()
+        self.file_index = cur.decode_uint32le()
+        self.creation_time = nttime.NtTime(cur.decode_uint64le())
+        self.last_access_time = nttime.NtTime(cur.decode_uint64le())
+        self.last_write_time = nttime.NtTime(cur.decode_uint64le())
+        self.change_time = nttime.NtTime(cur.decode_uint64le())
+        self.end_of_file = cur.decode_uint64le()
+        self.allocation_size = cur.decode_uint64le()
+        self.file_attributes = FileAttributes(cur.decode_uint32le())
+
+        self.file_name_length = cur.decode_uint32le()
+        self.ea_size = cur.decode_uint32le()
+        self.short_name_length = cur.decode_uint8le()
+        reserved = cur.decode_uint8le()
+        self.short_name = cur.decode_bytes(24)
+        reserved = cur.decode_uint16le()
+        self.file_id = cur.decode_uint64le()
+        self.file_name = cur.decode_utf16le(self.file_name_length)
+
         if next_offset:
             cur.advanceto(self.start + next_offset)
         else:
