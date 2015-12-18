@@ -1362,6 +1362,25 @@ class AppInstanceIdRequest(CreateRequestContext):
         cur.encode_uint16le(0)
         cur.encode_bytes(self.app_instance_id)
 
+class QueryOnDiskIDRequest(CreateRequestContext):
+    name = 'QFid'
+
+    def __init__(self, parent):
+        CreateRequestContext.__init__(self, parent)
+
+    def _encode(self, cur):
+        pass           # client sends no data to server
+
+class QueryOnDiskIDResponse(CreateResponseContext):
+    name = 'QFid'
+
+    def __init__(self, parent):
+        CreateResponseContext.__init__(self, parent)
+        self.file_id = array.array('B', [0]*32)
+
+    def _decode(self, cur):
+        self.file_id = cur.decode_bytes(32)
+
 class CloseRequest(Request):
     command_id = SMB2_CLOSE
     structure_size = 24
