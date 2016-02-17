@@ -414,8 +414,14 @@ class Connection(asyncore.dispatcher):
         self.error = None
         self.traceback = None
     
-        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connect((server,port))
+        for result in socket.getaddrinfo(server, port,
+                                         0,
+                                         socket.SOCK_STREAM,
+                                         socket.IPPROTO_TCP):
+            family, socktype, proto, canonname, sockaddr = result
+            break
+        self.create_socket(family, socktype)
+        self.connect(sockaddr)
         self.client._connections.append(self)
 
     def next_mid(self):
@@ -610,7 +616,8 @@ class Connection(asyncore.dispatcher):
                 future = self._future_map[smb_res.message_id]
                 if smb_res.status == ntstatus.STATUS_PENDING:
                     future.interim(smb_res)
-                elif isinstance(smb_res[0], smb2.ErrorResponse):
+                elif isinstance(smb_res[0], smb2.ErrorResponse) or \
+                     smb_res.status not in smb_res[0].allowed_status:
                     future.complete(ResponseError(smb_res))
                     del self._future_map[smb_res.message_id]
                 else:
@@ -997,7 +1004,8 @@ class Channel(object):
                durable=False,
                persistent=False,
                create_guid=None,
-               app_instance_id=None):
+               app_instance_id=None,
+               query_on_disk_id=False):
 
         prev_open = None
 
@@ -1046,6 +1054,9 @@ class Channel(object):
         if app_instance_id:
             app_instance_id_req = smb2.AppInstanceIdRequest(create_req)
             app_instance_id_req.app_instance_id = app_instance_id
+
+        if query_on_disk_id:
+            query_on_disk_id_req = smb2.QueryOnDiskIDRequest(create_req)
 
         open_future = Future(None)
 
@@ -1210,6 +1221,69 @@ class Channel(object):
         vni_req.security_mode = client.security_mode
         vni_req.dialects = client.dialects
 
+        res = self.connection.transceive(smb_req.parent)[0]
+
+        return res
+
+    def resume_key(self, file):
+        smb_req = self.request(obj=file.tree)
+        ioctl_req = smb2.IoctlRequest(smb_req)
+        resumekey_req = smb2.RequestResumeKeyRequest(ioctl_req)
+
+        ioctl_req.file_id = file.file_id
+        ioctl_req.flags |= smb2.SMB2_0_IOCTL_IS_FSCTL
+
+        return self.connection.transceive(smb_req.parent)[0]
+
+    def copychunk(self, source_file, target_file, chunks):
+        """
+        @param source_file: L{Open}
+        @param target_file: L{Open}
+        @param chunks: sequence of tuples (source_offset, target_offset, length)
+        """
+        resume_key = self.resume_key(source_file)[0][0].resume_key
+
+        smb_req = self.request(obj=target_file.tree)
+        ioctl_req = smb2.IoctlRequest(smb_req)
+        copychunk_req = smb2.CopyChunkCopyRequest(ioctl_req)
+
+        ioctl_req.max_output_response = 16384
+        ioctl_req.file_id = target_file.file_id
+        ioctl_req.flags |= smb2.SMB2_0_IOCTL_IS_FSCTL
+        copychunk_req.source_key = resume_key
+        copychunk_req.chunk_count = len(chunks)
+
+        for source_offset, target_offset, length in chunks:
+            chunk = smb2.CopyChunk(copychunk_req)
+            chunk.source_offset = source_offset
+            chunk.target_offset = target_offset
+            chunk.length = length
+
+        return self.connection.transceive(smb_req.parent)[0]
+
+    def set_symlink(self, file, target_name, flags):
+        smb_req = self.request(obj=file.tree)
+        ioctl_req = smb2.IoctlRequest(smb_req)
+        set_reparse_req = smb2.SetReparsePointRequest(ioctl_req)
+        symlink_buffer = smb2.SymbolicLinkReparseBuffer(set_reparse_req)
+
+        ioctl_req.max_output_response = 0
+        ioctl_req.file_id = file.file_id
+        ioctl_req.flags |= smb2.SMB2_0_IOCTL_IS_FSCTL
+        symlink_buffer.substitute_name = target_name
+        symlink_buffer.flags = flags
+
+        res = self.connection.transceive(smb_req.parent)[0]
+
+        return res
+
+    def get_symlink(self, file):
+        smb_req = self.request(obj=file.tree)
+        ioctl_req = smb2.IoctlRequest(smb_req)
+        set_reparse_req = smb2.GetReparsePointRequest(ioctl_req)
+
+        ioctl_req.file_id = file.file_id
+        ioctl_req.flags |= smb2.SMB2_0_IOCTL_IS_FSCTL
         res = self.connection.transceive(smb_req.parent)[0]
 
         return res
