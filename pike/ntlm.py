@@ -142,6 +142,7 @@ class ProductMinorVersionFlags(core.ValueEnum):
 ProductMinorVersionFlags.import_items(globals())
 
 class NTLMRevisionCurrentFlags(core.ValueEnum):
+    UNKNOWN                     = 0x0
     NTLMSSP_REVISION_W2K3       = 0x0F
 
 NTLMRevisionCurrentFlags.import_items(globals())
