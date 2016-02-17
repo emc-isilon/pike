@@ -71,7 +71,6 @@ class PikeTest(unittest.TestCase):
     @staticmethod
     def init_once():
         if not PikeTest.init_done:
-            PikeTest.init_done = True
             PikeTest.loglevel = getattr(logging, PikeTest.option('PIKE_LOGLEVEL', 'NOTSET').upper())
             PikeTest.handler = logging.StreamHandler()
             PikeTest.handler.setLevel(PikeTest.loglevel)
@@ -81,6 +80,7 @@ class PikeTest(unittest.TestCase):
             PikeTest.logger.setLevel(PikeTest.loglevel)
             PikeTest.trace = PikeTest.booloption('PIKE_TRACE')
             model.trace = PikeTest.trace
+            PikeTest.init_done = True
 
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self,*args,**kwargs)
@@ -190,6 +190,28 @@ class PikeTest(unittest.TestCase):
 
     def required_share_capabilities(self):
         return self._get_decorator_attr('RequireShareCapabilities', 0)
+
+    def assertBufferEqual(self, buf1, buf2):
+        """
+        Compare two sequences using a binary diff to efficiently determine 
+        the first offset where they differ
+        """
+        if len(buf1) != len(buf2):
+            raise AssertionError("Buffers are not the same size")
+        low = 0
+        high = len(buf1)
+        while high - low > 1:
+            chunk_1 = (low, low+(high-low)/2)
+            chunk_2 = (low+(high-low)/2, high)
+            if buf1[chunk_1[0]:chunk_1[1]] != buf2[chunk_1[0]:chunk_1[1]]:
+                low, high = chunk_1
+            elif buf1[chunk_2[0]:chunk_2[1]] != buf2[chunk_2[0]:chunk_2[1]]:
+                low, high = chunk_2
+            else:
+                break
+        if high - low <= 1:
+            raise AssertionError("Block mismatch at byte {0}: "
+                                 "{1} != {2}".format(low, buf1[low], buf2[low]))
         
 class _Decorator(object):
     def __init__(self, value):

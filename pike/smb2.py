@@ -249,7 +249,8 @@ class Smb2(core.Frame):
                     raise core.BadPacket()
             elif key in Smb2._response_table:
                 cls = Smb2._response_table[key]
-                if self.status not in cls.allowed_status:
+                if self.status not in cls.allowed_status and \
+                   structure_size == ErrorResponse.structure_size:
                     cls = ErrorResponse
             else:
                 cls = ErrorResponse
@@ -319,12 +320,23 @@ class ErrorResponse(Command):
         # Ignore Reserved
         cur.decode_uint16le()
         self.byte_count = cur.decode_uint32le()
+        end = cur + self.byte_count
 
         if self.parent.status == ntstatus.STATUS_BUFFER_TOO_SMALL and self.byte_count == 4:
             # Parse required buffer size
             self.error_data = cur.decode_uint32le()
+        elif self.parent.status == ntstatus.STATUS_STOPPED_ON_SYMLINK and self.byte_count >= 28:
+            self.sym_link_length = cur.decode_uint32le()
+            self.sym_link_error_tag = cur.decode_uint32le()
+            self.reparse_tag = cur.decode_uint32le()
+            if self.sym_link_error_tag != 0x4C4D5953:
+                raise core.BadPacket()
+            reparse_data = GetReparsePointResponse._reparse_tag_map[self.reparse_tag]
+            with cur.bounded(cur, end):
+                self.error_data = reparse_data(self)
+                self.error_data.decode(cur)
         else:
-           # Ignore ErrorData (FIXME: symlinks)
+           # Ignore ErrorData
            cur += self.byte_count if self.byte_count else 1
 
 class Cancel(Request):
@@ -1362,6 +1374,25 @@ class AppInstanceIdRequest(CreateRequestContext):
         cur.encode_uint16le(0)
         cur.encode_bytes(self.app_instance_id)
 
+class QueryOnDiskIDRequest(CreateRequestContext):
+    name = 'QFid'
+
+    def __init__(self, parent):
+        CreateRequestContext.__init__(self, parent)
+
+    def _encode(self, cur):
+        pass           # client sends no data to server
+
+class QueryOnDiskIDResponse(CreateResponseContext):
+    name = 'QFid'
+
+    def __init__(self, parent):
+        CreateResponseContext.__init__(self, parent)
+        self.file_id = array.array('B', [0]*32)
+
+    def _decode(self, cur):
+        self.file_id = cur.decode_bytes(32)
+
 class CloseRequest(Request):
     command_id = SMB2_CLOSE
     structure_size = 24
@@ -1432,6 +1463,7 @@ class FileInformationClass(core.ValueEnum):
     FILE_COMPRESSION_INFORMATION = 28
     FILE_NETWORK_OPEN_INFORMATION = 34
     FILE_ATTRIBUTE_TAG_INFORMATION = 35
+    FILE_ID_BOTH_DIR_INFORMATION = 37
     FILE_ID_FULL_DIR_INFORMATION = 38
     FILE_VALID_DATA_LENGTH_INFORMATION = 39
 
@@ -1844,7 +1876,6 @@ class FileFullDirectoryInformation(FileInformation):
         else:
             cur.advanceto(cur.upperbound)
 
-
 class FileIdFullDirectoryInformation(FileInformation):
     file_information_class = FILE_ID_FULL_DIR_INFORMATION
 
@@ -1881,6 +1912,52 @@ class FileIdFullDirectoryInformation(FileInformation):
         self.file_id = cur.decode_uint64le()
 
         self.file_name = cur.decode_utf16le(file_name_length)
+        if next_offset:
+            cur.advanceto(self.start + next_offset)
+        else:
+            cur.advanceto(cur.upperbound)
+
+
+class FileIdBothDirectoryInformation(FileInformation):
+    file_information_class = FILE_ID_BOTH_DIR_INFORMATION
+
+    def __init__(self, parent = None):
+        FileInformation.__init__(self, parent)
+        self.file_index = 0
+        self.creation_time = 0
+        self.last_access_time = 0
+        self.last_write_time = 0
+        self.change_time = 0
+        self.end_of_file = 0
+        self.allocation_size = 0
+        self.file_attributes = 0
+        self.ea_size = 0
+        self.file_id = 0
+        self.short_name = None
+        self.file_name = None
+        if parent is not None:
+            parent.append(self)
+
+    def _decode(self, cur):
+        next_offset = cur.decode_uint32le()
+        self.file_index = cur.decode_uint32le()
+        self.creation_time = nttime.NtTime(cur.decode_uint64le())
+        self.last_access_time = nttime.NtTime(cur.decode_uint64le())
+        self.last_write_time = nttime.NtTime(cur.decode_uint64le())
+        self.change_time = nttime.NtTime(cur.decode_uint64le())
+        self.end_of_file = cur.decode_uint64le()
+        self.allocation_size = cur.decode_uint64le()
+        self.file_attributes = FileAttributes(cur.decode_uint32le())
+
+        self.file_name_length = cur.decode_uint32le()
+        self.ea_size = cur.decode_uint32le()
+        self.short_name_length = cur.decode_uint8le()
+        reserved = cur.decode_uint8le()
+        self.short_name = cur.decode_bytes(24)
+        reserved = cur.decode_uint16le()
+        self.file_id = cur.decode_uint64le()
+        self.file_name = cur.decode_utf16le(self.file_name_length)
+
         if next_offset:
             cur.advanceto(self.start + next_offset)
         else:
@@ -2855,6 +2932,7 @@ class IoctlCode(core.ValueEnum):
     FSCTL_LMR_REQUEST_RESILIENCY       = 0x001401D4
     FSCTL_QUERY_NETWORK_INTERFACE_INFO = 0x001401FC
     FSCTL_SET_REPARSE_POINT            = 0x000900A4
+    FSCTL_GET_REPARSE_POINT            = 0x000900A8
     FSCTL_DFS_GET_REFERRALS_EX         = 0x000601B0
     FSCTL_FILE_LEVEL_TRIM              = 0x00098208
     FSCTL_VALIDATE_NEGOTIATE_INFO      = 0x00140204
@@ -2951,7 +3029,7 @@ class IoctlResponse(Response):
 
         cur.advanceto(self.parent.start + self.output_offset)
         end = cur + self.output_count
-        
+
         ioctl = self._ioctl_ctl_code_map[self.ctl_code]
         with cur.bounded(cur, end):
             ioctl(self).decode(cur)
@@ -2986,13 +3064,74 @@ class ValidateNegotiateInfoRequest(IoctlInput):
         for dialect in self.dialects:
             cur.encode_uint16le(dialect)
 
+class RequestResumeKeyRequest(IoctlInput):
+    ioctl_ctl_code = FSCTL_SRV_REQUEST_RESUME_KEY
+
+    def __init__(self, parent):
+        IoctlInput.__init__(self, parent)
+        parent.ioctl_input = self
+
+    def  _encode(self, cur):
+        pass
+
+class CopyChunkCopyRequest(IoctlInput):
+    ioctl_ctl_code = FSCTL_SRV_COPYCHUNK
+
+    def __init__(self, parent):
+        IoctlInput.__init__(self, parent)
+        self.source_key = 0
+        self.chunk_count = 0
+        self._children = []
+
+    def append(self, child):
+        self._children.append(child)
+
+    def  _encode(self, cur):
+        cur.encode_bytes(self.source_key)
+        cur.encode_uint32le(self.chunk_count)
+        cur.encode_uint32le(0)                          # reserved
+        #encode the chunks
+        for chunk in self._children:
+            chunk.encode(cur)
+
+class CopyChunk(core.Frame):
+    def __init__(self, parent):
+        core.Frame.__init__(self, parent)
+        parent.append(self)
+        self.source_offset = 0
+        self.target_offset = 0
+        self.length = 0
+
+    def _encode(self, cur):
+        cur.encode_uint64le(self.source_offset)
+        cur.encode_uint64le(self.target_offset)
+        cur.encode_uint32le(self.length)
+        cur.encode_uint32le(0)
+
+class SetReparsePointRequest(IoctlInput):
+    ioctl_ctl_code = FSCTL_SET_REPARSE_POINT
+
+    def __init__(self, parent):
+        IoctlInput.__init__(self, parent)
+        self.reparse_data = None
+
+    def _encode(self, cur):
+        if self.reparse_data is not None:
+            self.reparse_data.encode(cur)
+
+class GetReparsePointRequest(IoctlInput):
+    ioctl_ctl_code = FSCTL_GET_REPARSE_POINT
+
+    def _encode(self, *args, **kwds):
+        pass
+
 @IoctlResponse.ioctl_ctl_code
 class IoctlOutput(core.Frame):
     def __init__(self, parent):
         super(IoctlOutput, self).__init__(parent)
         if parent is not None:
             parent.ioctl_output = self
-    
+
 class ValidateNegotiateInfoResponse(IoctlOutput):
     ioctl_ctl_code = FSCTL_VALIDATE_NEGOTIATE_INFO
 
@@ -3008,3 +3147,123 @@ class ValidateNegotiateInfoResponse(IoctlOutput):
         self.client_guid = cur.decode_bytes(16)
         self.security_mode = SecurityMode(cur.decode_uint16le())
         self.dialect = Dialect(cur.decode_uint16le())
+
+class RequestResumeKeyResponse(IoctlOutput):
+   ioctl_ctl_code = FSCTL_SRV_REQUEST_RESUME_KEY
+
+   def __init__(self, parent):
+        IoctlOutput.__init__(self, parent)
+        self.resume_key = array.array('B',[0]*24)
+        self.context_length = 0
+
+   def _decode(self, cur):
+        self.resume_key = cur.decode_bytes(24)
+        self.context_length = cur.decode_uint32le()
+
+class CopyChunkCopyResponse(IoctlOutput):
+   ioctl_ctl_code = FSCTL_SRV_COPYCHUNK
+
+   def __init__(self, parent):
+        IoctlOutput.__init__(self, parent)
+        self.chunks_written = 0
+        self.chunk_bytes_written = 0
+        self.total_bytes_written = 0
+
+   def _decode(self, cur):
+        self.chunks_written = cur.decode_uint32le()
+        self.chunk_bytes_written = cur.decode_uint32le()
+        self.total_bytes_written = cur.decode_uint32le()
+
+class SetReparsePointResponse(IoctlOutput):
+    ioctl_ctl_code = FSCTL_SET_REPARSE_POINT
+    def _decode(self, *args, **kwds):
+        pass
+
+class GetReparsePointResponse(IoctlOutput):
+    ioctl_ctl_code = FSCTL_GET_REPARSE_POINT
+
+    field_blacklist = ['reparse_data']
+    _reparse_tag_map = {}
+    reparse_tag = core.Register(_reparse_tag_map, "reparse_tag")
+
+    def __init__(self, parent):
+        IoctlOutput.__init__(self, parent)
+        self.tag = 0
+
+    def _children(self):
+        return [self.reparse_data] if self.reparse_data is not None else []
+
+    def _decode(self, cur):
+        self.tag = cur.decode_uint32le()
+        reparse_data = self._reparse_tag_map[self.tag]
+        reparse_data(self).decode(cur)
+
+@GetReparsePointResponse.reparse_tag
+class ReparseDataBuffer(core.Frame):
+    def __init__(self, parent):
+        super(ReparseDataBuffer, self).__init__(parent)
+        if parent is not None:
+            parent.reparse_data = self
+
+class SymbolicLinkFlags(core.FlagEnum):
+    SYMLINK_FLAG_ABSOLUTE = 0x0
+    SYMLINK_FLAG_RELATIVE = 0x1
+SymbolicLinkFlags.import_items(globals())
+
+class SymbolicLinkReparseBuffer(ReparseDataBuffer):
+    reparse_tag = 0xA000000C
+
+    def __init__(self, parent):
+        super(SymbolicLinkReparseBuffer, self).__init__(parent)
+        self.unparsed_path_length = 0   # for ErrorResponse only
+        self.substitute_name = None
+        self.substitute_name_length = None
+        self.substitute_name_offset = 0
+        self.print_name = None
+        self.print_name_length = None
+        self.print_name_offset = None
+        self.flags = 0
+
+    def  _encode(self, cur):
+        cur.encode_uint32le(self.reparse_tag)
+        reparse_data_length_hole = cur.hole.encode_uint16le(0)
+        cur.encode_uint16le(0)      # reserved
+        reparse_data_len_start = cur.copy()
+        cur.encode_uint16le(self.substitute_name_offset)
+        sname_len_hole = cur.hole.encode_uint16le(0)
+        pname_offset_hole = cur.hole.encode_uint16le(0)
+        pname_len_hole = cur.hole.encode_uint16le(0)
+        cur.encode_uint32le(self.flags)
+
+        sname_start = cur.copy()
+        cur.encode_utf16le(self.substitute_name)
+        if self.substitute_name_length is None:
+            self.substitute_name_length = cur - sname_start
+        sname_len_hole(self.substitute_name_length)
+
+        if self.print_name is None:
+            self.print_name = self.substitute_name
+        pname_start = cur.copy()
+        if self.print_name_offset is None:
+            self.print_name_offset = self.substitute_name_length
+        pname_offset_hole(self.print_name_offset)
+        cur.encode_utf16le(self.print_name)
+        if self.print_name_length is None:
+            self.print_name_length = cur - pname_start
+        pname_len_hole(self.print_name_length)
+
+        reparse_data_length_hole(cur - reparse_data_len_start)
+
+    def _decode(self, cur):
+        reparse_data_length = cur.decode_uint16le()
+        self.unparsed_path_length = cur.decode_uint16le()
+        self.substitute_name_offset = cur.decode_uint16le()
+        self.substitute_name_length = cur.decode_uint16le()
+        self.print_name_offset = cur.decode_uint16le()
+        self.print_name_length = cur.decode_uint16le()
+        self.flags = cur.decode_uint32le()
+
+        buf_start = cur.copy()
+        self.substitute_name = cur.decode_utf16le(self.substitute_name_length)
+        cur.seekto(buf_start + self.print_name_offset)
+        self.print_name = cur.decode_utf16le(self.print_name_length)
