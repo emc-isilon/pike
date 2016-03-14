@@ -125,7 +125,7 @@ class Smb2(core.Frame):
         self.channel_sequence = 0
         self.status = None
         self.command = None
-        self.credit_request = 0
+        self.credit_request = None
         self.credit_response = None
         self.flags = SMB2_FLAGS_NONE
         self.next_command = 0

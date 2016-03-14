@@ -71,6 +71,9 @@ class TimeoutError(Exception):
 class StateError(Exception):
     pass
 
+class CreditError(Exception):
+    pass
+
 class ResponseError(Exception):
     def __init__(self, response):
         Exception.__init__(self, response.command, response.status)
@@ -400,6 +403,7 @@ class Connection(asyncore.dispatcher):
         self._binding = None
         self._binding_key = None
         self._settings = {}
+        self.credits = 1
         
         self.client = client
         self.server = server
@@ -420,13 +424,21 @@ class Connection(asyncore.dispatcher):
         self.connect(sockaddr)
         self.client._connections.append(self)
 
-    def next_mid(self):
-        while self._next_mid in self._mid_blacklist:
-            self._next_mid += 1
-        result = self._next_mid
-        self._next_mid += 1
+    def next_mid_range(self, length):
+        start_range = self._next_mid
+        while True:
+            r = set(range(start_range, start_range+length))
+            if not r.intersection(self._mid_blacklist):
+                break
+            start_range += 1
+        print(r)
+        result = sorted(list(r))[-1]
+        self._next_mid = result + 1
 
         return result
+
+    def next_mid(self):
+        return self.next_range(1)
 
     def reserve_mid(mid):
         self._mid_blacklist.add(mid)
@@ -440,7 +452,6 @@ class Connection(asyncore.dispatcher):
 
     def writable(self):
         # Do we have data to send?
-        # FIXME: credit tracking
         return self._out_buffer != None or len(self._out_queue) != 0
 
     def handle_connect(self):
@@ -469,7 +480,6 @@ class Connection(asyncore.dispatcher):
 
     def handle_write(self):
         # Try to write out more data
-        # FIXME: credit tracking
         while self._out_buffer is None and len(self._out_queue):
             self._out_buffer = self._prepare_outgoing()
         sent = self.send(self._out_buffer)
@@ -526,19 +536,43 @@ class Connection(asyncore.dispatcher):
 
         # Grab an outgoing smb2 request
         future = self._out_queue[0]
-        del self._out_queue[0]
 
         with future:
             req = future.request
             
-            # Assign message id
-            # FIXME: credit tracking
-            if req.message_id is None:
-                req.message_id = self.next_mid()
-            req.credit_request = 10
+            if req.credit_charge is None:
+                req.credit_charge = 0
+                for cmd in req:
+                    if isinstance(cmd, smb2.ReadRequest):
+                        # special handling, 1 credit per 64k
+                        req.credit_charge, remainder = divmod(cmd.length, 2**16)
+                    elif isinstance(cmd, smb2.WriteRequest):
+                        # special handling, 1 credit per 64k
+                        if cmd.length is None:
+                            cmd.length = len(cmd.buffer)
+                        req.credit_charge, remainder = divmod(cmd.length, 2**16)
+                    else:
+                        remainder = 1       # assume 1 credit per command
+                    if remainder > 0:
+                        req.credit_charge += 1
 
-            if req.credit_charge == None:
-                req.credit_charge = 1
+            if req.credit_request is None:
+                req.credit_request = 10
+                if req.credit_charge > 10:
+                    req.credit_request = req.credit_charge      # try not to fall behind
+            print("Credits={0} Charge={1} Req={2}".format(self.credits, req.credit_charge, req.credit_request))
+
+            if req.credit_charge > self.credits:
+                raise CreditError("Insufficient credits to send command. "
+                                  "Credits={0}, Charge={1}".format(self.credits,
+                                                                   req.credit_charge))
+
+            # since we have sufficient credits, the command will be sent now
+            del self._out_queue[0]
+
+            # Assign message id
+            if req.message_id is None:
+                req.message_id = self.next_mid_range(req.credit_charge)
 
             if req.is_last_child():
                 # Last command in chain, ready to send packet
@@ -587,6 +621,9 @@ class Connection(asyncore.dispatcher):
                                      self.local_addr[0], self.local_addr[1],
                                      ', '.join(f[0].__class__.__name__ for f in res))
         for smb_res in res:
+            print(smb_res)
+            self.credits -= smb_res.credit_charge
+            self.credits += smb_res.credit_response
             # Verify non-session-setup-response signatures
             if not isinstance(smb_res[0], smb2.SessionSetupResponse):
                 key = self.signing_key(smb_res.session_id)
