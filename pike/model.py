@@ -685,7 +685,7 @@ class Connection(asyncore.dispatcher):
 
         return self
 
-    def session_setup(self, creds=None, bind=None):
+    def session_setup(self, creds=None, bind=None, resume=None):
         """
         Establish a session.
 
@@ -699,20 +699,22 @@ class Connection(asyncore.dispatcher):
                       Kerberos authentication will be attempted.
         @type bind: L{Session}
         @param bind: An existing session to bind.
+        @type resume: L{Session}
+        @param resume: An previous session to resume.
         """
         assert self.negotiate_response is not None
 
         if creds and ntlm is not None:
             nt4,password = creds.split('%')
             domain,user = nt4.split('\\')
-            return self.session_setup_ntlm(domain, user, password, bind)
+            return self.session_setup_ntlm(domain, user, password, bind, resume)
         elif kerberos is not None:
-            return session_setup_kerberos(creds, bind)
+            return session_setup_kerberos(creds, bind, resume)
         else:
             raise ImportError("Neither ntlm nor kerberos authentication methods "
                               "are available")
 
-    def session_setup_kerberos(self, creds=None, bind=None):
+    def session_setup_kerberos(self, creds=None, bind=None, resume=None):
         """
         Establish a session.
 
@@ -726,6 +728,8 @@ class Connection(asyncore.dispatcher):
                       Kerberos authentication will be attempted.
         @type bind: L{Session}
         @param bind: An existing session to bind.
+        @type resume: L{Session}
+        @param resume: An previous session to resume.
         """
         assert self.negotiate_response is not None
 
@@ -743,6 +747,7 @@ class Connection(asyncore.dispatcher):
 
         result = kerberos.authGSSClientStep(context,
                                             self.negotiate_response.security_buffer.tostring())
+        prev_session_id = 0
         session_id = 0
         smb_res = None
 
@@ -751,6 +756,9 @@ class Connection(asyncore.dispatcher):
             session_id = bind.session_id
             self._binding = bind
             self._binding_key = digest.derive_key(bind.session_key, 'SMB2AESCMAC', 'SmbSign')[:16]
+        elif resume:
+            assert self.negotiate_response.dialect_revision >= 0x300
+            prev_session_id = resume.session_id
         
         while result == 0:
             smb_req = self.request()
@@ -758,6 +766,7 @@ class Connection(asyncore.dispatcher):
             
             smb_req.flags = smb2.SMB2_FLAGS_SIGNED if bind else 0
             smb_req.session_id = smb_res.session_id if smb_res else session_id
+            session_req.previous_session_id = prev_session_id
             session_req.flags = smb2.SMB2_SESSION_FLAG_BINDING if bind else 0
             session_req.security_mode = smb2.SMB2_NEGOTIATE_SIGNING_ENABLED
             session_req.security_buffer = array.array('B',kerberos.authGSSClientResponse(context))
@@ -791,7 +800,7 @@ class Connection(asyncore.dispatcher):
 
         return session.addchannel(self, signing_key)
 
-    def session_setup_ntlm(self, domain, user, password, bind=None):
+    def session_setup_ntlm(self, domain, user, password, bind=None, resume=None):
         """
         Establish a session.
 
@@ -805,9 +814,12 @@ class Connection(asyncore.dispatcher):
         @type password: str
         @type bind: L{Session}
         @param bind: An existing session to bind.
+        @type resume: L{Session}
+        @param resume: An previous session to resume.
         """
         assert self.negotiate_response is not None
 
+        prev_session_id = 0
         session_id = 0
         smb_res = None
 
@@ -816,6 +828,9 @@ class Connection(asyncore.dispatcher):
             session_id = bind.session_id
             self._binding = bind
             self._binding_key = digest.derive_key(bind.session_key, 'SMB2AESCMAC', 'SmbSign')[:16]
+        elif resume:
+            assert self.negotiate_response.dialect_revision >= 0x300
+            prev_session_id = resume.session_id
 
         def send_session_setup(sec_buf, smb_res=None):
             smb_req = self.request()
@@ -823,6 +838,7 @@ class Connection(asyncore.dispatcher):
 
             smb_req.flags = smb2.SMB2_FLAGS_SIGNED if bind else 0
             smb_req.session_id = smb_res.session_id if smb_res else session_id
+            session_req.previous_session_id = prev_session_id
             session_req.flags = smb2.SMB2_SESSION_FLAG_BINDING if bind else 0
             session_req.security_mode = smb2.SMB2_NEGOTIATE_SIGNING_ENABLED
             session_req.security_buffer = sec_buf
