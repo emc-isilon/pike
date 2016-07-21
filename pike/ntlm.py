@@ -581,19 +581,6 @@ def ComputeResponsev2(NegFlg, ResponseKeyNT, ResponseKeyLM, ServerChallenge,
                           ClientChallenge
     SessionBaseKey = HMAC.new(ResponseKeyNT, NTProofStr, MD5).digest()
     return NtChallengeResponse, LmChallengeResponse, SessionBaseKey
-# Else
-#     Set temp to ConcatenationOf(Responserversion, HiResponserversion,
-#     Z(6), Time, ClientChallenge, Z(4), ServerName, Z(4))
-#     Set NTProofStr to HMAC_MD5(ResponseKeyNT, 
-#     ConcatenationOf(CHALLENGE_MESSAGE.ServerChallenge,temp))
-#     Set NtChallengeResponse to ConcatenationOf(NTProofStr, temp)
-#     Set LmChallengeResponse to ConcatenationOf(HMAC_MD5(ResponseKeyLM, 
-#     ConcatenationOf(CHALLENGE_MESSAGE.ServerChallenge, ClientChallenge)),
-#     ClientChallenge )
-# EndIf
-#  
-# Set SessionBaseKey to HMAC_MD5(ResponseKeyNT, NTProofStr)
-# EndDefine
 
 class NtlmProvider(object):
     """
@@ -680,14 +667,6 @@ class NtlmProvider(object):
                                                     ctarget_info)
         self.key_exchange_key = self.session_base_key
 
-#        # build the special NTLMv2 Response
-#        ntlmv2_resp = NTLMv2Response()
-#        ntlmv2_resp.response = nt_challenge_response
-#        ntlmv2_client_challenge = NTLMv2ClientChallenge(ntlmv2_resp)
-#        ntlmv2_client_challenge.time_stamp = time
-#        ntlmv2_client_challenge.challenge_from_client = self.client_challenge
-#        ntlmv2_client_challenge.av_pairs = self.challenge_message.message.target_info[:]
-#        self.nt_challenge_response = encode_frame(ntlmv2_resp)
         if extract_pair(ctarget_info, MsvAvTimestamp) is not None:
             self.lm_challenge_response = "\0"*24
 
