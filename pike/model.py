@@ -800,7 +800,8 @@ class Connection(asyncore.dispatcher):
 
         return session.addchannel(self, signing_key)
 
-    def session_setup_ntlm(self, domain, user, password, bind=None, resume=None):
+    def session_setup_ntlm(self, domain, user, password, bind=None, resume=None,
+                           ntlm_version=None):
         """
         Establish a session.
 
@@ -808,14 +809,15 @@ class Connection(asyncore.dispatcher):
         a L{Channel} object which can be used for further requests on the given
         connection and session.
 
-        @type creds: str
-        @type dommain: str
+        @type domain: str
         @type user: str
         @type password: str
         @type bind: L{Session}
         @param bind: An existing session to bind.
         @type resume: L{Session}
         @param resume: An previous session to resume.
+        @type ntlm_version: NtlmVersion
+        @param ntlm_version: specify the version of NTLM to use, 1 or 2
         """
         assert self.negotiate_response is not None
 
@@ -853,6 +855,8 @@ class Connection(asyncore.dispatcher):
             return session_res.security_buffer, smb_res
 
         auth = ntlm.NtlmProvider(domain, user, password)
+        if ntlm_version is not None:
+            auth.ntlm_version = ntlm_version
         sec_buf, smb_res = send_session_setup(auth.negotiate())
         sec_buf, smb_res = send_session_setup(auth.authenticate(sec_buf), smb_res)
         session_key = auth.exported_session_key.tostring()
