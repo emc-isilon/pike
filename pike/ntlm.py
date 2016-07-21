@@ -36,7 +36,7 @@
 
 import array
 import random
-import hmac
+import struct
 from socket import gethostname
 import Crypto.Cipher.DES
 import Crypto.Cipher.ARC4 as RC4
@@ -544,8 +544,10 @@ class NTLMv2ClientChallenge(core.Frame):
 
 def NTOWFv2(password, user, userdom):
     nt_passwd = password.encode("utf-16-le")
-    return HMAC.new(MD4.new(nt_passwd).digest(),
-                    (user + userdom).upper(),
+    nt_hash_passwd = MD4.new(nt_passwd).digest()
+    nt_userdom = (user.upper() + userdom).encode("utf-16-le")
+    return HMAC.new(nt_hash_passwd,
+                    nt_userdom,
                     MD5).digest()
 
 def ComputeResponsev2(NegFlg, ResponseKeyNT, ResponseKeyLM, ServerChallenge,
@@ -660,7 +662,7 @@ class NtlmProvider(object):
         ctarget_info = self.challenge_message.message.target_info
         server_time = extract_pair(ctarget_info, MsvAvTimestamp)
         if server_time is not None:
-            time = struct.unpack("<Q", server_time.value)
+            time = nttime.NtTime(struct.unpack("<Q", server_time.value)[0])
         else:
             time = nttime.NtTime(nttime.datetime.now())
         server_name = extract_pair(ctarget_info,
