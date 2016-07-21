@@ -7,8 +7,12 @@ try:
 except ImportError:
     from distutils.core import setup, Extension, Command
 from distutils.command.build_ext import build_ext
+from distutils.command.build_py import build_py
 from distutils.errors import CCompilerError, DistutilsExecError, \
                              DistutilsPlatformError
+
+# attempt building the kerberos extension
+try_krb = True
 
 if sys.platform == 'win32' and sys.version_info > (2, 6):
    # 2.6's distutils.msvc9compiler can raise an IOError when failing to
@@ -37,12 +41,18 @@ class ve_build_ext(build_ext):
         except ext_errors:
             raise BuildFailed()
 
+class ve_build_py(build_py):
+    def run(self, *args, **kwds):
+        if not try_krb:
+            print("libgssapi_krb5 not available, skipping kerberos module")
+        build_py.run(self, *args, **kwds)
+
 try:
     libgssapi_krb5 = ctypes.CDLL("libgssapi_krb5.so")
     defines = [("HAVE_GSS_SET_CRED_OPTION", hasattr(libgssapi_krb5,
                                                     "gss_set_cred_option")),
                ("HAVE_GSSSPI_SET_CRED_OPTION", hasattr(libgssapi_krb5,
-                                                      "gssspi_set_cred_option"))]
+                                                       "gssspi_set_cred_option"))]
     lw_krb_module = Extension('kerberos', ["pykerb/base64.c",
                                            "pykerb/kerberosbasic.c",
                                            "pykerb/kerberos.c",
@@ -50,14 +60,12 @@ try:
                                            "pykerb/kerberospw.c"],
                               libraries=['gssapi_krb5'],
                               define_macros=defines)
-    try_krb = True
 except OSError:
-    print("libgssapi_krb5 not available, skipping kerberos module")
     try_krb = False
 
 def run_setup(with_extensions):
     ext_modules = []
-    cmdclass = { "test": Command }
+    cmdclass = { "test": Command, "build_py": ve_build_py }
     if with_extensions:
         ext_modules.append(lw_krb_module)
         cmdclass = dict(cmdclass, build_ext=ve_build_ext)
@@ -68,11 +76,11 @@ def run_setup(with_extensions):
           author_email='Brian.Koropoff@emc.com',
           url='https://github.com/emc-isilon/pike',
           packages=['pike'],
+          install_requires=['pycrypto'],
           ext_modules=ext_modules,
           cmdclass=cmdclass
           )
 try:
     run_setup(with_extensions=try_krb)
 except BuildFailed:
-    print("Failed to build binary kerberos module, skipping")
     run_setup(with_extensions=False)
