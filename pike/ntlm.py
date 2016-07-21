@@ -570,14 +570,11 @@ def ComputeResponsev2(NegFlg, ResponseKeyNT, ResponseKeyLM, ServerChallenge,
     ntlmv2_client_challenge.challenge_from_client = ClientChallenge
     if av_pairs is not None:
         ntlmv2_client_challenge.av_pairs = av_pairs
-    client_challenge = encode_frame(ntlmv2_client_challenge).tostring()
-    temp = Responseversion + HiResponseversion + "\0"*6 + \
-           TimeBuf.tostring() + ClientChallenge + "\0"*4 + \
-           ServerName + "\0"*4
+    temp = encode_frame(ntlmv2_client_challenge).tostring()
     NTProofStr = HMAC.new(ResponseKeyNT,
                           ServerChallenge + temp,
                           MD5).digest()
-    NtChallengeResponse = NTProofStr + client_challenge
+    NtChallengeResponse = NTProofStr + temp
     LmChallengeResponse = HMAC.new(ResponseKeyLM,
                                    ServerChallenge + ClientChallenge,
                                    MD5).digest() +\
