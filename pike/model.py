@@ -373,6 +373,37 @@ class Client(object):
     def dispose_lease(self, lease):
         del self._leases[lease.lease_key.tostring()]
 
+
+class KerberosProvider(object):
+    def __init__(self, conn, creds=None):
+        if creds:
+            nt4, password = creds.split('%')
+            domain, user = nt4.split('\\')
+            (self.result,
+             self.context) = kerberos.authGSSClientInit(
+                "cifs/" + conn.server,
+                gssmech=2,
+                user=user,
+                password=password,
+                domain=domain)
+        else:
+            (self.result,
+             self.context) = kerberos.authGSSClientInit("cifs/" + conn.server,
+                                                        gssmech=1)
+
+    def step(self, sec_buf):
+        self.result = kerberos.authGSSClientStep(
+                self.context,
+                sec_buf.tostring())
+        if self.result == 0:
+            return (array.array(
+                    'B',
+                    kerberos.authGSSClientResponse(self.context)),
+                    None)
+        else:
+            kerberos.authGSSClientSessionKey(self.context)
+            return (None, kerberos.authGSSClientResponse(self.context)[:16])
+
 class Connection(asyncore.dispatcher):
     """
     Connection to server.
@@ -685,6 +716,134 @@ class Connection(asyncore.dispatcher):
 
         return self
 
+    class SessionSetupContext(object):
+        def __init__(self, conn, creds=None, bind=None, resume=None,
+                     ntlm_version=None):
+            assert conn.negotiate_response is not None
+
+            self.conn = conn
+            self.bind = bind
+            self.resume = resume
+
+            if creds and ntlm is not None:
+                nt4, password = creds.split('%')
+                domain, user = nt4.split('\\')
+                self.auth = ntlm.NtlmProvider(domain, user, password)
+                if ntlm_version is not None:
+                    self.auth.ntlm_version = ntlm_version
+            elif kerberos is not None:
+                self.auth = KerberosProvider(self, creds)
+            else:
+                raise ImportError("Neither ntlm nor kerberos authentication "
+                                  "methods are available")
+
+            self.prev_session_id = 0
+            self.session_id = 0
+            self.requests = []
+            self.responses = []
+            self.session_future = Future()
+            self.interim_future = None
+
+            if bind:
+                assert conn.negotiate_response.dialect_revision >= 0x300
+                self.session_id = bind.session_id
+                conn._binding = bind
+                conn._binding_key = digest.derive_key(
+                        bind.session_key,
+                        'SMB2AESCMAC',
+                        'SmbSign')[:16]
+            elif resume:
+                assert conn.negotiate_response.dialect_revision >= 0x300
+                self.prev_session_id = resume.session_id
+
+        def _send_session_setup(self, sec_buf):
+            smb_req = self.conn.request()
+            session_req = smb2.SessionSetupRequest(smb_req)
+
+            smb_req.session_id = self.session_id
+            session_req.previous_session_id = self.prev_session_id
+            session_req.security_mode = smb2.SMB2_NEGOTIATE_SIGNING_ENABLED
+            session_req.security_buffer = sec_buf
+            if self.bind:
+                smb_req.flags = smb2.SMB2_FLAGS_SIGNED
+                session_req.flags = smb2.SMB2_SESSION_FLAG_BINDING
+
+            self.requests.append(smb_req)
+            return self.conn.submit(smb_req.parent)[0]
+
+        def _finish(self, smb_res):
+            sec_buf = smb_res[0].security_buffer
+            out_buf, self.session_key = self.auth.step(sec_buf)
+
+            if self.conn.negotiate_response.dialect_revision >= 0x300:
+                signing_key = digest.derive_key(
+                        self.session_key, 'SMB2AESCMAC', 'SmbSign')[:16]
+            else:
+                signing_key = self.session_key
+
+            # Verify final signature
+            smb_res.verify(self.conn.signing_digest(), signing_key)
+
+            if self.bind:
+                self.conn._binding = None
+                self.conn._binding_key = None
+                session = self.bind
+            else:
+                session = Session(self.conn.client,
+                                  self.session_id,
+                                  self.session_key)
+
+            return session.addchannel(self.conn, signing_key)
+
+        def __iter__(self):
+            return self
+
+        def submit(self, f=None):
+            """
+            Submit rounds of SessionSetupRequests
+
+            Returns a L{Future} object, for the L{Channel} object
+            """
+            try:
+                res = self.next()
+                res.then(self.submit)
+            except StopIteration:
+                pass
+            return self.session_future
+
+        def next(self):
+            out_buf = None
+            if not self.interim_future and not self.responses:
+                # send the initial request
+                out_buf, self.session_key = self.auth.step(
+                        self.conn.negotiate_response.security_buffer)
+
+            elif self.interim_future:
+                smb_res = self.interim_future.result()
+                self.interim_future = None
+                self.responses.append(smb_res)
+
+                if smb_res.status == ntstatus.STATUS_SUCCESS:
+                    # session is established
+                    self.session_future.complete(
+                            self._finish(smb_res))
+                    return self.session_future
+                else:
+                    # process interim request
+                    session_res = smb_res[0]
+                    self.session_id = smb_res.session_id
+                    if self.bind:
+                        # Need to verify intermediate signatures
+                        smb_res.verify(self.conn.signing_digest(),
+                                       self.conn._binding_key)
+                    out_buf, self.session_key = self.auth.step(
+                            session_res.security_buffer)
+            if out_buf:
+                # submit additional requests if necessary
+                self.interim_future = self._send_session_setup(out_buf)
+                return self.interim_future
+            raise StopIteration()
+
     def session_setup(self, creds=None, bind=None, resume=None):
         """
         Establish a session.
@@ -702,181 +861,8 @@ class Connection(asyncore.dispatcher):
         @type resume: L{Session}
         @param resume: An previous session to resume.
         """
-        assert self.negotiate_response is not None
-
-        if creds and ntlm is not None:
-            nt4,password = creds.split('%')
-            domain,user = nt4.split('\\')
-            return self.session_setup_ntlm(domain, user, password, bind, resume)
-        elif kerberos is not None:
-            return session_setup_kerberos(creds, bind, resume)
-        else:
-            raise ImportError("Neither ntlm nor kerberos authentication methods "
-                              "are available")
-
-    def session_setup_kerberos(self, creds=None, bind=None, resume=None):
-        """
-        Establish a session.
-
-        Establishes a session, performing GSS rounds as necessary.  Returns
-        a L{Channel} object which can be used for further requests on the given
-        connection and session.
-
-        @type creds: str
-        @param creds: A set of credentials of the form '<domain>\<user>%<password>'.
-                      If specified, NTLM authentication will be used.  If None,
-                      Kerberos authentication will be attempted.
-        @type bind: L{Session}
-        @param bind: An existing session to bind.
-        @type resume: L{Session}
-        @param resume: An previous session to resume.
-        """
-        assert self.negotiate_response is not None
-
-        if creds:
-            nt4,password = creds.split('%')
-            domain,user = nt4.split('\\')
-            (result,context) = kerberos.authGSSClientInit(
-                "cifs/" + self.server,
-                gssmech=2,
-                user=user,
-                password=password,
-                domain=domain)
-        else:
-            (result,context) = kerberos.authGSSClientInit("cifs/" + self.server,gssmech=1)
-
-        result = kerberos.authGSSClientStep(context,
-                                            self.negotiate_response.security_buffer.tostring())
-        prev_session_id = 0
-        session_id = 0
-        smb_res = None
-
-        if bind:
-            assert self.negotiate_response.dialect_revision >= 0x300
-            session_id = bind.session_id
-            self._binding = bind
-            self._binding_key = digest.derive_key(bind.session_key, 'SMB2AESCMAC', 'SmbSign')[:16]
-        elif resume:
-            assert self.negotiate_response.dialect_revision >= 0x300
-            prev_session_id = resume.session_id
-        
-        while result == 0:
-            smb_req = self.request()
-            session_req = smb2.SessionSetupRequest(smb_req)
-            
-            smb_req.flags = smb2.SMB2_FLAGS_SIGNED if bind else 0
-            smb_req.session_id = smb_res.session_id if smb_res else session_id
-            session_req.previous_session_id = prev_session_id
-            session_req.flags = smb2.SMB2_SESSION_FLAG_BINDING if bind else 0
-            session_req.security_mode = smb2.SMB2_NEGOTIATE_SIGNING_ENABLED
-            session_req.security_buffer = array.array('B',kerberos.authGSSClientResponse(context))
-            
-            smb_res = self.transceive(smb_req.parent)[0]
-            session_res = smb_res[0]
-            
-            result = kerberos.authGSSClientStep(context, session_res.security_buffer)
-
-            if bind and result == 0:
-                # Need to verify intermediate signatures
-                smb_res.verify(self.signing_digest(), self._binding_key)
-
-        result = kerberos.authGSSClientSessionKey(context)
-        session_key = kerberos.authGSSClientResponse(context)[:16]
-
-        if self.negotiate_response.dialect_revision >= 0x300:
-            signing_key = digest.derive_key(session_key, 'SMB2AESCMAC', 'SmbSign')[:16]
-        else:
-            signing_key = session_key
-
-        # Verify final signature
-        smb_res.verify(self.signing_digest(), signing_key)
-
-        if bind:
-            self._binding = None
-            self._binding_key = None
-            session = bind
-        else:
-            session = Session(self.client, smb_res.session_id, session_key)
-
-        return session.addchannel(self, signing_key)
-
-    def session_setup_ntlm(self, domain, user, password, bind=None, resume=None,
-                           ntlm_version=None):
-        """
-        Establish a session.
-
-        Establishes a session, using NTLM.  Returns
-        a L{Channel} object which can be used for further requests on the given
-        connection and session.
-
-        @type domain: str
-        @type user: str
-        @type password: str
-        @type bind: L{Session}
-        @param bind: An existing session to bind.
-        @type resume: L{Session}
-        @param resume: An previous session to resume.
-        @type ntlm_version: NtlmVersion
-        @param ntlm_version: specify the version of NTLM to use, 1 or 2
-        """
-        assert self.negotiate_response is not None
-
-        prev_session_id = 0
-        session_id = 0
-        smb_res = None
-
-        if bind:
-            assert self.negotiate_response.dialect_revision >= 0x300
-            session_id = bind.session_id
-            self._binding = bind
-            self._binding_key = digest.derive_key(bind.session_key, 'SMB2AESCMAC', 'SmbSign')[:16]
-        elif resume:
-            assert self.negotiate_response.dialect_revision >= 0x300
-            prev_session_id = resume.session_id
-
-        def send_session_setup(sec_buf, smb_res=None):
-            smb_req = self.request()
-            session_req = smb2.SessionSetupRequest(smb_req)
-
-            smb_req.flags = smb2.SMB2_FLAGS_SIGNED if bind else 0
-            smb_req.session_id = smb_res.session_id if smb_res else session_id
-            session_req.previous_session_id = prev_session_id
-            session_req.flags = smb2.SMB2_SESSION_FLAG_BINDING if bind else 0
-            session_req.security_mode = smb2.SMB2_NEGOTIATE_SIGNING_ENABLED
-            session_req.security_buffer = sec_buf
-
-            smb_res = self.transceive(smb_req.parent)[0]
-            session_res = smb_res[0]
-
-            if bind and smb_res.status != ntstatus.STATUS_SUCCESS:
-                # Need to verify intermediate signatures
-                smb_res.verify(self.signing_digest(), self._binding_key)
-
-            return session_res.security_buffer, smb_res
-
-        auth = ntlm.NtlmProvider(domain, user, password)
-        if ntlm_version is not None:
-            auth.ntlm_version = ntlm_version
-        sec_buf, smb_res = send_session_setup(auth.negotiate())
-        sec_buf, smb_res = send_session_setup(auth.authenticate(sec_buf), smb_res)
-        session_key = auth.exported_session_key.tostring()
-
-        if self.negotiate_response.dialect_revision >= 0x300:
-            signing_key = digest.derive_key(session_key, 'SMB2AESCMAC', 'SmbSign')[:16]
-        else:
-            signing_key = session_key
-
-        # Verify final signature
-        smb_res.verify(self.signing_digest(), signing_key)
-
-        if bind:
-            self._binding = None
-            self._binding_key = None
-            session = bind
-        else:
-            session = Session(self.client, smb_res.session_id, session_key)
-
-        return session.addchannel(self, signing_key)
+        session_context = self.SessionSetupContext(self, creds, bind, resume)
+        return session_context.submit().result()
 
     # Return a fresh netbios frame with connection as context
     def frame(self):
