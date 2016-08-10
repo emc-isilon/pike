@@ -186,15 +186,16 @@ class Smb2(core.Frame):
             self.next_command = 0
 
         next_command_hole(self.next_command)
-        
+
         # Calculate and backpatch signature
-        if self.flags & SMB2_FLAGS_SIGNED:
-            digest = self.context.signing_digest()
-            key = self.context.signing_key(self.session_id)
-            self.signature = digest(key, self.start[:cur])[:16]
-        else:
-            self.signature = array.array('B',[0]*16)
-            
+        if not hasattr(self, "signature"):
+            if self.flags & SMB2_FLAGS_SIGNED:
+                digest = self.context.signing_digest()
+                key = self.context.signing_key(self.session_id)
+                self.signature = digest(key, self.start[:cur])[:16]
+            else:
+                self.signature = array.array('B',[0]*16)
+
         signature_hole(self.signature)
 
     def _decode(self, cur):
