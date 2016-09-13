@@ -170,3 +170,49 @@ class CapMulticredit(CapTest):
     # multicredit cap is not advertised to downlevel client
     def test_downlevel(self):
         self.downlevel_cap(smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
+
+class NegotiateContext(test.PikeTest):
+    def negotiate(self, *args, **kwds):
+        self.conn = model.Client(dialects=[smb2.DIALECT_SMB3_1_1]).connect(self.server, self.port)
+        self.client = self.conn.client
+        return self.conn.negotiate(*args, **kwds).negotiate_response
+
+    def test_preauth_integrity_capabilities(self):
+        resp = self.negotiate(hash_algorithms=[smb2.SMB2_SHA_512])
+        if resp.dialect_revision >= smb2.DIALECT_SMB3_1_1:
+            for ctx in resp:
+                if isinstance(ctx, smb2.PreauthIntegrityCapabilitiesResponse):
+                    self.assertIn(smb2.SMB2_SHA_512, ctx.hash_algorithms)
+                    self.assertGreater(len(ctx.salt), 0)
+
+    def test_encryption_capabilities_both_prefer_ccm(self):
+        resp = self.negotiate(ciphers=[smb2.SMB2_AES_128_CCM, smb2.SMB2_AES_128_GCM])
+        if resp.dialect_revision >= smb2.DIALECT_SMB3_1_1:
+            for ctx in resp:
+                if isinstance(ctx, smb2.EncryptionCapabilitiesResponse):
+                    self.assertEqual(len(ctx.ciphers), 1)
+                    self.assertIn(smb2.SMB2_AES_128_CCM, ctx.ciphers)
+
+    def test_encryption_capabilities_both_prefer_gcm(self):
+        resp = self.negotiate(ciphers=[smb2.SMB2_AES_128_GCM, smb2.SMB2_AES_128_CCM])
+        if resp.dialect_revision >= smb2.DIALECT_SMB3_1_1:
+            for ctx in resp:
+                if isinstance(ctx, smb2.EncryptionCapabilitiesResponse):
+                    self.assertEqual(len(ctx.ciphers), 1)
+                    self.assertIn(smb2.SMB2_AES_128_GCM, ctx.ciphers)
+
+    def test_encryption_capabilities_ccm(self):
+        resp = self.negotiate(ciphers=[smb2.SMB2_AES_128_CCM])
+        if resp.dialect_revision >= smb2.DIALECT_SMB3_1_1:
+            for ctx in resp:
+                if isinstance(ctx, smb2.EncryptionCapabilitiesResponse):
+                    self.assertEqual(len(ctx.ciphers), 1)
+                    self.assertIn(smb2.SMB2_AES_128_CCM, ctx.ciphers)
+
+    def test_encryption_capabilities_gcm(self):
+        resp = self.negotiate(ciphers=[smb2.SMB2_AES_128_GCM])
+        if resp.dialect_revision >= smb2.DIALECT_SMB3_1_1:
+            for ctx in resp:
+                if isinstance(ctx, smb2.EncryptionCapabilitiesResponse):
+                    self.assertEqual(len(ctx.ciphers), 1)
+                    self.assertIn(smb2.SMB2_AES_128_GCM, ctx.ciphers)
