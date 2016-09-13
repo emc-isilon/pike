@@ -468,14 +468,15 @@ class Frame(object):
         self._decode_post(cur)
 
     def serialize(self):
-        arr = array.array('B')
-        cursor = Cursor(arr, 0)
+        self.buf = array.array('B')
+        cursor = Cursor(self.buf, 0)
         self.encode(cursor)
-        return arr
+        return self.buf
 
     def parse(self, arr):
         cursor = Cursor(arr, 0)
         self.decode(cursor)
+        self.buf = arr
 
     def next_sibling(self):
         children = self.parent.children
