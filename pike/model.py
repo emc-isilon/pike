@@ -819,14 +819,15 @@ class Connection(asyncore.dispatcher):
                         self.conn.negotiate_response.security_buffer)
 
             elif self.interim_future:
-                smb_res = self.interim_future.result()
+                with self.session_future:
+                    smb_res = self.interim_future.result()
                 self.interim_future = None
                 self.responses.append(smb_res)
 
                 if smb_res.status == ntstatus.STATUS_SUCCESS:
                     # session is established
-                    self.session_future.complete(
-                            self._finish(smb_res))
+                    with self.session_future:
+                        self.session_future(self._finish(smb_res))
                     return self.session_future
                 else:
                     # process interim request
