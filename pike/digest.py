@@ -57,7 +57,7 @@ def aes128_cmac(key,message):
             cout = (data[i] & 0x80) >> 7
             data[i] = ((data[i] << 1) | cin) & 0xFF
             cin = cout
-        
+
         return cout
 
     def xor(data1, data2):
@@ -90,7 +90,7 @@ def aes128_cmac(key,message):
 
     if (n == 0):
         n = 1
-    
+
     subkey1, subkey2 = subkeys(array.array('B',key))
 
     for i in xrange(0, n - 1):

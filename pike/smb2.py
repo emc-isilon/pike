@@ -296,6 +296,7 @@ class Command(core.Frame):
         if cur.decode_uint16le() != self.structure_size:
             raise core.BadPacket()
 
+
 @Smb2.request
 class Request(Command):
     pass
@@ -358,12 +359,12 @@ SecurityMode.import_items(globals())
 
 class GlobalCaps(core.FlagEnum):
     SMB2_GLOBAL_CAP_DFS                = 0x00000001
-    SMB2_GLOBAL_CAP_LEASING            = 0x00000002 
+    SMB2_GLOBAL_CAP_LEASING            = 0x00000002
     SMB2_GLOBAL_CAP_LARGE_MTU          = 0x00000004
     SMB2_GLOBAL_CAP_MULTI_CHANNEL      = 0x00000008
     SMB2_GLOBAL_CAP_PERSISTENT_HANDLES = 0x00000010
     SMB2_GLOBAL_CAP_DIRECTORY_LEASING  = 0x00000020
-    SMB2_GLOBAL_CAP_ENCRYPTION         = 0x00000040 
+    SMB2_GLOBAL_CAP_ENCRYPTION         = 0x00000040
 
 GlobalCaps.import_items(globals())
 
@@ -426,7 +427,6 @@ class NegotiateResponse(Response):
 
         # Advance to security buffer
         cur.advanceto(self.parent.start + offset)
-
         self.security_buffer = cur.decode_bytes(length)
 
 # Session setup constants
@@ -737,7 +737,7 @@ FileAttributes.import_items(globals())
 class CreateRequest(Request):
     command_id = SMB2_CREATE
     structure_size = 57
-    
+
     def __init__(self, parent):
         Request.__init__(self, parent)
         self.security_flags = 0
@@ -774,15 +774,15 @@ class CreateRequest(Request):
         cur.encode_uint32le(self.share_access)
         cur.encode_uint32le(self.create_disposition)
         cur.encode_uint32le(self.create_options)
-        
+
         name_offset_hole = cur.hole.encode_uint16le(0)
         name_length_hole = cur.hole.encode_uint16le(0)
 
         create_contexts_offset_hole = cur.hole.encode_uint32le(0)
         create_contexts_length_hole = cur.hole.encode_uint32le(0)
-        
+
         cur.align(self.parent.start, 2)
-        
+
         buffer_start = cur.copy()
 
 
@@ -905,13 +905,13 @@ class CreateResponse(Response):
                     cur.decode_uint16le()
                     data_offset = cur.decode_uint16le()
                     data_length = cur.decode_uint32le()
-                    
+
                     name = (con_start + name_offset).decode_bytes(name_length).tostring()
-                    
+
                     cur.seekto(con_start + data_offset)
                     with cur.bounded(cur, cur + data_length):
                         self._context_table[name](self).decode(cur)
-                    
+
                     next_cur = con_start + next_offset if next_offset != 0 else None
 
             # Make sure we end up at the end regardless of how much we jumped around
@@ -1418,7 +1418,7 @@ CloseFlags.import_items(globals())
 class CloseResponse(Response):
     command_id = SMB2_CLOSE
     structure_size = 60
-    
+
     def __init__(self, parent):
         Response.__init__(self, parent)
         self.flags = 0
@@ -1503,12 +1503,12 @@ class QueryDirectoryRequest(Request):
         cur.encode_uint32le(self.file_index)
         cur.encode_uint64le(self.file_id[0])
         cur.encode_uint64le(self.file_id[1])
-        
+
         file_name_offset_hole = cur.hole.encode_uint16le(0)
         file_name_length_hole = cur.hole.encode_uint16le(0)
-        
+
         cur.encode_uint32le(self.output_buffer_length)
-        
+
         file_name_start = cur.copy()
         file_name_offset_hole(file_name_start - self.parent.start)
         cur.encode_utf16le(self.file_name)
@@ -1523,14 +1523,14 @@ class QueryDirectoryResponse(Response):
 
     def __init__(self, parent):
         Response.__init__(self, parent)
-        
+
         # Try to figure out file information class by looking up
         # associated request in context
         context = self.context
 
         if context:
             request = context.get_request(parent.message_id)
-        
+
         if request:
             self._file_information_class = request[0].file_information_class
         else:
@@ -1547,7 +1547,7 @@ class QueryDirectoryResponse(Response):
     def _decode(self, cur):
         output_buffer_offset = cur.decode_uint16le()
         output_buffer_length = cur.decode_uint32le()
-        
+
         cur.advanceto(self.parent.start + output_buffer_offset)
 
         end = cur + output_buffer_length
@@ -1587,7 +1587,7 @@ ScanFlags.import_items(globals())
 class QueryInfoRequest(Request):
     command_id = SMB2_QUERY_INFO
     structure_size = 41
-    
+
     def __init__(self, parent):
         Request.__init__(self, parent)
         self.info_type = None
@@ -1596,16 +1596,16 @@ class QueryInfoRequest(Request):
         self.flags = 0
         self.file_id = None
         self.output_buffer_length = 4096
-        
+
     def _encode(self, cur):
         cur.encode_uint8le(self.info_type)
         cur.encode_uint8le(self.file_information_class)
         cur.encode_uint32le(self.output_buffer_length)
-        
+
         # We're not implementing the input buffer support right now
         cur.encode_uint16le(0)
         cur.encode_uint16le(0)  # Reserved
-        
+
         # We're not implementing the input buffer support right now
         cur.encode_uint32le(0)
 
@@ -1618,41 +1618,41 @@ class QueryInfoRequest(Request):
 class QueryInfoResponse(Response):
     command_id = SMB2_QUERY_INFO
     structure_size = 9
-    
+
     _file_info_map = {}
     file_information = core.Register(_file_info_map, "file_information_class")
 
     _fs_info_map = {}
     fs_information = core.Register(_fs_info_map, "file_information_class")
-    
+
     def __init__(self, parent):
         Response.__init__(self, parent)
         self._info_type = 0
         self._file_information_class = 0
-        
+
         context = self.context
         if context:
             request = context.get_request(parent.message_id)
-        
+
         if request:
             self._info_type = request[0].info_type
             self._file_information_class = request[0].file_information_class
-        
+
         self._entries = []
-        
+
     def _children(self):
         return self._entries
-    
+
     def append(self, e):
         self._entries.append(e)
-        
+
     def _decode(self, cur):
         output_buffer_offset = cur.decode_uint16le()
         output_buffer_length = cur.decode_uint32le()
-        
+
         cur.advanceto(self.parent.start + output_buffer_offset)
         end = cur + output_buffer_length
-        
+
         if self._file_information_class is not None:
             if self._info_type == SMB2_0_INFO_FILE:
                 table = self._file_info_map
@@ -1667,7 +1667,7 @@ class QueryInfoResponse(Response):
                     cls(self).decode(cur)
         else:
             cur.advanceto(end)
-        
+
 
 class SetInfoRequest(Request):
     command_id = SMB2_SET_INFO
@@ -1681,15 +1681,15 @@ class SetInfoRequest(Request):
         self.input_buffer_offset = 0
         self.security_info = 0                # SMB2_QUERY_INFO.AdditionalInformation
         self.file_id = None
-        
+
         self._entries = []
-        
+
     def _children(self):
         return self._entries
-    
+
     def append(self, e):
         self._entries.append(e)
-        
+
     def _encode(self, cur):
         if not self.info_type:
             # Only one supported at the moment.
@@ -1703,11 +1703,11 @@ class SetInfoRequest(Request):
 
         cur.encode_uint8le(self.info_type)
         cur.encode_uint8le(self.file_information_class)
-        
+
         buffer_length_hole = cur.hole.encode_uint32le(0)
         buffer_offset_hole = cur.hole.encode_uint16le(0)
         cur.encode_uint16le(0)  # Reserved
-        
+
         cur.encode_uint32le(self.security_info)
         cur.encode_uint64le(self.file_id[0])
         cur.encode_uint64le(self.file_id[1])
@@ -1727,7 +1727,7 @@ class SetInfoResponse(Response):
 
     def __init__(self, parent):
         Response.__init__(self, parent)
-        
+
     def _decode(self, cur):
         #The response is only the structure size
         pass
@@ -1744,16 +1744,16 @@ class FileSystemInformation(core.Frame):
 
 class FileAccessInformation(FileInformation):
     file_information_class = FILE_ACCESS_INFORMATION
-    
+
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
         self.access_flags = 0
         if parent is not None:
             parent.append(self)
-        
+
     def _decode(self, cur):
         self.access_flags = Access(cur.decode_uint32le())
-        
+
 # Alignment Requirement flags
 class Alignment(core.ValueEnum):
     FILE_BYTE_ALIGNMENT = 0x00000000
@@ -1771,24 +1771,24 @@ Alignment.import_items(globals())
 
 class FileAlignmentInformation(FileInformation):
     file_information_class = FILE_ALIGNMENT_INFORMATION
-    
+
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
         self.alignment_requirement = 0
         if parent is not None:
             parent.append(self)
-            
+
     def _decode(self, cur):
         self.alignment_requirement = Alignment(cur.decode_uint32le())
 
 class FileAllInformation(FileInformation):
     file_information_class = FILE_ALL_INFORMATION
-    
+
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
         if parent is not None:
             parent.append(self)
-        
+
         self.basic_information = FileBasicInformation()
         self.standard_information = FileStandardInformation()
         self.internal_information = FileInternalInformation()
@@ -1798,11 +1798,11 @@ class FileAllInformation(FileInformation):
         self.mode_information = FileModeInformation()
         self.alignment_information = FileAlignmentInformation()
         self.name_information = FileNameInformation()
-            
+
     def _decode(self, cur):
         for field in self.fields:
             getattr(self, field).decode(cur)
-            
+
 class FileDirectoryInformation(FileInformation):
     file_information_class = FILE_DIRECTORY_INFORMATION
 
@@ -1838,7 +1838,7 @@ class FileDirectoryInformation(FileInformation):
             cur.advanceto(self.start + next_offset)
         else:
             cur.advanceto(cur.upperbound)
-            
+
 
 class FileFullDirectoryInformation(FileInformation):
     file_information_class = FILE_FULL_DIRECTORY_INFORMATION
@@ -1967,7 +1967,7 @@ class FileIdBothDirectoryInformation(FileInformation):
 
 class FileBasicInformation(FileInformation):
     file_information_class = FILE_BASIC_INFORMATION
-    
+
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
         self.creation_time = 0
@@ -1977,7 +1977,7 @@ class FileBasicInformation(FileInformation):
         self.file_attributes = 0
         if parent is not None:
             parent.append(self)
-        
+
     def _decode(self, cur):
         self.creation_time = nttime.NtTime(cur.decode_uint64le())
         self.last_access_time = nttime.NtTime(cur.decode_uint64le())
@@ -2094,42 +2094,42 @@ class FileCompressionInformation(FileInformation):
 
 class FileInternalInformation(FileInformation):
     file_information_class = FILE_INTERNAL_INFORMATION
-    
+
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
         self.index_number = 0
         if parent is not None:
             parent.append(self)
-            
+
     def _decode(self, cur):
         self.index_number = cur.decode_uint64le()
 
 class FileModeInformation(FileInformation):
     file_information_class = FILE_MODE_INFORMATION
-    
+
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
         # See Create options (e.g. FILE_DELETE_ON_CLOSE) for available flags
         self.mode = 0
         if parent is not None:
             parent.append(self)
-        
+
     def _decode(self, cur):
         self.mode = CreateOptions(cur.decode_uint32le())
-        
+
     def _encode(self, cur):
         cur.encode_uint32le(self.mode)
 
 class FileNameInformation(FileInformation):
     file_information_class = FILE_NAME_INFORMATION
-    
+
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
         self.file_name = None
-        
+
         if parent is not None:
             parent.append(self)
-            
+
     def _decode(self, cur):
         file_name_length = cur.decode_uint32le()
         self.file_name = cur.decode_utf16le(file_name_length)
@@ -2215,45 +2215,45 @@ class FileValidDataLengthInformation(FileInformation):
 
 class FileNamesInformation(FileInformation):
     file_information_class = FILE_NAMES_INFORMATION
-    
+
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
         self.file_index = 0
         self.file_name = None
-        
+
         if parent is not None:
             parent.append(self)
-            
+
     def _decode(self, cur):
         next_entry_offset = cur.decode_uint32le()
         self.file_index = cur.decode_uint32le()
-        
+
         file_name_length = cur.decode_uint32le()
         self.file_name = cur.decode_utf16le(file_name_length)
-        
+
         if next_entry_offset:
             cur.advanceto(self.start + next_entry_offset)
         else:
             cur.advanceto(cur.upperbound)
-        
+
 class FilePositionInformation(FileInformation):
     file_information_class = FILE_POSITION_INFORMATION
-    
+
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
         self.current_byte_offset = 0
         if parent is not None:
             parent.append(self)
-            
+
     def _decode(self, cur):
         self.current_byte_offset = cur.decode_uint64le()
-    
+
     def _encode(self, cur):
         cur.encode_uint64le(self.current_byte_offset)
 
 class FileStandardInformation(FileInformation):
     file_information_class = FILE_STANDARD_INFORMATION
-    
+
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
         self.allocation_size = 0
@@ -2263,7 +2263,7 @@ class FileStandardInformation(FileInformation):
         self.directory = 0
         if parent is not None:
             parent.append(self)
-            
+
     def _decode(self, cur):
         self.allocation_size = cur.decode_uint64le()
         self.end_of_file = cur.decode_uint64le()
@@ -2281,16 +2281,16 @@ class FileStandardInformation(FileInformation):
         cur.encode_uint8le(self.directory)
         # Ignore 2-bytes Reserved field
         cur.encode_uint16le()
-        
+
 class FileEaInformation(FileInformation):
     file_information_class = FILE_EA_INFORMATION
-    
+
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
         self.ea_size = 0
         if parent is not None:
             parent.append(self)
-    
+
     def _decode(self, cur):
         self.ea_size = cur.decode_uint32le()
 
@@ -2692,7 +2692,7 @@ class LeaseBreakAcknowledgement(Request):
 class OplockBreakResponse(Response):
     command_id = SMB2_OPLOCK_BREAK
     structure_size = 24
-    
+
     def __init__(self, parent):
         Response.__init__(self, parent)
         self.oplock_level = 0
@@ -2709,7 +2709,7 @@ class OplockBreakResponse(Response):
 class LeaseBreakResponse(Response):
     command_id = SMB2_OPLOCK_BREAK
     structure_size = 36
-    
+
     def __init__(self, parent):
         Response.__init__(self, parent)
         self.flags = 0
@@ -2883,7 +2883,7 @@ class LockRequest(Request):
     """
     command_id = SMB2_LOCK
     structure_size = 48
-    
+
     def __init__(self, parent):
         Request.__init__(self, parent)
         self.file_id = None
@@ -2944,7 +2944,7 @@ class IoctlFlags(core.FlagEnum):
     SMB2_0_IOCTL_IS_FSCTL = 0x00000001
 
 IoctlFlags.import_items(globals())
-    
+
 class IoctlRequest(Request):
     command_id = SMB2_IOCTL
     structure_size = 57
@@ -2993,7 +2993,7 @@ class IoctlRequest(Request):
 
         buffer_start = cur.copy()
         input_offset_hole(buffer_start - self.parent.start)
-        
+
         # Encode the ioctl
         self.ioctl_input.encode(cur)
         # Set the ioctl count, which is the length in bytes

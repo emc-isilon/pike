@@ -176,7 +176,7 @@ class Future(object):
         @param timeout: The time in seconds before giving up and raising TimeoutError
         """
         self.wait(timeout)
-        
+
         if isinstance(self.response, BaseException):
             traceback = self.traceback
             self.traceback = None
@@ -272,7 +272,7 @@ class Client(object):
         while len(self._oplock_break_queue) == 0:
             asyncore.loop(count=1)
         return self._oplock_break_queue.pop()
-    
+
     # Do not use, may be removed.  Use lease_break_future.
     def next_lease_break(self):
         while len(self._lease_break_queue) == 0:
@@ -290,7 +290,7 @@ class Client(object):
         @type file_id: (number, number)
         @param file_id: The file ID of the oplocked file.
         """
-        
+
         future = Future(None)
 
         for smb_res in self._oplock_break_queue[:]:
@@ -444,7 +444,7 @@ class Connection(asyncore.dispatcher):
 
         self.error = None
         self.traceback = None
-    
+
         for result in socket.getaddrinfo(server, port,
                                          0,
                                          socket.SOCK_STREAM,
@@ -565,7 +565,7 @@ class Connection(asyncore.dispatcher):
 
         with future:
             req = future.request
-            
+
             # Assign message id
             # FIXME: credit tracking
             if req.message_id is None:
@@ -706,7 +706,7 @@ class Connection(asyncore.dispatcher):
         """
         smb_req = self.request()
         neg_req = smb2.NegotiateRequest(smb_req)
-        
+
         neg_req.dialects = self.client.dialects
         neg_req.security_mode = self.client.security_mode
         neg_req.capabilities = self.client.capabilities
@@ -911,7 +911,7 @@ class Connection(asyncore.dispatcher):
 
     def signing_digest(self):
         assert self.negotiate_response is not None
-        if self.negotiate_response.dialect_revision >= 0x300:
+        if self.negotiate_response.dialect_revision >= smb2.DIALECT_SMB3_0:
             return digest.aes128_cmac
         else:
             return digest.sha256_hmac
@@ -1229,7 +1229,7 @@ class Channel(object):
                     return
                 else:
                     raise
-            
+
     def query_file_info_request(
             self,
             create_res,
@@ -1238,9 +1238,9 @@ class Channel(object):
             output_buffer_length=4096):
         smb_req = self.request(obj=create_res)
         query_req = smb2.QueryInfoRequest(smb_req)
-        
+
         query_req.info_type = info_type
-        query_req.file_information_class = file_information_class        
+        query_req.file_information_class = file_information_class
         query_req.file_id = create_res.file_id
         query_req.output_buffer_length = output_buffer_length
         return query_req
@@ -1256,7 +1256,7 @@ class Channel(object):
                     file_information_class,
                     info_type,
                     output_buffer_length).parent.parent)[0][0][0]
-    
+
     @contextlib.contextmanager
     def set_file_info(self, handle, cls):
         smb_req = self.request(obj=handle)
