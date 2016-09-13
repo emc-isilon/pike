@@ -108,6 +108,25 @@ class ShareCaps(core.FlagEnum):
 
 ShareCaps.import_items(globals())
 
+# Share flags
+class ShareFlags(core.FlagEnum):
+    SMB2_SHAREFLAG_MANUAL_CACHING = 0x00000000
+    SMB2_SHAREFLAG_AUTO_CACHING = 0x00000010
+    SMB2_SHAREFLAG_VDO_CACHING = 0x00000020
+    SMB2_SHAREFLAG_NO_CACHING = 0x00000030
+    SMB2_SHAREFLAG_DFS = 0x00000001
+    SMB2_SHAREFLAG_DFS_ROOT = 0x00000002
+    SMB2_SHAREFLAG_RESTRICT_EXCLUSIVE_OPENS = 0x00000100
+    SMB2_SHAREFLAG_FORCE_SHARED_DELETE = 0x00000200
+    SMB2_SHAREFLAG_ALLOW_NAMESPACE_CACHING = 0x00000400
+    SMB2_SHAREFLAG_ACCESS_BASED_DIRECTORY_ENUM = 0x00000800
+    SMB2_SHAREFLAG_FORCE_LEVELII_OPLOCK = 0x00001000
+    SMB2_SHAREFLAG_ENABLE_HASH_V1 = 0x00002000
+    SMB2_SHAREFLAG_ENABLE_HASH_V2 = 0x00004000
+    SMB2_SHAREFLAG_ENCRYPT_DATA = 0x00008000
+
+ShareFlags.import_items(globals())
+
 # Misc
 RELATED_FID = (2**64-1,2**64-1)
 UNSOLICITED_MESSAGE_ID = (2**64-1)
@@ -167,7 +186,7 @@ class Smb2(core.Frame):
         if self.flags & SMB2_FLAGS_ASYNC_COMMAND:
             cur.encode_uint64le(self.async_id)
         else:
-            cur.encode_uint32le(0)
+            cur.encode_uint32le(0xfeff)     # default process id
             cur.encode_uint32le(self.tree_id)
         cur.encode_uint64le(self.session_id)
         # Set Signature to 0 for now
@@ -531,6 +550,7 @@ class PreauthIntegrityCapabilitiesResponse(NegotiateResponseContext,
 class SessionFlags(core.FlagEnum):
     SMB2_SESSION_FLAG_NONE    = 0x00
     SMB2_SESSION_FLAG_BINDING = 0x01
+    SMB2_SESSION_FLAG_ENCRYPT_DATA = 0x04
 
 SessionFlags.import_items(globals())
 
