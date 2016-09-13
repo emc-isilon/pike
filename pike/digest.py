@@ -44,12 +44,13 @@ import core
 def sha256_hmac(key,message):
     return array.array('B',
         Crypto.Hash.HMAC.new(
-            key,
-            message,
+            key.tostring(),
+            message.tostring(),
             Crypto.Hash.SHA256).digest())
 
 def aes128_cmac(key,message):
-    aes = Crypto.Cipher.AES.new(key)
+    aes = Crypto.Cipher.AES.new(key.tostring(),
+                                mode=Crypto.Cipher.AES.MODE_ECB)
 
     def shiftleft(data):
         cin = 0
@@ -69,7 +70,7 @@ def aes128_cmac(key,message):
         zero = array.array('B', [0]*16)
         rb = array.array('B', [0]*15 + [0x87])
 
-        key1 = array.array('B', aes.encrypt(zero))
+        key1 = array.array('B', aes.encrypt(zero.tostring()))
 
         if shiftleft(key1):
             xor(key1, rb)
@@ -96,7 +97,7 @@ def aes128_cmac(key,message):
 
     for i in xrange(0, n - 1):
         xor(mac, message[i*16:i*16+16])
-        mac = array.array('B',aes.encrypt(mac))
+        mac = array.array('B',aes.encrypt(mac.tostring()))
 
     if last_complete:
         scratch[0:16] = message[-16:]
@@ -107,7 +108,7 @@ def aes128_cmac(key,message):
         xor(scratch, subkey2)
 
     xor(mac, scratch)
-    mac = array.array('B',aes.encrypt(mac))
+    mac = array.array('B',aes.encrypt(mac.tostring()))
 
     return mac
 
@@ -124,7 +125,6 @@ def derive_key(key, label, context):
     cur.encode_uint8be(0)
     cur.encode_uint8be(0)
     cur.encode_bytes(context)
-    cur.encode_uint8be(0)
     cur.encode_uint32be(len(key)*8)
 
     return sha256_hmac(key, message)

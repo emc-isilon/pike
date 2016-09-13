@@ -406,7 +406,9 @@ class KerberosProvider(object):
                     None)
         else:
             kerberos.authGSSClientSessionKey(self.context)
-            return (None, kerberos.authGSSClientResponse(self.context)[:16])
+            return (None,
+                    array.array('B',
+                        kerberos.authGSSClientResponse(self.context)[:16]))
 
 class Connection(asyncore.dispatcher):
     """
@@ -794,7 +796,7 @@ class Connection(asyncore.dispatcher):
                 conn._binding_key = digest.derive_key(
                         bind.session_key,
                         'SMB2AESCMAC',
-                        'SmbSign')[:16]
+                        'SmbSign\0')[:16]
             elif resume:
                 assert conn.negotiate_response.dialect_revision >= 0x300
                 self.prev_session_id = resume.session_id
@@ -825,7 +827,7 @@ class Connection(asyncore.dispatcher):
                         self.conn._pre_auth_integrity_hash)[:16]
             elif self.conn.negotiate_response.dialect_revision >= smb2.DIALECT_SMB3_0:
                 signing_key = digest.derive_key(
-                        self.session_key, 'SMB2AESCMAC', 'SmbSign')[:16]
+                        self.session_key, 'SMB2AESCMAC', 'SmbSign\0')[:16]
             else:
                 signing_key = self.session_key
 
