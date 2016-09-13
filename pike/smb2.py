@@ -58,6 +58,8 @@ class Dialect(core.ValueEnum):
     DIALECT_SMB2_002      = 0x0202
     DIALECT_SMB2_1        = 0x0210
     DIALECT_SMB3_0        = 0x0300
+    DIALECT_SMB3_0_2      = 0x0302
+    DIALECT_SMB3_1_1      = 0x0311
 
 Dialect.import_items(globals())
 
@@ -368,6 +370,17 @@ class GlobalCaps(core.FlagEnum):
 
 GlobalCaps.import_items(globals())
 
+class NegotiateContextType(core.ValueEnum):
+    SMB2_PREAUTH_INTEGRITY_CAPABILITIES = 0x0001
+    SMB2_ENCRYPTION_CAPABILITIES = 0x0002
+
+NegotiateContextType.import_items(globals())
+
+class HashAlgorithms(core.ValueEnum):
+    SMB2_SHA_512 = 0x0001
+
+HashAlgorithms.import_items(globals())
+
 class NegotiateRequest(Request):
     command_id = SMB2_NEGOTIATE
     structure_size = 36
@@ -378,6 +391,10 @@ class NegotiateRequest(Request):
         self.capabilities = 0
         self.client_guid = [0]*16
         self.dialects = []
+        self._negotiate_contexts = []
+
+    def _children(self):
+        return self._negotiate_contexts
 
     def _encode(self, cur):
         cur.encode_uint16le(len(self.dialects))
@@ -385,13 +402,37 @@ class NegotiateRequest(Request):
         cur.encode_uint16le(0)
         cur.encode_uint32le(self.capabilities)
         cur.encode_bytes(self.client_guid)
-        cur.encode_uint64le(0)
+        if DIALECT_SMB3_1_1 in self.dialects:
+            negotiate_contexts_offset_hole = cur.hole.encode_uint32le(0)
+            cur.encode_uint16le(len(self._negotiate_contexts))
+            cur.encode_uint16le(0)      #reserved
+        else:
+            cur.encode_uint64le(0)
         for dialect in self.dialects:
             cur.encode_uint16le(dialect)
+
+        if self._negotiate_contexts:
+            cur.align(self.parent.start, 8)
+            negotiate_contexts_offset_hole(cur - self.parent.start)
+
+            for ctx in self._negotiate_contexts:
+                cur.align(self.parent.start, 8)
+                cur.encode_uint16le(ctx.context_type)
+                data_length_hole = cur.hole.encode_uint16le(0)
+                cur.encode_uint32le(0)      # reserved
+                data_start = cur.copy()
+                ctx.encode(cur)
+                data_length_hole(cur - data_start)
+
+    def append(self, e):
+        self._negotiate_contexts.append(e)
 
 class NegotiateResponse(Response):
     command_id = SMB2_NEGOTIATE
     structure_size = 65
+
+    _context_table = {}
+    negotiate_context = core.Register(_context_table, 'context_type')
 
     def __init__(self, parent):
         Response.__init__(self, parent)
@@ -405,12 +446,15 @@ class NegotiateResponse(Response):
         self.system_time = 0
         self.server_start_time = 0
         self.security_buffer = None
+        self._negotiate_contexts = []
+
+    def _children(self):
+        return self._negotiate_contexts
 
     def _decode(self, cur):
         self.security_mode = SecurityMode(cur.decode_uint16le())
         self.dialect_revision = Dialect(cur.decode_uint16le())
-        # Reserved (ignore)
-        cur.decode_uint16le()
+        negotiate_contexts_count = cur.decode_uint16le()
         self.server_guid = cur.decode_bytes(16)
         self.capabilities = GlobalCaps(cur.decode_uint32le())
         self.max_transact_size = cur.decode_uint32le()
@@ -422,12 +466,66 @@ class NegotiateResponse(Response):
         offset = cur.decode_uint16le()
         length = cur.decode_uint16le()
 
-        # Reserved2 (ignore)
-        cur.decode_uint32le()
+        negotiate_contexts_offset = cur.decode_uint32le()
 
         # Advance to security buffer
         cur.advanceto(self.parent.start + offset)
         self.security_buffer = cur.decode_bytes(length)
+        if negotiate_contexts_count > 0:
+            cur.seekto(self.parent.start + negotiate_contexts_offset)
+            for ix in xrange(negotiate_contexts_count):
+                cur.align(self.parent.start, 8)
+                context_type = cur.decode_uint16le()
+                data_length = cur.decode_uint16le()
+                cur.decode_uint32le()       # reserved
+                ctx = self._context_table[context_type]
+                ctx(self).decode(cur)
+
+    def append(self, e):
+        self._negotiate_contexts.append(e)
+
+class NegotiateRequestContext(core.Frame):
+    def __init__(self, parent):
+        core.Frame.__init__(self, parent)
+        if parent is not None:
+            parent.append(self)
+
+@NegotiateResponse.negotiate_context
+class NegotiateResponseContext(core.Frame):
+    def __init__(self, parent):
+        core.Frame.__init__(self, parent)
+        if parent is not None:
+            parent.append(self)
+
+class PreauthIntegrityCapabilities(core.Frame):
+    context_type = SMB2_PREAUTH_INTEGRITY_CAPABILITIES
+    def __init__(self):
+        self.hash_algorithms = []
+        self.salt = ""
+    def _encode(self, cur):
+        cur.encode_uint16le(len(self.hash_algorithms))
+        cur.encode_uint16le(len(self.salt))
+        for h in self.hash_algorithms:
+            cur.encode_uint16le(h)
+        cur.encode_bytes(self.salt)
+    def _decode(self, cur):
+        hash_algorithm_count = cur.decode_uint16le()
+        salt_length = cur.decode_uint16le()
+        for ix in xrange(hash_algorithm_count):
+            self.hash_algorithms.append(HashAlgorithms(cur.decode_uint16le()))
+        self.salt = cur.decode_bytes(salt_length)
+
+class PreauthIntegrityCapabilitiesRequest(NegotiateRequestContext,
+                                          PreauthIntegrityCapabilities):
+    def __init__(self, parent):
+        NegotiateRequestContext.__init__(self, parent)
+        PreauthIntegrityCapabilities.__init__(self)
+
+class PreauthIntegrityCapabilitiesResponse(NegotiateResponseContext,
+                                           PreauthIntegrityCapabilities):
+    def __init__(self, parent):
+        NegotiateResponseContext.__init__(self, parent)
+        PreauthIntegrityCapabilities.__init__(self)
 
 # Session setup constants
 class SessionFlags(core.FlagEnum):

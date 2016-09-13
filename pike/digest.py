@@ -36,6 +36,7 @@
 
 import Crypto.Hash.HMAC
 import Crypto.Hash.SHA256
+import Crypto.Hash.SHA512
 import Crypto.Cipher.AES
 import array
 import core
@@ -109,6 +110,10 @@ def aes128_cmac(key,message):
     mac = array.array('B',aes.encrypt(mac))
 
     return mac
+
+def smb3_sha512(message):
+    return array.array('B',
+            Crypto.Hash.SHA512.new(message.tostring()).digest())
 
 def derive_key(key, label, context):
     message = array.array('B')
