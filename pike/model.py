@@ -659,6 +659,7 @@ class Connection(asyncore.dispatcher):
             self.smb3_pa_integrity(smb_res, smb_res.parent.buf[4:])
 
             # Verify non-session-setup-response signatures
+            # session setup responses are verified in SessionSetupContext
             if not isinstance(smb_res[0], smb2.SessionSetupResponse):
                 key = self.signing_key(smb_res.session_id)
                 if key:
@@ -733,7 +734,7 @@ class Connection(asyncore.dispatcher):
         """
         return map(Future.result, self.submit(req))
 
-    def negotiate(self, hash_algorithms=None, salt=None):
+    def negotiate(self, hash_algorithms=None, salt=None, ciphers=None):
         """
         Perform dialect negotiation.
 
@@ -747,6 +748,11 @@ class Connection(asyncore.dispatcher):
         neg_req.security_mode = self.client.security_mode
         neg_req.capabilities = self.client.capabilities
         neg_req.client_guid = self.client.client_guid
+
+        if smb2.DIALECT_SMB3_1_1 in neg_req.dialects:
+            if ciphers is not None:
+                encryption_req = crypto.EncryptionCapabilitiesRequest(neg_req)
+                encryption_req.ciphers = ciphers
 
             preauth_integrity_req = smb2.PreauthIntegrityCapabilitiesRequest(neg_req)
             if hash_algorithms is None:
@@ -826,6 +832,13 @@ class Connection(asyncore.dispatcher):
                         self.session_key,
                         'SMBSigningKey',
                         self.conn._pre_auth_integrity_hash)[:16]
+                for nctx in self.conn.negotiate_response:
+                    if isinstance(nctx, crypto.EncryptionCapabilitiesResponse):
+                        encryption_context = crypto.EncryptionContext(
+                            crypto.CryptoKeys311(
+                                self.session_key,
+                                self.conn._pre_auth_integrity_hash),
+                            nctx.ciphers)
             elif self.conn.negotiate_response.dialect_revision >= smb2.DIALECT_SMB3_0:
                 signing_key = digest.derive_key(
                         self.session_key, 'SMB2AESCMAC', 'SmbSign\0')[:16]
@@ -1041,6 +1054,9 @@ class Channel(object):
 
     def tree_connect_request(self, path):
         smb_req = self.request()
+        if self.connection.negotiate_response.dialect_revision >= smb2.DIALECT_SMB3_1_1:
+            smb_req.flags |= smb2.SMB2_FLAGS_SIGNED
+        tree_req = smb2.TreeConnectRequest(smb_req)
         tree_req.path = "\\\\" + self.connection.server + "\\" + path
         return tree_req
 
