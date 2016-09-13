@@ -56,6 +56,7 @@ import operator
 import contextlib
 
 import core
+import crypto
 import netbios
 import smb2
 import ntstatus
@@ -828,6 +829,10 @@ class Connection(asyncore.dispatcher):
             elif self.conn.negotiate_response.dialect_revision >= smb2.DIALECT_SMB3_0:
                 signing_key = digest.derive_key(
                         self.session_key, 'SMB2AESCMAC', 'SmbSign\0')[:16]
+                if self.conn.negotiate_response.capabilities & smb2.SMB2_GLOBAL_CAP_ENCRYPTION:
+                    encryption_context = crypto.EncryptionContext(
+                        crypto.CryptoKeys300(self.session_key),
+                        [crypto.SMB2_AES_128_CCM])
             else:
                 signing_key = self.session_key
 
@@ -841,7 +846,9 @@ class Connection(asyncore.dispatcher):
             else:
                 session = Session(self.conn.client,
                                   self.session_id,
-                                  self.session_key)
+                                  self.session_key,
+                                  encryption_context,
+                                  smb_res)
 
             return session.addchannel(self.conn, signing_key)
 
@@ -959,6 +966,11 @@ class Connection(asyncore.dispatcher):
         elif self._binding and self._binding.session_id == session_id:
             return self._binding_key
 
+    def encryption_context(self, session_id):
+        if session_id in self._sessions:
+            session = self._sessions[session_id]
+            return session.encryption_context
+
     def signing_digest(self):
         assert self.negotiate_response is not None
         if self.negotiate_response.dialect_revision >= smb2.DIALECT_SMB3_0:
@@ -973,11 +985,17 @@ class Connection(asyncore.dispatcher):
             return None
 
 class Session(object):
-    def __init__(self, client, session_id, session_key):
+    def __init__(self, client, session_id, session_key,
+                 encryption_context, smb_res):
         object.__init__(self)
         self.client = client
         self.session_id = session_id
         self.session_key = session_key
+        self.encryption_context = encryption_context
+        self.encrypt_data = False
+        if smb_res[0].session_flags & smb2.SMB2_SESSION_FLAG_ENCRYPT_DATA and \
+            self.encryption_context is not None:
+            self.encrypt_data = True
         self._channels = {}
 
     def addchannel(self, conn, signing_key):
@@ -1022,8 +1040,7 @@ class Channel(object):
         return self.connection.submit(smb_req.parent)[0]
 
     def tree_connect_request(self, path):
-        self.smb_req = self.request()
-        tree_req = smb2.TreeConnectRequest(self.smb_req)
+        smb_req = self.request()
         tree_req.path = "\\\\" + self.connection.server + "\\" + path
         return tree_req
 
@@ -1520,18 +1537,30 @@ class Channel(object):
     def frame(self):
         return self.connection.frame()
 
-    def request(self, nb=None, obj=None):
+    def request(self, nb=None, obj=None, encrypt_data=None):
         smb_req = self.connection.request(nb)
         smb_req.session_id = self.session.session_id
-        
-        if self.connection.negotiate_response.security_mode & smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED or \
-           self.connection.client.security_mode & smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED:
-            smb_req.flags |= smb2.SMB2_FLAGS_SIGNED
-
         if isinstance(obj, Tree):
             smb_req.tree_id = obj.tree_id
         elif isinstance(obj, Open):
             smb_req.tree_id = obj.tree.tree_id
+
+        # encryption unspecified, follow session/tree negotiation
+        if encrypt_data is None:
+            encrypt_data = self.session.encrypt_data
+            if isinstance(obj, Tree):
+                encrypt_data |= obj.encrypt_data
+            elif isinstance(obj, Open):
+                encrypt_data |= obj.tree.encrypt_data
+
+        # a packet is either encrypted or signed
+        if encrypt_data:
+            transform = crypto.TransformHeader(smb_req.parent)
+            transform.encryption_context = self.session.encryption_context
+            transform.session_id = self.session.session_id
+        elif self.connection.negotiate_response.security_mode & smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED or \
+           self.connection.client.security_mode & smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED:
+           smb_req.flags |= smb2.SMB2_FLAGS_SIGNED
 
         return smb_req
 
@@ -1545,6 +1574,9 @@ class Tree(object):
         self.path = path
         self.tree_id = smb_res.tree_id
         self.tree_connect_response = smb_res[0]
+        self.encrypt_data = False
+        if smb_res[0].share_flags & smb2.SMB2_SHAREFLAG_ENCRYPT_DATA:
+            self.encrypt_data = True
 
 class Open(object):
     def __init__(self, tree, smb_res, create_guid=None, prev=None):
