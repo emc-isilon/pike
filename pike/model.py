@@ -70,10 +70,21 @@ import digest
 default_timeout = 30
 trace = False
 
+def loop(timeout=None, count=None):
+    """
+    wraps asyncore.loop and uses poll() for scalability
+    """
+    if timeout is None:
+        timeout = default_timeout
+    asyncore.loop(timeout=timeout, use_poll=True, count=count)
+
 class TimeoutError(Exception):
     pass
 
 class StateError(Exception):
+    pass
+
+class CreditError(Exception):
     pass
 
 class ResponseError(Exception):
@@ -147,7 +158,7 @@ class Future(object):
             now = time.time()
             if now > deadline:
                 raise TimeoutError('Timed out after %s seconds' % timeout)
-            asyncore.loop(timeout=deadline-now, count=1)
+            loop(timeout=deadline-now, count=1)
 
         return self
 
@@ -162,7 +173,7 @@ class Future(object):
             now = time.time()
             if now > deadline:
                 raise TimeoutError('Timed out after %s seconds' % timeout)
-            asyncore.loop(timeout=deadline-now, count=1)
+            loop(timeout=deadline-now, count=1)
 
         return self
 
@@ -275,13 +286,13 @@ class Client(object):
     # Do not use, may be removed.  Use oplock_break_future.
     def next_oplock_break(self):
         while len(self._oplock_break_queue) == 0:
-            asyncore.loop(count=1)
+            loop(count=1)
         return self._oplock_break_queue.pop()
 
     # Do not use, may be removed.  Use lease_break_future.
     def next_lease_break(self):
         while len(self._lease_break_queue) == 0:
-            asyncore.loop(count=1)
+            loop(count=1)
         return self._lease_break_queue.pop()
 
     def oplock_break_future(self, file_id):
@@ -443,7 +454,7 @@ class Connection(asyncore.dispatcher):
         self._binding_key = None
         self._settings = {}
         self._pre_auth_integrity_hash = array.array('B', "\0"*64)
-
+        self.credits = 1
         self.client = client
         self.server = server
         self.port = port
@@ -489,13 +500,22 @@ class Connection(asyncore.dispatcher):
                 self._pre_auth_integrity_hash +
                 data)
 
-    def next_mid(self):
-        while self._next_mid in self._mid_blacklist:
-            self._next_mid += 1
-        result = self._next_mid
-        self._next_mid += 1
+    def next_mid_range(self, length):
+        if length < 1:
+            length = 1
+        start_range = self._next_mid
+        while True:
+            r = set(range(start_range, start_range+length))
+            if not r.intersection(self._mid_blacklist):
+                break
+            start_range += 1
+        result = sorted(list(r))[-1]
+        self._next_mid = result + 1
 
         return result
+
+    def next_mid(self):
+        return self.next_range(1)
 
     def reserve_mid(mid):
         self._mid_blacklist.add(mid)
@@ -509,7 +529,6 @@ class Connection(asyncore.dispatcher):
 
     def writable(self):
         # Do we have data to send?
-        # FIXME: credit tracking
         return self._out_buffer != None or len(self._out_queue) != 0
 
     def handle_connect(self):
@@ -538,7 +557,6 @@ class Connection(asyncore.dispatcher):
 
     def handle_write(self):
         # Try to write out more data
-        # FIXME: credit tracking
         while self._out_buffer is None and len(self._out_queue):
             self._out_buffer = self._prepare_outgoing()
         sent = self.send(self._out_buffer)
@@ -595,19 +613,42 @@ class Connection(asyncore.dispatcher):
 
         # Grab an outgoing smb2 request
         future = self._out_queue[0]
-        del self._out_queue[0]
 
         with future:
             req = future.request
 
-            # Assign message id
-            # FIXME: credit tracking
-            if req.message_id is None:
-                req.message_id = self.next_mid()
-            req.credit_request = 10
+            if req.credit_charge is None:
+                req.credit_charge = 0
+                for cmd in req:
+                    if isinstance(cmd, smb2.ReadRequest):
+                        # special handling, 1 credit per 64k
+                        req.credit_charge, remainder = divmod(cmd.length, 2**16)
+                    elif isinstance(cmd, smb2.WriteRequest):
+                        # special handling, 1 credit per 64k
+                        if cmd.length is None:
+                            cmd.length = len(cmd.buffer)
+                        req.credit_charge, remainder = divmod(cmd.length, 2**16)
+                    else:
+                        remainder = 1       # assume 1 credit per command
+                    if remainder > 0:
+                        req.credit_charge += 1
 
-            if req.credit_charge == None:
-                req.credit_charge = 1
+            if req.credit_request is None:
+                req.credit_request = 10
+                if req.credit_charge > 10:
+                    req.credit_request = req.credit_charge      # try not to fall behind
+
+            if req.credit_charge > self.credits:
+                raise CreditError("Insufficient credits to send command. "
+                                  "Credits={0}, Charge={1}".format(self.credits,
+                                                                   req.credit_charge))
+
+            # since we have sufficient credits, the command will be sent now
+            del self._out_queue[0]
+
+            # Assign message id
+            if req.message_id is None:
+                req.message_id = self.next_mid_range(req.credit_charge)
 
             if req.is_last_child():
                 # Last command in chain, ready to send packet
@@ -657,6 +698,8 @@ class Connection(asyncore.dispatcher):
                                      ', '.join(f[0].__class__.__name__ for f in res))
         for smb_res in res:
             self.smb3_pa_integrity(smb_res, smb_res.parent.buf[4:])
+            self.credits -= smb_res.credit_charge
+            self.credits += smb_res.credit_response
 
             # Verify non-session-setup-response signatures
             # session setup responses are verified in SessionSetupContext
@@ -742,6 +785,7 @@ class Connection(asyncore.dispatcher):
         L{Connection.session_setup}().
         """
         smb_req = self.request()
+        smb_req.credit_charge = 0       # negotiate requests are free
         neg_req = smb2.NegotiateRequest(smb_req)
 
         neg_req.dialects = self.client.dialects
@@ -882,6 +926,10 @@ class Connection(asyncore.dispatcher):
             return self.session_future
 
         def next(self):
+            with self.session_future:
+                return self._process()
+
+        def _process(self):
             out_buf = None
             if not self.interim_future and not self.responses:
                 # send the initial request
@@ -889,8 +937,7 @@ class Connection(asyncore.dispatcher):
                         self.conn.negotiate_response.security_buffer)
 
             elif self.interim_future:
-                with self.session_future:
-                    smb_res = self.interim_future.result()
+                smb_res = self.interim_future.result()
                 self.interim_future = None
                 self.responses.append(smb_res)
 
@@ -1556,6 +1603,7 @@ class Channel(object):
     def request(self, nb=None, obj=None, encrypt_data=None):
         smb_req = self.connection.request(nb)
         smb_req.session_id = self.session.session_id
+
         if isinstance(obj, Tree):
             smb_req.tree_id = obj.tree_id
         elif isinstance(obj, Open):
