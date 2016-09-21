@@ -620,10 +620,10 @@ class Connection(asyncore.dispatcher):
             if req.credit_charge is None:
                 req.credit_charge = 0
                 for cmd in req:
-                    if isinstance(cmd, smb2.ReadRequest):
+                    if isinstance(cmd, smb2.ReadRequest) and cmd.length > 0:
                         # special handling, 1 credit per 64k
                         req.credit_charge, remainder = divmod(cmd.length, 2**16)
-                    elif isinstance(cmd, smb2.WriteRequest):
+                    elif isinstance(cmd, smb2.WriteRequest) and cmd.buffer is not None:
                         # special handling, 1 credit per 64k
                         if cmd.length is None:
                             cmd.length = len(cmd.buffer)
