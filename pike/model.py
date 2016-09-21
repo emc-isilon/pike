@@ -597,6 +597,7 @@ class Connection(asyncore.dispatcher):
         future = self._out_queue[0]
         del self._out_queue[0]
 
+        result = None
         with future:
             req = future.request
 

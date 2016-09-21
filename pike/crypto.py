@@ -198,7 +198,10 @@ class TransformHeader(core.Frame):
         end = pt_cur + len(self.plaintext)
         with pt_cur.bounded(pt_cur, end):
             while (pt_cur < end):
-                smb2.Smb2(self.parent).decode(pt_cur)
+                start = pt_cur.offset
+                message = smb2.Smb2(self.parent)
+                message.decode(pt_cur)
+                message.buf = pt_cur.array[start:pt_cur.offset]
 
     def verify(self, *args, **kwds):
         pass        # verification occurs at the point of decryption

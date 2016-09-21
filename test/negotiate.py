@@ -29,13 +29,14 @@
 #
 # Abstract:
 #
-#        Tests negotiatate responses when requests are sent with a 
+#        Tests negotiatate responses when requests are sent with a
 #        variety of bits set
 #
 # Authors: Angela Bartholomaus (angela.bartholomaus@emc.com)
 #          Paul Martin (paul.o.martin@emc.com)
 #
 
+import pike.crypto as crypto
 import pike.model as model
 import pike.smb2 as smb2
 import pike.test as test
@@ -98,7 +99,7 @@ class CapPersistent(CapTest):
                 smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL | \
                 smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES | \
                 smb2.SMB2_GLOBAL_CAP_DIRECTORY_LEASING | \
-                smb2.SMB2_GLOBAL_CAP_ENCRYPTION 
+                smb2.SMB2_GLOBAL_CAP_ENCRYPTION
         self.positive_cap(smb2.DIALECT_SMB3_0,
                           advertise_caps,
                           smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES)
@@ -128,7 +129,7 @@ class CapMultichannel(CapTest):
                 smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL | \
                 smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES | \
                 smb2.SMB2_GLOBAL_CAP_DIRECTORY_LEASING | \
-                smb2.SMB2_GLOBAL_CAP_ENCRYPTION 
+                smb2.SMB2_GLOBAL_CAP_ENCRYPTION
         self.positive_cap(smb2.DIALECT_SMB3_0,
                           advertise_caps,
                           smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL)
@@ -158,7 +159,7 @@ class CapMulticredit(CapTest):
                 smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL | \
                 smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES | \
                 smb2.SMB2_GLOBAL_CAP_LARGE_MTU | \
-                smb2.SMB2_GLOBAL_CAP_ENCRYPTION 
+                smb2.SMB2_GLOBAL_CAP_ENCRYPTION
         self.positive_cap(smb2.DIALECT_SMB3_0,
                           advertise_caps,
                           smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
@@ -171,9 +172,10 @@ class CapMulticredit(CapTest):
     def test_downlevel(self):
         self.downlevel_cap(smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
 
+@test.RequireDialect(smb2.DIALECT_SMB3_1_1)
 class NegotiateContext(test.PikeTest):
     def negotiate(self, *args, **kwds):
-        self.conn = model.Client(dialects=[smb2.DIALECT_SMB3_1_1]).connect(self.server, self.port)
+        self.conn = model.Client().connect(self.server, self.port)
         self.client = self.conn.client
         return self.conn.negotiate(*args, **kwds).negotiate_response
 
@@ -186,33 +188,33 @@ class NegotiateContext(test.PikeTest):
                     self.assertGreater(len(ctx.salt), 0)
 
     def test_encryption_capabilities_both_prefer_ccm(self):
-        resp = self.negotiate(ciphers=[smb2.SMB2_AES_128_CCM, smb2.SMB2_AES_128_GCM])
+        resp = self.negotiate(ciphers=[crypto.SMB2_AES_128_CCM, crypto.SMB2_AES_128_GCM])
         if resp.dialect_revision >= smb2.DIALECT_SMB3_1_1:
             for ctx in resp:
                 if isinstance(ctx, smb2.EncryptionCapabilitiesResponse):
                     self.assertEqual(len(ctx.ciphers), 1)
-                    self.assertIn(smb2.SMB2_AES_128_CCM, ctx.ciphers)
+                    self.assertIn(crypto.SMB2_AES_128_CCM, ctx.ciphers)
 
     def test_encryption_capabilities_both_prefer_gcm(self):
-        resp = self.negotiate(ciphers=[smb2.SMB2_AES_128_GCM, smb2.SMB2_AES_128_CCM])
+        resp = self.negotiate(ciphers=[crypto.SMB2_AES_128_GCM, crypto.SMB2_AES_128_CCM])
         if resp.dialect_revision >= smb2.DIALECT_SMB3_1_1:
             for ctx in resp:
                 if isinstance(ctx, smb2.EncryptionCapabilitiesResponse):
                     self.assertEqual(len(ctx.ciphers), 1)
-                    self.assertIn(smb2.SMB2_AES_128_GCM, ctx.ciphers)
+                    self.assertIn(crypto.SMB2_AES_128_GCM, ctx.ciphers)
 
     def test_encryption_capabilities_ccm(self):
-        resp = self.negotiate(ciphers=[smb2.SMB2_AES_128_CCM])
+        resp = self.negotiate(ciphers=[crypto.SMB2_AES_128_CCM])
         if resp.dialect_revision >= smb2.DIALECT_SMB3_1_1:
             for ctx in resp:
                 if isinstance(ctx, smb2.EncryptionCapabilitiesResponse):
                     self.assertEqual(len(ctx.ciphers), 1)
-                    self.assertIn(smb2.SMB2_AES_128_CCM, ctx.ciphers)
+                    self.assertIn(crypto.SMB2_AES_128_CCM, ctx.ciphers)
 
     def test_encryption_capabilities_gcm(self):
-        resp = self.negotiate(ciphers=[smb2.SMB2_AES_128_GCM])
+        resp = self.negotiate(ciphers=[crypto.SMB2_AES_128_GCM])
         if resp.dialect_revision >= smb2.DIALECT_SMB3_1_1:
             for ctx in resp:
                 if isinstance(ctx, smb2.EncryptionCapabilitiesResponse):
                     self.assertEqual(len(ctx.ciphers), 1)
-                    self.assertIn(smb2.SMB2_AES_128_GCM, ctx.ciphers)
+                    self.assertIn(crypto.SMB2_AES_128_GCM, ctx.ciphers)
