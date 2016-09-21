@@ -927,7 +927,10 @@ class Connection(asyncore.dispatcher):
 
         def next(self):
             with self.session_future:
-                return self._process()
+                res = self._process()
+            if res is None:
+                raise StopIteration()
+            return res
 
         def _process(self):
             out_buf = None
@@ -960,7 +963,6 @@ class Connection(asyncore.dispatcher):
                 # submit additional requests if necessary
                 self.interim_future = self._send_session_setup(out_buf)
                 return self.interim_future
-            raise StopIteration()
 
     def session_setup(self, creds=None, bind=None, resume=None):
         """
