@@ -83,7 +83,7 @@ def loop(timeout=None, count=None):
             break
         complete_iterations += 1
 
-class KQTransport(object):
+class Transport(object):
 
     def __init__(self):
         self.addr = None

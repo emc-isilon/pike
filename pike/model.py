@@ -433,7 +433,7 @@ class KerberosProvider(object):
                     array.array('B',
                         kerberos.authGSSClientResponse(self.context)[:16]))
 
-class Connection(transport.KQTransport):
+class Connection(transport.Transport):
     """
     Connection to server.
 
@@ -452,7 +452,7 @@ class Connection(transport.KQTransport):
         This should generally not be used directly.  Instead,
         use L{Client.connect}().
         """
-        transport.KQTransport.__init__(self)
+        super(Connection, self).__init__()
         self._in_buffer = array.array('B')
         self._watermark = 4
         self._out_buffer = None
