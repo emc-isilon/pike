@@ -46,7 +46,6 @@ constructing packets.
 
 import sys
 import socket
-import asyncore
 import array
 import struct
 import random
@@ -59,6 +58,7 @@ import core
 import crypto
 import netbios
 import smb2
+import transport
 import ntstatus
 try:
     import kerberos
@@ -76,7 +76,7 @@ def loop(timeout=None, count=None):
     """
     if timeout is None:
         timeout = default_timeout
-    asyncore.loop(timeout=timeout, use_poll=True, count=count)
+    transport.loop(timeout=timeout, count=count)
 
 class TimeoutError(Exception):
     pass
@@ -275,13 +275,24 @@ class Client(object):
         """
         Create a connection.
 
-        Returns a new L{Connection} object connected to the given
-        server and port.
+        Returns a new L{Connection} object connected to the given server and port.
 
         @param server: The server to connect to.
         @param port: The port to connect to.
         """
-        return Connection(self, server, port)
+        return self.connect_submit(server, port).result()
+
+    def connect_submit(self, server, port=445):
+        """
+        Create a connection.
+
+        Returns a new L{Future} object for the L{Connection} being established
+        asynchronously to the given server and port.
+
+        @param server: The server to connect to.
+        @param port: The port to connect to.
+        """
+        return Connection(self, server, port).connection_future
 
     # Do not use, may be removed.  Use oplock_break_future.
     def next_oplock_break(self):
@@ -422,7 +433,7 @@ class KerberosProvider(object):
                     array.array('B',
                         kerberos.authGSSClientResponse(self.context)[:16]))
 
-class Connection(asyncore.dispatcher):
+class Connection(transport.KQTransport):
     """
     Connection to server.
 
@@ -441,7 +452,7 @@ class Connection(asyncore.dispatcher):
         This should generally not be used directly.  Instead,
         use L{Client.connect}().
         """
-        asyncore.dispatcher.__init__(self)
+        transport.KQTransport.__init__(self)
         self._in_buffer = array.array('B')
         self._watermark = 4
         self._out_buffer = None
@@ -454,6 +465,7 @@ class Connection(asyncore.dispatcher):
         self._binding_key = None
         self._settings = {}
         self._pre_auth_integrity_hash = array.array('B', "\0"*64)
+        self.connection_future = Future()
         self.credits = 1
         self.client = client
         self.server = server
@@ -472,7 +484,6 @@ class Connection(asyncore.dispatcher):
             break
         self.create_socket(family, socktype)
         self.connect(sockaddr)
-        self.client._connections.append(self)
 
     def smb3_pa_integrity(self, packet, data=None):
         """ perform smb3 pre-auth integrity hash update if needed """
@@ -532,13 +543,15 @@ class Connection(asyncore.dispatcher):
         return self._out_buffer != None or len(self._out_queue) != 0
 
     def handle_connect(self):
-        self.local_addr = self.socket.getsockname()
-        self.remote_addr = self.socket.getpeername()
+        self.client._connections.append(self)
+        with self.connection_future:
+            self.local_addr = self.socket.getsockname()
+            self.remote_addr = self.socket.getpeername()
 
-        self.client.logger.debug('connect: %s/%s -> %s/%s',
-                                 self.local_addr[0], self.local_addr[1],
-                                 self.remote_addr[0], self.remote_addr[1])
-        pass
+            self.client.logger.debug('connect: %s/%s -> %s/%s',
+                                     self.local_addr[0], self.local_addr[1],
+                                     self.remote_addr[0], self.remote_addr[1])
+        self.connection_future(self)
 
     def handle_read(self):
         # Try to read the next netbios frame
@@ -581,7 +594,7 @@ class Connection(asyncore.dispatcher):
         if self not in self.client._connections:
             return
 
-        asyncore.dispatcher.close(self)
+        super(Connection, self).close()
 
         # Run down connection
         if self.error is None:
@@ -928,9 +941,9 @@ class Connection(asyncore.dispatcher):
         def next(self):
             with self.session_future:
                 res = self._process()
-            if res is None:
-                raise StopIteration()
-            return res
+                if res is not None:
+                    return res
+            raise StopIteration()
 
         def _process(self):
             out_buf = None
