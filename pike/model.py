@@ -778,6 +778,10 @@ class Connection(transport.Transport):
                 future = Future(smb_req)
                 self._out_queue.append(future)
                 futures.append(future)
+
+        # don't wait for the callback, send the data now
+        if self.writable():
+            self.handle_write()
         return futures
 
     def transceive(self, req):
