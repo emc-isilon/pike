@@ -964,6 +964,7 @@ class Connection(transport.Transport):
                 smb_res = self.interim_future.result()
                 self.interim_future = None
                 self.responses.append(smb_res)
+                self.session_id = smb_res.session_id
 
                 if smb_res.status == ntstatus.STATUS_SUCCESS:
                     # session is established
@@ -973,7 +974,6 @@ class Connection(transport.Transport):
                 else:
                     # process interim request
                     session_res = smb_res[0]
-                    self.session_id = smb_res.session_id
                     if self.bind:
                         # Need to verify intermediate signatures
                         smb_res.verify(self.conn.signing_digest(),
