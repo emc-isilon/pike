@@ -841,6 +841,7 @@ class Connection(transport.Transport):
             assert conn.negotiate_response is not None
 
             self.conn = conn
+            self.dialect_revision = conn.negotiate_response.dialect_revision
             self.bind = bind
             self.resume = resume
 
@@ -867,13 +868,45 @@ class Connection(transport.Transport):
                 assert conn.negotiate_response.dialect_revision >= 0x300
                 self.session_id = bind.session_id
                 conn._binding = bind
-                conn._binding_key = digest.derive_key(
-                        bind.session_key,
-                        'SMB2AESCMAC',
-                        'SmbSign\0')[:16]
+                # assume the signing key from the previous session
+                conn._binding_key = bind.first_channel().signing_key
             elif resume:
                 assert conn.negotiate_response.dialect_revision >= 0x300
                 self.prev_session_id = resume.session_id
+
+        def derive_signing_key(self, session_key=None, context=None):
+            if session_key is None:
+                session_key = self.session_key
+            if self.dialect_revision >= smb2.DIALECT_SMB3_1_1:
+                if context is None:
+                    context = self.conn._pre_auth_integrity_hash
+                return digest.derive_key(
+                        session_key,
+                        'SMBSigningKey',
+                        context)[:16]
+            elif self.dialect_revision >= smb2.DIALECT_SMB3_0:
+                if context is None:
+                    context = 'SmbSign\0'
+                return digest.derive_key(session_key, 'SMB2AESCMAC', context)[:16]
+            else:
+                return session_key
+
+        def derive_encryption_keys(self, session_key=None, context=None):
+            if self.dialect_revision >= smb2.DIALECT_SMB3_1_1:
+                if context is None:
+                    context = self.conn._pre_auth_integrity_hash
+                for nctx in self.conn.negotiate_response:
+                    if isinstance(nctx, crypto.EncryptionCapabilitiesResponse):
+                        return crypto.EncryptionContext(
+                            crypto.CryptoKeys311(
+                                self.session_key,
+                                context),
+                            nctx.ciphers)
+            elif self.dialect_revision >= smb2.DIALECT_SMB3_0:
+                if self.conn.negotiate_response.capabilities & smb2.SMB2_GLOBAL_CAP_ENCRYPTION:
+                    return crypto.EncryptionContext(
+                        crypto.CryptoKeys300(self.session_key),
+                        [crypto.SMB2_AES_128_CCM])
 
         def _send_session_setup(self, sec_buf):
             smb_req = self.conn.request()
@@ -893,28 +926,8 @@ class Connection(transport.Transport):
         def _finish(self, smb_res):
             sec_buf = smb_res[0].security_buffer
             out_buf, self.session_key = self.auth.step(sec_buf)
-            encryption_context = None
-            if self.conn.negotiate_response.dialect_revision >= smb2.DIALECT_SMB3_1_1:
-                signing_key = digest.derive_key(
-                        self.session_key,
-                        'SMBSigningKey',
-                        self.conn._pre_auth_integrity_hash)[:16]
-                for nctx in self.conn.negotiate_response:
-                    if isinstance(nctx, crypto.EncryptionCapabilitiesResponse):
-                        encryption_context = crypto.EncryptionContext(
-                            crypto.CryptoKeys311(
-                                self.session_key,
-                                self.conn._pre_auth_integrity_hash),
-                            nctx.ciphers)
-            elif self.conn.negotiate_response.dialect_revision >= smb2.DIALECT_SMB3_0:
-                signing_key = digest.derive_key(
-                        self.session_key, 'SMB2AESCMAC', 'SmbSign\0')[:16]
-                if self.conn.negotiate_response.capabilities & smb2.SMB2_GLOBAL_CAP_ENCRYPTION:
-                    encryption_context = crypto.EncryptionContext(
-                        crypto.CryptoKeys300(self.session_key),
-                        [crypto.SMB2_AES_128_CCM])
-            else:
-                signing_key = self.session_key
+            signing_key = self.derive_signing_key()
+            encryption_context = self.derive_encryption_keys()
 
             # Verify final signature
             smb_res.verify(self.conn.signing_digest(), signing_key)
