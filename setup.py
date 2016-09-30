@@ -70,7 +70,7 @@ def run_setup(with_extensions):
         ext_modules.append(lw_krb_module)
         cmdclass = dict(cmdclass, build_ext=ve_build_ext)
     setup(name='Pike',
-          version='0.1.8',
+          version='0.2',
           description='Pure python SMB client',
           author='Brian Koropoff',
           author_email='Brian.Koropoff@emc.com',
