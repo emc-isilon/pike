@@ -849,7 +849,7 @@ class Connection(transport.Transport):
                 if ntlm_version is not None:
                     self.auth.ntlm_version = ntlm_version
             elif kerberos is not None:
-                self.auth = KerberosProvider(self, creds)
+                self.auth = KerberosProvider(conn, creds)
             else:
                 raise ImportError("Neither ntlm nor kerberos authentication "
                                   "methods are available")
