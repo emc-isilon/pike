@@ -124,7 +124,7 @@ class Cursor(object):
         self.offset = offset
         self.bounds = bounds
         self.hole = Cursor.Hole(self)
-  
+
     def __eq__(self, o):
         return self.array is o.array and self.offset == o.offset
 
@@ -240,7 +240,7 @@ class Cursor(object):
 
     def encode_utf16le(self, val):
         self.encode_bytes(unicode(val).encode('utf-16le'))
-    
+
     def trunc(self):
         self._expand_to(self.offset)
         del self.array[self.offset:]
@@ -251,7 +251,7 @@ class Cursor(object):
 
         if start < lower or end > upper:
             raise BufferOverrun()
-    
+
     def decode_bytes(self, size):
         self._check_bounds(self.offset, self.offset + size)
         result = self.array[self.offset:self.offset+size]
@@ -372,7 +372,7 @@ class Cursor(object):
         def __init__(self, cur, lower, upper):
             self.cur = cur
             self.bounds = (lower,upper)
-        
+
         def __enter__(self):
             self.oldbounds = self.cur.bounds
             self.cur.bounds = self.bounds
@@ -468,14 +468,15 @@ class Frame(object):
         self._decode_post(cur)
 
     def serialize(self):
-        arr = array.array('B')
-        cursor = Cursor(arr, 0)
+        self.buf = array.array('B')
+        cursor = Cursor(self.buf, 0)
         self.encode(cursor)
-        return arr
+        return self.buf
 
     def parse(self, arr):
         cursor = Cursor(arr, 0)
         self.decode(cursor)
+        self.buf = arr
 
     def next_sibling(self):
         children = self.parent.children
@@ -498,15 +499,15 @@ class Frame(object):
             for base in bases:
                 if hasattr(base, '_register'):
                     dict['_register'] += base._register
-                    
+
             # Inherit field_blacklist from bases
             if 'field_blacklist' in dict:
                 for base in bases:
                     if hasattr(base,'field_blacklist'):
                         dict['field_blacklist'] += base.field_blacklist
-                        
+
             result = type.__new__(mcs, name, bases, dict)
-                                
+
             # Register class in appropriate tables
             for (table,keyattrs) in result._register:
                 if all(hasattr(result, a) for a in keyattrs):
@@ -570,7 +571,7 @@ class Enum(long):
         This method is intended to allow importing enumeration
         values from an L{Enum} subclass into the root of a module,
         and should be invoked as::
-        
+
             SomeEnumClass.import_items(globals())
         """
         dictionary.update((name,cls(value)) for (name,value) in cls.items())
@@ -630,7 +631,7 @@ class Enum(long):
 class ValueEnum(Enum):
     """
     Value Enumeration
-    
+
     Subclass this class to define enumerations of values.
     For example::
 
@@ -659,7 +660,7 @@ class ValueEnum(Enum):
 class FlagEnum(Enum):
     """
     Flag Enumeration
-    
+
     Subclass this class to define enumerations of flags.
     For example::
 

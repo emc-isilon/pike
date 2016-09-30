@@ -56,6 +56,7 @@ import operator
 import contextlib
 
 import core
+import crypto
 import netbios
 import smb2
 import ntstatus
@@ -176,7 +177,7 @@ class Future(object):
         @param timeout: The time in seconds before giving up and raising TimeoutError
         """
         self.wait(timeout)
-        
+
         if isinstance(self.response, BaseException):
             traceback = self.traceback
             self.traceback = None
@@ -222,7 +223,11 @@ class Client(object):
     @ivar channel_sequence: Current channel sequence number
     """
     def __init__(self,
-                 dialects=[smb2.DIALECT_SMB2_002, smb2.DIALECT_SMB2_1, smb2.DIALECT_SMB3_0],
+                 dialects=[smb2.DIALECT_SMB2_002,
+                           smb2.DIALECT_SMB2_1,
+                           smb2.DIALECT_SMB3_0,
+                           smb2.DIALECT_SMB3_0_2,
+                           smb2.DIALECT_SMB3_1_1],
                  capabilities=smb2.GlobalCaps(reduce(operator.or_, smb2.GlobalCaps.values())),
                  security_mode=smb2.SMB2_NEGOTIATE_SIGNING_ENABLED,
                  client_guid=None):
@@ -272,7 +277,7 @@ class Client(object):
         while len(self._oplock_break_queue) == 0:
             asyncore.loop(count=1)
         return self._oplock_break_queue.pop()
-    
+
     # Do not use, may be removed.  Use lease_break_future.
     def next_lease_break(self):
         while len(self._lease_break_queue) == 0:
@@ -290,7 +295,7 @@ class Client(object):
         @type file_id: (number, number)
         @param file_id: The file ID of the oplocked file.
         """
-        
+
         future = Future(None)
 
         for smb_res in self._oplock_break_queue[:]:
@@ -402,7 +407,9 @@ class KerberosProvider(object):
                     None)
         else:
             kerberos.authGSSClientSessionKey(self.context)
-            return (None, kerberos.authGSSClientResponse(self.context)[:16])
+            return (None,
+                    array.array('B',
+                        kerberos.authGSSClientResponse(self.context)[:16]))
 
 class Connection(asyncore.dispatcher):
     """
@@ -435,7 +442,8 @@ class Connection(asyncore.dispatcher):
         self._binding = None
         self._binding_key = None
         self._settings = {}
-        
+        self._pre_auth_integrity_hash = array.array('B', "\0"*64)
+
         self.client = client
         self.server = server
         self.port = port
@@ -444,7 +452,7 @@ class Connection(asyncore.dispatcher):
 
         self.error = None
         self.traceback = None
-    
+
         for result in socket.getaddrinfo(server, port,
                                          0,
                                          socket.SOCK_STREAM,
@@ -454,6 +462,32 @@ class Connection(asyncore.dispatcher):
         self.create_socket(family, socktype)
         self.connect(sockaddr)
         self.client._connections.append(self)
+
+    def smb3_pa_integrity(self, packet, data=None):
+        """ perform smb3 pre-auth integrity hash update if needed """
+        if smb2.DIALECT_SMB3_1_1 not in self.client.dialects:
+            # hash only applies if client requests 3.1.1
+            return
+        neg_resp = getattr(self, "negotiate_response", None)
+        if (neg_resp is not None and
+            neg_resp.dialect_revision < smb2.DIALECT_SMB3_1_1):
+            # hash only applies if server negotiates 3.1.1
+            return
+        if packet[0].__class__ not in [smb2.NegotiateRequest,
+                                       smb2.NegotiateResponse,
+                                       smb2.SessionSetupRequest,
+                                       smb2.SessionSetupResponse]:
+            # hash only applies to pre-auth messages
+            return
+        if (packet[0].__class__ == smb2.SessionSetupResponse and
+            packet.status == ntstatus.STATUS_SUCCESS):
+            # last session setup doesn't count in hash
+            return
+        if data is None:
+            data = packet.serialize()
+        self._pre_auth_integrity_hash = digest.smb3_sha512(
+                self._pre_auth_integrity_hash +
+                data)
 
     def next_mid(self):
         while self._next_mid in self._mid_blacklist:
@@ -563,9 +597,10 @@ class Connection(asyncore.dispatcher):
         future = self._out_queue[0]
         del self._out_queue[0]
 
+        result = None
         with future:
             req = future.request
-            
+
             # Assign message id
             # FIXME: credit tracking
             if req.message_id is None:
@@ -577,8 +612,9 @@ class Connection(asyncore.dispatcher):
 
             if req.is_last_child():
                 # Last command in chain, ready to send packet
-                buf = req.parent.serialize()
-                if trace: 
+                self.smb3_pa_integrity(req)
+                result = req.parent.serialize()
+                if trace:
                     self.client.logger.debug('send (%s/%s -> %s/%s): %s',
                                              self.local_addr[0], self.local_addr[1],
                                              self.remote_addr[0], self.remote_addr[1],
@@ -588,7 +624,6 @@ class Connection(asyncore.dispatcher):
                                              self.local_addr[0], self.local_addr[1],
                                              self.remote_addr[0], self.remote_addr[1],
                                              ', '.join(f[0].__class__.__name__ for f in req.parent))
-                result = buf
             else:
                 # Not ready to send chain
                 result = None
@@ -622,7 +657,10 @@ class Connection(asyncore.dispatcher):
                                      self.local_addr[0], self.local_addr[1],
                                      ', '.join(f[0].__class__.__name__ for f in res))
         for smb_res in res:
+            self.smb3_pa_integrity(smb_res, smb_res.parent.buf[4:])
+
             # Verify non-session-setup-response signatures
+            # session setup responses are verified in SessionSetupContext
             if not isinstance(smb_res[0], smb2.SessionSetupResponse):
                 key = self.signing_key(smb_res.session_id)
                 if key:
@@ -697,7 +735,7 @@ class Connection(asyncore.dispatcher):
         """
         return map(Future.result, self.submit(req))
 
-    def negotiate(self):
+    def negotiate(self, hash_algorithms=None, salt=None, ciphers=None):
         """
         Perform dialect negotiation.
 
@@ -706,11 +744,26 @@ class Connection(asyncore.dispatcher):
         """
         smb_req = self.request()
         neg_req = smb2.NegotiateRequest(smb_req)
-        
+
         neg_req.dialects = self.client.dialects
         neg_req.security_mode = self.client.security_mode
         neg_req.capabilities = self.client.capabilities
         neg_req.client_guid = self.client.client_guid
+
+        if smb2.DIALECT_SMB3_1_1 in neg_req.dialects:
+            if ciphers is not None:
+                encryption_req = crypto.EncryptionCapabilitiesRequest(neg_req)
+                encryption_req.ciphers = ciphers
+
+            preauth_integrity_req = smb2.PreauthIntegrityCapabilitiesRequest(neg_req)
+            if hash_algorithms is None:
+                hash_algorithms = [smb2.SMB2_SHA_512]
+            preauth_integrity_req.hash_algorithms = hash_algorithms
+            if salt is not None:
+                preauth_integrity_req.salt = salt
+            else:
+                preauth_integrity_req.salt = array.array('B',
+                    map(random.randint, [0]*32, [255]*32))
 
         self.negotiate_response = self.transceive(smb_req.parent)[0][0]
 
@@ -751,7 +804,7 @@ class Connection(asyncore.dispatcher):
                 conn._binding_key = digest.derive_key(
                         bind.session_key,
                         'SMB2AESCMAC',
-                        'SmbSign')[:16]
+                        'SmbSign\0')[:16]
             elif resume:
                 assert conn.negotiate_response.dialect_revision >= 0x300
                 self.prev_session_id = resume.session_id
@@ -774,10 +827,26 @@ class Connection(asyncore.dispatcher):
         def _finish(self, smb_res):
             sec_buf = smb_res[0].security_buffer
             out_buf, self.session_key = self.auth.step(sec_buf)
-
-            if self.conn.negotiate_response.dialect_revision >= 0x300:
+            encryption_context = None
+            if self.conn.negotiate_response.dialect_revision >= smb2.DIALECT_SMB3_1_1:
                 signing_key = digest.derive_key(
-                        self.session_key, 'SMB2AESCMAC', 'SmbSign')[:16]
+                        self.session_key,
+                        'SMBSigningKey',
+                        self.conn._pre_auth_integrity_hash)[:16]
+                for nctx in self.conn.negotiate_response:
+                    if isinstance(nctx, crypto.EncryptionCapabilitiesResponse):
+                        encryption_context = crypto.EncryptionContext(
+                            crypto.CryptoKeys311(
+                                self.session_key,
+                                self.conn._pre_auth_integrity_hash),
+                            nctx.ciphers)
+            elif self.conn.negotiate_response.dialect_revision >= smb2.DIALECT_SMB3_0:
+                signing_key = digest.derive_key(
+                        self.session_key, 'SMB2AESCMAC', 'SmbSign\0')[:16]
+                if self.conn.negotiate_response.capabilities & smb2.SMB2_GLOBAL_CAP_ENCRYPTION:
+                    encryption_context = crypto.EncryptionContext(
+                        crypto.CryptoKeys300(self.session_key),
+                        [crypto.SMB2_AES_128_CCM])
             else:
                 signing_key = self.session_key
 
@@ -791,7 +860,9 @@ class Connection(asyncore.dispatcher):
             else:
                 session = Session(self.conn.client,
                                   self.session_id,
-                                  self.session_key)
+                                  self.session_key,
+                                  encryption_context,
+                                  smb_res)
 
             return session.addchannel(self.conn, signing_key)
 
@@ -819,14 +890,15 @@ class Connection(asyncore.dispatcher):
                         self.conn.negotiate_response.security_buffer)
 
             elif self.interim_future:
-                smb_res = self.interim_future.result()
+                with self.session_future:
+                    smb_res = self.interim_future.result()
                 self.interim_future = None
                 self.responses.append(smb_res)
 
                 if smb_res.status == ntstatus.STATUS_SUCCESS:
                     # session is established
-                    self.session_future.complete(
-                            self._finish(smb_res))
+                    with self.session_future:
+                        self.session_future(self._finish(smb_res))
                     return self.session_future
                 else:
                     # process interim request
@@ -908,9 +980,14 @@ class Connection(asyncore.dispatcher):
         elif self._binding and self._binding.session_id == session_id:
             return self._binding_key
 
+    def encryption_context(self, session_id):
+        if session_id in self._sessions:
+            session = self._sessions[session_id]
+            return session.encryption_context
+
     def signing_digest(self):
         assert self.negotiate_response is not None
-        if self.negotiate_response.dialect_revision >= 0x300:
+        if self.negotiate_response.dialect_revision >= smb2.DIALECT_SMB3_0:
             return digest.aes128_cmac
         else:
             return digest.sha256_hmac
@@ -922,11 +999,17 @@ class Connection(asyncore.dispatcher):
             return None
 
 class Session(object):
-    def __init__(self, client, session_id, session_key):
+    def __init__(self, client, session_id, session_key,
+                 encryption_context, smb_res):
         object.__init__(self)
         self.client = client
         self.session_id = session_id
         self.session_key = session_key
+        self.encryption_context = encryption_context
+        self.encrypt_data = False
+        if smb_res[0].session_flags & smb2.SMB2_SESSION_FLAG_ENCRYPT_DATA and \
+            self.encryption_context is not None:
+            self.encrypt_data = True
         self._channels = {}
 
     def addchannel(self, conn, signing_key):
@@ -971,8 +1054,10 @@ class Channel(object):
         return self.connection.submit(smb_req.parent)[0]
 
     def tree_connect_request(self, path):
-        self.smb_req = self.request()
-        tree_req = smb2.TreeConnectRequest(self.smb_req)
+        smb_req = self.request()
+        if self.connection.negotiate_response.dialect_revision >= smb2.DIALECT_SMB3_1_1:
+            smb_req.flags |= smb2.SMB2_FLAGS_SIGNED
+        tree_req = smb2.TreeConnectRequest(smb_req)
         tree_req.path = "\\\\" + self.connection.server + "\\" + path
         return tree_req
 
@@ -1228,7 +1313,7 @@ class Channel(object):
                     return
                 else:
                     raise
-            
+
     def query_file_info_request(
             self,
             create_res,
@@ -1237,9 +1322,9 @@ class Channel(object):
             output_buffer_length=4096):
         smb_req = self.request(obj=create_res)
         query_req = smb2.QueryInfoRequest(smb_req)
-        
+
         query_req.info_type = info_type
-        query_req.file_information_class = file_information_class        
+        query_req.file_information_class = file_information_class
         query_req.file_id = create_res.file_id
         query_req.output_buffer_length = output_buffer_length
         return query_req
@@ -1255,7 +1340,7 @@ class Channel(object):
                     file_information_class,
                     info_type,
                     output_buffer_length).parent.parent)[0][0][0]
-    
+
     @contextlib.contextmanager
     def set_file_info(self, handle, cls):
         smb_req = self.request(obj=handle)
@@ -1469,18 +1554,30 @@ class Channel(object):
     def frame(self):
         return self.connection.frame()
 
-    def request(self, nb=None, obj=None):
+    def request(self, nb=None, obj=None, encrypt_data=None):
         smb_req = self.connection.request(nb)
         smb_req.session_id = self.session.session_id
-        
-        if self.connection.negotiate_response.security_mode & smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED or \
-           self.connection.client.security_mode & smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED:
-            smb_req.flags |= smb2.SMB2_FLAGS_SIGNED
-
         if isinstance(obj, Tree):
             smb_req.tree_id = obj.tree_id
         elif isinstance(obj, Open):
             smb_req.tree_id = obj.tree.tree_id
+
+        # encryption unspecified, follow session/tree negotiation
+        if encrypt_data is None:
+            encrypt_data = self.session.encrypt_data
+            if isinstance(obj, Tree):
+                encrypt_data |= obj.encrypt_data
+            elif isinstance(obj, Open):
+                encrypt_data |= obj.tree.encrypt_data
+
+        # a packet is either encrypted or signed
+        if encrypt_data:
+            transform = crypto.TransformHeader(smb_req.parent)
+            transform.encryption_context = self.session.encryption_context
+            transform.session_id = self.session.session_id
+        elif self.connection.negotiate_response.security_mode & smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED or \
+           self.connection.client.security_mode & smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED:
+           smb_req.flags |= smb2.SMB2_FLAGS_SIGNED
 
         return smb_req
 
@@ -1494,6 +1591,9 @@ class Tree(object):
         self.path = path
         self.tree_id = smb_res.tree_id
         self.tree_connect_response = smb_res[0]
+        self.encrypt_data = False
+        if smb_res[0].share_flags & smb2.SMB2_SHAREFLAG_ENCRYPT_DATA:
+            self.encrypt_data = True
 
 class Open(object):
     def __init__(self, tree, smb_res, create_guid=None, prev=None):

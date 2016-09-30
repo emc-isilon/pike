@@ -677,7 +677,7 @@ class NtlmProvider(object):
         if self.auth_flags & NTLMSSP_NEGOTIATE_KEY_EXCH:
             r = RC4.new(self.key_exchange_key)
             self.exported_session_key = nonce(16)
-            return r.encrypt(self.exported_session_key)
+            return r.encrypt(self.exported_session_key.tostring())
         else:
             self.exported_session_key = self.key_exchange_key
 
@@ -735,4 +735,4 @@ class NtlmProvider(object):
             return (self.negotiate(), None)
         elif self.challenge_message is None:
             self.authenticate(sec_buf)
-        return (self.authenticate_buffer, self.exported_session_key.tostring())
+        return (self.authenticate_buffer, self.exported_session_key)
