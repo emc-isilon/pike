@@ -794,13 +794,7 @@ class Connection(transport.Transport):
         """
         return map(Future.result, self.submit(req))
 
-    def negotiate(self, hash_algorithms=None, salt=None, ciphers=None):
-        """
-        Perform dialect negotiation.
-
-        This must be performed before setting up a session with
-        L{Connection.session_setup}().
-        """
+    def negotiate_request(self, hash_algorithms=None, salt=None, ciphers=None):
         smb_req = self.request()
         smb_req.credit_charge = 0       # negotiate requests are free
         neg_req = smb2.NegotiateRequest(smb_req)
@@ -824,9 +818,28 @@ class Connection(transport.Transport):
             else:
                 preauth_integrity_req.salt = array.array('B',
                     map(random.randint, [0]*32, [255]*32))
+        return neg_req
 
-        self.negotiate_response = self.transceive(smb_req.parent)[0][0]
+    def negotiate_submit(self, negotiate_request):
+        negotiate_future = self.submit(negotiate_request.parent.parent)[0]
+        def assign_response(f):
+            self.negotiate_response = f.result()[0]
+        negotiate_future.then(assign_response)
+        return negotiate_future
 
+    def negotiate(self, hash_algorithms=None, salt=None, ciphers=None):
+        """
+        Perform dialect negotiation.
+
+        This must be performed before setting up a session with
+        L{Connection.session_setup}().
+        """
+        self.negotiate_submit(
+                self.negotiate_request(
+                    hash_algorithms,
+                    salt,
+                    ciphers
+        )).result()
         return self
 
     class SessionSetupContext(object):
