@@ -10,20 +10,23 @@ Prerequisites
 =============
 
 Required for basic functionality:
-    * Python 2.7
-    * PyCryptodome
+* Python 2.7
+* PyCryptodome
 
 Required for building kerberos library:
-    * Python development headers
-    * MIT gssapi\_krb5 (plus devel headers)
-        * Ubuntu: krb5-user, libkrb5-dev
+* Python development headers
+* MIT gssapi\_krb5 (plus devel headers)
+    * Ubuntu: krb5-user, libkrb5-dev
 
 Optional: epydoc for doc generation
 
 Build instructions
 ==================
 
-    python setup.py build
+Ubuntu 14.04 / 16.04
+
+    apt-get install -y --no-install-recommends krb5-user libkrb5-dev python-dev build-essential python2.7 python-pip
+    pip install setuptools pycryptodome
     python setup.py install
 
 Running tests
@@ -47,8 +50,32 @@ To run an individual test file:
 
     $ python -m unittest discover -s test -p echo.py EchoTest.test_echo
 
-If PIKE\_CREDS is not specified, your current Kerberos credentials will be used
-to authenticate.  Use kinit if you need to acquire a ticket.
+Kerberos Hints
+==============
+
+Setting up MIT Kerberos as provided by many linux distributions to interop
+with an existing Active Directory and Pike is relatively simple.
+
+If PIKE\_CREDS is not specified and the kerberos module was built while
+installing pike, your current Kerberos credentials will be used to
+authenticate.
+
+Use a minimal /etc/krb5.conf on the client such as the following
+
+    [libdefaults]
+        default_realm = AD.EXAMPLE.COM
+
+Retrieve a ticket for the desired user
+
+    $ kinit user_1
+
+(Optional) in leiu of DNS, add host entries for the server name + domain
+
+    $ echo "10.1.1.150    smb-server.ad.example.com" >> /etc/hosts
+
+Fire pike tests
+
+    $ PIKE_SERVER="smb-server.ad.example.com" PIKE_SHARE="C$" python -m unittest discover -s test -p tree.py
 
 Note that you will probably need to specify the server by fully-qualified
 hostname in order for Kerberos to figure out which ticket to use.  If you
