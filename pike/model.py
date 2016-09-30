@@ -72,7 +72,8 @@ trace = False
 
 def loop(timeout=None, count=None):
     """
-    wraps asyncore.loop and uses poll() for scalability
+    wrapper for blocking on the underlying event loop for the given timeout
+    or given count of iterations
     """
     if timeout is None:
         timeout = default_timeout
@@ -531,17 +532,6 @@ class Connection(transport.Transport):
     def reserve_mid(mid):
         self._mid_blacklist.add(mid)
 
-    #
-    # async dispatcher callbacks
-    #
-    def readable(self):
-        # Always want to read if possible
-        return True
-
-    def writable(self):
-        # Do we have data to send?
-        return self._out_buffer != None or len(self._out_queue) != 0
-
     def handle_connect(self):
         self.client._connections.append(self)
         with self.connection_future:
@@ -572,10 +562,11 @@ class Connection(transport.Transport):
         # Try to write out more data
         while self._out_buffer is None and len(self._out_queue):
             self._out_buffer = self._prepare_outgoing()
-        sent = self.send(self._out_buffer)
-        del self._out_buffer[:sent]
-        if len(self._out_buffer) == 0:
-            self._out_buffer = None
+        while self._out_buffer is not None:
+            sent = self.send(self._out_buffer)
+            del self._out_buffer[:sent]
+            if len(self._out_buffer) == 0:
+                self._out_buffer = None
 
     def handle_close(self):
         self.close()
@@ -780,8 +771,7 @@ class Connection(transport.Transport):
                 futures.append(future)
 
         # don't wait for the callback, send the data now
-        if self.writable():
-            self.handle_write()
+        self.handle_write()
         return futures
 
     def transceive(self, req):

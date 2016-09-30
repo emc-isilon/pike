@@ -86,8 +86,7 @@ class BasePoller(object):
         for fileno in readables:
             t = self.connections[fileno]
             try:
-                if t.readable():
-                    t.handle_read()
+                t.handle_read()
             except socket.error, e:
                 if e.args[0] not in (EBADF, ECONNRESET, ENOTCONN, ESHUTDOWN, ECONNABORTED):
                     t.handle_error()
