@@ -623,8 +623,11 @@ class NtlmProvider(object):
         self.session_base_key = nonce(16)
 
         self.negotiate_message = None
+        self.negotiate_buffer = None
         self.challenge_message = None
+        self.challenge_buffer = None
         self.authenticate_message = None
+        self.authenticate_buffer = None
 
     def ntlmv1(self):
         self.lm_hash = LMOWFv1(self.password)
@@ -684,15 +687,14 @@ class NtlmProvider(object):
         neg.negotiate_flags = self.neg_flags
         neg.domain_name = self.domain
         neg.version = self.version
-        buffer = array.array('B')
-        ntlm.encode(core.Cursor(buffer, 0))
+        self.negotiate_buffer = array.array('B')
+        ntlm.encode(core.Cursor(self.negotiate_buffer, 0))
         self.negotiate_message = ntlm
-        self.messages.append(buffer.tostring())
-        return buffer
+        return self.negotiate_buffer
 
     def authenticate(self, challenge_buf):
         # parse the challenge message
-        self.messages.append(challenge_buf.tostring())
+        self.challenge_buffer = challenge_buf
         ntlm_challenge = Ntlm()
         ntlm_challenge.decode(core.Cursor(challenge_buf, 0))
         self.server_challenge = ntlm_challenge.message.server_challenge
@@ -723,8 +725,14 @@ class NtlmProvider(object):
         if session_key is not None:
             auth.encrypted_random_session_key = session_key
 
-        buffer = array.array('B')
-        ntlm.encode(core.Cursor(buffer, 0))
+        self.authenticate_buffer = array.array('B')
+        ntlm.encode(core.Cursor(self.authenticate_buffer, 0))
         self.authenticate_message = ntlm
-        self.messages.append(buffer)
-        return buffer
+        return self.authenticate_buffer
+
+    def step(self, sec_buf):
+        if self.negotiate_message is None:
+            return (self.negotiate(), None)
+        elif self.challenge_message is None:
+            self.authenticate(sec_buf)
+        return (self.authenticate_buffer, self.exported_session_key.tostring())
