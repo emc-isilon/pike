@@ -454,6 +454,7 @@ class Connection(transport.Transport):
         use L{Client.connect}().
         """
         super(Connection, self).__init__()
+        self._no_delay = True
         self._in_buffer = array.array('B')
         self._watermark = 4
         self._out_buffer = None
@@ -562,11 +563,11 @@ class Connection(transport.Transport):
         # Try to write out more data
         while self._out_buffer is None and len(self._out_queue):
             self._out_buffer = self._prepare_outgoing()
-        while self._out_buffer is not None:
-            sent = self.send(self._out_buffer)
-            del self._out_buffer[:sent]
-            if len(self._out_buffer) == 0:
-                self._out_buffer = None
+            while self._out_buffer is not None:
+                sent = self.send(self._out_buffer)
+                del self._out_buffer[:sent]
+                if len(self._out_buffer) == 0:
+                    self._out_buffer = None
 
     def handle_close(self):
         self.close()
@@ -772,7 +773,8 @@ class Connection(transport.Transport):
                 futures.append(future)
 
         # don't wait for the callback, send the data now
-        self.handle_write()
+        if self._no_delay:
+            self.handle_write()
         return futures
 
     def transceive(self, req):
