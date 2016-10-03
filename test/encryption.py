@@ -49,6 +49,7 @@ class TestEncryption(pike.test.PikeTest):
         self.assertTrue(conn.negotiate_response.capabilities &
                         smb2.SMB2_GLOBAL_CAP_ENCRYPTION)
         chan = conn.session_setup(self.creds)
+        chan.session.encrypt_data = True
         self.assertIsNotNone(chan.session.encryption_context)
         self.assertEqual(chan.session.encryption_context.aes_mode,
                          crypto.AES.MODE_CCM)
@@ -64,6 +65,7 @@ class TestEncryption(pike.test.PikeTest):
         self.assertTrue(conn.negotiate_response.capabilities &
                         smb2.SMB2_GLOBAL_CAP_ENCRYPTION)
         chan = conn.session_setup(self.creds)
+        chan.session.encrypt_data = True
         self.assertIsNotNone(chan.session.encryption_context)
         self.assertEqual(chan.session.encryption_context.aes_mode,
                          crypto.AES.MODE_CCM)
@@ -80,6 +82,7 @@ class TestEncryption(pike.test.PikeTest):
         self.assertFalse(conn.negotiate_response.capabilities &
                         smb2.SMB2_GLOBAL_CAP_ENCRYPTION)
         chan = conn.session_setup(self.creds)
+        chan.session.encrypt_data = True
         self.assertIsNotNone(chan.session.encryption_context)
         self.assertEqual(chan.session.encryption_context.aes_mode,
                          crypto.AES.MODE_GCM)
@@ -96,6 +99,7 @@ class TestEncryption(pike.test.PikeTest):
         self.assertFalse(conn.negotiate_response.capabilities &
                         smb2.SMB2_GLOBAL_CAP_ENCRYPTION)
         chan = conn.session_setup(self.creds)
+        chan.session.encrypt_data = True
         self.assertIsNotNone(chan.session.encryption_context)
         self.assertEqual(chan.session.encryption_context.aes_mode,
                          crypto.AES.MODE_CCM)
@@ -112,6 +116,7 @@ class TestEncryption(pike.test.PikeTest):
         self.assertFalse(conn.negotiate_response.capabilities &
                         smb2.SMB2_GLOBAL_CAP_ENCRYPTION)
         chan = conn.session_setup(self.creds)
+        chan.session.encrypt_data = True
         self.assertIsNotNone(chan.session.encryption_context)
         self.assertEqual(chan.session.encryption_context.aes_mode,
                          crypto.AES.MODE_GCM)
