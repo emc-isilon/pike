@@ -191,7 +191,7 @@ class NegotiateContext(test.PikeTest):
         resp = self.negotiate(ciphers=[crypto.SMB2_AES_128_CCM, crypto.SMB2_AES_128_GCM])
         if resp.dialect_revision >= smb2.DIALECT_SMB3_1_1:
             for ctx in resp:
-                if isinstance(ctx, smb2.EncryptionCapabilitiesResponse):
+                if isinstance(ctx, crypto.EncryptionCapabilitiesResponse):
                     self.assertEqual(len(ctx.ciphers), 1)
                     self.assertIn(crypto.SMB2_AES_128_CCM, ctx.ciphers)
 
@@ -199,7 +199,7 @@ class NegotiateContext(test.PikeTest):
         resp = self.negotiate(ciphers=[crypto.SMB2_AES_128_GCM, crypto.SMB2_AES_128_CCM])
         if resp.dialect_revision >= smb2.DIALECT_SMB3_1_1:
             for ctx in resp:
-                if isinstance(ctx, smb2.EncryptionCapabilitiesResponse):
+                if isinstance(ctx, crypto.EncryptionCapabilitiesResponse):
                     self.assertEqual(len(ctx.ciphers), 1)
                     self.assertIn(crypto.SMB2_AES_128_GCM, ctx.ciphers)
 
@@ -207,7 +207,7 @@ class NegotiateContext(test.PikeTest):
         resp = self.negotiate(ciphers=[crypto.SMB2_AES_128_CCM])
         if resp.dialect_revision >= smb2.DIALECT_SMB3_1_1:
             for ctx in resp:
-                if isinstance(ctx, smb2.EncryptionCapabilitiesResponse):
+                if isinstance(ctx, crypto.EncryptionCapabilitiesResponse):
                     self.assertEqual(len(ctx.ciphers), 1)
                     self.assertIn(crypto.SMB2_AES_128_CCM, ctx.ciphers)
 
@@ -215,6 +215,6 @@ class NegotiateContext(test.PikeTest):
         resp = self.negotiate(ciphers=[crypto.SMB2_AES_128_GCM])
         if resp.dialect_revision >= smb2.DIALECT_SMB3_1_1:
             for ctx in resp:
-                if isinstance(ctx, smb2.EncryptionCapabilitiesResponse):
+                if isinstance(ctx, crypto.EncryptionCapabilitiesResponse):
                     self.assertEqual(len(ctx.ciphers), 1)
                     self.assertIn(crypto.SMB2_AES_128_GCM, ctx.ciphers)
