@@ -71,7 +71,7 @@ class TestReparsePoint(pike.test.PikeTest):
             chan.create(tree, "symlink", share=share_all).result()
         except pike.model.ResponseError as err:
             self.assertEqual(err.response.status, pike.ntstatus.STATUS_STOPPED_ON_SYMLINK)
-            self.assertEqual(err.response[0].error_data.substitute_name, target)
-            self.assertEqual(err.response[0].error_data.print_name, target)
+            self.assertEqual(err.response[0][0].error_data.substitute_name, target)
+            self.assertEqual(err.response[0][0].error_data.print_name, target)
         chan.close(link)
 

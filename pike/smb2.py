@@ -333,34 +333,101 @@ class Notification(Command):
 class ErrorResponse(Command):
     structure_size = 9
 
+    _context_table = {}
+    error_context = core.Register(_context_table, 'error_id', 'parent_status')
+    special_statuses = [ntstatus.STATUS_STOPPED_ON_SYMLINK,
+                        ntstatus.STATUS_BUFFER_TOO_SMALL]
+
     def __init__(self, parent):
         super(ErrorResponse,self).__init__(parent)
         parent._command = self
         self.byte_count = None
+        self.error_context_count = 0
         self.error_data = None
+        self._error_contexts = []
+
+    def _children(self):
+        return self._error_contexts
+
+    def append(self, e):
+        self._error_contexts.append(e)
 
     def _decode(self, cur):
+        self.error_context_count = cur.decode_uint8le()
         # Ignore Reserved
-        cur.decode_uint16le()
+        cur.decode_uint8le()
         self.byte_count = cur.decode_uint32le()
         end = cur + self.byte_count
 
-        if self.parent.status == ntstatus.STATUS_BUFFER_TOO_SMALL and self.byte_count == 4:
-            # Parse required buffer size
-            self.error_data = cur.decode_uint32le()
-        elif self.parent.status == ntstatus.STATUS_STOPPED_ON_SYMLINK and self.byte_count >= 28:
-            self.sym_link_length = cur.decode_uint32le()
-            self.sym_link_error_tag = cur.decode_uint32le()
-            self.reparse_tag = cur.decode_uint32le()
-            if self.sym_link_error_tag != 0x4C4D5953:
-                raise core.BadPacket()
-            reparse_data = GetReparsePointResponse._reparse_tag_map[self.reparse_tag]
+        # SMB 3.1.1+ Error context handling
+        if self.error_context_count > 0:
+            for ix in xrange(self.error_context_count):
+                cur.align(self.parent.start, 8)
+                data_length = cur.decode_uint32le()
+                error_id = cur.decode_uint32le()
+                parent_status = self.parent.status
+                if parent_status not in self.special_statuses:
+                    parent_status = None
+                key = (error_id, parent_status)
+                ctx = self._context_table[key]
+                with cur.bounded(cur, end):
+                    ctx(self, data_length).decode(cur)
+        elif self.byte_count > 0:
+            # compatability shim for older dialects
+            error_id = 0
+            parent_status = self.parent.status
+            if parent_status not in self.special_statuses:
+                parent_status = None
+            key = (error_id, parent_status)
+            ctx = self._context_table[key]
             with cur.bounded(cur, end):
-                self.error_data = reparse_data(self)
+                self.error_data = ctx(self, self.byte_count)
                 self.error_data.decode(cur)
         else:
            # Ignore ErrorData
            cur += self.byte_count if self.byte_count else 1
+
+class ErrorId(core.ValueEnum):
+    SMB2_ERROR_ID_DEFAULT = 0x0
+
+ErrorId.import_items(globals())
+
+@ErrorResponse.error_context
+class ErrorResponseContext(core.Frame):
+    def __init__(self, parent, data_length):
+        core.Frame.__init__(self, parent)
+        self.data_length = data_length
+        self.error_data = None
+        if parent is not None:
+            parent.append(self)
+
+class ErrorResponseDefault(ErrorResponseContext):
+    error_id = SMB2_ERROR_ID_DEFAULT
+    parent_status = None
+    def _decode(self, cur):
+        self.error_data = cur.decode_bytes(self.data_length)
+
+class ErrorResponseDefaultBufferSize(ErrorResponseContext):
+    error_id = SMB2_ERROR_ID_DEFAULT
+    parent_status = ntstatus.STATUS_BUFFER_TOO_SMALL
+    def _decode(self, cur):
+        self.error_data = cur.decode_uint32le()
+        self.minimum_buffer_length = self.error_data
+
+class SymbolicLinkErrorResponse(ErrorResponseContext):
+    error_id = SMB2_ERROR_ID_DEFAULT
+    parent_status = ntstatus.STATUS_STOPPED_ON_SYMLINK
+    def _decode(self, cur):
+        end = cur + self.data_length
+        self.sym_link_length = cur.decode_uint32le()
+        self.sym_link_error_tag = cur.decode_uint32le()
+        self.reparse_tag = cur.decode_uint32le()
+        if self.sym_link_error_tag != 0x4C4D5953:
+            raise core.BadPacket()
+        reparse_data = GetReparsePointResponse._reparse_tag_map[self.reparse_tag]
+        with cur.bounded(cur, end):
+            self.error_data = reparse_data(self)
+            self.error_data.decode(cur)
 
 class Cancel(Request):
     command_id = SMB2_CANCEL

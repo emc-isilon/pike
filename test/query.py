@@ -132,5 +132,5 @@ class QueryTest(pike.test.PikeTest):
 
         err = cm.response[0]
 
-        self.assertEqual(err.byte_count, 4)
-        self.assertTrue(err.error_data > 0)
+        self.assertEqual(err[0].data_length, 4)
+        self.assertTrue(err[0].minimum_buffer_length > 0)
