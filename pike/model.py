@@ -798,7 +798,10 @@ class Connection(transport.Transport):
         neg_req.client_guid = self.client.client_guid
 
         if smb2.DIALECT_SMB3_1_1 in neg_req.dialects:
-            if ciphers is not None:
+            if ciphers is None:
+                ciphers = [crypto.SMB2_AES_128_GCM,
+                           crypto.SMB2_AES_128_CCM]
+            if ciphers:
                 encryption_req = crypto.EncryptionCapabilitiesRequest(neg_req)
                 encryption_req.ciphers = ciphers
 
@@ -1656,7 +1659,7 @@ class Channel(object):
                 encrypt_data |= obj.tree.encrypt_data
 
         # a packet is either encrypted or signed
-        if encrypt_data:
+        if encrypt_data and self.session.encryption_context is not None:
             transform = crypto.TransformHeader(smb_req.parent)
             transform.encryption_context = self.session.encryption_context
             transform.session_id = self.session.session_id
