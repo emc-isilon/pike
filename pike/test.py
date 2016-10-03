@@ -108,7 +108,7 @@ class PikeTest(unittest.TestCase):
         self.logger.critical(*args, **kwargs)
 
     def tree_connect(self, client=None):
-        req_dialect = self.required_dialect()
+        dialect_range = self.required_dialect()
         req_caps = self.required_capabilities()
         req_share_caps = self.required_share_capabilities()
 
@@ -117,8 +117,9 @@ class PikeTest(unittest.TestCase):
 
         conn = client.connect(self.server, self.port).negotiate()
 
-        if conn.negotiate_response.dialect_revision < req_dialect:
-            self.skipTest("Dialect required: %s" % str(req_dialect))
+        if (conn.negotiate_response.dialect_revision < dialect_range[0] or
+            conn.negotiate_response.dialect_revision > dialect_range[1]):
+            self.skipTest("Dialect required: %s" % str(dialect_range))
 
         if conn.negotiate_response.capabilities & req_caps != req_caps:
             self.skipTest("Capabilities missing: %s " %
@@ -221,6 +222,16 @@ class _Decorator(object):
         setattr(thing, '__pike_test_' + self.__class__.__name__, self.value)
         return thing
 
-class RequireDialect(_Decorator): pass
+class _RangeDecorator(object):
+    def __init__(self, minvalue=0, maxvalue=float('inf')):
+        self.minvalue = minvalue
+        self.maxvalue = maxvalue
+
+    def __call__(self, thing):
+        setattr(thing, '__pike_test_' + self.__class__.__name__,
+                (self.minvalue, self.maxvalue))
+        return thing
+
+class RequireDialect(_RangeDecorator): pass
 class RequireCapabilities(_Decorator): pass
 class RequireShareCapabilities(_Decorator): pass

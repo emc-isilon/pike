@@ -41,7 +41,7 @@ import pike.test as test
 
 class ValidateNegotiateInfo(test.PikeTest):
     # VALIDATE_NEGOTIATE_INFO fsctl succeeds for SMB3
-    @test.RequireDialect(smb2.DIALECT_SMB3_0)
+    @test.RequireDialect(smb2.DIALECT_SMB3_0, smb2.DIALECT_SMB3_0_2)
     def test_validate_negotiate_smb3(self):
         chan, tree = self.tree_connect()
         chan.validate_negotiate_info(tree)
