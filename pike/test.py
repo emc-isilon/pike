@@ -48,6 +48,7 @@ except ImportError:
     import unittest
 
 import model
+import smb2
 
 class PikeTest(unittest.TestCase):
     init_done = False
@@ -67,6 +68,10 @@ class PikeTest(unittest.TestCase):
     def booloption(name, default = 'no'):
         table = {'yes': True, 'no': False, '': False}
         return table[PikeTest.option(name, 'no')]
+
+    @staticmethod
+    def smb2constoption(name, default=None):
+        return getattr(smb2, PikeTest.option(name, '').upper(), default)
     
     @staticmethod
     def init_once():
@@ -89,8 +94,23 @@ class PikeTest(unittest.TestCase):
         self.port = int(self.option('PIKE_PORT', '445'))
         self.creds = self.option('PIKE_CREDS')
         self.share = self.option('PIKE_SHARE', 'c$')
+        self.signing = self.booloption('PIKE_SIGN')
+        self.encryption = self.booloption('PIKE_ENCRYPT')
+        self.min_dialect = self.smb2constoption('PIKE_MIN_DIALECT')
+        self.max_dialect = self.smb2constoption('PIKE_MAX_DIALECT')
         self._connections = []
         self.default_client = model.Client()
+        if self.min_dialect is not None:
+            self.default_client.dialects = filter(
+                    lambda d: d >= self.min_dialect,
+                    self.default_client.dialects)
+        if self.max_dialect is not None:
+            self.default_client.dialects = filter(
+                    lambda d: d <= self.max_dialect,
+                    self.default_client.dialects)
+        if self.signing:
+            self.default_client.security_mode = (smb2.SMB2_NEGOTIATE_SIGNING_ENABLED |
+                                                 smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED)
 
     def debug(self, *args, **kwargs):
         self.logger.debug(*args, **kwargs)
@@ -108,7 +128,7 @@ class PikeTest(unittest.TestCase):
         self.logger.critical(*args, **kwargs)
 
     def tree_connect(self, client=None):
-        req_dialect = self.required_dialect()
+        dialect_range = self.required_dialect()
         req_caps = self.required_capabilities()
         req_share_caps = self.required_share_capabilities()
 
@@ -117,14 +137,17 @@ class PikeTest(unittest.TestCase):
 
         conn = client.connect(self.server, self.port).negotiate()
 
-        if conn.negotiate_response.dialect_revision < req_dialect:
-            self.skipTest("Dialect required: %s" % str(req_dialect))
+        if (conn.negotiate_response.dialect_revision < dialect_range[0] or
+            conn.negotiate_response.dialect_revision > dialect_range[1]):
+            self.skipTest("Dialect required: %s" % str(dialect_range))
 
         if conn.negotiate_response.capabilities & req_caps != req_caps:
             self.skipTest("Capabilities missing: %s " %
                           str(req_caps & ~conn.negotiate_response.capabilities))
 
         chan = conn.session_setup(self.creds)
+        if self.encryption:
+            chan.session.encrypt_data = True
 
         tree = chan.tree_connect(self.share)
 
@@ -183,7 +206,7 @@ class PikeTest(unittest.TestCase):
             return default
 
     def required_dialect(self):
-        return self._get_decorator_attr('RequireDialect', 0)
+        return self._get_decorator_attr('RequireDialect', (0, float('inf')))
 
     def required_capabilities(self):
         return self._get_decorator_attr('RequireCapabilities', 0)
@@ -221,6 +244,16 @@ class _Decorator(object):
         setattr(thing, '__pike_test_' + self.__class__.__name__, self.value)
         return thing
 
-class RequireDialect(_Decorator): pass
+class _RangeDecorator(object):
+    def __init__(self, minvalue=0, maxvalue=float('inf')):
+        self.minvalue = minvalue
+        self.maxvalue = maxvalue
+
+    def __call__(self, thing):
+        setattr(thing, '__pike_test_' + self.__class__.__name__,
+                (self.minvalue, self.maxvalue))
+        return thing
+
+class RequireDialect(_RangeDecorator): pass
 class RequireCapabilities(_Decorator): pass
 class RequireShareCapabilities(_Decorator): pass

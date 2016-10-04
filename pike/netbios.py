@@ -35,12 +35,15 @@
 #
 
 import core
+import crypto
 import smb2
 
 class Netbios(core.Frame):
     def __init__(self, context=None):
         core.Frame.__init__(self, None, context)
         self.len = 0
+        self.conn = context
+        self.transform = None
         self._smb2_frames = []
 
     def _children(self):
@@ -50,9 +53,12 @@ class Netbios(core.Frame):
         # Frame length (0 for now)
         len_hole = cur.hole.encode_uint32be(0)
         base = cur.copy()
-
-        for child in self.children:
-            child.encode(cur)
+        if self.transform is not None:
+            # performing encryption
+            self.transform.encode(cur)
+        else:
+            for child in self.children:
+                child.encode(cur)
 
         self.len = cur - base
         len_hole(self.len)
@@ -63,8 +69,11 @@ class Netbios(core.Frame):
 
         with cur.bounded(cur, end):
             while (cur < end):
-                smb2_frame = smb2.Smb2(self)
-                smb2_frame.decode(cur)
+                signature = cur.copy().decode_bytes(4)
+                if (signature.tostring() == '\xfdSMB'):
+                    crypto.TransformHeader(self).decode(cur)
+                else:
+                    smb2.Smb2(self).decode(cur)
 
     def append(self, smb2_frame):
         self._smb2_frames.append(smb2_frame)

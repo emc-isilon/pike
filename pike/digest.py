@@ -36,6 +36,7 @@
 
 import Crypto.Hash.HMAC
 import Crypto.Hash.SHA256
+import Crypto.Hash.SHA512
 import Crypto.Cipher.AES
 import array
 import core
@@ -43,12 +44,13 @@ import core
 def sha256_hmac(key,message):
     return array.array('B',
         Crypto.Hash.HMAC.new(
-            key,
-            message,
+            key.tostring(),
+            message.tostring(),
             Crypto.Hash.SHA256).digest())
 
 def aes128_cmac(key,message):
-    aes = Crypto.Cipher.AES.new(key)
+    aes = Crypto.Cipher.AES.new(key.tostring(),
+                                mode=Crypto.Cipher.AES.MODE_ECB)
 
     def shiftleft(data):
         cin = 0
@@ -57,7 +59,7 @@ def aes128_cmac(key,message):
             cout = (data[i] & 0x80) >> 7
             data[i] = ((data[i] << 1) | cin) & 0xFF
             cin = cout
-        
+
         return cout
 
     def xor(data1, data2):
@@ -68,7 +70,7 @@ def aes128_cmac(key,message):
         zero = array.array('B', [0]*16)
         rb = array.array('B', [0]*15 + [0x87])
 
-        key1 = array.array('B', aes.encrypt(zero))
+        key1 = array.array('B', aes.encrypt(zero.tostring()))
 
         if shiftleft(key1):
             xor(key1, rb)
@@ -90,12 +92,12 @@ def aes128_cmac(key,message):
 
     if (n == 0):
         n = 1
-    
+
     subkey1, subkey2 = subkeys(array.array('B',key))
 
     for i in xrange(0, n - 1):
         xor(mac, message[i*16:i*16+16])
-        mac = array.array('B',aes.encrypt(mac))
+        mac = array.array('B',aes.encrypt(mac.tostring()))
 
     if last_complete:
         scratch[0:16] = message[-16:]
@@ -106,9 +108,13 @@ def aes128_cmac(key,message):
         xor(scratch, subkey2)
 
     xor(mac, scratch)
-    mac = array.array('B',aes.encrypt(mac))
+    mac = array.array('B',aes.encrypt(mac.tostring()))
 
     return mac
+
+def smb3_sha512(message):
+    return array.array('B',
+            Crypto.Hash.SHA512.new(message.tostring()).digest())
 
 def derive_key(key, label, context):
     message = array.array('B')
@@ -119,7 +125,6 @@ def derive_key(key, label, context):
     cur.encode_uint8be(0)
     cur.encode_uint8be(0)
     cur.encode_bytes(context)
-    cur.encode_uint8be(0)
     cur.encode_uint32be(len(key)*8)
 
     return sha256_hmac(key, message)

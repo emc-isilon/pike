@@ -20,8 +20,6 @@
  * Modified by EMC Corporation.
  */
 
-#include "config.h"
-
 #include <Python.h>
 #include "kerberosgss.h"
 

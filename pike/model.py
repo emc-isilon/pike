@@ -46,7 +46,6 @@ constructing packets.
 
 import sys
 import socket
-import asyncore
 import array
 import struct
 import random
@@ -56,19 +55,37 @@ import operator
 import contextlib
 
 import core
+import crypto
 import netbios
 import smb2
+import transport
 import ntstatus
-import kerberos
+try:
+    import kerberos
+except ImportError:
+    kerberos = None
+import ntlm
 import digest
 
 default_timeout = 30
 trace = False
 
+def loop(timeout=None, count=None):
+    """
+    wrapper for blocking on the underlying event loop for the given timeout
+    or given count of iterations
+    """
+    if timeout is None:
+        timeout = default_timeout
+    transport.loop(timeout=timeout, count=count)
+
 class TimeoutError(Exception):
     pass
 
 class StateError(Exception):
+    pass
+
+class CreditError(Exception):
     pass
 
 class ResponseError(Exception):
@@ -142,7 +159,7 @@ class Future(object):
             now = time.time()
             if now > deadline:
                 raise TimeoutError('Timed out after %s seconds' % timeout)
-            asyncore.loop(timeout=deadline-now, count=1)
+            loop(timeout=deadline-now, count=1)
 
         return self
 
@@ -157,7 +174,7 @@ class Future(object):
             now = time.time()
             if now > deadline:
                 raise TimeoutError('Timed out after %s seconds' % timeout)
-            asyncore.loop(timeout=deadline-now, count=1)
+            loop(timeout=deadline-now, count=1)
 
         return self
 
@@ -172,7 +189,7 @@ class Future(object):
         @param timeout: The time in seconds before giving up and raising TimeoutError
         """
         self.wait(timeout)
-        
+
         if isinstance(self.response, BaseException):
             traceback = self.traceback
             self.traceback = None
@@ -218,7 +235,11 @@ class Client(object):
     @ivar channel_sequence: Current channel sequence number
     """
     def __init__(self,
-                 dialects=[smb2.DIALECT_SMB2_002, smb2.DIALECT_SMB2_1, smb2.DIALECT_SMB3_0],
+                 dialects=[smb2.DIALECT_SMB2_002,
+                           smb2.DIALECT_SMB2_1,
+                           smb2.DIALECT_SMB3_0,
+                           smb2.DIALECT_SMB3_0_2,
+                           smb2.DIALECT_SMB3_1_1],
                  capabilities=smb2.GlobalCaps(reduce(operator.or_, smb2.GlobalCaps.values())),
                  security_mode=smb2.SMB2_NEGOTIATE_SIGNING_ENABLED,
                  client_guid=None):
@@ -255,24 +276,35 @@ class Client(object):
         """
         Create a connection.
 
-        Returns a new L{Connection} object connected to the given
-        server and port.
+        Returns a new L{Connection} object connected to the given server and port.
 
         @param server: The server to connect to.
         @param port: The port to connect to.
         """
-        return Connection(self, server, port)
+        return self.connect_submit(server, port).result()
+
+    def connect_submit(self, server, port=445):
+        """
+        Create a connection.
+
+        Returns a new L{Future} object for the L{Connection} being established
+        asynchronously to the given server and port.
+
+        @param server: The server to connect to.
+        @param port: The port to connect to.
+        """
+        return Connection(self, server, port).connection_future
 
     # Do not use, may be removed.  Use oplock_break_future.
     def next_oplock_break(self):
         while len(self._oplock_break_queue) == 0:
-            asyncore.loop(count=1)
+            loop(count=1)
         return self._oplock_break_queue.pop()
-    
+
     # Do not use, may be removed.  Use lease_break_future.
     def next_lease_break(self):
         while len(self._lease_break_queue) == 0:
-            asyncore.loop(count=1)
+            loop(count=1)
         return self._lease_break_queue.pop()
 
     def oplock_break_future(self, file_id):
@@ -286,7 +318,7 @@ class Client(object):
         @type file_id: (number, number)
         @param file_id: The file ID of the oplocked file.
         """
-        
+
         future = Future(None)
 
         for smb_res in self._oplock_break_queue[:]:
@@ -369,7 +401,40 @@ class Client(object):
     def dispose_lease(self, lease):
         del self._leases[lease.lease_key.tostring()]
 
-class Connection(asyncore.dispatcher):
+
+class KerberosProvider(object):
+    def __init__(self, conn, creds=None):
+        if creds:
+            nt4, password = creds.split('%')
+            domain, user = nt4.split('\\')
+            (self.result,
+             self.context) = kerberos.authGSSClientInit(
+                "cifs/" + conn.server,
+                gssmech=2,
+                user=user,
+                password=password,
+                domain=domain)
+        else:
+            (self.result,
+             self.context) = kerberos.authGSSClientInit("cifs/" + conn.server,
+                                                        gssmech=1)
+
+    def step(self, sec_buf):
+        self.result = kerberos.authGSSClientStep(
+                self.context,
+                sec_buf.tostring())
+        if self.result == 0:
+            return (array.array(
+                    'B',
+                    kerberos.authGSSClientResponse(self.context)),
+                    None)
+        else:
+            kerberos.authGSSClientSessionKey(self.context)
+            return (None,
+                    array.array('B',
+                        kerberos.authGSSClientResponse(self.context)[:16]))
+
+class Connection(transport.Transport):
     """
     Connection to server.
 
@@ -388,7 +453,8 @@ class Connection(asyncore.dispatcher):
         This should generally not be used directly.  Instead,
         use L{Client.connect}().
         """
-        asyncore.dispatcher.__init__(self)
+        super(Connection, self).__init__()
+        self._no_delay = True
         self._in_buffer = array.array('B')
         self._watermark = 4
         self._out_buffer = None
@@ -400,7 +466,9 @@ class Connection(asyncore.dispatcher):
         self._binding = None
         self._binding_key = None
         self._settings = {}
-        
+        self._pre_auth_integrity_hash = array.array('B', "\0"*64)
+        self.connection_future = Future()
+        self.credits = 1
         self.client = client
         self.server = server
         self.port = port
@@ -409,7 +477,7 @@ class Connection(asyncore.dispatcher):
 
         self.error = None
         self.traceback = None
-    
+
         for result in socket.getaddrinfo(server, port,
                                          0,
                                          socket.SOCK_STREAM,
@@ -418,39 +486,63 @@ class Connection(asyncore.dispatcher):
             break
         self.create_socket(family, socktype)
         self.connect(sockaddr)
-        self.client._connections.append(self)
 
-    def next_mid(self):
-        while self._next_mid in self._mid_blacklist:
-            self._next_mid += 1
-        result = self._next_mid
-        self._next_mid += 1
+    def smb3_pa_integrity(self, packet, data=None):
+        """ perform smb3 pre-auth integrity hash update if needed """
+        if smb2.DIALECT_SMB3_1_1 not in self.client.dialects:
+            # hash only applies if client requests 3.1.1
+            return
+        neg_resp = getattr(self, "negotiate_response", None)
+        if (neg_resp is not None and
+            neg_resp.dialect_revision < smb2.DIALECT_SMB3_1_1):
+            # hash only applies if server negotiates 3.1.1
+            return
+        if packet[0].__class__ not in [smb2.NegotiateRequest,
+                                       smb2.NegotiateResponse,
+                                       smb2.SessionSetupRequest,
+                                       smb2.SessionSetupResponse]:
+            # hash only applies to pre-auth messages
+            return
+        if (packet[0].__class__ == smb2.SessionSetupResponse and
+            packet.status == ntstatus.STATUS_SUCCESS):
+            # last session setup doesn't count in hash
+            return
+        if data is None:
+            data = packet.serialize()
+        self._pre_auth_integrity_hash = digest.smb3_sha512(
+                self._pre_auth_integrity_hash +
+                data)
+
+    def next_mid_range(self, length):
+        if length < 1:
+            length = 1
+        start_range = self._next_mid
+        while True:
+            r = set(range(start_range, start_range+length))
+            if not r.intersection(self._mid_blacklist):
+                break
+            start_range += 1
+        result = sorted(list(r))[-1]
+        self._next_mid = result + 1
 
         return result
+
+    def next_mid(self):
+        return self.next_range(1)
 
     def reserve_mid(mid):
         self._mid_blacklist.add(mid)
 
-    #
-    # async dispatcher callbacks
-    #
-    def readable(self):
-        # Always want to read if possible
-        return True
-
-    def writable(self):
-        # Do we have data to send?
-        # FIXME: credit tracking
-        return self._out_buffer != None or len(self._out_queue) != 0
-
     def handle_connect(self):
-        self.local_addr = self.socket.getsockname()
-        self.remote_addr = self.socket.getpeername()
+        self.client._connections.append(self)
+        with self.connection_future:
+            self.local_addr = self.socket.getsockname()
+            self.remote_addr = self.socket.getpeername()
 
-        self.client.logger.debug('connect: %s/%s -> %s/%s',
-                                 self.local_addr[0], self.local_addr[1],
-                                 self.remote_addr[0], self.remote_addr[1])
-        pass
+            self.client.logger.debug('connect: %s/%s -> %s/%s',
+                                     self.local_addr[0], self.local_addr[1],
+                                     self.remote_addr[0], self.remote_addr[1])
+        self.connection_future(self)
 
     def handle_read(self):
         # Try to read the next netbios frame
@@ -469,13 +561,13 @@ class Connection(asyncore.dispatcher):
 
     def handle_write(self):
         # Try to write out more data
-        # FIXME: credit tracking
         while self._out_buffer is None and len(self._out_queue):
             self._out_buffer = self._prepare_outgoing()
-        sent = self.send(self._out_buffer)
-        del self._out_buffer[:sent]
-        if len(self._out_buffer) == 0:
-            self._out_buffer = None
+            while self._out_buffer is not None:
+                sent = self.send(self._out_buffer)
+                del self._out_buffer[:sent]
+                if len(self._out_buffer) == 0:
+                    self._out_buffer = None
 
     def handle_close(self):
         self.close()
@@ -494,7 +586,7 @@ class Connection(asyncore.dispatcher):
         if self not in self.client._connections:
             return
 
-        asyncore.dispatcher.close(self)
+        super(Connection, self).close()
 
         # Run down connection
         if self.error is None:
@@ -526,24 +618,49 @@ class Connection(asyncore.dispatcher):
 
         # Grab an outgoing smb2 request
         future = self._out_queue[0]
-        del self._out_queue[0]
 
+        result = None
         with future:
             req = future.request
-            
-            # Assign message id
-            # FIXME: credit tracking
-            if req.message_id is None:
-                req.message_id = self.next_mid()
-            req.credit_request = 10
 
-            if req.credit_charge == None:
-                req.credit_charge = 1
+            if req.credit_charge is None:
+                req.credit_charge = 0
+                for cmd in req:
+                    if isinstance(cmd, smb2.ReadRequest) and cmd.length > 0:
+                        # special handling, 1 credit per 64k
+                        req.credit_charge, remainder = divmod(cmd.length, 2**16)
+                    elif isinstance(cmd, smb2.WriteRequest) and cmd.buffer is not None:
+                        # special handling, 1 credit per 64k
+                        if cmd.length is None:
+                            cmd.length = len(cmd.buffer)
+                        req.credit_charge, remainder = divmod(cmd.length, 2**16)
+                    else:
+                        remainder = 1       # assume 1 credit per command
+                    if remainder > 0:
+                        req.credit_charge += 1
+
+            if req.credit_request is None:
+                req.credit_request = 10
+                if req.credit_charge > 10:
+                    req.credit_request = req.credit_charge      # try not to fall behind
+
+            if req.credit_charge > self.credits:
+                raise CreditError("Insufficient credits to send command. "
+                                  "Credits={0}, Charge={1}".format(self.credits,
+                                                                   req.credit_charge))
+
+            # since we have sufficient credits, the command will be sent now
+            del self._out_queue[0]
+
+            # Assign message id
+            if req.message_id is None:
+                req.message_id = self.next_mid_range(req.credit_charge)
 
             if req.is_last_child():
                 # Last command in chain, ready to send packet
-                buf = req.parent.serialize()
-                if trace: 
+                self.smb3_pa_integrity(req)
+                result = req.parent.serialize()
+                if trace:
                     self.client.logger.debug('send (%s/%s -> %s/%s): %s',
                                              self.local_addr[0], self.local_addr[1],
                                              self.remote_addr[0], self.remote_addr[1],
@@ -553,7 +670,6 @@ class Connection(asyncore.dispatcher):
                                              self.local_addr[0], self.local_addr[1],
                                              self.remote_addr[0], self.remote_addr[1],
                                              ', '.join(f[0].__class__.__name__ for f in req.parent))
-                result = buf
             else:
                 # Not ready to send chain
                 result = None
@@ -587,7 +703,12 @@ class Connection(asyncore.dispatcher):
                                      self.local_addr[0], self.local_addr[1],
                                      ', '.join(f[0].__class__.__name__ for f in res))
         for smb_res in res:
+            self.smb3_pa_integrity(smb_res, smb_res.parent.buf[4:])
+            self.credits -= smb_res.credit_charge
+            self.credits += smb_res.credit_response
+
             # Verify non-session-setup-response signatures
+            # session setup responses are verified in SessionSetupContext
             if not isinstance(smb_res[0], smb2.SessionSetupResponse):
                 key = self.signing_key(smb_res.session_id)
                 if key:
@@ -650,6 +771,10 @@ class Connection(asyncore.dispatcher):
                 future = Future(smb_req)
                 self._out_queue.append(future)
                 futures.append(future)
+
+        # don't wait for the callback, send the data now
+        if self._no_delay:
+            self.handle_write()
         return futures
 
     def transceive(self, req):
@@ -662,26 +787,223 @@ class Connection(asyncore.dispatcher):
         """
         return map(Future.result, self.submit(req))
 
-    def negotiate(self):
+    def negotiate_request(self, hash_algorithms=None, salt=None, ciphers=None):
+        smb_req = self.request()
+        smb_req.credit_charge = 0       # negotiate requests are free
+        neg_req = smb2.NegotiateRequest(smb_req)
+
+        neg_req.dialects = self.client.dialects
+        neg_req.security_mode = self.client.security_mode
+        neg_req.capabilities = self.client.capabilities
+        neg_req.client_guid = self.client.client_guid
+
+        if smb2.DIALECT_SMB3_1_1 in neg_req.dialects:
+            if ciphers is None:
+                ciphers = [crypto.SMB2_AES_128_GCM,
+                           crypto.SMB2_AES_128_CCM]
+            if ciphers:
+                encryption_req = crypto.EncryptionCapabilitiesRequest(neg_req)
+                encryption_req.ciphers = ciphers
+
+            preauth_integrity_req = smb2.PreauthIntegrityCapabilitiesRequest(neg_req)
+            if hash_algorithms is None:
+                hash_algorithms = [smb2.SMB2_SHA_512]
+            preauth_integrity_req.hash_algorithms = hash_algorithms
+            if salt is not None:
+                preauth_integrity_req.salt = salt
+            else:
+                preauth_integrity_req.salt = array.array('B',
+                    map(random.randint, [0]*32, [255]*32))
+        return neg_req
+
+    def negotiate_submit(self, negotiate_request):
+        negotiate_future = self.submit(negotiate_request.parent.parent)[0]
+        def assign_response(f):
+            self.negotiate_response = f.result()[0]
+        negotiate_future.then(assign_response)
+        return negotiate_future
+
+    def negotiate(self, hash_algorithms=None, salt=None, ciphers=None):
         """
         Perform dialect negotiation.
 
         This must be performed before setting up a session with
         L{Connection.session_setup}().
         """
-        smb_req = self.request()
-        neg_req = smb2.NegotiateRequest(smb_req)
-        
-        neg_req.dialects = self.client.dialects
-        neg_req.security_mode = self.client.security_mode
-        neg_req.capabilities = self.client.capabilities
-        neg_req.client_guid = self.client.client_guid
-
-        self.negotiate_response = self.transceive(smb_req.parent)[0][0]
-
+        self.negotiate_submit(
+                self.negotiate_request(
+                    hash_algorithms,
+                    salt,
+                    ciphers
+        )).result()
         return self
 
-    def session_setup(self, creds=None, bind=None):
+    class SessionSetupContext(object):
+        def __init__(self, conn, creds=None, bind=None, resume=None,
+                     ntlm_version=None):
+            assert conn.negotiate_response is not None
+
+            self.conn = conn
+            self.dialect_revision = conn.negotiate_response.dialect_revision
+            self.bind = bind
+            self.resume = resume
+
+            if creds and ntlm is not None:
+                nt4, password = creds.split('%')
+                domain, user = nt4.split('\\')
+                self.auth = ntlm.NtlmProvider(domain, user, password)
+                if ntlm_version is not None:
+                    self.auth.ntlm_version = ntlm_version
+            elif kerberos is not None:
+                self.auth = KerberosProvider(conn, creds)
+            else:
+                raise ImportError("Neither ntlm nor kerberos authentication "
+                                  "methods are available")
+
+            self.prev_session_id = 0
+            self.session_id = 0
+            self.requests = []
+            self.responses = []
+            self.session_future = Future()
+            self.interim_future = None
+
+            if bind:
+                assert conn.negotiate_response.dialect_revision >= 0x300
+                self.session_id = bind.session_id
+                conn._binding = bind
+                # assume the signing key from the previous session
+                conn._binding_key = bind.first_channel().signing_key
+            elif resume:
+                assert conn.negotiate_response.dialect_revision >= 0x300
+                self.prev_session_id = resume.session_id
+
+        def derive_signing_key(self, session_key=None, context=None):
+            if session_key is None:
+                session_key = self.session_key
+            if self.dialect_revision >= smb2.DIALECT_SMB3_1_1:
+                if context is None:
+                    context = self.conn._pre_auth_integrity_hash
+                return digest.derive_key(
+                        session_key,
+                        'SMBSigningKey',
+                        context)[:16]
+            elif self.dialect_revision >= smb2.DIALECT_SMB3_0:
+                if context is None:
+                    context = 'SmbSign\0'
+                return digest.derive_key(session_key, 'SMB2AESCMAC', context)[:16]
+            else:
+                return session_key
+
+        def derive_encryption_keys(self, session_key=None, context=None):
+            if self.dialect_revision >= smb2.DIALECT_SMB3_1_1:
+                if context is None:
+                    context = self.conn._pre_auth_integrity_hash
+                for nctx in self.conn.negotiate_response:
+                    if isinstance(nctx, crypto.EncryptionCapabilitiesResponse):
+                        return crypto.EncryptionContext(
+                            crypto.CryptoKeys311(
+                                self.session_key,
+                                context),
+                            nctx.ciphers)
+            elif self.dialect_revision >= smb2.DIALECT_SMB3_0:
+                if self.conn.negotiate_response.capabilities & smb2.SMB2_GLOBAL_CAP_ENCRYPTION:
+                    return crypto.EncryptionContext(
+                        crypto.CryptoKeys300(self.session_key),
+                        [crypto.SMB2_AES_128_CCM])
+
+        def _send_session_setup(self, sec_buf):
+            smb_req = self.conn.request()
+            session_req = smb2.SessionSetupRequest(smb_req)
+
+            smb_req.session_id = self.session_id
+            session_req.previous_session_id = self.prev_session_id
+            session_req.security_mode = smb2.SMB2_NEGOTIATE_SIGNING_ENABLED
+            session_req.security_buffer = sec_buf
+            if self.bind:
+                smb_req.flags = smb2.SMB2_FLAGS_SIGNED
+                session_req.flags = smb2.SMB2_SESSION_FLAG_BINDING
+
+            self.requests.append(smb_req)
+            return self.conn.submit(smb_req.parent)[0]
+
+        def _finish(self, smb_res):
+            sec_buf = smb_res[0].security_buffer
+            out_buf, self.session_key = self.auth.step(sec_buf)
+            signing_key = self.derive_signing_key()
+            encryption_context = self.derive_encryption_keys()
+
+            # Verify final signature
+            smb_res.verify(self.conn.signing_digest(), signing_key)
+
+            if self.bind:
+                self.conn._binding = None
+                self.conn._binding_key = None
+                session = self.bind
+            else:
+                session = Session(self.conn.client,
+                                  self.session_id,
+                                  self.session_key,
+                                  encryption_context,
+                                  smb_res)
+
+            return session.addchannel(self.conn, signing_key)
+
+        def __iter__(self):
+            return self
+
+        def submit(self, f=None):
+            """
+            Submit rounds of SessionSetupRequests
+
+            Returns a L{Future} object, for the L{Channel} object
+            """
+            try:
+                res = self.next()
+                res.then(self.submit)
+            except StopIteration:
+                pass
+            return self.session_future
+
+        def next(self):
+            with self.session_future:
+                res = self._process()
+                if res is not None:
+                    return res
+            raise StopIteration()
+
+        def _process(self):
+            out_buf = None
+            if not self.interim_future and not self.responses:
+                # send the initial request
+                out_buf, self.session_key = self.auth.step(
+                        self.conn.negotiate_response.security_buffer)
+
+            elif self.interim_future:
+                smb_res = self.interim_future.result()
+                self.interim_future = None
+                self.responses.append(smb_res)
+                self.session_id = smb_res.session_id
+
+                if smb_res.status == ntstatus.STATUS_SUCCESS:
+                    # session is established
+                    with self.session_future:
+                        self.session_future(self._finish(smb_res))
+                    return self.session_future
+                else:
+                    # process interim request
+                    session_res = smb_res[0]
+                    if self.bind:
+                        # Need to verify intermediate signatures
+                        smb_res.verify(self.conn.signing_digest(),
+                                       self.conn._binding_key)
+                    out_buf, self.session_key = self.auth.step(
+                            session_res.security_buffer)
+            if out_buf:
+                # submit additional requests if necessary
+                self.interim_future = self._send_session_setup(out_buf)
+                return self.interim_future
+
+    def session_setup(self, creds=None, bind=None, resume=None):
         """
         Establish a session.
 
@@ -695,70 +1017,11 @@ class Connection(asyncore.dispatcher):
                       Kerberos authentication will be attempted.
         @type bind: L{Session}
         @param bind: An existing session to bind.
+        @type resume: L{Session}
+        @param resume: An previous session to resume.
         """
-        assert self.negotiate_response is not None
-
-        if creds:
-            nt4,password = creds.split('%')
-            domain,user = nt4.split('\\')
-            (result,context) = kerberos.authGSSClientInit(
-                "cifs/" + self.server,
-                gssmech=2,
-                user=user,
-                password=password,
-                domain=domain)
-        else:
-            (result,context) = kerberos.authGSSClientInit("cifs/" + self.server,gssmech=1)
-
-        result = kerberos.authGSSClientStep(context,
-                                            self.negotiate_response.security_buffer.tostring())
-        session_id = 0
-        smb_res = None
-
-        if bind:
-            assert self.negotiate_response.dialect_revision >= 0x300
-            session_id = bind.session_id
-            self._binding = bind
-            self._binding_key = digest.derive_key(bind.session_key, 'SMB2AESCMAC', 'SmbSign')[:16]
-        
-        while result == 0:
-            smb_req = self.request()
-            session_req = smb2.SessionSetupRequest(smb_req)
-            
-            smb_req.flags = smb2.SMB2_FLAGS_SIGNED if bind else 0
-            smb_req.session_id = smb_res.session_id if smb_res else session_id
-            session_req.flags = smb2.SMB2_SESSION_FLAG_BINDING if bind else 0
-            session_req.security_mode = smb2.SMB2_NEGOTIATE_SIGNING_ENABLED
-            session_req.security_buffer = array.array('B',kerberos.authGSSClientResponse(context))
-            
-            smb_res = self.transceive(smb_req.parent)[0]
-            session_res = smb_res[0]
-            
-            result = kerberos.authGSSClientStep(context, session_res.security_buffer)
-
-            if bind and result == 0:
-                # Need to verify intermediate signatures
-                smb_res.verify(self.signing_digest(), self._binding_key)
-
-        result = kerberos.authGSSClientSessionKey(context)
-        session_key = kerberos.authGSSClientResponse(context)[:16]
-
-        if self.negotiate_response.dialect_revision >= 0x300:
-            signing_key = digest.derive_key(session_key, 'SMB2AESCMAC', 'SmbSign')[:16]
-        else:
-            signing_key = session_key
-
-        # Verify final signature
-        smb_res.verify(self.signing_digest(), signing_key)
-
-        if bind:
-            self._binding = None
-            self._binding_key = None
-            session = bind
-        else:
-            session = Session(self.client, smb_res.session_id, session_key)
-
-        return session.addchannel(self, signing_key)
+        session_context = self.SessionSetupContext(self, creds, bind, resume)
+        return session_context.submit().result()
 
     # Return a fresh netbios frame with connection as context
     def frame(self):
@@ -804,9 +1067,14 @@ class Connection(asyncore.dispatcher):
         elif self._binding and self._binding.session_id == session_id:
             return self._binding_key
 
+    def encryption_context(self, session_id):
+        if session_id in self._sessions:
+            session = self._sessions[session_id]
+            return session.encryption_context
+
     def signing_digest(self):
         assert self.negotiate_response is not None
-        if self.negotiate_response.dialect_revision >= 0x300:
+        if self.negotiate_response.dialect_revision >= smb2.DIALECT_SMB3_0:
             return digest.aes128_cmac
         else:
             return digest.sha256_hmac
@@ -818,11 +1086,17 @@ class Connection(asyncore.dispatcher):
             return None
 
 class Session(object):
-    def __init__(self, client, session_id, session_key):
+    def __init__(self, client, session_id, session_key,
+                 encryption_context, smb_res):
         object.__init__(self)
         self.client = client
         self.session_id = session_id
         self.session_key = session_key
+        self.encryption_context = encryption_context
+        self.encrypt_data = False
+        if smb_res[0].session_flags & smb2.SMB2_SESSION_FLAG_ENCRYPT_DATA and \
+            self.encryption_context is not None:
+            self.encrypt_data = True
         self._channels = {}
 
     def addchannel(self, conn, signing_key):
@@ -866,48 +1140,72 @@ class Channel(object):
 
         return self.connection.submit(smb_req.parent)[0]
 
-    def tree_connect(self, path):
+    def tree_connect_request(self, path):
         smb_req = self.request()
+        if self.connection.negotiate_response.dialect_revision >= smb2.DIALECT_SMB3_1_1:
+            smb_req.flags |= smb2.SMB2_FLAGS_SIGNED
         tree_req = smb2.TreeConnectRequest(smb_req)
-
         tree_req.path = "\\\\" + self.connection.server + "\\" + path
-        
-        smb_res = self.connection.transceive(smb_req.parent)[0]
+        return tree_req
 
-        return Tree(self.session, path, smb_res)
+    def tree_connect_submit(self, tree_req):
+        tree_future = Future()
+        resp_future = self.connection.submit(tree_req.parent.parent)[0]
+        resp_future.then(lambda f: tree_future.complete(Tree(self.session,
+                                                             tree_req.path,
+                                                             f.result())))
+        return tree_future
 
-    def tree_disconnect(self, tree):
+    def tree_connect(self, path):
+        return self.tree_connect_submit(
+                self.tree_connect_request(
+                    path)).result()
+
+    def tree_disconnect_request(self, tree):
         smb_req = self.request(obj=tree)
         tree_req = smb2.TreeDisconnectRequest(smb_req)
+        return tree_req
 
-        self.connection.transceive(smb_req.parent)[0]
+    def tree_disconnect(self, tree):
+        return self.connection.transceive(
+                self.tree_disconnect_request(tree).parent.parent)[0]
 
-    def logoff(self):
+    def logoff_request(self):
         smb_req = self.request()
         logoff_req = smb2.LogoffRequest(smb_req)
+        return logoff_req
 
-        self.connection.transceive(smb_req.parent)[0]
+    def logoff_submit(self, logoff_req):
+        def logoff_finish(f):
+            for channel in self.session._channels.itervalues():
+                del channel.connection._sessions[self.session.session_id]
+        logoff_future = self.connection.submit(logoff_req.parent.parent)[0]
+        logoff_future.then(logoff_finish)
+        return logoff_future
 
-        for channel in self.session._channels.itervalues():
-            del channel.connection._sessions[self.session.session_id]
+    def logoff(self):
+        return self.logoff_submit(
+                self.logoff_request()).result()
 
-    def create(self,
-               tree,
-               path,
-               access=smb2.GENERIC_READ | smb2.GENERIC_WRITE,
-               attributes=smb2.FILE_ATTRIBUTE_NORMAL,
-               share=0,
-               disposition=smb2.FILE_OPEN_IF,
-               options=0,
-               maximal_access=None,
-               oplock_level=smb2.SMB2_OPLOCK_LEVEL_NONE,
-               lease_key=None,
-               lease_state=None,
-               durable=False,
-               persistent=False,
-               create_guid=None,
-               app_instance_id=None,
-               query_on_disk_id=False):
+    def create_request(
+            self,
+            tree,
+            path,
+            access=smb2.GENERIC_READ | smb2.GENERIC_WRITE,
+            attributes=smb2.FILE_ATTRIBUTE_NORMAL,
+            share=0,
+            disposition=smb2.FILE_OPEN_IF,
+            options=0,
+            maximal_access=None,
+            oplock_level=smb2.SMB2_OPLOCK_LEVEL_NONE,
+            lease_key=None,
+            lease_state=None,
+            durable=False,
+            persistent=False,
+            create_guid=None,
+            app_instance_id=None,
+            query_on_disk_id=False,
+            extended_attributes=None):
 
         prev_open = None
 
@@ -960,32 +1258,105 @@ class Channel(object):
         if query_on_disk_id:
             query_on_disk_id_req = smb2.QueryOnDiskIDRequest(create_req)
 
-        open_future = Future(None)
+        if extended_attributes:
+            ext_attr_len = len(extended_attributes.keys())
+            for name, value in extended_attributes.iteritems():
+                ext_attr = smb2.ExtendedAttributeRequest(create_req)
+                if ext_attr_len == 1:
+                    next_entry_offset = 0
+                else:
+                    next_entry_offset = 10 + len(name) + len(value)
+                ext_attr.next_entry_offset = next_entry_offset
+                ext_attr.ea_name = name
+                ext_attr.ea_name_length = len(name)
+                ext_attr.ea_value = value
+                ext_attr.ea_value_length = len(value)
+                ext_attr_len = ext_attr_len - 1
 
+        open_future = Future(None)
         def finish(f):
-            with open_future: open_future(Open(tree, f.result(), create_guid=create_guid, prev=prev_open))
-            
-        open_future.request_future = self.connection.submit(smb_req.parent)[0]
-        open_future.request_future.then(finish)
+            with open_future: open_future(
+                    Open(
+                        tree,
+                        f.result(),
+                        create_guid=create_guid,
+                        prev=prev_open))
+        create_req.open_future = open_future
+        create_req.finish = finish
+
+        return create_req
+
+    def create_submit(self, create_req):
+        open_future = create_req.open_future
+        open_future.request_future = self.connection.submit(
+                create_req.parent.parent)[0]
+        open_future.request_future.then(create_req.finish)
 
         return open_future
 
-    def close(self, handle):
+    def create(
+            self,
+            tree,
+            path,
+            access=smb2.GENERIC_READ | smb2.GENERIC_WRITE,
+            attributes=smb2.FILE_ATTRIBUTE_NORMAL,
+            share=0,
+            disposition=smb2.FILE_OPEN_IF,
+            options=0,
+            maximal_access=None,
+            oplock_level=smb2.SMB2_OPLOCK_LEVEL_NONE,
+            lease_key=None,
+            lease_state=None,
+            durable=False,
+            persistent=False,
+            create_guid=None,
+            app_instance_id=None,
+            query_on_disk_id=False,
+            extended_attributes=None):
+        return self.create_submit(self.create_request(
+                tree,
+                path,
+                access,
+                attributes,
+                share,
+                disposition,
+                options,
+                maximal_access,
+                oplock_level,
+                lease_key,
+                lease_state,
+                durable,
+                persistent,
+                create_guid,
+                app_instance_id,
+                query_on_disk_id,
+                extended_attributes))
+
+    def close_request(self, handle):
         smb_req = self.request(obj=handle)
         close_req = smb2.CloseRequest(smb_req)
 
         close_req.file_id = handle.file_id
+        close_req.handle = handle
+        return close_req
 
-        self.connection.transceive(smb_req.parent)
-        handle.dispose()
+    def close_submit(self, close_req):
+        resp_future = self.connection.submit(close_req.parent.parent)[0]
+        resp_future.then(close_req.handle.dispose())
+        return resp_future
 
-    def query_directory(self,
-                        handle,
-                        file_information_class=smb2.FILE_DIRECTORY_INFORMATION,
-                        flags = 0,
-                        file_index = 0,
-                        file_name='*',
-                        output_buffer_length=8192):
+    def close(self, handle):
+        return self.close_submit(
+                self.close_request(handle)).result()
+
+    def query_directory_request(
+            self,
+            handle,
+            file_information_class=smb2.FILE_DIRECTORY_INFORMATION,
+            flags=0,
+            file_index=0,
+            file_name='*',
+            output_buffer_length=8192):
         smb_req = self.request(obj=handle)
         enum_req = smb2.QueryDirectoryRequest(smb_req)
         enum_req.file_id = handle.file_id
@@ -994,8 +1365,23 @@ class Channel(object):
         enum_req.file_information_class = file_information_class
         enum_req.flags = flags
         enum_req.file_index = file_index
+        return enum_req
 
-        return self.connection.transceive(smb_req.parent)[0][0]
+    def query_directory(self,
+                        handle,
+                        file_information_class=smb2.FILE_DIRECTORY_INFORMATION,
+                        flags=0,
+                        file_index=0,
+                        file_name='*',
+                        output_buffer_length=8192):
+        return self.connection.transceive(
+                self.query_directory_request(
+                    handle,
+                    file_information_class,
+                    flags,
+                    file_index,
+                    file_name,
+                    output_buffer_length).parent.parent)[0][0]
 
     def enum_directory(self,
                        handle,
@@ -1014,24 +1400,34 @@ class Channel(object):
                     return
                 else:
                     raise
-            
-    def query_file_info(self,
-                        create_res,
-                        file_information_class = smb2.FILE_BASIC_INFORMATION,
-                        info_type = smb2.SMB2_0_INFO_FILE,
-                        output_buffer_length = 4096):
+
+    def query_file_info_request(
+            self,
+            create_res,
+            file_information_class=smb2.FILE_BASIC_INFORMATION,
+            info_type=smb2.SMB2_0_INFO_FILE,
+            output_buffer_length=4096):
         smb_req = self.request(obj=create_res)
         query_req = smb2.QueryInfoRequest(smb_req)
-        
+
         query_req.info_type = info_type
-        query_req.file_information_class = file_information_class        
+        query_req.file_information_class = file_information_class
         query_req.file_id = create_res.file_id
         query_req.output_buffer_length = output_buffer_length
-        
-        query_res = self.connection.transceive(smb_req.parent)[0][0][0]
+        return query_req
 
-        return query_res
-    
+    def query_file_info(self,
+                        create_res,
+                        file_information_class=smb2.FILE_BASIC_INFORMATION,
+                        info_type=smb2.SMB2_0_INFO_FILE,
+                        output_buffer_length=4096):
+        return self.connection.transceive(
+                self.query_file_info_request(
+                    create_res,
+                    file_information_class,
+                    info_type,
+                    output_buffer_length).parent.parent)[0][0][0]
+
     @contextlib.contextmanager
     def set_file_info(self, handle, cls):
         smb_req = self.request(obj=handle)
@@ -1050,20 +1446,20 @@ class Channel(object):
         # frame
         self.connection.transceive(smb_req.parent)[0][0]
 
-    def flush(self,
-              file):
+    def flush(self, file):
         smb_req = self.request(obj=file)
-        flush_req = pike.smb2.FlushRequest(smb_req)
+        flush_req = smb2.FlushRequest(smb_req)
         flush_req.file_id = file.file_id
 
         self.connection.transceive(smb_req.parent)
 
-    def read(self,
-             file,
-             length,
-             offset,
-             minimum_count=0,
-             remaining_bytes=0):
+    def read_request(
+            self,
+            file,
+            length,
+            offset,
+            minimum_count=0,
+            remaining_bytes=0):
         smb_req = self.request(obj=file)
         read_req = smb2.ReadRequest(smb_req)
 
@@ -1072,17 +1468,30 @@ class Channel(object):
         read_req.minimum_count = minimum_count
         read_req.remaining_bytes = remaining_bytes
         read_req.file_id = file.file_id
+        return read_req
 
-        smb_res = self.connection.transceive(smb_req.parent)
+    def read(
+            self,
+            file,
+            length,
+            offset,
+            minimum_count=0,
+            remaining_bytes=0):
+        return self.connection.transceive(
+                self.read_request(
+                    file,
+                    length,
+                    offset,
+                    minimum_count,
+                    remaining_bytes).parent.parent)[0][0].data
 
-        return smb_res[0][0].data
-
-    def write(self,
-              file,
-              offset,
-              buffer=None,
-              remaining_bytes=0,
-              flags=0):
+    def write_request(
+            self,
+            file,
+            offset,
+            buffer=None,
+            remaining_bytes=0,
+            flags=0):
         smb_req = self.request(obj=file)
         write_req = smb2.WriteRequest(smb_req)
 
@@ -1091,12 +1500,25 @@ class Channel(object):
         write_req.buffer = buffer
         write_req.remaining_bytes = remaining_bytes
         write_req.flags = flags
+        return write_req
 
-        smb_res = self.connection.transceive(smb_req.parent)
+    def write(self,
+              file,
+              offset,
+              buffer=None,
+              remaining_bytes=0,
+              flags=0):
+        smb_res = self.connection.transceive(
+                self.write_request(
+                    file,
+                    offset,
+                    buffer,
+                    remaining_bytes,
+                    flags).parent.parent)
 
         return smb_res[0][0].count
 
-    def lock(self, handle, locks, sequence=0):
+    def lock_request(self, handle, locks, sequence=0):
         """
         @param locks: A list of lock tuples, each of which consists of (offset, length, flags).
         """
@@ -1106,8 +1528,17 @@ class Channel(object):
         lock_req.file_id = handle.file_id
         lock_req.locks = locks
         lock_req.lock_sequence = sequence
+        return lock_req
 
-        return self.connection.submit(smb_req.parent)[0]
+    def lock(self, handle, locks, sequence=0):
+        """
+        @param locks: A list of lock tuples, each of which consists of (offset, length, flags).
+        """
+        return self.connection.submit(
+                self.lock_request(
+                    handle,
+                    locks,
+                    sequence).parent.parent)[0]
 
     def validate_negotiate_info(self, tree):
         smb_req = self.request(obj=tree)
@@ -1137,7 +1568,7 @@ class Channel(object):
 
         return self.connection.transceive(smb_req.parent)[0]
 
-    def copychunk(self, source_file, target_file, chunks):
+    def copychunk_request(self, source_file, target_file, chunks):
         """
         @param source_file: L{Open}
         @param target_file: L{Open}
@@ -1160,10 +1591,21 @@ class Channel(object):
             chunk.source_offset = source_offset
             chunk.target_offset = target_offset
             chunk.length = length
+        return ioctl_req
 
-        return self.connection.transceive(smb_req.parent)[0]
+    def copychunk(self, source_file, target_file, chunks):
+        """
+        @param source_file: L{Open}
+        @param target_file: L{Open}
+        @param chunks: sequence of tuples (source_offset, target_offset, length)
+        """
+        return self.connection.transceive(
+                self.copychunk_request(
+                    source_file,
+                    target_file,
+                    chunks).parent.parent)[0]
 
-    def set_symlink(self, file, target_name, flags):
+    def set_symlink_request(self, file, target_name, flags):
         smb_req = self.request(obj=file.tree)
         ioctl_req = smb2.IoctlRequest(smb_req)
         set_reparse_req = smb2.SetReparsePointRequest(ioctl_req)
@@ -1174,37 +1616,56 @@ class Channel(object):
         ioctl_req.flags |= smb2.SMB2_0_IOCTL_IS_FSCTL
         symlink_buffer.substitute_name = target_name
         symlink_buffer.flags = flags
+        return ioctl_req
 
-        res = self.connection.transceive(smb_req.parent)[0]
+    def set_symlink(self, file, target_name, flags):
+        return self.connection.transceive(
+                self.set_symlink_request(
+                    file,
+                    target_name,
+                    flags).parent.parent)[0]
 
-        return res
-
-    def get_symlink(self, file):
+    def get_symlink_request(self, file):
         smb_req = self.request(obj=file.tree)
         ioctl_req = smb2.IoctlRequest(smb_req)
         set_reparse_req = smb2.GetReparsePointRequest(ioctl_req)
 
         ioctl_req.file_id = file.file_id
         ioctl_req.flags |= smb2.SMB2_0_IOCTL_IS_FSCTL
-        res = self.connection.transceive(smb_req.parent)[0]
+        return ioctl_req
 
-        return res
+    def get_symlink(self, file):
+        return self.connection.transceive(
+                self.get_symlink_request(file).parent.parent)[0]
 
     def frame(self):
         return self.connection.frame()
 
-    def request(self, nb=None, obj=None):
+    def request(self, nb=None, obj=None, encrypt_data=None):
         smb_req = self.connection.request(nb)
         smb_req.session_id = self.session.session_id
-        
-        if self.connection.negotiate_response.security_mode & smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED or \
-           self.connection.client.security_mode & smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED:
-            smb_req.flags |= smb2.SMB2_FLAGS_SIGNED
 
         if isinstance(obj, Tree):
             smb_req.tree_id = obj.tree_id
         elif isinstance(obj, Open):
             smb_req.tree_id = obj.tree.tree_id
+
+        # encryption unspecified, follow session/tree negotiation
+        if encrypt_data is None:
+            encrypt_data = self.session.encrypt_data
+            if isinstance(obj, Tree):
+                encrypt_data |= obj.encrypt_data
+            elif isinstance(obj, Open):
+                encrypt_data |= obj.tree.encrypt_data
+
+        # a packet is either encrypted or signed
+        if encrypt_data and self.session.encryption_context is not None:
+            transform = crypto.TransformHeader(smb_req.parent)
+            transform.encryption_context = self.session.encryption_context
+            transform.session_id = self.session.session_id
+        elif self.connection.negotiate_response.security_mode & smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED or \
+           self.connection.client.security_mode & smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED:
+           smb_req.flags |= smb2.SMB2_FLAGS_SIGNED
 
         return smb_req
 
@@ -1218,6 +1679,9 @@ class Tree(object):
         self.path = path
         self.tree_id = smb_res.tree_id
         self.tree_connect_response = smb_res[0]
+        self.encrypt_data = False
+        if smb_res[0].share_flags & smb2.SMB2_SHAREFLAG_ENCRYPT_DATA:
+            self.encrypt_data = True
 
 class Open(object):
     def __init__(self, tree, smb_res, create_guid=None, prev=None):
