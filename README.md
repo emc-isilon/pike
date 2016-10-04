@@ -44,11 +44,11 @@ the tests:
 If PIKE\_TRACE is set to "yes", then incoming/outgoing packets
 will be logged at debug level.
 
-    $ python -m unittest discover -s test -p *.py
+    $ python -m unittest discover -s pike/test -p *.py
 
 To run an individual test file:
 
-    $ python -m unittest discover -s test -p echo.py EchoTest.test_echo
+    $ python -m unittest discover -s pike/test -p echo.py EchoTest.test_echo
 
 Kerberos Hints
 ==============
@@ -75,7 +75,7 @@ Retrieve a ticket for the desired user
 
 Fire pike tests
 
-    $ PIKE_SERVER="smb-server.ad.example.com" PIKE_SHARE="C$" python -m unittest discover -s test -p tree.py
+    $ PIKE_SERVER="smb-server.ad.example.com" PIKE_SHARE="C$" python -m unittest discover -s pike/test -p tree.py
 
 Note that you will probably need to specify the server by fully-qualified
 hostname in order for Kerberos to figure out which ticket to use.  If you

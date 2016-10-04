@@ -75,10 +75,10 @@ def run_setup(with_extensions):
           author='Brian Koropoff',
           author_email='Brian.Koropoff@emc.com',
           url='https://github.com/emc-isilon/pike',
-          packages=['pike'],
+          packages=['pike', 'pike.test'],
           install_requires=['pycryptodome'],
           ext_modules=ext_modules,
-          cmdclass=cmdclass
+          cmdclass=cmdclass,
           )
 try:
     run_setup(with_extensions=try_krb)
