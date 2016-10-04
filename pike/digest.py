@@ -34,23 +34,22 @@
 # Authors: Brian Koropoff (brian.koropoff@emc.com)
 #
 
-import Crypto.Hash.HMAC
-import Crypto.Hash.SHA256
-import Crypto.Hash.SHA512
-import Crypto.Cipher.AES
+import Cryptodome.Hash.HMAC as HMAC
+import Cryptodome.Hash.SHA256 as SHA256
+import Cryptodome.Hash.SHA512 as SHA512
+import Cryptodome.Cipher.AES as AES
 import array
 import core
 
 def sha256_hmac(key,message):
     return array.array('B',
-        Crypto.Hash.HMAC.new(
+        HMAC.new(
             key.tostring(),
             message.tostring(),
-            Crypto.Hash.SHA256).digest())
+            SHA256).digest())
 
 def aes128_cmac(key,message):
-    aes = Crypto.Cipher.AES.new(key.tostring(),
-                                mode=Crypto.Cipher.AES.MODE_ECB)
+    aes = AES.new(key.tostring(), mode=AES.MODE_ECB)
 
     def shiftleft(data):
         cin = 0
@@ -114,7 +113,7 @@ def aes128_cmac(key,message):
 
 def smb3_sha512(message):
     return array.array('B',
-            Crypto.Hash.SHA512.new(message.tostring()).digest())
+            SHA512.new(message.tostring()).digest())
 
 def derive_key(key, label, context):
     message = array.array('B')

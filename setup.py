@@ -76,7 +76,7 @@ def run_setup(with_extensions):
           author_email='Brian.Koropoff@emc.com',
           url='https://github.com/emc-isilon/pike',
           packages=['pike'],
-          install_requires=['pycryptodome'],
+          install_requires=['pycryptodomex'],
           ext_modules=ext_modules,
           cmdclass=cmdclass
           )

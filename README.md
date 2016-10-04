@@ -11,7 +11,7 @@ Prerequisites
 
 Required for basic functionality:
 * Python 2.7
-* PyCryptodome
+* PyCryptodomex
 
 Required for building kerberos library:
 * Python development headers
@@ -26,7 +26,7 @@ Build instructions
 Ubuntu 14.04 / 16.04
 
     apt-get install -y --no-install-recommends krb5-user libkrb5-dev python-dev build-essential python2.7 python-pip
-    pip install setuptools pycryptodome
+    pip install setuptools pycryptodomex
     python setup.py install
 
 Running tests
