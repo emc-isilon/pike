@@ -40,11 +40,20 @@ the tests:
     PIKE_SHARE=<share name>
     PIKE_CREDS=DOMAIN\User%Passwd
     PIKE_LOGLEVEL=info|warning|error|critical|debug
+    PIKE_SIGN=yes|no
+    PIKE_ENCRYPT=yes|no
+    PIKE_MAX_DIALECT=DIALECT_SMBX_Y_Z
+    PIKE_MIN_DIALECT=DIALECT_SMBX_Y_Z
+    PIKE_TRACE=yes|no
 
 If PIKE\_TRACE is set to "yes", then incoming/outgoing packets
 will be logged at debug level.
 
     $ python -m unittest discover -s pike/test -p *.py
+
+Alternatively, to build and run all tests
+
+    $ python setup.py test
 
 To run an individual test file:
 
