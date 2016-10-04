@@ -1803,6 +1803,7 @@ class QueryInfoRequest(Request):
 class QueryInfoResponse(Response):
     command_id = SMB2_QUERY_INFO
     structure_size = 9
+    allowed_status = [ntstatus.STATUS_SUCCESS, ntstatus.STATUS_BUFFER_OVERFLOW]
 
     _file_info_map = {}
     file_information = core.Register(_file_info_map, "file_information_class")
