@@ -477,6 +477,9 @@ class NegotiateRequest(Request):
         self.capabilities = 0
         self.client_guid = [0]*16
         self.dialects = []
+        self.negotiate_contexts_count = None
+        self.negotiate_contexts_offset = None
+        self.negotiate_contexts_data_length = None
         self._negotiate_contexts = []
 
     def _children(self):
@@ -490,7 +493,9 @@ class NegotiateRequest(Request):
         cur.encode_bytes(self.client_guid)
         if DIALECT_SMB3_1_1 in self.dialects:
             negotiate_contexts_offset_hole = cur.hole.encode_uint32le(0)
-            cur.encode_uint16le(len(self._negotiate_contexts))
+            if self.negotiate_contexts_count is None:
+                self.negotiate_contexts_count = len(self._negotiate_contexts)
+            cur.encode_uint16le(self.negotiate_contexts_count)
             cur.encode_uint16le(0)      #reserved
         else:
             cur.encode_uint64le(0)
@@ -499,7 +504,11 @@ class NegotiateRequest(Request):
 
         if self._negotiate_contexts:
             cur.align(self.parent.start, 8)
-            negotiate_contexts_offset_hole(cur - self.parent.start)
+            if self.negotiate_contexts_offset is not None:
+                negotiate_contexts_offset_hole(
+                        self.negotiate_contexts_offset)
+            else:
+                negotiate_contexts_offset_hole(cur - self.parent.start)
 
             for ctx in self._negotiate_contexts:
                 cur.align(self.parent.start, 8)
@@ -508,7 +517,10 @@ class NegotiateRequest(Request):
                 cur.encode_uint32le(0)      # reserved
                 data_start = cur.copy()
                 ctx.encode(cur)
-                data_length_hole(cur - data_start)
+                if self.negotiate_contexts_data_length is not None:
+                    data_length_hole(self.negotiate_contexts_data_length)
+                else:
+                    data_length_hole(cur - data_start)
 
     def append(self, e):
         self._negotiate_contexts.append(e)
