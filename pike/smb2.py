@@ -599,19 +599,25 @@ class PreauthIntegrityCapabilities(core.Frame):
     context_type = SMB2_PREAUTH_INTEGRITY_CAPABILITIES
     def __init__(self):
         self.hash_algorithms = []
+        self.hash_algorithms_count = None
         self.salt = ""
+        self.salt_length = None
     def _encode(self, cur):
-        cur.encode_uint16le(len(self.hash_algorithms))
-        cur.encode_uint16le(len(self.salt))
+        if self.hash_algorithms_count is None:
+            self.hash_algorithms_count = len(self.hash_algorithms)
+        cur.encode_uint16le(self.hash_algorithms_count)
+        if self.salt_length is None:
+            self.salt_length = len(self.salt)
+        cur.encode_uint16le(self.salt_length)
         for h in self.hash_algorithms:
             cur.encode_uint16le(h)
         cur.encode_bytes(self.salt)
     def _decode(self, cur):
-        hash_algorithm_count = cur.decode_uint16le()
-        salt_length = cur.decode_uint16le()
-        for ix in xrange(hash_algorithm_count):
+        self.hash_algorithm_count = cur.decode_uint16le()
+        self.salt_length = cur.decode_uint16le()
+        for ix in xrange(self.hash_algorithm_count):
             self.hash_algorithms.append(HashAlgorithms(cur.decode_uint16le()))
-        self.salt = cur.decode_bytes(salt_length)
+        self.salt = cur.decode_bytes(self.salt_length)
 
 class PreauthIntegrityCapabilitiesRequest(NegotiateRequestContext,
                                           PreauthIntegrityCapabilities):
