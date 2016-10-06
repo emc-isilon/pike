@@ -479,7 +479,6 @@ class NegotiateRequest(Request):
         self.dialects = []
         self.negotiate_contexts_count = None
         self.negotiate_contexts_offset = None
-        self.negotiate_contexts_data_length = None
         self._negotiate_contexts = []
 
     def _children(self):
@@ -517,10 +516,9 @@ class NegotiateRequest(Request):
                 cur.encode_uint32le(0)      # reserved
                 data_start = cur.copy()
                 ctx.encode(cur)
-                if self.negotiate_contexts_data_length is not None:
-                    data_length_hole(self.negotiate_contexts_data_length)
-                else:
-                    data_length_hole(cur - data_start)
+                if ctx.data_length is None:
+                    ctx.data_length = cur - data_start
+                data_length_hole(ctx.data_length)
 
     def append(self, e):
         self._negotiate_contexts.append(e)
@@ -587,6 +585,7 @@ class NegotiateRequestContext(core.Frame):
         core.Frame.__init__(self, parent)
         if parent is not None:
             parent.append(self)
+        self.data_length = None
 
 @NegotiateResponse.negotiate_context
 class NegotiateResponseContext(core.Frame):
