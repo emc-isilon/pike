@@ -479,6 +479,7 @@ class NegotiateRequest(Request):
         self.dialects = []
         self.negotiate_contexts_count = None
         self.negotiate_contexts_offset = None
+        self.negotiate_contexts_alignment_skew = 0
         self._negotiate_contexts = []
 
     def _children(self):
@@ -503,6 +504,7 @@ class NegotiateRequest(Request):
 
         if self._negotiate_contexts:
             cur.align(self.parent.start, 8)
+            cur.seekto(cur + self.negotiate_contexts_alignment_skew)
             if self.negotiate_contexts_offset is not None:
                 negotiate_contexts_offset_hole(
                         self.negotiate_contexts_offset)
