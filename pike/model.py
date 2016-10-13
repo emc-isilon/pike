@@ -93,6 +93,18 @@ class ResponseError(Exception):
         Exception.__init__(self, response.command, response.status)
         self.response = response
 
+class Events(core.ValueEnum):
+    """ Events used for callback functions """
+    EV_REQ_PRE_SERIALIZE = 0x1      # cb expects Netbios frame
+    EV_REQ_POST_SERIALIZE = 0x2     # cb expects Netbios frame
+    EV_REQ_PRE_SEND = 0x3           # cb expects a buffer to send
+    EV_REQ_POST_SEND = 0x4          # cb expects an integer of bytes sent
+    EV_RES_PRE_RECV = 0x5           # cb expects an integer of bytes to read
+    EV_RES_POST_RECV = 0x6          # cb expects a buffer that was read
+    EV_RES_PRE_DESERIALIZE = 0x7    # cb expects a complete netbios buffer
+    EV_RES_POST_DESERIALIZE = 0x8   # cb expects a Netbios frame
+Events.import_items(globals())
+
 class Future(object):
     """
     Result of an asynchronous operation.
@@ -262,7 +274,7 @@ class Client(object):
         self.security_mode = security_mode
         self.client_guid = client_guid
         self.channel_sequence = 0
-
+        self.callbacks = {}
         self._oplock_break_map = {}
         self._lease_break_map = {}
         self._oplock_break_queue = []
@@ -271,6 +283,26 @@ class Client(object):
         self._leases = {}
 
         self.logger = logging.getLogger('pike')
+
+    def register_callback(self, event, cb):
+        """
+        Registers a callback function, cb for the given event.
+        When the event fires, cb will be called with the relevant top-level
+        Netbios frame as the single paramter.
+        """
+        ev = Events(event)
+        if ev not in self.callbacks:
+            self.callbacks[ev] = []
+        self.callbacks[ev].append(cb)
+
+    def unregister_callback(self, event, cb):
+        """
+        Unregisters a callback function, cb for the given event.
+        """
+        ev = Events(event)
+        if ev not in self.callbacks:
+            self.callbacks[ev] = []
+        self.callbacks[ev].append(cb)
 
     def connect(self, server, port=445):
         """
@@ -467,6 +499,7 @@ class Connection(transport.Transport):
         self._binding_key = None
         self._settings = {}
         self._pre_auth_integrity_hash = array.array('B', "\0"*64)
+        self.callbacks = {}
         self.connection_future = Future()
         self.credits = 1
         self.client = client
@@ -486,6 +519,45 @@ class Connection(transport.Transport):
             break
         self.create_socket(family, socktype)
         self.connect(sockaddr)
+
+    def register_callback(self, event, cb):
+        """
+        Registers a callback function, cb for the given event.
+        When the event fires, cb will be called with the relevant top-level
+        Netbios frame as the single paramter.
+        """
+        ev = Events(event)
+        if ev not in self.callbacks:
+            self.callbacks[ev] = []
+        self.callbacks[ev].append(cb)
+
+    def unregister_callback(self, event, cb):
+        """
+        Unregisters a callback function, cb for the given event.
+        """
+        ev = Events(event)
+        if ev not in self.callbacks:
+            return
+        if cb not in self.callbacks[ev]:
+            return
+        self.callbacks[ev].remove(cb)
+
+    def process_callbacks(self, event, obj):
+        """
+        Fire callbacks for the given event, passing obj as the parameter
+
+        Connection-specific callbacks will be fired first, followed by client
+        callbacks
+        """
+        ev = Events(event)
+        all_callbacks = [self.callbacks]
+        if hasattr(self.client, "callbacks"):
+            all_callbacks.append(self.client.callbacks)
+        for callbacks in all_callbacks:
+            if ev not in callbacks:
+                continue
+            for cb in callbacks[ev]:
+                cb(obj)
 
     def smb3_pa_integrity(self, packet, data=None):
         """ perform smb3 pre-auth integrity hash update if needed """
@@ -547,13 +619,16 @@ class Connection(transport.Transport):
     def handle_read(self):
         # Try to read the next netbios frame
         remaining = self._watermark - len(self._in_buffer)
-        data = self.recv(remaining)
-        self._in_buffer.extend(array.array('B', data))
+        self.process_callbacks(EV_RES_PRE_RECV, remaining)
+        data = array.array('B', self.recv(remaining))
+        self.process_callbacks(EV_RES_POST_RECV, data)
+        self._in_buffer.extend(data)
         avail = len(self._in_buffer)
         if avail >= 4:
             self._watermark = 4 + struct.unpack('>L', self._in_buffer[0:4])[0]
         if avail == self._watermark:
             nb = self.frame()
+            self.process_callbacks(EV_RES_PRE_DESERIALIZE, self._in_buffer)
             nb.parse(self._in_buffer)
             self._in_buffer = array.array('B')
             self._watermark = 4
@@ -564,10 +639,12 @@ class Connection(transport.Transport):
         while self._out_buffer is None and len(self._out_queue):
             self._out_buffer = self._prepare_outgoing()
             while self._out_buffer is not None:
+                self.process_callbacks(EV_REQ_PRE_SEND, self._out_buffer)
                 sent = self.send(self._out_buffer)
                 del self._out_buffer[:sent]
                 if len(self._out_buffer) == 0:
                     self._out_buffer = None
+                self.process_callbacks(EV_REQ_POST_SEND, sent)
 
     def handle_close(self):
         self.close()
@@ -622,6 +699,7 @@ class Connection(transport.Transport):
         result = None
         with future:
             req = future.request
+            self.process_callbacks(EV_REQ_PRE_SERIALIZE, req.parent)
 
             if req.credit_charge is None:
                 req.credit_charge = 0
@@ -658,8 +736,10 @@ class Connection(transport.Transport):
 
             if req.is_last_child():
                 # Last command in chain, ready to send packet
+                # TODO: move smb pa integrity to callback
                 self.smb3_pa_integrity(req)
                 result = req.parent.serialize()
+                self.process_callbacks(EV_REQ_POST_SERIALIZE, req.parent)
                 if trace:
                     self.client.logger.debug('send (%s/%s -> %s/%s): %s',
                                              self.local_addr[0], self.local_addr[1],
@@ -702,7 +782,9 @@ class Connection(transport.Transport):
                                      self.remote_addr[0], self.remote_addr[1],
                                      self.local_addr[0], self.local_addr[1],
                                      ', '.join(f[0].__class__.__name__ for f in res))
+        self.process_callbacks(EV_RES_POST_DESERIALIZE, res)
         for smb_res in res:
+            # TODO: move smb pa integrity and credit tracking to callbacks
             self.smb3_pa_integrity(smb_res, smb_res.parent.buf[4:])
             self.credits -= smb_res.credit_charge
             self.credits += smb_res.credit_response
@@ -1059,6 +1141,9 @@ class Connection(transport.Transport):
     #
     # SMB2 context upcalls
     #
+    def session(self, session_id):
+        return self._sessions.get(session_id, None)
+
     def signing_key(self, session_id):
         if session_id in self._sessions:
             session = self._sessions[session_id]
@@ -1098,6 +1183,8 @@ class Session(object):
             self.encryption_context is not None:
             self.encrypt_data = True
         self._channels = {}
+        self._trees = {}
+        self.user = None
 
     def addchannel(self, conn, signing_key):
         channel = Channel(conn, self, signing_key)
@@ -1111,6 +1198,9 @@ class Session(object):
 
     def first_channel(self):
         return self._channels.itervalues().next()
+
+    def tree(self, tree_id):
+        return self._trees.get(tree_id, None)
 
 class Channel(object):
     def __init__(self, connection, session, signing_key):
@@ -1682,6 +1772,7 @@ class Tree(object):
         self.encrypt_data = False
         if smb_res[0].share_flags & smb2.SMB2_SHAREFLAG_ENCRYPT_DATA:
             self.encrypt_data = True
+        self.session._trees[self.tree_id] = self
 
 class Open(object):
     def __init__(self, tree, smb_res, create_guid=None, prev=None):
