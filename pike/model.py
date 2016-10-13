@@ -54,17 +54,13 @@ import time
 import operator
 import contextlib
 
+import auth
 import core
 import crypto
 import netbios
 import smb2
 import transport
 import ntstatus
-try:
-    import kerberos
-except ImportError:
-    kerberos = None
-import ntlm
 import digest
 
 default_timeout = 30
@@ -432,39 +428,6 @@ class Client(object):
     # Internal function to remove lease from table
     def dispose_lease(self, lease):
         del self._leases[lease.lease_key.tostring()]
-
-
-class KerberosProvider(object):
-    def __init__(self, conn, creds=None):
-        if creds:
-            nt4, password = creds.split('%')
-            domain, user = nt4.split('\\')
-            (self.result,
-             self.context) = kerberos.authGSSClientInit(
-                "cifs/" + conn.server,
-                gssmech=2,
-                user=user,
-                password=password,
-                domain=domain)
-        else:
-            (self.result,
-             self.context) = kerberos.authGSSClientInit("cifs/" + conn.server,
-                                                        gssmech=1)
-
-    def step(self, sec_buf):
-        self.result = kerberos.authGSSClientStep(
-                self.context,
-                sec_buf.tostring())
-        if self.result == 0:
-            return (array.array(
-                    'B',
-                    kerberos.authGSSClientResponse(self.context)),
-                    None)
-        else:
-            kerberos.authGSSClientSessionKey(self.context)
-            return (None,
-                    array.array('B',
-                        kerberos.authGSSClientResponse(self.context)[:16]))
 
 class Connection(transport.Transport):
     """
@@ -930,14 +893,12 @@ class Connection(transport.Transport):
             self.bind = bind
             self.resume = resume
 
-            if creds and ntlm is not None:
-                nt4, password = creds.split('%')
-                domain, user = nt4.split('\\')
-                self.auth = ntlm.NtlmProvider(domain, user, password)
+            if creds and auth.ntlm is not None:
+                self.auth = auth.NtlmProvider(conn, creds)
                 if ntlm_version is not None:
-                    self.auth.ntlm_version = ntlm_version
-            elif kerberos is not None:
-                self.auth = KerberosProvider(conn, creds)
+                    self.auth.authenticator.ntlm_version = ntlm_version
+            elif auth.kerberos is not None:
+                self.auth = auth.KerberosProvider(conn, creds)
             else:
                 raise ImportError("Neither ntlm nor kerberos authentication "
                                   "methods are available")
@@ -1027,6 +988,7 @@ class Connection(transport.Transport):
                                   self.session_key,
                                   encryption_context,
                                   smb_res)
+                session.user = self.auth.username()
 
             return session.addchannel(self.conn, signing_key)
 

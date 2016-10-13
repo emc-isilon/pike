@@ -582,7 +582,7 @@ def ComputeResponsev2(NegFlg, ResponseKeyNT, ResponseKeyLM, ServerChallenge,
     SessionBaseKey = HMAC.new(ResponseKeyNT, NTProofStr, MD5).digest()
     return NtChallengeResponse, LmChallengeResponse, SessionBaseKey
 
-class NtlmProvider(object):
+class NtlmAuthenticator(object):
     """
     State machine for conducting ntlm authentication
     """
@@ -729,10 +729,3 @@ class NtlmProvider(object):
         ntlm.encode(core.Cursor(self.authenticate_buffer, 0))
         self.authenticate_message = ntlm
         return self.authenticate_buffer
-
-    def step(self, sec_buf):
-        if self.negotiate_message is None:
-            return (self.negotiate(), None)
-        elif self.challenge_message is None:
-            self.authenticate(sec_buf)
-        return (self.authenticate_buffer, self.exported_session_key)
