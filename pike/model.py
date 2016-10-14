@@ -750,7 +750,7 @@ class Connection(transport.Transport):
         L{smb2.Smb2} frame in the request.
         """
         if self.error is not None:
-            raise self.error
+            raise self.error, None, self.traceback
         futures = []
         for smb_req in req:
             if isinstance(smb_req[0], smb2.Cancel):
