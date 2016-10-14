@@ -39,7 +39,6 @@ import gc
 import logging
 import sys
 import contextlib
-import model
 
 # Try and import backported unittest2 module in python2.6
 try:
@@ -47,8 +46,8 @@ try:
 except ImportError:
     import unittest
 
-import model
-import smb2
+import pike.model as model
+import pike.smb2 as smb2
 
 class PikeTest(unittest.TestCase):
     init_done = False
@@ -257,3 +256,9 @@ class _RangeDecorator(object):
 class RequireDialect(_RangeDecorator): pass
 class RequireCapabilities(_Decorator): pass
 class RequireShareCapabilities(_Decorator): pass
+
+if __name__ == '__main__':
+    test_loader = unittest.defaultTestLoader
+    test_runner = unittest.TextTestRunner()
+    test_suite = test_loader.discover(".", "*.py")
+    test_runner.run(test_suite)

@@ -2,6 +2,7 @@
 
 import ctypes
 import sys
+import unittest
 try:
     from setuptools import setup, Extension, Command
 except ImportError:
@@ -63,9 +64,12 @@ try:
 except OSError:
     try_krb = False
 
+def pike_suite():
+    return unittest.defaultTestLoader.discover('pike/test', pattern='*.py')
+
 def run_setup(with_extensions):
     ext_modules = []
-    cmdclass = { "test": Command, "build_py": ve_build_py }
+    cmdclass = { "build_py": ve_build_py }
     if with_extensions:
         ext_modules.append(lw_krb_module)
         cmdclass = dict(cmdclass, build_ext=ve_build_ext)
@@ -75,10 +79,11 @@ def run_setup(with_extensions):
           author='Brian Koropoff',
           author_email='Brian.Koropoff@emc.com',
           url='https://github.com/emc-isilon/pike',
-          packages=['pike'],
+          packages=['pike', 'pike.test'],
           install_requires=['pycryptodomex'],
           ext_modules=ext_modules,
-          cmdclass=cmdclass
+          test_suite='setup.pike_suite',
+          cmdclass=cmdclass,
           )
 try:
     run_setup(with_extensions=try_krb)
