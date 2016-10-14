@@ -485,13 +485,18 @@ class NegotiateRequest(Request):
     def _children(self):
         return self._negotiate_contexts
 
+    def _has_negotiate_contexts(self):
+        return (self._negotiate_contexts or
+                self.negotiate_contexts_offset is not None or
+                self.negotiate_contexts_count is not None)
+
     def _encode(self, cur):
         cur.encode_uint16le(len(self.dialects))
         cur.encode_uint16le(self.security_mode)
         cur.encode_uint16le(0)
         cur.encode_uint32le(self.capabilities)
         cur.encode_bytes(self.client_guid)
-        if DIALECT_SMB3_1_1 in self.dialects:
+        if self._has_negotiate_contexts():
             negotiate_contexts_offset_hole = cur.hole.encode_uint32le(0)
             if self.negotiate_contexts_count is None:
                 self.negotiate_contexts_count = len(self._negotiate_contexts)
@@ -502,7 +507,7 @@ class NegotiateRequest(Request):
         for dialect in self.dialects:
             cur.encode_uint16le(dialect)
 
-        if self._negotiate_contexts:
+        if self._has_negotiate_contexts():
             cur.align(self.parent.start, 8)
             cur.seekto(cur + self.negotiate_contexts_alignment_skew)
             if self.negotiate_contexts_offset is not None:
