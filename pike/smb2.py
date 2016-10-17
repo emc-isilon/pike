@@ -480,13 +480,13 @@ class NegotiateRequest(Request):
         self.negotiate_contexts_count = None
         self.negotiate_contexts_offset = None
         self.negotiate_contexts_alignment_skew = 0
-        self._negotiate_contexts = []
+        self.negotiate_contexts = []
 
     def _children(self):
-        return self._negotiate_contexts
+        return self.negotiate_contexts
 
     def _has_negotiate_contexts(self):
-        return (self._negotiate_contexts or
+        return (self.negotiate_contexts or
                 self.negotiate_contexts_offset is not None or
                 self.negotiate_contexts_count is not None)
 
@@ -499,7 +499,7 @@ class NegotiateRequest(Request):
         if self._has_negotiate_contexts():
             negotiate_contexts_offset_hole = cur.hole.encode_uint32le(0)
             if self.negotiate_contexts_count is None:
-                self.negotiate_contexts_count = len(self._negotiate_contexts)
+                self.negotiate_contexts_count = len(self.negotiate_contexts)
             cur.encode_uint16le(self.negotiate_contexts_count)
             cur.encode_uint16le(0)      #reserved
         else:
@@ -516,7 +516,7 @@ class NegotiateRequest(Request):
             else:
                 negotiate_contexts_offset_hole(cur - self.parent.start)
 
-            for ctx in self._negotiate_contexts:
+            for ctx in self.negotiate_contexts:
                 cur.align(self.parent.start, 8)
                 cur.encode_uint16le(ctx.context_type)
                 data_length_hole = cur.hole.encode_uint16le(0)
@@ -528,7 +528,7 @@ class NegotiateRequest(Request):
                 data_length_hole(ctx.data_length)
 
     def append(self, e):
-        self._negotiate_contexts.append(e)
+        self.negotiate_contexts.append(e)
 
 class NegotiateResponse(Response):
     command_id = SMB2_NEGOTIATE
@@ -549,15 +549,17 @@ class NegotiateResponse(Response):
         self.system_time = 0
         self.server_start_time = 0
         self.security_buffer = None
-        self._negotiate_contexts = []
+        self.negotiate_contexts_count = None
+        self.negotiate_contexts_offset = None
+        self.negotiate_contexts = []
 
     def _children(self):
-        return self._negotiate_contexts
+        return self.negotiate_contexts
 
     def _decode(self, cur):
         self.security_mode = SecurityMode(cur.decode_uint16le())
         self.dialect_revision = Dialect(cur.decode_uint16le())
-        negotiate_contexts_count = cur.decode_uint16le()
+        self.negotiate_contexts_count = cur.decode_uint16le()
         self.server_guid = cur.decode_bytes(16)
         self.capabilities = GlobalCaps(cur.decode_uint32le())
         self.max_transact_size = cur.decode_uint32le()
@@ -569,14 +571,14 @@ class NegotiateResponse(Response):
         offset = cur.decode_uint16le()
         length = cur.decode_uint16le()
 
-        negotiate_contexts_offset = cur.decode_uint32le()
+        self.negotiate_contexts_offset = cur.decode_uint32le()
 
         # Advance to security buffer
         cur.advanceto(self.parent.start + offset)
         self.security_buffer = cur.decode_bytes(length)
-        if negotiate_contexts_count > 0:
-            cur.seekto(self.parent.start + negotiate_contexts_offset)
-            for ix in xrange(negotiate_contexts_count):
+        if self.negotiate_contexts_count > 0:
+            cur.seekto(self.parent.start + self.negotiate_contexts_offset)
+            for ix in xrange(self.negotiate_contexts_count):
                 cur.align(self.parent.start, 8)
                 context_type = cur.decode_uint16le()
                 data_length = cur.decode_uint16le()
@@ -585,7 +587,7 @@ class NegotiateResponse(Response):
                 ctx(self).decode(cur)
 
     def append(self, e):
-        self._negotiate_contexts.append(e)
+        self.negotiate_contexts.append(e)
 
 class NegotiateRequestContext(core.Frame):
     def __init__(self, parent):
