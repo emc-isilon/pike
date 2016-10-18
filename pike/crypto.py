@@ -52,18 +52,18 @@ class EncryptionCapabilities(core.Frame):
     context_type = smb2.SMB2_ENCRYPTION_CAPABILITIES
     def __init__(self):
         self.ciphers = []
-        self.cipher_count = None
+        self.ciphers_count = None
 
     def _encode(self, cur):
-        if self.cipher_count is None:
-            self.cipher_count = len(self.ciphers)
-        cur.encode_uint16le(self.cipher_count)
+        if self.ciphers_count is None:
+            self.ciphers_count = len(self.ciphers)
+        cur.encode_uint16le(self.ciphers_count)
         for c in self.ciphers:
             cur.encode_uint16le(c)
 
     def _decode(self, cur):
-        self.cipher_count = cur.decode_uint16le()
-        for ix in xrange(self.cipher_count):
+        self.ciphers_count = cur.decode_uint16le()
+        for ix in xrange(self.ciphers_count):
             self.ciphers.append(Ciphers(cur.decode_uint16le()))
 
 
