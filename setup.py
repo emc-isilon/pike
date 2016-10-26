@@ -54,11 +54,12 @@ try:
                                                     "gss_set_cred_option")),
                ("HAVE_GSSSPI_SET_CRED_OPTION", hasattr(libgssapi_krb5,
                                                        "gssspi_set_cred_option"))]
-    lw_krb_module = Extension('kerberos', ["pykerb/base64.c",
-                                           "pykerb/kerberosbasic.c",
-                                           "pykerb/kerberos.c",
-                                           "pykerb/kerberosgss.c",
-                                           "pykerb/kerberospw.c"],
+    lw_krb_module = Extension('pike.kerberos',
+                              ["pykerb/base64.c",
+                               "pykerb/kerberosbasic.c",
+                               "pykerb/kerberos.c",
+                               "pykerb/kerberosgss.c",
+                               "pykerb/kerberospw.c"],
                               libraries=['gssapi_krb5'],
                               define_macros=defines)
 except OSError:
