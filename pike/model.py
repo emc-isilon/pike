@@ -913,6 +913,7 @@ class Connection(transport.Transport):
                 raise ImportError("Neither ntlm nor kerberos authentication "
                                   "methods are available")
 
+            self._settings = {}
             self.prev_session_id = 0
             self.session_id = 0
             self.requests = []
@@ -929,6 +930,9 @@ class Connection(transport.Transport):
             elif resume:
                 assert conn.negotiate_response.dialect_revision >= 0x300
                 self.prev_session_id = resume.session_id
+
+        def let(self, **kwargs):
+            return core.Let(self, kwargs)
 
         def derive_signing_key(self, session_key=None, context=None):
             if session_key is None:
@@ -975,6 +979,9 @@ class Connection(transport.Transport):
             if self.bind:
                 smb_req.flags = smb2.SMB2_FLAGS_SIGNED
                 session_req.flags = smb2.SMB2_SESSION_FLAG_BINDING
+
+            for (attr,value) in self._settings.iteritems():
+                setattr(session_req, attr, value)
 
             self.requests.append(smb_req)
             return self.conn.submit(smb_req.parent)[0]
@@ -1095,20 +1102,7 @@ class Connection(transport.Transport):
         return req
 
     def let(self, **kwargs):
-        return self._Let(self, kwargs)
-
-    class _Let(object):
-        def __init__(self, conn, settings):
-            self.conn = conn
-            self.settings = settings
-
-        def __enter__(self):
-            self.backup = dict(self.conn._settings)
-            self.conn._settings.update(self.settings)
-            return self
-
-        def __exit__(self, exc_type, exc_val, exc_tb):
-            self.conn._settings = self.backup
+        return core.Let(self, kwargs)
 
     #
     # SMB2 context upcalls
