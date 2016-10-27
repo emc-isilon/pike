@@ -714,21 +714,27 @@ class SessionSetupRequest(Request):
         self.flags = 0
         self.security_mode = 0
         self.capabilities = 0
+        self.channel = 0            # must not be used
         self.previous_session_id = 0
         self.security_buffer = None
+        self.security_buffer_offset = None
+        self.security_buffer_length = None
 
     def _encode(self, cur):
         cur.encode_uint8le(self.flags)
         cur.encode_uint8le(self.security_mode)
         cur.encode_uint32le(self.capabilities)
-        # Channel, must not be used
-        cur.encode_uint32le(0)
+        cur.encode_uint32le(self.channel)
         # Encode 0 for security buffer offset for now
         sec_buf_ofs = cur.hole.encode_uint16le(0)
-        cur.encode_uint16le(len(self.security_buffer))
+        if self.security_buffer_length is None:
+            self.security_buffer_length = len(self.security_buffer)
+        cur.encode_uint16le(self.security_buffer_length)
         cur.encode_uint64le(self.previous_session_id)
         # Go back and set security buffer offset
-        sec_buf_ofs(cur - self.parent.start)
+        if self.security_buffer_offset is None:
+            self.security_buffer_offset = cur - self.parent.start
+        sec_buf_ofs(self.security_buffer_offset)
         cur.encode_bytes(self.security_buffer)
 
 class SessionSetupResponse(Response):
