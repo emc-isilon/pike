@@ -38,11 +38,11 @@ import array
 import random
 import struct
 from socket import gethostname
-import Crypto.Cipher.DES
-import Crypto.Cipher.ARC4 as RC4
-import Crypto.Hash.HMAC as HMAC
-import Crypto.Hash.MD4 as MD4
-import Crypto.Hash.MD5 as MD5
+import Cryptodome.Cipher.DES as DES
+import Cryptodome.Cipher.ARC4 as RC4
+import Cryptodome.Hash.HMAC as HMAC
+import Cryptodome.Hash.MD4 as MD4
+import Cryptodome.Hash.MD5 as MD5
 import core
 import model
 import nttime
@@ -60,7 +60,7 @@ def des_key_64(K):
     return "".join(out_key)
 
 def DES(K, D):
-    d1 = Crypto.Cipher.DES.new(des_key_64(K))
+    d1 = DES.new(des_key_64(K))
     return d1.encrypt(D)
 
 def DESL(K, D):

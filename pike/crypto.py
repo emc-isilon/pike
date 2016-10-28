@@ -40,7 +40,7 @@ import smb2
 import array
 import random
 
-from Crypto.Cipher import AES
+from Cryptodome.Cipher import AES
 
 class Ciphers(core.ValueEnum):
     SMB2_AES_128_CCM = 0x0001
