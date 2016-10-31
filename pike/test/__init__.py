@@ -49,11 +49,12 @@ except ImportError:
 import pike.model as model
 import pike.smb2 as smb2
 
+
 class PikeTest(unittest.TestCase):
     init_done = False
 
     @staticmethod
-    def option(name, default = None):
+    def option(name, default=None):
         if name in os.environ:
             value = os.environ[name]
             if len(value) == 0:
@@ -64,14 +65,14 @@ class PikeTest(unittest.TestCase):
         return value
 
     @staticmethod
-    def booloption(name, default = 'no'):
+    def booloption(name, default='no'):
         table = {'yes': True, 'no': False, '': False}
         return table[PikeTest.option(name, 'no')]
 
     @staticmethod
     def smb2constoption(name, default=None):
         return getattr(smb2, PikeTest.option(name, '').upper(), default)
-    
+
     @staticmethod
     def init_once():
         if not PikeTest.init_done:
@@ -87,7 +88,7 @@ class PikeTest(unittest.TestCase):
             PikeTest.init_done = True
 
     def __init__(self, *args, **kwargs):
-        unittest.TestCase.__init__(self,*args,**kwargs)
+        unittest.TestCase.__init__(self, *args, **kwargs)
         self.init_once()
         self.server = self.option('PIKE_SERVER')
         self.port = int(self.option('PIKE_PORT', '445'))
@@ -215,7 +216,7 @@ class PikeTest(unittest.TestCase):
 
     def assertBufferEqual(self, buf1, buf2):
         """
-        Compare two sequences using a binary diff to efficiently determine 
+        Compare two sequences using a binary diff to efficiently determine
         the first offset where they differ
         """
         if len(buf1) != len(buf2):
@@ -234,7 +235,7 @@ class PikeTest(unittest.TestCase):
         if high - low <= 1:
             raise AssertionError("Block mismatch at byte {0}: "
                                  "{1} != {2}".format(low, buf1[low], buf2[low]))
-        
+
 class _Decorator(object):
     def __init__(self, value):
         self.value = value
@@ -242,6 +243,7 @@ class _Decorator(object):
     def __call__(self, thing):
         setattr(thing, '__pike_test_' + self.__class__.__name__, self.value)
         return thing
+
 
 class _RangeDecorator(object):
     def __init__(self, minvalue=0, maxvalue=float('inf')):
@@ -252,6 +254,7 @@ class _RangeDecorator(object):
         setattr(thing, '__pike_test_' + self.__class__.__name__,
                 (self.minvalue, self.maxvalue))
         return thing
+
 
 class RequireDialect(_RangeDecorator): pass
 class RequireCapabilities(_Decorator): pass
