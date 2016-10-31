@@ -260,8 +260,41 @@ class RequireDialect(_RangeDecorator): pass
 class RequireCapabilities(_Decorator): pass
 class RequireShareCapabilities(_Decorator): pass
 
+
+class PikeTestSuite(unittest.TestSuite):
+    """
+    Custom test suite for easily patching in skip tests in downstream
+    distributions of these test cases
+    """
+    skip_tests_reasons = {
+            "test_to_be_skipped": "This test should be skipped",
+    }
+
+    @staticmethod
+    def _raise_skip(reason):
+        def inner(*args, **kwds):
+            raise unittest.SkipTest(reason)
+        return inner
+
+    def addTest(self, test):
+        testMethodName = getattr(test, "_testMethodName", None)
+        if testMethodName in self.skip_tests_reasons:
+            setattr(
+                    test,
+                    testMethodName,
+                    self._raise_skip(
+                        self.skip_tests_reasons[testMethodName]))
+        super(PikeTestSuite, self).addTest(test)
+
+
+def suite():
+    test_loader = unittest.TestLoader()
+    test_loader.suiteClass = PikeTestSuite
+    test_suite = test_loader.discover(
+            os.path.abspath(os.path.dirname(__file__)),
+            "*.py")
+    return test_suite
+
 if __name__ == '__main__':
-    test_loader = unittest.defaultTestLoader
     test_runner = unittest.TextTestRunner()
-    test_suite = test_loader.discover(".", "*.py")
-    test_runner.run(test_suite)
+    test_runner.run(suite())
