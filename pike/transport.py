@@ -311,7 +311,7 @@ class BasePoller(object):
                     t.handle_connect_event()
                 else:
                     if fileno in self.deferred_writers:
-                        self.deferred_writers.remove(fd)
+                        self.deferred_writers.remove(fileno)
                     t.handle_write()
             except socket.error, e:
                 if e.args[0] not in (EBADF, ECONNRESET, ENOTCONN, ESHUTDOWN, ECONNABORTED):
