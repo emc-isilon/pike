@@ -297,8 +297,10 @@ class Client(object):
         """
         ev = Events(event)
         if ev not in self.callbacks:
-            self.callbacks[ev] = []
-        self.callbacks[ev].append(cb)
+            return
+        if cb not in self.callbacks[ev]:
+            return
+        self.callbacks[ev].remove(cb)
 
     def connect(self, server, port=445):
         """
