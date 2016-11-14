@@ -49,11 +49,12 @@ except ImportError:
 import pike.model as model
 import pike.smb2 as smb2
 
+
 class PikeTest(unittest.TestCase):
     init_done = False
 
     @staticmethod
-    def option(name, default = None):
+    def option(name, default=None):
         if name in os.environ:
             value = os.environ[name]
             if len(value) == 0:
@@ -64,14 +65,14 @@ class PikeTest(unittest.TestCase):
         return value
 
     @staticmethod
-    def booloption(name, default = 'no'):
+    def booloption(name, default='no'):
         table = {'yes': True, 'no': False, '': False}
         return table[PikeTest.option(name, 'no')]
 
     @staticmethod
     def smb2constoption(name, default=None):
         return getattr(smb2, PikeTest.option(name, '').upper(), default)
-    
+
     @staticmethod
     def init_once():
         if not PikeTest.init_done:
@@ -87,7 +88,7 @@ class PikeTest(unittest.TestCase):
             PikeTest.init_done = True
 
     def __init__(self, *args, **kwargs):
-        unittest.TestCase.__init__(self,*args,**kwargs)
+        unittest.TestCase.__init__(self, *args, **kwargs)
         self.init_once()
         self.server = self.option('PIKE_SERVER')
         self.port = int(self.option('PIKE_PORT', '445'))
@@ -215,7 +216,7 @@ class PikeTest(unittest.TestCase):
 
     def assertBufferEqual(self, buf1, buf2):
         """
-        Compare two sequences using a binary diff to efficiently determine 
+        Compare two sequences using a binary diff to efficiently determine
         the first offset where they differ
         """
         if len(buf1) != len(buf2):
@@ -234,7 +235,7 @@ class PikeTest(unittest.TestCase):
         if high - low <= 1:
             raise AssertionError("Block mismatch at byte {0}: "
                                  "{1} != {2}".format(low, buf1[low], buf2[low]))
-        
+
 class _Decorator(object):
     def __init__(self, value):
         self.value = value
@@ -242,6 +243,7 @@ class _Decorator(object):
     def __call__(self, thing):
         setattr(thing, '__pike_test_' + self.__class__.__name__, self.value)
         return thing
+
 
 class _RangeDecorator(object):
     def __init__(self, minvalue=0, maxvalue=float('inf')):
@@ -253,12 +255,46 @@ class _RangeDecorator(object):
                 (self.minvalue, self.maxvalue))
         return thing
 
+
 class RequireDialect(_RangeDecorator): pass
 class RequireCapabilities(_Decorator): pass
 class RequireShareCapabilities(_Decorator): pass
 
+
+class PikeTestSuite(unittest.TestSuite):
+    """
+    Custom test suite for easily patching in skip tests in downstream
+    distributions of these test cases
+    """
+    skip_tests_reasons = {
+            "test_to_be_skipped": "This test should be skipped",
+    }
+
+    @staticmethod
+    def _raise_skip(reason):
+        def inner(*args, **kwds):
+            raise unittest.SkipTest(reason)
+        return inner
+
+    def addTest(self, test):
+        testMethodName = getattr(test, "_testMethodName", None)
+        if testMethodName in self.skip_tests_reasons:
+            setattr(
+                    test,
+                    testMethodName,
+                    self._raise_skip(
+                        self.skip_tests_reasons[testMethodName]))
+        super(PikeTestSuite, self).addTest(test)
+
+
+def suite():
+    test_loader = unittest.TestLoader()
+    test_loader.suiteClass = PikeTestSuite
+    test_suite = test_loader.discover(
+            os.path.abspath(os.path.dirname(__file__)),
+            "*.py")
+    return test_suite
+
 if __name__ == '__main__':
-    test_loader = unittest.defaultTestLoader
     test_runner = unittest.TextTestRunner()
-    test_suite = test_loader.discover(".", "*.py")
-    test_runner.run(test_suite)
+    test_runner.run(suite())
