@@ -762,14 +762,14 @@ class TreeConnectRequest(Request):
 
     def __init__(self, parent):
         Request.__init__(self, parent)
-        self.reserved = 0
+        self.flags = 0
         self.path_offset = None
         self.path_length = None
         self.path = None
 
     def _encode(self, cur):
-        # Reserved
-        cur.encode_uint16le(self.reserved)
+        # Reserved/Flags (SMB 3.1.1)
+        cur.encode_uint16le(self.flags)
         # Path Offset
         path_offset_hole = cur.hole.encode_uint16le(0)
         # Path Length
