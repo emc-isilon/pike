@@ -58,6 +58,7 @@ import auth
 import core
 import crypto
 import netbios
+import nttime
 import smb2
 import transport
 import ntstatus
@@ -1259,7 +1260,8 @@ class Channel(object):
             create_guid=None,
             app_instance_id=None,
             query_on_disk_id=False,
-            extended_attributes=None):
+            extended_attributes=None,
+            timewarp=None):
 
         prev_open = None
 
@@ -1327,6 +1329,10 @@ class Channel(object):
                 ext_attr.ea_value_length = len(value)
                 ext_attr_len = ext_attr_len - 1
 
+        if timewarp:
+            timewarp_req = smb2.TimewarpTokenRequest(create_req)
+            timewarp_req.timestamp = nttime.NtTime(timewarp)
+
         open_future = Future(None)
         def finish(f):
             with open_future: open_future(
@@ -1366,7 +1372,8 @@ class Channel(object):
             create_guid=None,
             app_instance_id=None,
             query_on_disk_id=False,
-            extended_attributes=None):
+            extended_attributes=None,
+            timewarp=None):
         return self.create_submit(self.create_request(
                 tree,
                 path,
@@ -1384,7 +1391,8 @@ class Channel(object):
                 create_guid,
                 app_instance_id,
                 query_on_disk_id,
-                extended_attributes))
+                extended_attributes,
+                timewarp))
 
     def close_request(self, handle):
         smb_req = self.request(obj=handle)
@@ -1691,6 +1699,22 @@ class Channel(object):
     def get_symlink(self, file):
         return self.connection.transceive(
                 self.get_symlink_request(file).parent.parent)[0]
+
+    def enumerate_snapshots_request(self, fh, max_output_response=16384):
+        smb_req = self.request(obj=fh.tree)
+        ioctl_req = smb2.IoctlRequest(smb_req)
+        ioctl_req.max_output_response = max_output_response
+        ioctl_req.file_id = fh.file_id
+        ioctl_req.flags |= smb2.SMB2_0_IOCTL_IS_FSCTL
+        enum_req = smb2.EnumerateSnapshotsRequest(ioctl_req)
+        return enum_req
+
+    def enumerate_snapshots(self, fh):
+        return self.connection.transceive(
+                self.enumerate_snapshots_request(fh).parent.parent.parent)[0]
+
+    def enumerate_snapshots_list(self, fh):
+        return self.enumerate_snapshots(fh)[0][0].snapshots
 
     def frame(self):
         return self.connection.frame()
