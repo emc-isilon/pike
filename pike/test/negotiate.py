@@ -53,8 +53,8 @@ class CapTest(test.PikeTest):
         self.chan.logoff()
         self.chan.connection.close()
 
-        self.conn = model.Client().connect(self.server, self.port)
-        self.client = self.conn.client
+        self.client = self.default_client
+        self.conn = self.client.connect(self.server, self.port)
 
     def teardown(self):
         self.conn.close()
@@ -175,8 +175,8 @@ class CapMulticredit(CapTest):
 @test.RequireDialect(smb2.DIALECT_SMB3_1_1)
 class NegotiateContext(test.PikeTest):
     def negotiate(self, *args, **kwds):
-        self.conn = model.Client().connect(self.server, self.port)
-        self.client = self.conn.client
+        self.client = self.default_client
+        self.conn = self.client.connect(self.server, self.port)
         return self.conn.negotiate(*args, **kwds).negotiate_response
 
     def test_preauth_integrity_capabilities(self):
