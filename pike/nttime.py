@@ -55,10 +55,22 @@ def _nt_time_to_unix_time(t):
     result = (t / _intervals_per_second) - _unix_time_offset
     return result if result >= 0 else 0
 
+def GMT_to_datetime(gmt_token):
+    dt_obj = datetime.strptime(
+            gmt_token,
+            "@GMT-%Y.%m.%d-%H.%M.%S")
+    # apply timezone conversion
+    dt_obj -= timedelta(seconds=time.timezone)
+    return dt_obj
+
 class NtTime(long):
     def __new__(cls, value):
-        if isinstance(value, str):
-            value = _datetime_to_nt_time(datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
+        if isinstance(value, basestring):
+            if value.startswith("@GMT-"):
+                dt = GMT_to_datetime(value)
+            else:
+                dt = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+            value = _datetime_to_nt_time(dt)
         elif isinstance(value, datetime):
             value = _datetime_to_nt_time(value)
         
