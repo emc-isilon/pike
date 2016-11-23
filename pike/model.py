@@ -957,11 +957,14 @@ class Connection(transport.Transport):
                     context = self.conn._pre_auth_integrity_hash
                 for nctx in self.conn.negotiate_response:
                     if isinstance(nctx, crypto.EncryptionCapabilitiesResponse):
-                        return crypto.EncryptionContext(
-                            crypto.CryptoKeys311(
-                                self.session_key,
-                                context),
-                            nctx.ciphers)
+                        try:
+                            return crypto.EncryptionContext(
+                                crypto.CryptoKeys311(
+                                    self.session_key,
+                                    context),
+                                nctx.ciphers)
+                        except crypto.CipherMismatch:
+                            pass
             elif self.dialect_revision >= smb2.DIALECT_SMB3_0:
                 if self.conn.negotiate_response.capabilities & smb2.SMB2_GLOBAL_CAP_ENCRYPTION:
                     return crypto.EncryptionContext(

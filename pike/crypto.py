@@ -42,14 +42,27 @@ import random
 
 from Cryptodome.Cipher import AES
 
+
+class CipherMismatch(Exception):
+    pass
+
+
 class Ciphers(core.ValueEnum):
+    SMB2_NONE_CIPHER = 0x0000
     SMB2_AES_128_CCM = 0x0001
     SMB2_AES_128_GCM = 0x0002
 
 Ciphers.import_items(globals())
 
+cipher_map = {
+        SMB2_AES_128_CCM: (AES.MODE_CCM, 11),
+        SMB2_AES_128_GCM: (AES.MODE_GCM, 12)
+}
+
+
 class EncryptionCapabilities(core.Frame):
     context_type = smb2.SMB2_ENCRYPTION_CAPABILITIES
+
     def __init__(self):
         self.ciphers = []
         self.ciphers_count = None
@@ -235,13 +248,15 @@ class EncryptionContext(object):
     """
     def __init__(self, keys, ciphers):
         self.keys = keys
-        self.cipher = ciphers[0]
-        if self.cipher == SMB2_AES_128_CCM:
-            self.aes_mode = AES.MODE_CCM
-            self.nonce_length = 11
-        elif self.cipher == SMB2_AES_128_GCM:
-            self.aes_mode = AES.MODE_GCM
-            self.nonce_length = 12
+        for c in ciphers:
+            if c in cipher_map:
+                self.aes_mode, self.nonce_length = cipher_map[c]
+                self.cipher = c
+                break
+        else:
+            raise CipherMismatch(
+                    "Client did not recognize any ciphers returned by the "
+                    "server: {0}".format(ciphers))
 
     def encrypt(self, plaintext, authenticated_data, nonce):
         enc_cipher = AES.new(self.keys.encryption,
@@ -256,6 +271,8 @@ class EncryptionContext(object):
                              self.aes_mode,
                              nonce=nonce[:self.nonce_length].tostring())
         dec_cipher.update(authenticated_data.tostring())
-        return array.array('B',
-                dec_cipher.decrypt_and_verify(ciphertext.tostring(),
-                                              signature.tostring()))
+        return array.array(
+                'B',
+                dec_cipher.decrypt_and_verify(
+                    ciphertext.tostring(),
+                    signature.tostring()))
