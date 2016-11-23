@@ -41,7 +41,7 @@ import smb2
 class Netbios(core.Frame):
     def __init__(self, context=None):
         core.Frame.__init__(self, None, context)
-        self.len = 0
+        self.len = None
         self.conn = context
         self.transform = None
         self._smb2_frames = []
@@ -60,7 +60,8 @@ class Netbios(core.Frame):
             for child in self.children:
                 child.encode(cur)
 
-        self.len = cur - base
+        if self.len is None:
+            self.len = cur - base
         len_hole(self.len)
 
     def _decode(self, cur):
