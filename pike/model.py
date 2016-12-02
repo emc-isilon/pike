@@ -588,6 +588,8 @@ class Connection(transport.Transport):
         self.process_callbacks(EV_RES_PRE_RECV, remaining)
         data = array.array('B', self.recv(remaining))
         self.process_callbacks(EV_RES_POST_RECV, data)
+        if not data:
+            self.handle_error()
         self._in_buffer.extend(data)
         avail = len(self._in_buffer)
         if avail >= 4:
@@ -626,14 +628,19 @@ class Connection(transport.Transport):
         This unceremoniously terminates the connection and fails all
         outstanding requests with EOFError.
         """
+        # If there is no error, propagate EOFError
+        if self.error is None:
+            self.error = EOFError("close")
+
+        # if the connection hasn't been established, raise the error
+        if self.connection_future.response is None:
+            self.connection_future(self.error)
+
+        # otherwise, ignore this connection since it's not associated with its client
         if self not in self.client._connections:
             return
 
         super(Connection, self).close()
-
-        # Run down connection
-        if self.error is None:
-            self.error = EOFError("close")
 
         if self.remote_addr is not None:
             self.client.logger.debug("disconnect (%s/%s -> %s/%s): %s",
