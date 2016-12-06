@@ -1579,6 +1579,16 @@ class QueryOnDiskIDResponse(CreateResponseContext):
     def _decode(self, cur):
         self.file_id = cur.decode_bytes(32)
 
+class TimewarpTokenRequest(CreateRequestContext):
+    name = 'TWrp'
+
+    def __init__(self, parent):
+        super(TimewarpTokenRequest, self).__init__(parent)
+        self.timestamp = 0
+
+    def _encode(self, cur):
+        cur.encode_uint64le(self.timestamp)
+
 class CloseRequest(Request):
     command_id = SMB2_CLOSE
     structure_size = 24
@@ -3312,6 +3322,12 @@ class GetReparsePointRequest(IoctlInput):
     def _encode(self, *args, **kwds):
         pass
 
+class EnumerateSnapshotsRequest(IoctlInput):
+    ioctl_ctl_code = FSCTL_SRV_ENUMERATE_SNAPSHOTS
+
+    def _encode(self, *args, **kwds):
+        pass
+
 @IoctlResponse.ioctl_ctl_code
 class IoctlOutput(core.Frame):
     def __init__(self, parent):
@@ -3454,3 +3470,22 @@ class SymbolicLinkReparseBuffer(ReparseDataBuffer):
         self.substitute_name = cur.decode_utf16le(self.substitute_name_length)
         cur.seekto(buf_start + self.print_name_offset)
         self.print_name = cur.decode_utf16le(self.print_name_length)
+
+class EnumerateSnapshotsResponse(IoctlOutput):
+    ioctl_ctl_code = FSCTL_SRV_ENUMERATE_SNAPSHOTS
+
+    def __init__(self, parent):
+        super(EnumerateSnapshotsResponse, self).__init__(parent)
+        self.number_of_snapshots = 0
+        self.number_of_snapshots_returns = 0
+        self.snapshot_array_size = 0
+        self.snapshots = []
+
+    def _decode(self, cur):
+        self.number_of_snapshots = cur.decode_uint32le()
+        self.number_of_snapshots_returned = cur.decode_uint32le()
+        self.snapshot_array_size = cur.decode_uint32le()
+        snapshot_buffer = cur.decode_utf16le(self.snapshot_array_size)
+        # TODO: handle the case where the buffer is too small
+        self.snapshots = snapshot_buffer.strip("\0").split("\0")
+
