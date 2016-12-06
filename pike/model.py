@@ -1475,7 +1475,8 @@ class Channel(object):
             create_res,
             file_information_class=smb2.FILE_BASIC_INFORMATION,
             info_type=smb2.SMB2_0_INFO_FILE,
-            output_buffer_length=4096):
+            output_buffer_length=4096,
+            additional_information=None):
         smb_req = self.request(obj=create_res)
         query_req = smb2.QueryInfoRequest(smb_req)
 
@@ -1483,27 +1484,54 @@ class Channel(object):
         query_req.file_information_class = file_information_class
         query_req.file_id = create_res.file_id
         query_req.output_buffer_length = output_buffer_length
+        if additional_information:
+            query_req.additional_information = additional_information
         return query_req
 
     def query_file_info(self,
                         create_res,
                         file_information_class=smb2.FILE_BASIC_INFORMATION,
                         info_type=smb2.SMB2_0_INFO_FILE,
-                        output_buffer_length=4096):
+                        output_buffer_length=4096,
+                        additional_information=None):
         return self.connection.transceive(
                 self.query_file_info_request(
                     create_res,
                     file_information_class,
                     info_type,
-                    output_buffer_length).parent.parent)[0][0][0]
+                    output_buffer_length,
+                    additional_information).parent.parent)[0][0][0]
 
-    @contextlib.contextmanager
-    def set_file_info(self, handle, cls):
+    def set_file_info_request(
+            self,
+            handle,
+            file_information_class=smb2.FILE_BASIC_INFORMATION,
+            info_type=smb2.SMB2_0_INFO_FILE,
+            input_buffer_length=4096,
+            additional_information=None):
         smb_req = self.request(obj=handle)
         set_req = smb2.SetInfoRequest(smb_req)
         set_req.file_id = handle.file_id
+        set_req.file_information_class = file_information_class
+        set_req.info_type = info_type
+        set_req.input_buffer_length = input_buffer_length
+        if additional_information:
+            set_req.additional_information = additional_information
+        return set_req
+
+    @contextlib.contextmanager
+    def set_file_info(self, handle, cls):
+        info_type = file_information_class = None
+        if hasattr(cls, "info_type"):
+            info_type = cls.info_type
+        if hasattr(cls, "file_information_class"):
+            file_information_class = cls.file_information_class
+        set_req = self.set_file_info_request(
+                handle,
+                file_information_class,
+                info_type)
         yield cls(set_req)
-        self.connection.transceive(smb_req.parent)[0]
+        self.connection.transceive(set_req.parent.parent)[0]
 
     # Send an echo request and get a response
     def echo(self):
