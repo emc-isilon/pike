@@ -42,6 +42,7 @@ import time
 
 _reraised_exceptions = (KeyboardInterrupt, SystemExit)
 
+
 class Transport(object):
     """
     Transport is responsible for managing the underlying socket, registering
@@ -376,7 +377,7 @@ class SelectPoller(BasePoller):
     def poll(self):
         non_connected = [t._fileno for t in self.connections.values() if not t.connected]
         readers = self.connections.keys()
-        writers = non_connection + self.deferred_writers
+        writers = non_connected + self.deferred_writers
         readables, writables, _ = select.select(readers,
                                                 writers,
                                                 [], 0)
@@ -388,22 +389,23 @@ class PollPoller(BasePoller):
     """
     Implementation of poll, available on Linux
     """
-    READ_EVENTS = (select.POLLIN |
-                   select.POLLERR |
-                   select.POLLHUP |
-                   select.POLLNVAL |
-                   select.POLLMSG |
-                   select.POLLPRI)
-    WRITE_EVENTS = select.POLLOUT
     def __init__(self):
         super(PollPoller, self).__init__()
         self.p = select.poll()
+        self.read_events = (
+                select.POLLIN |
+                select.POLLERR |
+                select.POLLHUP |
+                select.POLLNVAL |
+                select.POLLMSG |
+                select.POLLPRI)
+        self.write_events = select.POLLOUT
 
     def add_channel(self, transport):
         super(PollPoller, self).add_channel(transport)
         self.p.register(
                 transport._fileno,
-                self.READ_EVENTS | self.WRITE_EVENTS)
+                self.read_events | self.write_events)
 
     def del_channel(self, transport):
         super(PollPoller, self).del_channel(transport)
@@ -413,18 +415,18 @@ class PollPoller(BasePoller):
         super(PollPoller, self).defer_write(transport)
         self.p.modify(
                 transport._fileno,
-                self.READ_EVENTS | self.WRITE_EVENTS)
+                self.read_events | self.write_events)
 
     def poll(self):
         events = self.p.poll(0)
         readables = []
         writables = []
         for fd, event in events:
-            if event & self.READ_EVENTS:
+            if event & self.read_events:
                 readables.append(fd)
-            elif event & self.WRITE_EVENTS:
+            elif event & self.write_events:
                 writables.append(fd)
-                self.p.modify(fd, self.READ_EVENTS)
+                self.p.modify(fd, self.read_events)
         self.process_readables(readables)
         self.process_writables(writables)
 
@@ -440,6 +442,7 @@ elif hasattr(select, "poll"):
     poller = PollPoller()
 else:
     poller = SelectPoller()
+
 
 def loop(timeout=None, count=None):
     poller.loop(timeout, count)
