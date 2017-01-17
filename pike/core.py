@@ -697,3 +697,44 @@ class FlagEnum(Enum):
 
     def __and__(self, o):
         return self.__class__(super(FlagEnum,self).__and__(o))
+
+class Let(object):
+    """
+    A Let allows for temporarily storing passed arguments in the _settings
+    member of a target object for the duration of the contextmanager's scope
+
+    Implementation on a factory class
+
+    class MyThingFactory(object):
+        def __init__(self):
+            self._settings = {}
+        def generate_thing(self):
+            # do something here
+            new_obj = Thing()
+            for k,v in self._settings.iteritems():
+                setattr(new_obj, k, v)
+            return new_obj
+        def let(self, **kwds):
+            return Let(self, kwds)
+
+    Calling code that wants to temporarily customize the Thing objects that are
+    returned by the factory:
+
+    fac = MyThingFactory()
+    with fac.let(this="that", foo="bar"):
+        a_thing = fac.generate_thing()
+        self.assertEqual(a_thing.this, "that")
+    """
+    def __init__(self, target, settings_dict):
+        self.target = target
+        self.settings_dict = settings_dict
+        if not hasattr(target, "_settings"):
+            target._settings = {}
+
+    def __enter__(self):
+        self.backup = dict(self.target._settings)
+        self.target._settings.update(self.settings_dict)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.target._settings = self.backup

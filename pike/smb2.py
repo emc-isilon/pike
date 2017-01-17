@@ -477,10 +477,18 @@ class NegotiateRequest(Request):
         self.capabilities = 0
         self.client_guid = [0]*16
         self.dialects = []
-        self._negotiate_contexts = []
+        self.negotiate_contexts_count = None
+        self.negotiate_contexts_offset = None
+        self.negotiate_contexts_alignment_skew = 0
+        self.negotiate_contexts = []
 
     def _children(self):
-        return self._negotiate_contexts
+        return self.negotiate_contexts
+
+    def _has_negotiate_contexts(self):
+        return (self.negotiate_contexts or
+                self.negotiate_contexts_offset is not None or
+                self.negotiate_contexts_count is not None)
 
     def _encode(self, cur):
         cur.encode_uint16le(len(self.dialects))
@@ -488,30 +496,39 @@ class NegotiateRequest(Request):
         cur.encode_uint16le(0)
         cur.encode_uint32le(self.capabilities)
         cur.encode_bytes(self.client_guid)
-        if DIALECT_SMB3_1_1 in self.dialects:
+        if self._has_negotiate_contexts():
             negotiate_contexts_offset_hole = cur.hole.encode_uint32le(0)
-            cur.encode_uint16le(len(self._negotiate_contexts))
+            if self.negotiate_contexts_count is None:
+                self.negotiate_contexts_count = len(self.negotiate_contexts)
+            cur.encode_uint16le(self.negotiate_contexts_count)
             cur.encode_uint16le(0)      #reserved
         else:
             cur.encode_uint64le(0)
         for dialect in self.dialects:
             cur.encode_uint16le(dialect)
 
-        if self._negotiate_contexts:
+        if self._has_negotiate_contexts():
             cur.align(self.parent.start, 8)
-            negotiate_contexts_offset_hole(cur - self.parent.start)
+            cur.seekto(cur + self.negotiate_contexts_alignment_skew)
+            if self.negotiate_contexts_offset is not None:
+                negotiate_contexts_offset_hole(
+                        self.negotiate_contexts_offset)
+            else:
+                negotiate_contexts_offset_hole(cur - self.parent.start)
 
-            for ctx in self._negotiate_contexts:
+            for ctx in self.negotiate_contexts:
                 cur.align(self.parent.start, 8)
                 cur.encode_uint16le(ctx.context_type)
                 data_length_hole = cur.hole.encode_uint16le(0)
                 cur.encode_uint32le(0)      # reserved
                 data_start = cur.copy()
                 ctx.encode(cur)
-                data_length_hole(cur - data_start)
+                if ctx.data_length is None:
+                    ctx.data_length = cur - data_start
+                data_length_hole(ctx.data_length)
 
     def append(self, e):
-        self._negotiate_contexts.append(e)
+        self.negotiate_contexts.append(e)
 
 class NegotiateResponse(Response):
     command_id = SMB2_NEGOTIATE
@@ -532,15 +549,17 @@ class NegotiateResponse(Response):
         self.system_time = 0
         self.server_start_time = 0
         self.security_buffer = None
-        self._negotiate_contexts = []
+        self.negotiate_contexts_count = None
+        self.negotiate_contexts_offset = None
+        self.negotiate_contexts = []
 
     def _children(self):
-        return self._negotiate_contexts
+        return self.negotiate_contexts
 
     def _decode(self, cur):
         self.security_mode = SecurityMode(cur.decode_uint16le())
         self.dialect_revision = Dialect(cur.decode_uint16le())
-        negotiate_contexts_count = cur.decode_uint16le()
+        self.negotiate_contexts_count = cur.decode_uint16le()
         self.server_guid = cur.decode_bytes(16)
         self.capabilities = GlobalCaps(cur.decode_uint32le())
         self.max_transact_size = cur.decode_uint32le()
@@ -552,14 +571,14 @@ class NegotiateResponse(Response):
         offset = cur.decode_uint16le()
         length = cur.decode_uint16le()
 
-        negotiate_contexts_offset = cur.decode_uint32le()
+        self.negotiate_contexts_offset = cur.decode_uint32le()
 
         # Advance to security buffer
         cur.advanceto(self.parent.start + offset)
         self.security_buffer = cur.decode_bytes(length)
-        if negotiate_contexts_count > 0:
-            cur.seekto(self.parent.start + negotiate_contexts_offset)
-            for ix in xrange(negotiate_contexts_count):
+        if self.negotiate_contexts_count > 0:
+            cur.seekto(self.parent.start + self.negotiate_contexts_offset)
+            for ix in xrange(self.negotiate_contexts_count):
                 cur.align(self.parent.start, 8)
                 context_type = cur.decode_uint16le()
                 data_length = cur.decode_uint16le()
@@ -568,13 +587,14 @@ class NegotiateResponse(Response):
                 ctx(self).decode(cur)
 
     def append(self, e):
-        self._negotiate_contexts.append(e)
+        self.negotiate_contexts.append(e)
 
 class NegotiateRequestContext(core.Frame):
     def __init__(self, parent):
         core.Frame.__init__(self, parent)
         if parent is not None:
             parent.append(self)
+        self.data_length = None
 
 @NegotiateResponse.negotiate_context
 class NegotiateResponseContext(core.Frame):
@@ -587,19 +607,25 @@ class PreauthIntegrityCapabilities(core.Frame):
     context_type = SMB2_PREAUTH_INTEGRITY_CAPABILITIES
     def __init__(self):
         self.hash_algorithms = []
+        self.hash_algorithms_count = None
         self.salt = ""
+        self.salt_length = None
     def _encode(self, cur):
-        cur.encode_uint16le(len(self.hash_algorithms))
-        cur.encode_uint16le(len(self.salt))
+        if self.hash_algorithms_count is None:
+            self.hash_algorithms_count = len(self.hash_algorithms)
+        cur.encode_uint16le(self.hash_algorithms_count)
+        if self.salt_length is None:
+            self.salt_length = len(self.salt)
+        cur.encode_uint16le(self.salt_length)
         for h in self.hash_algorithms:
             cur.encode_uint16le(h)
         cur.encode_bytes(self.salt)
     def _decode(self, cur):
-        hash_algorithm_count = cur.decode_uint16le()
-        salt_length = cur.decode_uint16le()
-        for ix in xrange(hash_algorithm_count):
+        self.hash_algorithm_count = cur.decode_uint16le()
+        self.salt_length = cur.decode_uint16le()
+        for ix in xrange(self.hash_algorithm_count):
             self.hash_algorithms.append(HashAlgorithms(cur.decode_uint16le()))
-        self.salt = cur.decode_bytes(salt_length)
+        self.salt = cur.decode_bytes(self.salt_length)
 
 class PreauthIntegrityCapabilitiesRequest(NegotiateRequestContext,
                                           PreauthIntegrityCapabilities):
@@ -688,21 +714,27 @@ class SessionSetupRequest(Request):
         self.flags = 0
         self.security_mode = 0
         self.capabilities = 0
+        self.channel = 0            # must not be used
         self.previous_session_id = 0
         self.security_buffer = None
+        self.security_buffer_offset = None
+        self.security_buffer_length = None
 
     def _encode(self, cur):
         cur.encode_uint8le(self.flags)
         cur.encode_uint8le(self.security_mode)
         cur.encode_uint32le(self.capabilities)
-        # Channel, must not be used
-        cur.encode_uint32le(0)
+        cur.encode_uint32le(self.channel)
         # Encode 0 for security buffer offset for now
         sec_buf_ofs = cur.hole.encode_uint16le(0)
-        cur.encode_uint16le(len(self.security_buffer))
+        if self.security_buffer_length is None:
+            self.security_buffer_length = len(self.security_buffer)
+        cur.encode_uint16le(self.security_buffer_length)
         cur.encode_uint64le(self.previous_session_id)
         # Go back and set security buffer offset
-        sec_buf_ofs(cur - self.parent.start)
+        if self.security_buffer_offset is None:
+            self.security_buffer_offset = cur - self.parent.start
+        sec_buf_ofs(self.security_buffer_offset)
         cur.encode_bytes(self.security_buffer)
 
 class SessionSetupResponse(Response):
@@ -730,14 +762,14 @@ class TreeConnectRequest(Request):
 
     def __init__(self, parent):
         Request.__init__(self, parent)
-        self.reserved = 0
+        self.flags = 0
         self.path_offset = None
         self.path_length = None
         self.path = None
 
     def _encode(self, cur):
-        # Reserved
-        cur.encode_uint16le(self.reserved)
+        # Reserved/Flags (SMB 3.1.1)
+        cur.encode_uint16le(self.flags)
         # Path Offset
         path_offset_hole = cur.hole.encode_uint16le(0)
         # Path Length
@@ -1718,6 +1750,7 @@ class QueryDirectoryResponse(Response):
 
     def __init__(self, parent):
         Response.__init__(self, parent)
+        self._file_information_class = None
 
         # Try to figure out file information class by looking up
         # associated request in context
@@ -1726,10 +1759,8 @@ class QueryDirectoryResponse(Response):
         if context:
             request = context.get_request(parent.message_id)
 
-        if request:
+        if request and request.children:
             self._file_information_class = request[0].file_information_class
-        else:
-            self._file_information_class = None
 
         self._entries = []
 
@@ -1754,7 +1785,7 @@ class QueryDirectoryResponse(Response):
                 while cur < end:
                     cls(self).decode(cur)
         else:
-            cur.advanceto(end)
+            Information(self, end).decode(cur)
 
 class InfoType(core.ValueEnum):
     SMB2_0_INFO_FILE       = 0x01
@@ -1815,24 +1846,21 @@ class QueryInfoResponse(Response):
     structure_size = 9
     allowed_status = [ntstatus.STATUS_SUCCESS, ntstatus.STATUS_BUFFER_OVERFLOW]
 
-    _file_info_map = {}
-    file_information = core.Register(_file_info_map, "file_information_class")
-
-    _fs_info_map = {}
-    fs_information = core.Register(_fs_info_map, "file_information_class")
+    _info_map = {}
+    information = core.Register(_info_map, "info_type", "file_information_class")
 
     def __init__(self, parent):
         Response.__init__(self, parent)
-        self._info_type = 0
-        self._file_information_class = 0
+        self._info_type = None
+        self._file_information_class = None
 
         context = self.context
         if context:
             request = context.get_request(parent.message_id)
 
-        if request:
-            self._info_type = request[0].info_type
-            self._file_information_class = request[0].file_information_class
+        if request and request.children and request[0].children:
+            self._info_type = request[0][0].info_type
+            self._file_information_class = request[0][0].file_information_class
 
         self._entries = []
 
@@ -1849,20 +1877,13 @@ class QueryInfoResponse(Response):
         cur.advanceto(self.parent.start + output_buffer_offset)
         end = cur + output_buffer_length
 
-        if self._file_information_class is not None:
-            if self._info_type == SMB2_0_INFO_FILE:
-                table = self._file_info_map
-            elif self._info_type == SMB2_0_INFO_FILESYSTEM:
-                table = self._fs_info_map
-            else:
-                table = None
-
-            if table is not None and self._file_information_class in table:
-                cls = table[self._file_information_class]
-                with cur.bounded(cur, end):
-                    cls(self).decode(cur)
+        key = (self._info_type, self._file_information_class)
+        if key in self._info_map:
+            cls = self._info_map[key]
+            with cur.bounded(cur, end):
+                cls(self).decode(cur)
         else:
-            cur.advanceto(end)
+            Information(self, end).decode(cur)
 
 
 class SetInfoRequest(Request):
@@ -1875,7 +1896,7 @@ class SetInfoRequest(Request):
         self.file_information_class = 0
         self.input_buffer_length = 0
         self.input_buffer_offset = 0
-        self.security_info = 0                # SMB2_QUERY_INFO.AdditionalInformation
+        self.additional_information = 0
         self.file_id = None
 
         self._entries = []
@@ -1888,10 +1909,7 @@ class SetInfoRequest(Request):
 
     def _encode(self, cur):
         if not self.info_type:
-            # Only one supported at the moment.
-            # When we support more, look at child object
-            # to decide what kind of set we are doing
-            self.info_type = SMB2_0_INFO_FILE
+            self.info_type = self[0].info_type
 
         if not self.file_information_class:
             # Determine it from child object
@@ -1904,7 +1922,7 @@ class SetInfoRequest(Request):
         buffer_offset_hole = cur.hole.encode_uint16le(0)
         cur.encode_uint16le(0)  # Reserved
 
-        cur.encode_uint32le(self.security_info)
+        cur.encode_uint32le(self.additional_information)
         cur.encode_uint64le(self.file_id[0])
         cur.encode_uint64le(self.file_id[1])
 
@@ -1929,14 +1947,43 @@ class SetInfoResponse(Response):
         pass
 
 
-@QueryDirectoryResponse.file_information
-@QueryInfoResponse.file_information
-class FileInformation(core.Frame):
-    pass
+class Information(core.Frame):
+    """
+    Base class for all info frames. Holds the raw data if no specific decoder
+    has been registered for the given info type
+    """
+    info_type = 0
+    file_information_class = 0
 
-@QueryInfoResponse.fs_information
-class FileSystemInformation(core.Frame):
-    pass
+    def __init__(self, parent = None, end = None):
+        super(Information, self).__init__(parent)
+        if parent is not None:
+            parent.append(self)
+        self.end = end
+        self.raw_data = ''
+
+    def _decode(self, cur):
+        """
+        decode the raw data to the specified end of buffer
+        """
+        if self.end is not None:
+            self.raw_data = cur.decode_bytes(self.end - cur)
+
+    def _encode(self, cur):
+        """
+        encode the raw data
+        """
+        cur.encode_bytes(self.raw_data)
+
+
+@QueryDirectoryResponse.file_information
+@QueryInfoResponse.information
+class FileInformation(Information):
+    info_type = SMB2_0_INFO_FILE
+
+@QueryInfoResponse.information
+class FileSystemInformation(Information):
+    info_type = SMB2_0_INFO_FILESYSTEM
 
 class FileAccessInformation(FileInformation):
     file_information_class = FILE_ACCESS_INFORMATION
@@ -1944,8 +1991,6 @@ class FileAccessInformation(FileInformation):
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
         self.access_flags = 0
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.access_flags = Access(cur.decode_uint32le())
@@ -1971,8 +2016,6 @@ class FileAlignmentInformation(FileInformation):
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
         self.alignment_requirement = 0
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.alignment_requirement = Alignment(cur.decode_uint32le())
@@ -1982,8 +2025,6 @@ class FileAllInformation(FileInformation):
 
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
-        if parent is not None:
-            parent.append(self)
 
         self.basic_information = FileBasicInformation()
         self.standard_information = FileStandardInformation()
@@ -2013,8 +2054,6 @@ class FileDirectoryInformation(FileInformation):
         self.allocation_size = 0
         self.file_attributes = 0
         self.file_name = None
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         next_offset = cur.decode_uint32le()
@@ -2051,8 +2090,6 @@ class FileFullDirectoryInformation(FileInformation):
         self.file_attributes = 0
         self.ea_size = 0
         self.file_name = None
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         next_offset = cur.decode_uint32le()
@@ -2090,8 +2127,6 @@ class FileIdFullDirectoryInformation(FileInformation):
         self.reserved = 0
         self.file_id = 0
         self.file_name = None
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         next_offset = cur.decode_uint32le()
@@ -2132,8 +2167,6 @@ class FileIdBothDirectoryInformation(FileInformation):
         self.file_id = 0
         self.short_name = None
         self.file_name = None
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         next_offset = cur.decode_uint32le()
@@ -2171,8 +2204,6 @@ class FileBasicInformation(FileInformation):
         self.last_write_time = 0
         self.change_time = 0
         self.file_attributes = 0
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.creation_time = nttime.NtTime(cur.decode_uint64le())
@@ -2205,8 +2236,6 @@ class FileNetworkOpenInformation(FileInformation):
         self.allocation_size = 0
         self.end_of_file = 0
         self.file_attributes = 0
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.creation_time = nttime.NtTime(cur.decode_uint64le())
@@ -2227,8 +2256,6 @@ class FileAttributeTagInformation(FileInformation):
         FileInformation.__init__(self, parent)
         self.file_attributes = 0
         self.reparse_tag = 0
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.file_attributes = FileAttributes(cur.decode_uint32le())
@@ -2245,8 +2272,6 @@ class FileStreamInformation(FileInformation):
         self.stream_size = 0
         self.stream_allocation_size = 0
         self.stream_name = None
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.next_entry_offset = cur.decode_uint32le()
@@ -2275,8 +2300,6 @@ class FileCompressionInformation(FileInformation):
         self.chunk_shift = 0
         self.cluster_shift = None
         self.reserved = 0
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.compressed_file_size = cur.decode_int64le()
@@ -2294,8 +2317,6 @@ class FileInternalInformation(FileInformation):
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
         self.index_number = 0
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.index_number = cur.decode_uint64le()
@@ -2307,8 +2328,6 @@ class FileModeInformation(FileInformation):
         FileInformation.__init__(self, parent)
         # See Create options (e.g. FILE_DELETE_ON_CLOSE) for available flags
         self.mode = 0
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.mode = CreateOptions(cur.decode_uint32le())
@@ -2323,9 +2342,6 @@ class FileNameInformation(FileInformation):
         FileInformation.__init__(self, parent)
         self.file_name = None
 
-        if parent is not None:
-            parent.append(self)
-
     def _decode(self, cur):
         file_name_length = cur.decode_uint32le()
         self.file_name = cur.decode_utf16le(file_name_length)
@@ -2338,9 +2354,6 @@ class FileRenameInformation(FileInformation):
         self.replace_if_exists = 0
         self.root_directory = (0,0)
         self.file_name = None
-
-        if parent is not None:
-            parent.append(self)
 
     def _encode(self, cur):
         cur.encode_uint8le(self.replace_if_exists)
@@ -2361,9 +2374,6 @@ class FileAllocationInformation(FileInformation):
         FileInformation.__init__(self,parent)
         self.allocation_size = 0
 
-        if parent is not None:
-            parent.append(self)
-
     def _encode(self, cur):
         cur.encode_int64le(self.allocation_size)
 
@@ -2374,9 +2384,6 @@ class FileDispositionInformation(FileInformation):
    def __init__(self, parent = None):
         FileInformation.__init__(self,parent)
         self.delete_pending = 0
-
-        if parent is not None:
-            parent.append(self)
 
    def _encode(self, cur):
         cur.encode_uint8le(self.delete_pending)
@@ -2389,9 +2396,6 @@ class FileEndOfFileInformation(FileInformation):
         FileInformation.__init__(self, parent)
         self.endoffile = 0
 
-        if parent is not None:
-            parent.append(self)
-
    def _encode(self, cur):
        cur.encode_int64le(self.endoffile)
 
@@ -2403,9 +2407,6 @@ class FileValidDataLengthInformation(FileInformation):
         FileInformation.__init__(self, parent)
         self.valid_data_length = 0
 
-        if parent is not None:
-           parent.append(self)
-
    def _encode(self, cur):
         cur.encode_int64le(self.valid_data_length)
 
@@ -2416,9 +2417,6 @@ class FileNamesInformation(FileInformation):
         FileInformation.__init__(self, parent)
         self.file_index = 0
         self.file_name = None
-
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         next_entry_offset = cur.decode_uint32le()
@@ -2438,8 +2436,6 @@ class FilePositionInformation(FileInformation):
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
         self.current_byte_offset = 0
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.current_byte_offset = cur.decode_uint64le()
@@ -2457,8 +2453,6 @@ class FileStandardInformation(FileInformation):
         self.number_of_links = 0
         self.delete_pending = 0
         self.directory = 0
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.allocation_size = cur.decode_uint64le()
@@ -2484,8 +2478,6 @@ class FileEaInformation(FileInformation):
     def __init__(self, parent = None):
         FileInformation.__init__(self, parent)
         self.ea_size = 0
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.ea_size = cur.decode_uint32le()
@@ -2500,8 +2492,6 @@ class FileFsSizeInformation(FileSystemInformation):
         self.available_allocation_units = 0
         self.sectors_per_allocation_unit = 0
         self.bytes_per_sector = 0
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.total_allocation_units = cur.decode_int64le()
@@ -2520,8 +2510,6 @@ class FileFsFullSizeInformation(FileSystemInformation):
         self.actual_available_allocation_units = 0
         self.sectors_per_allocation_unit = 0
         self.bytes_per_sector = 0
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.total_allocation_units = cur.decode_uint64le()
@@ -2563,8 +2551,6 @@ class FileFsDeviceInformation(FileSystemInformation):
         FileSystemInformation.__init__(self, parent)
         self.device_type = 0
         self.characteristics = 0
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.device_type = DeviceType(cur.decode_uint32le())
@@ -2607,8 +2593,6 @@ class FileFsAttributeInformation(FileSystemInformation):
         self.maximum_component_name_length = 0
         self.file_system_name_length = 0
         self.file_system_name = 0
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.file_system_attibutes = cur.decode_uint32le()
@@ -2628,8 +2612,6 @@ class FileFsVolumeInformation(FileSystemInformation):
         self.supports_objects = 0
         self.reserved = 0
         self.volume_label = None
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         self.volume_creation_time  = nttime.NtTime(cur.decode_uint64le())
@@ -2667,8 +2649,6 @@ class FileFsControlInformation(FileSystemInformation):
         self.default_quota_limit = 0
         self.file_system_control_flags = None
         self.padding = 0
-        if parent is not None:
-            parent.append(self)
 
     def _encode(self, cur):
         cur.encode_int64le(self.free_space_start_filtering)
@@ -2696,8 +2676,6 @@ class FileFsObjectIdInformation(FileSystemInformation):
         FileSystemInformation.__init__(self, parent)
         self.objectid = ""
         self.extended_info = ""
-        if parent is not None:
-            parent.append(self)
 
     def _decode(self, cur):
         for count in xrange(2):

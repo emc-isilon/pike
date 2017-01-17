@@ -588,6 +588,8 @@ class Connection(transport.Transport):
         self.process_callbacks(EV_RES_PRE_RECV, remaining)
         data = array.array('B', self.recv(remaining))
         self.process_callbacks(EV_RES_POST_RECV, data)
+        if not data:
+            self.handle_error()
         self._in_buffer.extend(data)
         avail = len(self._in_buffer)
         if avail >= 4:
@@ -626,14 +628,19 @@ class Connection(transport.Transport):
         This unceremoniously terminates the connection and fails all
         outstanding requests with EOFError.
         """
+        # If there is no error, propagate EOFError
+        if self.error is None:
+            self.error = EOFError("close")
+
+        # if the connection hasn't been established, raise the error
+        if self.connection_future.response is None:
+            self.connection_future(self.error)
+
+        # otherwise, ignore this connection since it's not associated with its client
         if self not in self.client._connections:
             return
 
         super(Connection, self).close()
-
-        # Run down connection
-        if self.error is None:
-            self.error = EOFError("close")
 
         if self.remote_addr is not None:
             self.client.logger.debug("disconnect (%s/%s -> %s/%s): %s",
@@ -906,6 +913,7 @@ class Connection(transport.Transport):
                 raise ImportError("Neither ntlm nor kerberos authentication "
                                   "methods are available")
 
+            self._settings = {}
             self.prev_session_id = 0
             self.session_id = 0
             self.requests = []
@@ -922,6 +930,9 @@ class Connection(transport.Transport):
             elif resume:
                 assert conn.negotiate_response.dialect_revision >= 0x300
                 self.prev_session_id = resume.session_id
+
+        def let(self, **kwargs):
+            return core.Let(self, kwargs)
 
         def derive_signing_key(self, session_key=None, context=None):
             if session_key is None:
@@ -946,11 +957,14 @@ class Connection(transport.Transport):
                     context = self.conn._pre_auth_integrity_hash
                 for nctx in self.conn.negotiate_response:
                     if isinstance(nctx, crypto.EncryptionCapabilitiesResponse):
-                        return crypto.EncryptionContext(
-                            crypto.CryptoKeys311(
-                                self.session_key,
-                                context),
-                            nctx.ciphers)
+                        try:
+                            return crypto.EncryptionContext(
+                                crypto.CryptoKeys311(
+                                    self.session_key,
+                                    context),
+                                nctx.ciphers)
+                        except crypto.CipherMismatch:
+                            pass
             elif self.dialect_revision >= smb2.DIALECT_SMB3_0:
                 if self.conn.negotiate_response.capabilities & smb2.SMB2_GLOBAL_CAP_ENCRYPTION:
                     return crypto.EncryptionContext(
@@ -968,6 +982,9 @@ class Connection(transport.Transport):
             if self.bind:
                 smb_req.flags = smb2.SMB2_FLAGS_SIGNED
                 session_req.flags = smb2.SMB2_SESSION_FLAG_BINDING
+
+            for (attr,value) in self._settings.iteritems():
+                setattr(session_req, attr, value)
 
             self.requests.append(smb_req)
             return self.conn.submit(smb_req.parent)[0]
@@ -1088,20 +1105,7 @@ class Connection(transport.Transport):
         return req
 
     def let(self, **kwargs):
-        return self._Let(self, kwargs)
-
-    class _Let(object):
-        def __init__(self, conn, settings):
-            self.conn = conn
-            self.settings = settings
-
-        def __enter__(self):
-            self.backup = dict(self.conn._settings)
-            self.conn._settings.update(self.settings)
-            return self
-
-        def __exit__(self, exc_type, exc_val, exc_tb):
-            self.conn._settings = self.backup
+        return core.Let(self, kwargs)
 
     #
     # SMB2 context upcalls
@@ -1468,7 +1472,8 @@ class Channel(object):
             create_res,
             file_information_class=smb2.FILE_BASIC_INFORMATION,
             info_type=smb2.SMB2_0_INFO_FILE,
-            output_buffer_length=4096):
+            output_buffer_length=4096,
+            additional_information=None):
         smb_req = self.request(obj=create_res)
         query_req = smb2.QueryInfoRequest(smb_req)
 
@@ -1476,27 +1481,54 @@ class Channel(object):
         query_req.file_information_class = file_information_class
         query_req.file_id = create_res.file_id
         query_req.output_buffer_length = output_buffer_length
+        if additional_information:
+            query_req.additional_information = additional_information
         return query_req
 
     def query_file_info(self,
                         create_res,
                         file_information_class=smb2.FILE_BASIC_INFORMATION,
                         info_type=smb2.SMB2_0_INFO_FILE,
-                        output_buffer_length=4096):
+                        output_buffer_length=4096,
+                        additional_information=None):
         return self.connection.transceive(
                 self.query_file_info_request(
                     create_res,
                     file_information_class,
                     info_type,
-                    output_buffer_length).parent.parent)[0][0][0]
+                    output_buffer_length,
+                    additional_information).parent.parent)[0][0][0]
 
-    @contextlib.contextmanager
-    def set_file_info(self, handle, cls):
+    def set_file_info_request(
+            self,
+            handle,
+            file_information_class=smb2.FILE_BASIC_INFORMATION,
+            info_type=smb2.SMB2_0_INFO_FILE,
+            input_buffer_length=4096,
+            additional_information=None):
         smb_req = self.request(obj=handle)
         set_req = smb2.SetInfoRequest(smb_req)
         set_req.file_id = handle.file_id
+        set_req.file_information_class = file_information_class
+        set_req.info_type = info_type
+        set_req.input_buffer_length = input_buffer_length
+        if additional_information:
+            set_req.additional_information = additional_information
+        return set_req
+
+    @contextlib.contextmanager
+    def set_file_info(self, handle, cls):
+        info_type = file_information_class = None
+        if hasattr(cls, "info_type"):
+            info_type = cls.info_type
+        if hasattr(cls, "file_information_class"):
+            file_information_class = cls.file_information_class
+        set_req = self.set_file_info_request(
+                handle,
+                file_information_class,
+                info_type)
         yield cls(set_req)
-        self.connection.transceive(smb_req.parent)[0]
+        self.connection.transceive(set_req.parent.parent)[0]
 
     # Send an echo request and get a response
     def echo(self):

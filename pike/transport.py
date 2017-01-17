@@ -388,6 +388,13 @@ class PollPoller(BasePoller):
     """
     Implementation of poll, available on Linux
     """
+    READ_EVENTS = (select.POLLIN |
+                   select.POLLERR |
+                   select.POLLHUP |
+                   select.POLLNVAL |
+                   select.POLLMSG |
+                   select.POLLPRI)
+    WRITE_EVENTS = select.POLLOUT
     def __init__(self):
         super(PollPoller, self).__init__()
         self.p = select.poll()
@@ -396,7 +403,7 @@ class PollPoller(BasePoller):
         super(PollPoller, self).add_channel(transport)
         self.p.register(
                 transport._fileno,
-                select.POLLIN | select.POLLOUT | select.POLLERR)
+                self.READ_EVENTS | self.WRITE_EVENTS)
 
     def del_channel(self, transport):
         super(PollPoller, self).del_channel(transport)
@@ -406,21 +413,18 @@ class PollPoller(BasePoller):
         super(PollPoller, self).defer_write(transport)
         self.p.modify(
                 transport._fileno,
-                select.POLLIN | select.POLLOUT | select.POLLERR)
+                self.READ_EVENTS | self.WRITE_EVENTS)
 
     def poll(self):
         events = self.p.poll(0)
         readables = []
         writables = []
         for fd, event in events:
-            if event == select.POLLIN:
+            if event & self.READ_EVENTS:
                 readables.append(fd)
-            elif event == select.POLLOUT:
+            elif event & self.WRITE_EVENTS:
                 writables.append(fd)
-                self.p.modify(fd, select.POLLIN | select.POLLERR)
-            elif event == select.POLLERR:
-                t = self.connections[fd]
-                t.handle_error()
+                self.p.modify(fd, self.READ_EVENTS)
         self.process_readables(readables)
         self.process_writables(writables)
 
