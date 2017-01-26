@@ -282,6 +282,17 @@ class Client(object):
 
         self.logger = logging.getLogger('pike')
 
+    @contextlib.contextmanager
+    def callback(self, event, cb):
+        """
+        Register a callback function for the context block, then unregister it
+        """
+        self.register_callback(event, cb)
+        try:
+            yield
+        finally:
+            self.unregister_callback(event, cb)
+
     def register_callback(self, event, cb):
         """
         Registers a callback function, cb for the given event.
@@ -486,6 +497,17 @@ class Connection(transport.Transport):
             break
         self.create_socket(family, socktype)
         self.connect(sockaddr)
+
+    @contextlib.contextmanager
+    def callback(self, event, cb):
+        """
+        Register a callback function for the context block, then unregister it
+        """
+        self.register_callback(event, cb)
+        try:
+            yield
+        finally:
+            self.unregister_callback(event, cb)
 
     def register_callback(self, event, cb):
         """
