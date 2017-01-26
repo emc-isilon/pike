@@ -64,6 +64,7 @@ import transport
 import ntstatus
 import digest
 
+default_credit_request = 10
 default_timeout = 30
 trace = False
 
@@ -552,6 +553,10 @@ class Connection(transport.Transport):
                 data)
 
     def next_mid_range(self, length):
+        """
+        multicredit requests must reserve 1 message id per credit charged.
+        the message id of the request should be the first id of the range.
+        """
         if length < 1:
             length = 1
         start_range = self._next_mid
@@ -560,10 +565,8 @@ class Connection(transport.Transport):
             if not r.intersection(self._mid_blacklist):
                 break
             start_range += 1
-        result = sorted(list(r))[-1]
-        self._next_mid = result + 1
-
-        return result
+        self._next_mid = sorted(list(r))[-1] + 1
+        return start_range
 
     def next_mid(self):
         return self.next_range(1)
@@ -691,8 +694,8 @@ class Connection(transport.Transport):
                         req.credit_charge += 1
 
             if req.credit_request is None:
-                req.credit_request = 10
-                if req.credit_charge > 10:
+                req.credit_request = default_credit_request
+                if req.credit_charge > req.credit_request:
                     req.credit_request = req.credit_charge      # try not to fall behind
 
             if req.credit_charge > self.credits:
