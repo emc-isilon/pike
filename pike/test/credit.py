@@ -365,8 +365,8 @@ class Generated_{name}_{tag}(pike.test.credit.CreditTest):
     def test_{name}_{tag}_{ix}(self):
         self.generic_arbitrary_mc_write_mc_read({file_size}, {write_size}, {read_size})"""
     @classmethod
-    def generate_power_of_2_test_cases(cls, tag, n_cases, size_range_multiple, write_range_multiple, read_range_multiple):
-        name = "Pow2"
+    def generate_multiple_64k_test_cases(cls, tag, n_cases, size_range_multiple, write_range_multiple, read_range_multiple):
+        name = "Mult64k"
         print(cls.header.format(**locals()))
         for ix in xrange(n_cases):
             file_size = 2**16 * random.randint(*size_range_multiple)
@@ -387,7 +387,7 @@ class Generated_{name}_{tag}(pike.test.credit.CreditTest):
         print(cls.footer.format(**locals()))
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1].startswith("pow"):
-        TestCaseGenerator.generate_power_of_2_test_cases("pow2_1", 32, (1, 128), (1, 16), (1, 16)) 
+    if len(sys.argv) > 1 and sys.argv[1].startswith("64"):
+        TestCaseGenerator.generate_multiple_64k_test_cases("gen1", 8, (1, 128), (1, 16), (1, 16)) 
     else:
         TestCaseGenerator.generate_arbitrary_test_cases("iter1", 32, (45*1024, 2**23), (2**15, 2**20), (2**15, 2**20))
