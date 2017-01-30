@@ -387,6 +387,8 @@ class Generated_{name}_{tag}(pike.test.credit.CreditTest):
         print(cls.footer.format(**locals()))
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
     if len(sys.argv) > 1 and sys.argv[1].startswith("64"):
         TestCaseGenerator.generate_multiple_64k_test_cases("gen1", 8, (1, 128), (1, 16), (1, 16)) 
     else:
