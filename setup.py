@@ -11,6 +11,7 @@ from distutils.command.build_ext import build_ext
 from distutils.command.build_py import build_py
 from distutils.errors import CCompilerError, DistutilsExecError, \
                              DistutilsPlatformError
+from pike import __version__
 
 # attempt building the kerberos extension
 try_krb = True
@@ -75,7 +76,7 @@ def run_setup(with_extensions):
         ext_modules.append(lw_krb_module)
         cmdclass = dict(cmdclass, build_ext=ve_build_ext)
     setup(name='Pike',
-          version='0.2.5.1',
+          version=__version__,
           description='Pure python SMB client',
           author='Brian Koropoff',
           author_email='Brian.Koropoff@emc.com',
