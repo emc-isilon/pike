@@ -2038,7 +2038,9 @@ class FileAllInformation(FileInformation):
 
     def _decode(self, cur):
         for field in self.fields:
-            getattr(self, field).decode(cur)
+            frame = getattr(self, field)
+            if isinstance(frame, core.Frame):
+                frame.decode(cur)
 
 class FileDirectoryInformation(FileInformation):
     file_information_class = FILE_DIRECTORY_INFORMATION
