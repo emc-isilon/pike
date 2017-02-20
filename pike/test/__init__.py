@@ -127,7 +127,7 @@ class PikeTest(unittest.TestCase):
     def critical(self, *args, **kwargs):
         self.logger.critical(*args, **kwargs)
 
-    def tree_connect(self, client=None):
+    def tree_connect(self, client=None, resume=None):
         dialect_range = self.required_dialect()
         req_caps = self.required_capabilities()
         req_share_caps = self.required_share_capabilities()
@@ -145,7 +145,7 @@ class PikeTest(unittest.TestCase):
             self.skipTest("Capabilities missing: %s " %
                           str(req_caps & ~conn.negotiate_response.capabilities))
 
-        chan = conn.session_setup(self.creds)
+        chan = conn.session_setup(self.creds, resume=resume)
         if self.encryption:
             chan.session.encrypt_data = True
 
