@@ -40,6 +40,12 @@ import pike.smb2 as smb2
 import pike.test as test
 
 class ValidateNegotiateInfo(test.PikeTest):
+    def __init__(self, *args, **kwds):
+        super(ValidateNegotiateInfo, self).__init__(*args, **kwds)
+        self.default_client.dialects = [
+                smb2.DIALECT_SMB3_0,
+                smb2.DIALECT_SMB3_0_2]
+
     # VALIDATE_NEGOTIATE_INFO fsctl succeeds for SMB3
     @test.RequireDialect(smb2.DIALECT_SMB3_0, smb2.DIALECT_SMB3_0_2)
     def test_validate_negotiate_smb3(self):

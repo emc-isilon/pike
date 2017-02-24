@@ -1858,9 +1858,9 @@ class QueryInfoResponse(Response):
         if context:
             request = context.get_request(parent.message_id)
 
-        if request and request.children and request[0].children:
-            self._info_type = request[0][0].info_type
-            self._file_information_class = request[0][0].file_information_class
+        if request and request.children:
+            self._info_type = request[0].info_type
+            self._file_information_class = request[0].file_information_class
 
         self._entries = []
 
@@ -2038,7 +2038,9 @@ class FileAllInformation(FileInformation):
 
     def _decode(self, cur):
         for field in self.fields:
-            getattr(self, field).decode(cur)
+            frame = getattr(self, field)
+            if isinstance(frame, core.Frame):
+                frame.decode(cur)
 
 class FileDirectoryInformation(FileInformation):
     file_information_class = FILE_DIRECTORY_INFORMATION

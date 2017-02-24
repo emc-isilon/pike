@@ -53,8 +53,11 @@ except ImportError:
 
 
 def split_credentials(creds):
-    nt4, password = creds.split('%')
-    domain, user = nt4.split('\\')
+    user, password = creds.split('%')
+    if '\\' in user:
+        domain, user = user.split('\\')
+    else:
+        domain = "NONE"
     return (domain, user, password)
 
 
