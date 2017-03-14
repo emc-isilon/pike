@@ -485,6 +485,7 @@ class Connection(transport.Transport):
         self.port = port
         self.remote_addr = None
         self.local_addr = None
+        self.verify_signature = True
 
         self.error = None
         self.traceback = None
@@ -791,7 +792,7 @@ class Connection(transport.Transport):
             # session setup responses are verified in SessionSetupContext
             if not isinstance(smb_res[0], smb2.SessionSetupResponse):
                 key = self.signing_key(smb_res.session_id)
-                if key:
+                if key and self.verify_signature:
                     smb_res.verify(self.signing_digest(), key)
 
             if smb_res.message_id == smb2.UNSOLICITED_MESSAGE_ID:
