@@ -142,6 +142,8 @@ class Transport(object):
         result = ''
         try:
             result = self.socket.recv(bufsize)
+            if result == '':
+                raise EOFError("Remote host closed connection")
         except socket.error as err:
             # raise non-retryable errors
             if err.errno != EAGAIN:

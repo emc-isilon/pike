@@ -614,8 +614,6 @@ class Connection(transport.Transport):
         self.process_callbacks(EV_RES_PRE_RECV, remaining)
         data = array.array('B', self.recv(remaining))
         self.process_callbacks(EV_RES_POST_RECV, data)
-        if not data:
-            self.handle_error()
         self._in_buffer.extend(data)
         avail = len(self._in_buffer)
         if avail >= 4:
