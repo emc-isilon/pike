@@ -1083,7 +1083,10 @@ class CreateResponse(Response):
         self.allocation_size = 0
         self.end_of_file = 0
         self.file_attributes = 0
+        self.reserved2 = 0
         self.file_id = (0,0)
+        self.create_contexts_offset = 0
+        self.create_contexts_length = 0
         self._create_contexts = []
 
     def _children(self):
@@ -1101,14 +1104,14 @@ class CreateResponse(Response):
         self.end_of_file = cur.decode_uint64le()
         self.file_attributes = FileAttributes(cur.decode_uint32le())
         # Ignore Reserved2
-        cur.decode_uint32le()
+        self.reserved2 = cur.decode_uint32le()
         self.file_id = (cur.decode_uint64le(),cur.decode_uint64le())
-        create_contexts_offset = cur.decode_uint32le()
-        create_contexts_length = cur.decode_uint32le()
+        self.create_contexts_offset = cur.decode_uint32le()
+        self.create_contexts_length = cur.decode_uint32le()
 
-        if create_contexts_length:
-            create_contexts_start = self.parent.start + create_contexts_offset
-            create_contexts_end = create_contexts_start + create_contexts_length
+        if self.create_contexts_length > 0:
+            create_contexts_start = self.parent.start + self.create_contexts_offset
+            create_contexts_end = create_contexts_start + self.create_contexts_length
             next_cur = create_contexts_start
 
             with cur.bounded(create_contexts_start, create_contexts_end):
