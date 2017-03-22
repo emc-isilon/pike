@@ -1822,11 +1822,11 @@ class Open(object):
     def __init__(self, tree, smb_res, create_guid=None, prev=None):
         object.__init__(self)
 
-        create_res = smb_res[0]
+        self.create_response = smb_res[0]
 
         self.tree = tree
-        self.file_id = create_res.file_id
-        self.oplock_level = create_res.oplock_level
+        self.file_id = self.create_response.file_id
+        self.oplock_level = self.create_response.oplock_level
         self.lease = None
         self.durable_timeout = None
         self.durable_flags = None
@@ -1838,12 +1838,17 @@ class Open(object):
 
         if self.oplock_level != smb2.SMB2_OPLOCK_LEVEL_NONE:
             if self.oplock_level == smb2.SMB2_OPLOCK_LEVEL_LEASE:
-                lease_res = filter(lambda c: isinstance(c, smb2.LeaseResponse), create_res)[0]
+                lease_res = filter(
+                        lambda c: isinstance(c, smb2.LeaseResponse),
+                        self.create_response)[0]
                 self.lease = tree.session.client.lease(tree, lease_res)
             else:
-                self.oplock_future = tree.session.client.oplock_break_future(self.file_id)
+                self.oplock_future = tree.session.client.oplock_break_future(
+                        self.file_id)
 
-        durable_v2_res = filter(lambda c: isinstance(c, smb2.DurableHandleV2Response), create_res)
+        durable_v2_res = filter(
+                lambda c: isinstance(c, smb2.DurableHandleV2Response),
+                self.create_response)
         if durable_v2_res != []:
             self.durable_timeout = durable_v2_res[0].timeout
             self.durable_flags = durable_v2_res[0].flags
