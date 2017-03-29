@@ -3036,17 +3036,17 @@ class WriteResponse(Response):
     def __init__(self, parent):
         Response.__init__(self, parent)
         self.count = 0
+        self.reserved = 0
+        self.remaining = 0
+        self.write_channel_info_offset = 0
+        self.write_channel_info_length = 0
 
     def _decode(self, cur):
-        # Ignore reserved
-        cur.decode_uint16le()
+        self.reserved = cur.decode_uint16le()
         self.count = cur.decode_uint32le()
-        # Ignore Remaining
-        cur.decode_uint32le()
-        # Ignore WriteChannelInfoOffset
-        cur.decode_uint16le()
-        # Ignore WriteChannelInfoLength
-        cur.decode_uint16le()
+        self.remaining = cur.decode_uint32le()
+        self.write_channel_info_offset = cur.decode_uint16le()
+        self.write_channel_info_length = cur.decode_uint16le()
 
 class LockFlags(core.FlagEnum):
     SMB2_LOCKFLAG_SHARED_LOCK      = 0x00000001
