@@ -2958,22 +2958,24 @@ class ReadResponse(Response):
 
     def __init__(self, parent):
         Response.__init__(self, parent)
+        self.offset = 0
+        self.length = 0
         self.data = None
+        self.reserved = 0
+        self.data_remaining = 0
+        self.reserved2 = 0
 
     def _decode(self, cur):
-        offset = cur.decode_uint8le()
-        # Ignore reserved
-        cur.decode_uint8le()
-        length = cur.decode_uint32le()
-        # Ignore DataRemaining
-        cur.decode_uint32le()
-        # Ignore reserved
-        cur.decode_uint32le()
+        self.offset = cur.decode_uint8le()
+        self.reserved = cur.decode_uint8le()
+        self.length = cur.decode_uint32le()
+        self.data_remaining = cur.decode_uint32le()
+        self.reserved2 = cur.decode_uint32le()
 
         # Advance to data
-        cur.advanceto(self.parent.start + offset)
+        cur.advanceto(self.parent.start + self.offset)
 
-        self.data = cur.decode_bytes(length)
+        self.data = cur.decode_bytes(self.length)
 
 # Flag constants
 class WriteFlags(core.FlagEnum):
