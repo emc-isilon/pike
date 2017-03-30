@@ -142,6 +142,8 @@ class Transport(object):
         result = ''
         try:
             result = self.socket.recv(bufsize)
+            if result == '':
+                raise EOFError("Remote host closed connection")
         except socket.error as err:
             # raise non-retryable errors
             if err.errno != EAGAIN:
@@ -377,7 +379,7 @@ class SelectPoller(BasePoller):
     def poll(self):
         non_connected = [t._fileno for t in self.connections.values() if not t.connected]
         readers = self.connections.keys()
-        writers = non_connected + self.deferred_writers
+        writers = non_connected + list(self.deferred_writers)
         readables, writables, _ = select.select(readers,
                                                 writers,
                                                 [], 0)

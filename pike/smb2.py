@@ -1083,7 +1083,10 @@ class CreateResponse(Response):
         self.allocation_size = 0
         self.end_of_file = 0
         self.file_attributes = 0
+        self.reserved2 = 0
         self.file_id = (0,0)
+        self.create_contexts_offset = 0
+        self.create_contexts_length = 0
         self._create_contexts = []
 
     def _children(self):
@@ -1101,14 +1104,14 @@ class CreateResponse(Response):
         self.end_of_file = cur.decode_uint64le()
         self.file_attributes = FileAttributes(cur.decode_uint32le())
         # Ignore Reserved2
-        cur.decode_uint32le()
+        self.reserved2 = cur.decode_uint32le()
         self.file_id = (cur.decode_uint64le(),cur.decode_uint64le())
-        create_contexts_offset = cur.decode_uint32le()
-        create_contexts_length = cur.decode_uint32le()
+        self.create_contexts_offset = cur.decode_uint32le()
+        self.create_contexts_length = cur.decode_uint32le()
 
-        if create_contexts_length:
-            create_contexts_start = self.parent.start + create_contexts_offset
-            create_contexts_end = create_contexts_start + create_contexts_length
+        if self.create_contexts_length > 0:
+            create_contexts_start = self.parent.start + self.create_contexts_offset
+            create_contexts_end = create_contexts_start + self.create_contexts_length
             next_cur = create_contexts_start
 
             with cur.bounded(create_contexts_start, create_contexts_end):
@@ -2955,22 +2958,24 @@ class ReadResponse(Response):
 
     def __init__(self, parent):
         Response.__init__(self, parent)
+        self.offset = 0
+        self.length = 0
         self.data = None
+        self.reserved = 0
+        self.data_remaining = 0
+        self.reserved2 = 0
 
     def _decode(self, cur):
-        offset = cur.decode_uint8le()
-        # Ignore reserved
-        cur.decode_uint8le()
-        length = cur.decode_uint32le()
-        # Ignore DataRemaining
-        cur.decode_uint32le()
-        # Ignore reserved
-        cur.decode_uint32le()
+        self.offset = cur.decode_uint8le()
+        self.reserved = cur.decode_uint8le()
+        self.length = cur.decode_uint32le()
+        self.data_remaining = cur.decode_uint32le()
+        self.reserved2 = cur.decode_uint32le()
 
         # Advance to data
-        cur.advanceto(self.parent.start + offset)
+        cur.advanceto(self.parent.start + self.offset)
 
-        self.data = cur.decode_bytes(length)
+        self.data = cur.decode_bytes(self.length)
 
 # Flag constants
 class WriteFlags(core.FlagEnum):
@@ -3033,17 +3038,17 @@ class WriteResponse(Response):
     def __init__(self, parent):
         Response.__init__(self, parent)
         self.count = 0
+        self.reserved = 0
+        self.remaining = 0
+        self.write_channel_info_offset = 0
+        self.write_channel_info_length = 0
 
     def _decode(self, cur):
-        # Ignore reserved
-        cur.decode_uint16le()
+        self.reserved = cur.decode_uint16le()
         self.count = cur.decode_uint32le()
-        # Ignore Remaining
-        cur.decode_uint32le()
-        # Ignore WriteChannelInfoOffset
-        cur.decode_uint16le()
-        # Ignore WriteChannelInfoLength
-        cur.decode_uint16le()
+        self.remaining = cur.decode_uint32le()
+        self.write_channel_info_offset = cur.decode_uint16le()
+        self.write_channel_info_length = cur.decode_uint16le()
 
 class LockFlags(core.FlagEnum):
     SMB2_LOCKFLAG_SHARED_LOCK      = 0x00000001

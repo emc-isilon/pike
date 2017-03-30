@@ -32,9 +32,11 @@
 #        NT time format utility class
 #
 # Authors: Rafal Szczesniak (rafal.szczesniak@isilon.com)
+#          Masen Furer (masen.furer@dell.com)
 #
 
 from datetime import datetime, timedelta
+import math
 import time
 
 _unix_time_offset = 11644473600L
@@ -52,8 +54,24 @@ def _datetime_to_nt_time(t):
     return _unix_time_to_nt_time(_datetime_to_unix_time(t))
 
 def _nt_time_to_unix_time(t):
-    result = (t / _intervals_per_second) - _unix_time_offset
-    return result if result >= 0 else 0
+    """
+    Converts "FILETIME" to Python's time library format.
+
+    routine borrowed from dist_shell: sys_ex/windows/file.py
+    """
+
+    # This calculation below might seem rather complex for such time
+    # conversions, however, due to issues with floating point
+    # arithmetics precision, this HACK is required to compute the time
+    # in Python's time library format such that times like "12:59.59.1"
+    # don't turn into "01:00:00.0" when converted back. This
+    # calculation below makes use of Python's bigint capabilities.
+    py_time = (t << 32) / _intervals_per_second
+    py_time -= _unix_time_offset << 32
+    py_time_parts = divmod(py_time, 2**32)
+    py_time = float(py_time_parts[0])
+    py_time += math.copysign(py_time_parts[1], py_time) / 2**32
+    return py_time
 
 def GMT_to_datetime(gmt_token):
     dt_obj = datetime.strptime(
@@ -64,6 +82,12 @@ def GMT_to_datetime(gmt_token):
     return dt_obj
 
 class NtTime(long):
+    """
+    NtTime may be initialized with any of the following values
+      * string in ISO format or @GMT- format (timewarp)
+      * datetime
+      * int/long indicating number of 100-nanosecond intervals since 1601-01-01
+    """
     def __new__(cls, value):
         if isinstance(value, basestring):
             if value.startswith("@GMT-"):
@@ -73,11 +97,20 @@ class NtTime(long):
             value = _datetime_to_nt_time(dt)
         elif isinstance(value, datetime):
             value = _datetime_to_nt_time(value)
-        
+
         return super(NtTime, cls).__new__(cls, long(value))
 
     def __repr__(self):
         return str(self)
 
     def __str__(self):
-        return datetime.fromtimestamp(_nt_time_to_unix_time(self)).strftime("%Y-%m-%d %H:%M:%S")
+        return self.to_datetime().isoformat(" ")
+
+    def to_datetime(self):
+        return datetime.fromtimestamp(_nt_time_to_unix_time(self))
+
+    def to_pytime(self):
+        return _nt_time_to_unix_time(self)
+
+    def to_unixtime(self):
+        return long(self.to_pytime())
