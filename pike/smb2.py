@@ -702,8 +702,7 @@ class FlushResponse(Response):
         Response.__init__(self, parent)
 
     def _decode(self, cur):
-        # Reserved
-        cur.decode_uint16le()
+        self.reserved = cur.decode_uint16le()
 
 class SessionSetupRequest(Request):
     command_id = SMB2_SESSION_SETUP
@@ -1662,8 +1661,7 @@ class CloseResponse(Response):
 
     def _decode(self, cur):
         self.flags = CloseFlags(cur.decode_uint16le())
-        # Ignore Reserved
-        cur.decode_uint32le()
+        self.reserved = cur.decode_uint32le()
         self.creation_time = nttime.NtTime(cur.decode_uint64le())
         self.last_access_time = nttime.NtTime(cur.decode_uint64le())
         self.last_write_time = nttime.NtTime(cur.decode_uint64le())
@@ -3098,8 +3096,7 @@ class LockResponse(Response):
         Response.__init__(self, parent)
 
     def _decode(self, cur):
-        # Ignore reserved
-        cur.decode_uint16le()
+        self.reserved = cur.decode_uint16le()
 
 class IoctlCode(core.ValueEnum):
     FSCTL_DFS_GET_REFERRALS            = 0x00060194
