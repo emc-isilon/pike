@@ -1564,12 +1564,14 @@ class Channel(object):
         # frame
         self.connection.transceive(smb_req.parent)[0][0]
 
-    def flush(self, file):
+    def flush_request(self, file):
         smb_req = self.request(obj=file)
         flush_req = smb2.FlushRequest(smb_req)
         flush_req.file_id = file.file_id
+        return flush_req
 
-        self.connection.transceive(smb_req.parent)
+    def flush(self, file):
+        self.connection.transceive(self.flush_request(file).parent.parent)
 
     def read_request(
             self,
