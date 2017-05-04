@@ -1774,6 +1774,32 @@ class Channel(object):
     def enumerate_snapshots_list(self, fh):
         return self.enumerate_snapshots(fh)[0][0].snapshots
 
+    def lease_break_acknowledgement(self, tree, notify):
+        """
+        @param tree: L{Tree} which the lease is taken against
+        @param notify: L{Smb2} frame containing a LeaseBreakRequest
+        return a LeaseBreakAcknowledgement with some fields pre-populated
+        """
+        lease_break = notify[0]
+        smb_req = self.request(obj=tree)
+        ack_req = smb2.LeaseBreakAcknowledgement(smb_req)
+        ack_req.lease_key = lease_break.lease_key
+        ack_req.lease_state = lease_break.new_lease_state
+        return ack_req
+
+    def oplock_break_acknowledgement(self, fh, notify):
+        """
+        @param fh: Acknowledge break on this L{Open}
+        @param notify: L{Smb2} frame containing a OplockBreakRequest
+        return a OplockBreakAcknowledgement with some fields pre-populated
+        """
+        oplock_break = notify[0]
+        smb_req = self.request(obj=fh)
+        ack_req = smb2.OplockBreakAcknowledgement(smb_req)
+        ack_req.file_id = oplock_break.file_id
+        ack_req.oplock_level = oplock_break.oplock_level
+        return ack_req
+
     def frame(self):
         return self.connection.frame()
 
@@ -1845,8 +1871,7 @@ class Open(object):
                         self.create_response)[0]
                 self.lease = tree.session.client.lease(tree, lease_res)
             else:
-                self.oplock_future = tree.session.client.oplock_break_future(
-                        self.file_id)
+                self.arm_oplock_future()
 
         durable_v2_res = filter(
                 lambda c: isinstance(c, smb2.DurableHandleV2Response),
@@ -1855,23 +1880,50 @@ class Open(object):
             self.durable_timeout = durable_v2_res[0].timeout
             self.durable_flags = durable_v2_res[0].flags
 
+    def arm_oplock_future(self):
+        """
+        (Re)arm the oplock future for this open. This function should be called
+        when an oplock changes level to anything except SMB2_OPLOCK_LEVEL_NONE
+        """
+        self.oplock_future = self.tree.session.client.oplock_break_future(
+                self.file_id)
+
     def on_oplock_break(self, cb):
-        def handle_break(f):
-            notify = f.result()[0]
+        """
+        Simple oplock break callback handler.
+        @param cb: callable taking 1 parameter: the break request oplock level
+                   should return the desired oplock level to break to
+        """
+        def simple_handle_break(op, smb_res):
+            """
+            note that op is not used in this callback,
+            since it already closes over self
+            """
+            notify = smb_res[0]
             if self.oplock_level != smb2.SMB2_OPLOCK_LEVEL_II:
                 chan = self.tree.session.first_channel()
-                req = chan.request(obj=self)
-                ack = smb2.OplockBreakAcknowledgement(req)
-                ack.file_id = notify.file_id
+                ack = chan.oplock_break_acknowledgement(self, smb_res)
                 ack.oplock_level = cb(notify.oplock_level)
-                ack_res = chan.connection.transceive(req.parent)[0][0]
+                ack_res = chan.connection.transceive(ack.parent.parent)[0][0]
                 if ack.oplock_level != smb2.SMB2_OPLOCK_LEVEL_NONE:
-                    self.oplock_future = self.tree.session.client.oplock_break_future(self.file_id)
+                    self.arm_oplock_future()
                     self.on_oplock_break(cb)
                 self.oplock_level = ack_res.oplock_level
             else:
                 self.oplock_level = notify.oplock_level
+        self.on_oplock_break_request(simple_handle_break)
 
+    def on_oplock_break_request(self, cb):
+        """
+        Complex oplock break callback handler.
+        @param cb: callable taking 2 parameters: L{Open} and L{Smb2} containing the break request
+                   should handle breaking the oplock in some way
+                   callback is also responsible for re-arming the future
+                   and updating the oplock_level (if changed)
+        """
+        def handle_break(f):
+            smb_res = f.result()
+            cb(self, smb_res)
         self.oplock_future.then(handle_break)
 
     def dispose(self):
@@ -1890,7 +1942,14 @@ class Lease(object):
         self.lease_key = lease_res.lease_key
         self.lease_state = lease_res.lease_state
         if self.future is None:
-            self.future = self.tree.session.client.lease_break_future(self.lease_key)
+            self.arm_future()
+
+    def arm_future(self):
+        """
+        (Re)arm the lease future for this Lease. This function should be called
+        when a lease changes state to anything other than SMB2_LEASE_NONE
+        """
+        self.future = self.tree.session.client.lease_break_future(self.lease_key)
 
     def ref(self):
         self.refs += 1
@@ -1901,20 +1960,39 @@ class Lease(object):
             self.tree.session.client.dispose_lease(self)
 
     def on_break(self, cb):
-        def handle_break(f):
-            notify = f.result()[0]
+        """
+        Simple lease break callback handler.
+        @param cb: callable taking 1 parameter: the break request lease state
+                   should return the desired lease state to break to
+        """
+        def simple_handle_break(lease, smb_res):
+            """
+            note that lease is not used in this callback,
+            since it already closes over self
+            """
+            notify = smb_res[0]
             if notify.flags & smb2.SMB2_NOTIFY_BREAK_LEASE_FLAG_ACK_REQUIRED:
                 chan = self.tree.session.first_channel()
-                req = chan.request(obj=self.tree)
-                ack = smb2.LeaseBreakAcknowledgement(req)
-                ack.lease_key = notify.lease_key
+                ack = chan.lease_break_acknowledgement(self.tree, smb_res)
                 ack.lease_state = cb(notify.new_lease_state)
-                ack_res = chan.connection.transceive(req.parent)[0][0]
+                ack_res = chan.connection.transceive(ack.parent.parent)[0][0]
                 if ack_res.lease_state != smb2.SMB2_LEASE_NONE:
-                    self.future = self.tree.session.client.lease_break_future(self.lease_key)
+                    self.arm_future()
                     self.on_break(cb)
                 self.lease_state = ack_res.lease_state
             else:
                 self.lease_state = notify.new_lease_state
+        self.on_break_request(simple_handle_break)
 
+    def on_break_request(self, cb):
+        """
+        Complex lease break callback handler.
+        @param cb: callable taking 2 parameters: L{Lease} and L{Smb2} containing the break request
+                   should handle breaking the lease in some way
+                   callback is also responsible for re-arming the future
+                   and updating the lease_state (if changed)
+        """
+        def handle_break(f):
+            smb_res = f.result()
+            cb(self, smb_res)
         self.future.then(handle_break)
