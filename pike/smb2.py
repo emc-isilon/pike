@@ -2473,7 +2473,7 @@ class FileStandardInformation(FileInformation):
         cur.encode_uint8le(self.delete_pending)
         cur.encode_uint8le(self.directory)
         # Ignore 2-bytes Reserved field
-        cur.encode_uint16le()
+        cur.encode_uint16le(0)
 
 class FileEaInformation(FileInformation):
     file_information_class = FILE_EA_INFORMATION
