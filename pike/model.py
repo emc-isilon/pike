@@ -1202,7 +1202,7 @@ class Channel(object):
         self.session = session
         self.signing_key = signing_key
 
-    def cancel(self, future):
+    def cancel_request(self, future):
         if (future.response is not None):
             raise StateError("Cannot cancel completed request")
 
@@ -1221,7 +1221,11 @@ class Channel(object):
         else:
             smb_req.message_id = future.request.message_id
 
-        return self.connection.submit(smb_req.parent)[0]
+        return cancel_req
+
+    def cancel(self, future):
+        cancel_req = self.cancel_request(future)
+        return self.connection.submit(cancel_req.parent.parent)[0]
 
     def tree_connect_request(self, path):
         smb_req = self.request()
@@ -1553,6 +1557,32 @@ class Channel(object):
                 info_type)
         yield cls(set_req)
         self.connection.transceive(set_req.parent.parent)[0]
+
+    def change_notify_request(
+            self,
+            handle,
+            completion_filter=smb2.SMB2_NOTIFY_CHANGE_CREATION,
+            flags=0,
+            buffer_length=4096):
+        smb_req = self.request(obj=handle)
+        cnotify_req = smb2.ChangeNotifyRequest(smb_req)
+        cnotify_req.file_id = handle.file_id
+        cnotify_req.buffer_length = buffer_length
+        cnotify_req.flags = flags
+        return cnotify_req
+
+    def change_notify(
+            self,
+            handle,
+            completion_filter=smb2.SMB2_NOTIFY_CHANGE_CREATION,
+            flags=0,
+            buffer_length=4096):
+        return self.connection.submit(
+                self.change_notify_request(
+                    handle,
+                    completion_filter,
+                    flags,
+                    buffer_length=4096).parent.parent)[0][0]
 
     # Send an echo request and get a response
     def echo(self):
