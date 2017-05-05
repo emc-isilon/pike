@@ -2755,7 +2755,7 @@ class ChangeNotifyResponse(Response):
     def _decode(self, cur):
         self.offset = cur.decode_uint16le()
         self.buffer_length = cur.decode_uint32le()
-        if buffer_length > 0:
+        if self.buffer_length > 0:
             while True:
                 neo = FileNotifyInformation(self)._decode(cur)
                 if neo == 0:
