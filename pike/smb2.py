@@ -2798,10 +2798,8 @@ class OplockBreakNotification(Notification):
 
     def _decode(self, cur):
         self.oplock_level = OplockLevel(cur.decode_uint8le())
-        # Ignore Reserved1
-        cur.decode_uint8le()
-        # Ignore Reserved2
-        cur.decode_uint32le()
+        self.reserved1 = cur.decode_uint8le()
+        self.reserved2 = cur.decode_uint32le()
         self.file_id = (cur.decode_uint64le(), cur.decode_uint64le())
 
 class LeaseBreakNotification(Notification):
@@ -2822,12 +2820,9 @@ class LeaseBreakNotification(Notification):
         self.lease_key = cur.decode_bytes(16)
         self.current_lease_state = LeaseState(cur.decode_uint32le())
         self.new_lease_state = LeaseState(cur.decode_uint32le())
-        # Ignore BreakReason
-        cur.decode_uint32le()
-        # Ignore AcccessMaskHint
-        cur.decode_uint32le()
-        # Ignore ShareMaskHint
-        cur.decode_uint32le()
+        self.break_reason = cur.decode_uint32le()
+        self.access_mask_hint = cur.decode_uint32le()
+        self.share_mask_hint = cur.decode_uint32le()
 
 class OplockBreakAcknowledgement(Request):
     command_id = SMB2_OPLOCK_BREAK
@@ -2877,10 +2872,8 @@ class OplockBreakResponse(Response):
 
     def _decode(self, cur):
         self.oplock_level = OplockLevel(cur.decode_uint8le())
-        # Ignore Reserved1
-        cur.decode_uint8le()
-        # Ignore Reserved2
-        cur.decode_uint32le()
+        self.reserved1 = cur.decode_uint8le()
+        self.reserved2 = cur.decode_uint32le()
         self.file_id = (cur.decode_uint64le(), cur.decode_uint64le())
 
 class LeaseBreakResponse(Response):
@@ -2894,13 +2887,11 @@ class LeaseBreakResponse(Response):
         self.lease_state = 0
 
     def _decode(self, cur):
-        # Ignore Reserved
-        cur.decode_uint16le()
+        self.reserved = cur.decode_uint16le()
         self.flags = BreakLeaseFlags(cur.decode_uint32le())
         self.lease_key = cur.decode_bytes(16)
         self.lease_state = LeaseState(cur.decode_uint32le())
-        # Ignore LeaseDuration
-        cur.decode_uint64le()
+        self.lease_duration = cur.decode_uint64le()
 
 class ReadRequest(Request):
     command_id = SMB2_READ
