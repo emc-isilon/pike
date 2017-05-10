@@ -1924,7 +1924,7 @@ class Open(object):
         @param cb: callable taking 1 parameter: the break request oplock level
                    should return the desired oplock level to break to
         """
-        def simple_handle_break(op, smb_res):
+        def simple_handle_break(op, smb_res, cb_ctx):
             """
             note that op is not used in this callback,
             since it already closes over self
@@ -1943,17 +1943,20 @@ class Open(object):
                 self.oplock_level = notify.oplock_level
         self.on_oplock_break_request(simple_handle_break)
 
-    def on_oplock_break_request(self, cb):
+    def on_oplock_break_request(self, cb, cb_ctx=None):
         """
         Complex oplock break callback handler.
-        @param cb: callable taking 2 parameters: L{Open} and L{Smb2} containing the break request
+        @param cb: callable taking 3 parameters:
+                        L{Open}
+                        L{Smb2} containing the break request
+                        L{object} arbitrary context
                    should handle breaking the oplock in some way
                    callback is also responsible for re-arming the future
                    and updating the oplock_level (if changed)
         """
         def handle_break(f):
             smb_res = f.result()
-            cb(self, smb_res)
+            cb(self, smb_res, cb_ctx)
         self.oplock_future.then(handle_break)
 
     def dispose(self):
@@ -1995,7 +1998,7 @@ class Lease(object):
         @param cb: callable taking 1 parameter: the break request lease state
                    should return the desired lease state to break to
         """
-        def simple_handle_break(lease, smb_res):
+        def simple_handle_break(lease, smb_res, cb_ctx):
             """
             note that lease is not used in this callback,
             since it already closes over self
@@ -2014,15 +2017,18 @@ class Lease(object):
                 self.lease_state = notify.new_lease_state
         self.on_break_request(simple_handle_break)
 
-    def on_break_request(self, cb):
+    def on_break_request(self, cb, cb_ctx=None):
         """
         Complex lease break callback handler.
-        @param cb: callable taking 2 parameters: L{Lease} and L{Smb2} containing the break request
+        @param cb: callable taking 3 parameters:
+                        L{Lease}
+                        L{Smb2} containing the break request
+                        L{object} arbitrary context
                    should handle breaking the lease in some way
                    callback is also responsible for re-arming the future
                    and updating the lease_state (if changed)
         """
         def handle_break(f):
             smb_res = f.result()
-            cb(self, smb_res)
+            cb(self, smb_res, cb_ctx)
         self.future.then(handle_break)
