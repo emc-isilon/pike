@@ -479,7 +479,7 @@ class Connection(transport.Transport):
         self._pre_auth_integrity_hash = array.array('B', "\0"*64)
         self.callbacks = {}
         self.connection_future = Future()
-        self.credits = 1
+        self.credits = 0
         self.client = client
         self.server = server
         self.port = port
@@ -713,18 +713,14 @@ class Connection(transport.Transport):
                         remainder = 1       # assume 1 credit per command
                     if remainder > 0:
                         req.credit_charge += 1
+            # do credit accounting based on our calculations (MS-SMB2 3.2.5.1)
+            self.credits -= req.credit_charge
 
             if req.credit_request is None:
                 req.credit_request = default_credit_request
                 if req.credit_charge > req.credit_request:
                     req.credit_request = req.credit_charge      # try not to fall behind
 
-            if req.credit_charge > self.credits:
-                raise CreditError("Insufficient credits to send command. "
-                                  "Credits={0}, Charge={1}".format(self.credits,
-                                                                   req.credit_charge))
-
-            # since we have sufficient credits, the command will be sent now
             del self._out_queue[0]
 
             # Assign message id
@@ -783,7 +779,6 @@ class Connection(transport.Transport):
         for smb_res in res:
             # TODO: move smb pa integrity and credit tracking to callbacks
             self.smb3_pa_integrity(smb_res, smb_res.parent.buf[4:])
-            self.credits -= smb_res.credit_charge
             self.credits += smb_res.credit_response
 
             # Verify non-session-setup-response signatures
