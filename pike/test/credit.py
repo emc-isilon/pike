@@ -40,6 +40,7 @@ import pike.test
 import array
 import random
 import sys
+import time
 
 # common size constants
 size_64k = 2**16
@@ -51,6 +52,9 @@ size_1m = 2**20
 size_2m = 2**21
 size_4m = 2**22
 size_8m = 2**23
+
+share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
+lease_rh = pike.smb2.SMB2_LEASE_READ_CACHING | pike.smb2.SMB2_LEASE_HANDLE_CACHING
 
 # debugging callback functions which are registered if debug logging is enabled
 def post_serialize_credit_assessment(nb):
@@ -92,6 +96,14 @@ class CreditTest(pike.test.PikeTest):
             self.default_client.register_callback(
                     pike.model.EV_RES_POST_DESERIALIZE,
                     post_deserialize_credit_assessment)
+
+    # set the default credit request to 1 to make things more predictable
+    def setUp(self):
+        self.prev_default_credit_request = pike.model.default_credit_request
+        pike.model.default_credit_request = 1
+
+    def tearDown(self):
+        pike.model.default_credit_request = self.prev_default_credit_request
 
     def generic_mc_write_mc_read(self, file_size, write_size, read_size):
         """
@@ -349,6 +361,149 @@ class PowerOf2CreditTest(CreditTest):
 
     def test_5_192k_write_1_960k_read(self):
         self.generic_mc_write_mc_read(size_960k, size_192k, size_960k)
+
+class EdgeCreditTest(CreditTest):
+    def test_sequence_number_wrap(self):
+        """
+        one client performs requests until the sequence number is > 2048
+        then exhausts it's remaining credits with a single large mtu
+        multicredit op
+        """
+        fname = "test_sequence_number_wrap"
+        # buf is 64k == 1 credit
+        buf = "\0\1\2\3\4\5\6\7"*8192
+        credits_per_req = 16
+        sequence_number_target = 2080
+
+        chan1, tree1 = self.tree_connect()
+        self.assertEqual(chan1.connection.credits, 1)
+
+        with chan1.let(credit_request=credits_per_req):
+            fh1 = chan1.create(
+                    tree1,
+                    fname).result()
+        self.assertEqual(chan1.connection.credits, credits_per_req)
+
+        # build up the sequence number to greater than 2048
+        while chan1.connection._next_mid < sequence_number_target:
+            smb_req = chan1.write_request(fh1, 0, buf*credits_per_req).parent
+            smb_resp = chan1.connection.submit(smb_req.parent)[0].result()
+            # if the server is granting our request,
+            self.assertEqual(smb_resp.credit_response, credits_per_req)
+            # then total number of credits should stay the same
+            self.assertEqual(chan1.connection.credits, credits_per_req)
+
+        # at the end, next mid should be > 2048
+        self.assertGreater(chan1.connection._next_mid, sequence_number_target)
+
+class AsyncCreditTest(CreditTest):
+    def test_async_lock(self):
+        """
+        establish 2 sessions
+        session 1 opens file1 with exclusive lock
+        session 2 opens file1 with 3 exclusive lock - allowing pending
+        wait for all 3 lock requests to pend
+        session 1 unlocks file1
+        wait for all 3 lock requests to complete
+        verify that credits were not double granted
+        """
+        chan1, tree1 = self.tree_connect()
+        chan2, tree2 = self.tree_connect()
+        fname = "test_async_lock"
+        buf = "\0\1\2\3\4\5\6\7"
+        lock1 = (0, 8, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK)
+        contend_locks = [
+                (0, 2, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK),
+                (2, 2, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK),
+                (4, 4, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK)]
+
+        fh1 = chan1.create(
+                tree1,
+                fname,
+                share=share_all).result()
+        fh2 = chan2.create(
+                tree2,
+                fname,
+                share=share_all).result()
+        # onefs counts this as 4, because onefs starts at 4 instead of 1
+        self.assertEqual(chan2.connection.credits, 1)
+        chan1.lock(fh1, [lock1]).result()
+
+        # send 3 locks, 1 credit charge, 3 credit request
+        lock_futures = []
+        for l in contend_locks:
+            with chan2.let(credit_request=3):
+                f = chan2.lock(fh2, [l])
+                lock_futures.append(f)
+        # wait for the interim responses
+        map(lambda f: f.wait_interim(), lock_futures)
+
+        # at this point, we should have sent 3x 1charge, 3request lock commands
+        # so if the server granted our request should have 1 + 3 * (3 - 1)
+        # onefs counts this as 10, because onefs starts at 4 instead of 1
+        self.assertEqual(chan2.connection.credits, 7)
+
+        # unlock fh1 locks
+        lock1_un = tuple(list(lock1[:2]) + [pike.smb2.SMB2_LOCKFLAG_UN_LOCK])
+        chan1.lock(fh1, [lock1_un])
+
+        # these completion responses shouldn't have a carry a 1 credit charge + 0 grant
+        for f in lock_futures:
+            print(f.result())
+        # onefs counts this as 10, because onefs starts at 4 instead of 1
+        self.assertEqual(chan2.connection.credits, 7)
+        buf = "\0\1\2\3\4\5\6\7"*8192
+        # now write a 7 credit request to ensure we do have 7 credits
+        chan2.write(fh2, 0, buf*7)
+        self.assertEqual(chan2.connection.credits, 7)
+        # now write an 8 credit request to ensure we do have 7 credits (this should fail)
+        with self.assertRaises(EOFError):
+            chan2.write(fh2, 0, buf*8)
+            self.fail("We should have less than 8 credits, but an 8 credit request succeeds")
+
+    def test_async_write(self):
+        """
+        establish 2 sessions
+        session 1 opens file1 with read/handle caching lease
+        session 2 opens file1 with no lease
+        session 2 sends several large multi-credit writes triggering a lease break on session 1
+        session 2 write requests will return STATUS_PENDING (server consumes credits)
+        session 2 write requests should complete with STATUS_SUCCESS (server already consumed credit)
+        """
+        chan1, tree1 = self.tree_connect()
+        chan2, tree2 = self.tree_connect()
+        fname = "test_async_write"
+        lkey = array.array('B',map(random.randint, [0]*16, [255]*16))
+        # buf is 64k
+        buf = "\0\1\2\3\4\5\6\7"*8192
+        write_request_multiples = [1,2,3,4]
+
+        fh1 = chan1.create(
+                tree1,
+                fname,
+                share=share_all,
+                oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
+                lease_key=lkey,
+                lease_state=lease_rh).result()
+        fh2 = chan2.create(
+                tree2,
+                fname,
+                share=share_all).result()
+        self.assertEqual(chan2.connection.credits, 2)
+        write_futures = []
+        for n_credits in write_request_multiples:
+            with chan2.let(credit_request=16):
+                f = chan2.connection.submit(chan2.write_request(fh2, 0, buf*n_credits).parent.parent)[0]
+                f.wait_interim()
+                write_futures.append(f)
+
+        # wait for the interim timer before breaking the lease
+        map(lambda f: f.wait_interim(), write_futures)
+        fh1.lease.on_break(lambda s: s)
+        for w in write_futures:
+            print(w.result())
+        chan2.close(fh2)
+        chan1.close(fh1)
 
 class TestCaseGenerator(object):
     header = """#!/usr/bin/env python
