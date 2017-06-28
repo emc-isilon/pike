@@ -120,7 +120,10 @@ class CreditTest(pike.test.PikeTest):
         write_credits_per_op = write_size / size_64k
         chan, tree = self.tree_connect()
         self.info("creating {0} ({1} bytes)".format(fname, file_size))
-        fh = chan.create(tree, fname).result()
+
+        # get enough initial credits
+        with chan.let(credit_request=16):
+            fh = chan.create(tree, fname).result()
 
         self.info("writing {0} chunks of {1} bytes; {2} credits per op".format(
                 write_chunks,
@@ -139,8 +142,8 @@ class CreditTest(pike.test.PikeTest):
         chan.close(fh)
 
         # calculate a reasonable expected number of credits
-        # from negotiate, session_setup (x2), tree_connect, create, close
-        exp_credits = 2 + ((pike.model.default_credit_request - 1) * 5)
+        # from negotiate, session_setup (x2), tree_connect, create (+16), close
+        exp_credits = 1 + ((pike.model.default_credit_request - 1) * 4) + 15
         credit_request_per_op = pike.model.default_credit_request
         # from the series of write requests
         if write_credits_per_op > credit_request_per_op:
@@ -210,7 +213,10 @@ class CreditTest(pike.test.PikeTest):
 
         chan, tree = self.tree_connect()
         self.info("creating {0} ({1} bytes)".format(fname, file_size))
-        fh = chan.create(tree, fname).result()
+
+        # get enough initial credits
+        with chan.let(credit_request=16):
+            fh = chan.create(tree, fname).result()
 
         self.info("writing {0} chunks of {1} bytes; {2} credits per op".format(
                 write_chunks,
@@ -258,8 +264,8 @@ class CreditTest(pike.test.PikeTest):
         chan.close(fh)
 
         # calculate a reasonable expected number of credits
-        # from negotiate, session_setup (x2), tree_connect, create, close
-        exp_credits = 2 + ((pike.model.default_credit_request - 1) * 5)
+        # from negotiate, session_setup (x2), tree_connect, create (+16), close
+        exp_credits = 1 + ((pike.model.default_credit_request - 1) * 4) + 15
         credit_request_per_op = pike.model.default_credit_request
         # from the series of write requests
         if write_credits_per_op > credit_request_per_op:
@@ -416,6 +422,7 @@ class AsyncCreditTest(CreditTest):
                 (0, 2, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK),
                 (2, 2, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK),
                 (4, 4, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK)]
+        credit_req = 3
 
         fh1 = chan1.create(
                 tree1,
@@ -432,11 +439,14 @@ class AsyncCreditTest(CreditTest):
         # send 3 locks, 1 credit charge, 3 credit request
         lock_futures = []
         for l in contend_locks:
-            with chan2.let(credit_request=3):
+            with chan2.let(credit_request=credit_req):
                 f = chan2.lock(fh2, [l])
                 lock_futures.append(f)
         # wait for the interim responses
-        map(lambda f: f.wait_interim(), lock_futures)
+        for f in lock_futures:
+            f.wait_interim()
+            if f.interim_response is not None:
+                self.assertEqual(f.interim_response.credit_response, credit_req)
 
         # at this point, we should have sent 3x 1charge, 3request lock commands
         # so if the server granted our request should have 1 + 3 * (3 - 1)
@@ -449,7 +459,7 @@ class AsyncCreditTest(CreditTest):
 
         # these completion responses shouldn't have a carry a 1 credit charge + 0 grant
         for f in lock_futures:
-            print(f.result())
+            self.assertEqual(f.result().credit_response, 0)
         # onefs counts this as 10, because onefs starts at 4 instead of 1
         self.assertEqual(chan2.connection.credits, 7)
         buf = "\0\1\2\3\4\5\6\7"*8192
@@ -477,6 +487,7 @@ class AsyncCreditTest(CreditTest):
         # buf is 64k
         buf = "\0\1\2\3\4\5\6\7"*8192
         write_request_multiples = [1,2,3,4]
+        credit_req = 16
 
         fh1 = chan1.create(
                 tree1,
@@ -489,19 +500,23 @@ class AsyncCreditTest(CreditTest):
                 tree2,
                 fname,
                 share=share_all).result()
-        self.assertEqual(chan2.connection.credits, 2)
+        self.assertEqual(chan2.connection.credits, 1)
         write_futures = []
         for n_credits in write_request_multiples:
-            with chan2.let(credit_request=16):
+            with chan2.let(credit_request=credit_req):
                 f = chan2.connection.submit(chan2.write_request(fh2, 0, buf*n_credits).parent.parent)[0]
                 f.wait_interim()
+                if f.interim_response is not None:
+                    self.assertEqual(f.interim_response.credit_response, credit_req)
                 write_futures.append(f)
 
-        # wait for the interim timer before breaking the lease
-        map(lambda f: f.wait_interim(), write_futures)
         fh1.lease.on_break(lambda s: s)
         for w in write_futures:
-            print(w.result())
+            smb_resp = w.result()
+            if smb_resp.flags & pike.smb2.SMB2_FLAGS_ASYNC_COMMAND:
+                self.assertEqual(smb_resp.credit_response, 0)
+            else:
+                self.assertEqual(smb_resp.credit_response, credit_req)
         chan2.close(fh2)
         chan1.close(fh1)
 
