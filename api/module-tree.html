@@ -39,6 +39,8 @@
     <td>
       <table cellpadding="0" cellspacing="0">
         <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
             >]&nbsp;|&nbsp;<a href="module-tree.html"
@@ -55,15 +57,50 @@
 <ul class="nomargin-top">
     <li> <strong class="uidlink"><a href="pike-module.html">pike</a></strong>
     <ul>
+    <li> <strong class="uidlink"><a href="pike.auth-module.html">pike.auth</a></strong>: <em class="summary">Authentication Plugins for Pike</em>    </li>
     <li> <strong class="uidlink"><a href="pike.core-module.html">pike.core</a></strong>: <em class="summary">Core Pike infrastructure</em>    </li>
+    <li> <strong class="uidlink"><a href="pike.crypto-module.html">pike.crypto</a></strong>    </li>
     <li> <strong class="uidlink"><a href="pike.digest-module.html">pike.digest</a></strong>    </li>
-    <li> <strong class="uidlink"><a href="pike.kerberos-module.html">pike.kerberos</a></strong>: <em class="summary">PyKerberos Function Description.</em>    </li>
     <li> <strong class="uidlink"><a href="pike.model-module.html">pike.model</a></strong>: <em class="summary">SMB2 Object Model.</em>    </li>
     <li> <strong class="uidlink"><a href="pike.netbios-module.html">pike.netbios</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.ntlm-module.html">pike.ntlm</a></strong>    </li>
     <li> <strong class="uidlink"><a href="pike.ntstatus-module.html">pike.ntstatus</a></strong>    </li>
     <li> <strong class="uidlink"><a href="pike.nttime-module.html">pike.nttime</a></strong>    </li>
     <li> <strong class="uidlink"><a href="pike.smb2-module.html">pike.smb2</a></strong>: <em class="summary">SMB2 packet definitions</em>    </li>
-    <li> <strong class="uidlink"><a href="pike.test-module.html">pike.test</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test-module.html">pike.test</a></strong>
+    <ul>
+    <li> <strong class="uidlink"><a href="pike.test.appinstanceid-module.html">pike.test.appinstanceid</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.changenotify-module.html">pike.test.changenotify</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.compound-module.html">pike.test.compound</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.copychunk-module.html">pike.test.copychunk</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.credit-module.html">pike.test.credit</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.durable-module.html">pike.test.durable</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.echo-module.html">pike.test.echo</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.encryption-module.html">pike.test.encryption</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.internal-module.html">pike.test.internal</a></strong>
+    <ul>
+    <li> <strong class="uidlink"><a href="pike.test.internal.test_callbacks-module.html">pike.test.internal.test_callbacks</a></strong>    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.ioctl-module.html">pike.test.ioctl</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.lease-module.html">pike.test.lease</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.lock-module.html">pike.test.lock</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.multichannel-module.html">pike.test.multichannel</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.negotiate-module.html">pike.test.negotiate</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.oplock-module.html">pike.test.oplock</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.persistent-module.html">pike.test.persistent</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.query-module.html">pike.test.query</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.querydirectory-module.html">pike.test.querydirectory</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.queryondiskid-module.html">pike.test.queryondiskid</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.readwrite-module.html">pike.test.readwrite</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.reparse-module.html">pike.test.reparse</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.session-module.html">pike.test.session</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.set-module.html">pike.test.set</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.test_smb3_encryption_vector-module.html">pike.test.test_smb3_encryption_vector</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="pike.test.tree-module.html">pike.test.tree</a></strong>    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.transport-module.html">pike.transport</a></strong>    </li>
     </ul>
     </li>
 </ul>
@@ -93,7 +130,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Sep 19 09:27:42 2013
+    Generated by Epydoc 3.0.1 on Thu Jun 29 08:51:13 2017
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

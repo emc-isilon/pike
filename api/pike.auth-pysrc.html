@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>pike.auth</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="pike-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="pike-module.html">Package&nbsp;pike</a> ::
+        Module&nbsp;auth
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="pike.auth-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="pike.auth-module.html">Module pike.auth</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"><tt class="py-comment"># Copyright (c) 2016, Dell Technologies</tt> </tt>
+<a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"><tt class="py-comment"># All rights reserved.</tt> </tt>
+<a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"><tt class="py-comment"># Redistribution and use in source and binary forms, with or without</tt> </tt>
+<a name="L6"></a><tt class="py-lineno">  6</tt>  <tt class="py-line"><tt class="py-comment"># modification, are permitted provided that the following conditions are met:</tt> </tt>
+<a name="L7"></a><tt class="py-lineno">  7</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L8"></a><tt class="py-lineno">  8</tt>  <tt class="py-line"><tt class="py-comment"># 1. Redistributions of source code must retain the above copyright notice,</tt> </tt>
+<a name="L9"></a><tt class="py-lineno">  9</tt>  <tt class="py-line"><tt class="py-comment"># this list of conditions and the following disclaimer.</tt> </tt>
+<a name="L10"></a><tt class="py-lineno"> 10</tt>  <tt class="py-line"><tt class="py-comment"># 2. Redistributions in binary form must reproduce the above copyright notice,</tt> </tt>
+<a name="L11"></a><tt class="py-lineno"> 11</tt>  <tt class="py-line"><tt class="py-comment"># this list of conditions and the following disclaimer in the documentation</tt> </tt>
+<a name="L12"></a><tt class="py-lineno"> 12</tt>  <tt class="py-line"><tt class="py-comment"># and/or other materials provided with the distribution.</tt> </tt>
+<a name="L13"></a><tt class="py-lineno"> 13</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L14"></a><tt class="py-lineno"> 14</tt>  <tt class="py-line"><tt class="py-comment"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"</tt> </tt>
+<a name="L15"></a><tt class="py-lineno"> 15</tt>  <tt class="py-line"><tt class="py-comment"># AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</tt> </tt>
+<a name="L16"></a><tt class="py-lineno"> 16</tt>  <tt class="py-line"><tt class="py-comment"># IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</tt> </tt>
+<a name="L17"></a><tt class="py-lineno"> 17</tt>  <tt class="py-line"><tt class="py-comment"># ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE</tt> </tt>
+<a name="L18"></a><tt class="py-lineno"> 18</tt>  <tt class="py-line"><tt class="py-comment"># LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</tt> </tt>
+<a name="L19"></a><tt class="py-lineno"> 19</tt>  <tt class="py-line"><tt class="py-comment"># CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</tt> </tt>
+<a name="L20"></a><tt class="py-lineno"> 20</tt>  <tt class="py-line"><tt class="py-comment"># SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</tt> </tt>
+<a name="L21"></a><tt class="py-lineno"> 21</tt>  <tt class="py-line"><tt class="py-comment"># INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</tt> </tt>
+<a name="L22"></a><tt class="py-lineno"> 22</tt>  <tt class="py-line"><tt class="py-comment"># CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</tt> </tt>
+<a name="L23"></a><tt class="py-lineno"> 23</tt>  <tt class="py-line"><tt class="py-comment"># ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</tt> </tt>
+<a name="L24"></a><tt class="py-lineno"> 24</tt>  <tt class="py-line"><tt class="py-comment"># POSSIBILITY OF SUCH DAMAGE.</tt> </tt>
+<a name="L25"></a><tt class="py-lineno"> 25</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line"><tt class="py-comment"># Module Name:</tt> </tt>
+<a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L28"></a><tt class="py-lineno"> 28</tt>  <tt class="py-line"><tt class="py-comment">#        auth.py</tt> </tt>
+<a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line"><tt class="py-comment"># Abstract:</tt> </tt>
+<a name="L31"></a><tt class="py-lineno"> 31</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line"><tt class="py-comment">#        Authentication Plugins for Pike</tt> </tt>
+<a name="L33"></a><tt class="py-lineno"> 33</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L34"></a><tt class="py-lineno"> 34</tt>  <tt class="py-line"><tt class="py-comment"># Authors: Masen Furer (masen.furer@dell.com)</tt> </tt>
+<a name="L35"></a><tt class="py-lineno"> 35</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L36"></a><tt class="py-lineno"> 36</tt>  <tt class="py-line"> </tt>
+<a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line"><tt class="py-docstring">"""</tt> </tt>
+<a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line"><tt class="py-docstring">Authentication Plugins for Pike</tt> </tt>
+<a name="L39"></a><tt class="py-lineno"> 39</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L40"></a><tt class="py-lineno"> 40</tt>  <tt class="py-line"><tt class="py-docstring">This module contains wrappers around external authentication mechanisms and APIs.</tt> </tt>
+<a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line"><tt class="py-docstring">"""</tt> </tt>
+<a name="L42"></a><tt class="py-lineno"> 42</tt>  <tt class="py-line"> </tt>
+<a name="L43"></a><tt class="py-lineno"> 43</tt>  <tt class="py-line"> </tt>
+<a name="L44"></a><tt class="py-lineno"> 44</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">array</tt> </tt>
+<a name="L45"></a><tt class="py-lineno"> 45</tt>  <tt class="py-line"><tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L46"></a><tt class="py-lineno"> 46</tt>  <tt class="py-line">    <tt class="py-keyword">import</tt> <tt id="link-0" class="py-name" targets="Variable pike.auth.kerberos=pike.auth-module.html#kerberos"><a title="pike.auth.kerberos" class="py-name" href="#" onclick="return doclink('link-0', 'kerberos', 'link-0');">kerberos</a></tt> </tt>
+<a name="L47"></a><tt class="py-lineno"> 47</tt>  <tt class="py-line"><tt class="py-keyword">except</tt> <tt class="py-name">ImportError</tt><tt class="py-op">:</tt> </tt>
+<a name="L48"></a><tt class="py-lineno"> 48</tt>  <tt class="py-line">    <tt id="link-1" class="py-name"><a title="pike.auth.kerberos" class="py-name" href="#" onclick="return doclink('link-1', 'kerberos', 'link-0');">kerberos</a></tt> <tt class="py-op">=</tt> <tt class="py-name">None</tt> </tt>
+<a name="L49"></a><tt class="py-lineno"> 49</tt>  <tt class="py-line"><tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L50"></a><tt class="py-lineno"> 50</tt>  <tt class="py-line">    <tt class="py-keyword">import</tt> <tt id="link-2" class="py-name" targets="Module pike.ntlm=pike.ntlm-module.html"><a title="pike.ntlm" class="py-name" href="#" onclick="return doclink('link-2', 'ntlm', 'link-2');">ntlm</a></tt> </tt>
+<a name="L51"></a><tt class="py-lineno"> 51</tt>  <tt class="py-line"><tt class="py-keyword">except</tt> <tt class="py-name">ImportError</tt><tt class="py-op">:</tt> </tt>
+<a name="L52"></a><tt class="py-lineno"> 52</tt>  <tt class="py-line">    <tt id="link-3" class="py-name"><a title="pike.ntlm" class="py-name" href="#" onclick="return doclink('link-3', 'ntlm', 'link-2');">ntlm</a></tt> <tt class="py-op">=</tt> <tt class="py-name">None</tt> </tt>
+<a name="L53"></a><tt class="py-lineno"> 53</tt>  <tt class="py-line"> </tt>
+<a name="L54"></a><tt class="py-lineno"> 54</tt>  <tt class="py-line"> </tt>
+<a name="split_credentials"></a><div id="split_credentials-def"><a name="L55"></a><tt class="py-lineno"> 55</tt> <a class="py-toggle" href="#" id="split_credentials-toggle" onclick="return toggle('split_credentials');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.auth-module.html#split_credentials">split_credentials</a><tt class="py-op">(</tt><tt class="py-param">creds</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="split_credentials-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="split_credentials-expanded"><a name="L56"></a><tt class="py-lineno"> 56</tt>  <tt class="py-line">    <tt class="py-name">user</tt><tt class="py-op">,</tt> <tt class="py-name">password</tt> <tt class="py-op">=</tt> <tt class="py-name">creds</tt><tt class="py-op">.</tt><tt class="py-name">split</tt><tt class="py-op">(</tt><tt class="py-string">'%'</tt><tt class="py-op">)</tt> </tt>
+<a name="L57"></a><tt class="py-lineno"> 57</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-string">'\\'</tt> <tt class="py-keyword">in</tt> <tt class="py-name">user</tt><tt class="py-op">:</tt> </tt>
+<a name="L58"></a><tt class="py-lineno"> 58</tt>  <tt class="py-line">        <tt class="py-name">domain</tt><tt class="py-op">,</tt> <tt class="py-name">user</tt> <tt class="py-op">=</tt> <tt class="py-name">user</tt><tt class="py-op">.</tt><tt class="py-name">split</tt><tt class="py-op">(</tt><tt class="py-string">'\\'</tt><tt class="py-op">)</tt> </tt>
+<a name="L59"></a><tt class="py-lineno"> 59</tt>  <tt class="py-line">    <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L60"></a><tt class="py-lineno"> 60</tt>  <tt class="py-line">        <tt class="py-name">domain</tt> <tt class="py-op">=</tt> <tt class="py-string">"NONE"</tt> </tt>
+<a name="L61"></a><tt class="py-lineno"> 61</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-op">(</tt><tt class="py-name">domain</tt><tt class="py-op">,</tt> <tt class="py-name">user</tt><tt class="py-op">,</tt> <tt class="py-name">password</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L62"></a><tt class="py-lineno"> 62</tt>  <tt class="py-line"> </tt>
+<a name="L63"></a><tt class="py-lineno"> 63</tt>  <tt class="py-line"> </tt>
+<a name="KerberosProvider"></a><div id="KerberosProvider-def"><a name="L64"></a><tt class="py-lineno"> 64</tt> <a class="py-toggle" href="#" id="KerberosProvider-toggle" onclick="return toggle('KerberosProvider');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="pike.auth.KerberosProvider-class.html">KerberosProvider</a><tt class="py-op">(</tt><tt class="py-base-class">object</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="KerberosProvider-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="KerberosProvider-expanded"><a name="KerberosProvider.__init__"></a><div id="KerberosProvider.__init__-def"><a name="L65"></a><tt class="py-lineno"> 65</tt> <a class="py-toggle" href="#" id="KerberosProvider.__init__-toggle" onclick="return toggle('KerberosProvider.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.auth.KerberosProvider-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">conn</tt><tt class="py-op">,</tt> <tt class="py-param">creds</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="KerberosProvider.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="KerberosProvider.__init__-expanded"><a name="L66"></a><tt class="py-lineno"> 66</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">creds</tt><tt class="py-op">:</tt> </tt>
+<a name="L67"></a><tt class="py-lineno"> 67</tt>  <tt class="py-line">            <tt class="py-name">domain</tt><tt class="py-op">,</tt> <tt class="py-name">user</tt><tt class="py-op">,</tt> <tt class="py-name">password</tt> <tt class="py-op">=</tt> <tt id="link-4" class="py-name" targets="Function pike.auth.split_credentials()=pike.auth-module.html#split_credentials"><a title="pike.auth.split_credentials" class="py-name" href="#" onclick="return doclink('link-4', 'split_credentials', 'link-4');">split_credentials</a></tt><tt class="py-op">(</tt><tt class="py-name">creds</tt><tt class="py-op">)</tt> </tt>
+<a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line">            <tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-5" class="py-name" targets="Method pike.model.Future.result()=pike.model.Future-class.html#result"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-5', 'result', 'link-5');">result</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L69"></a><tt class="py-lineno"> 69</tt>  <tt class="py-line">             <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-6" class="py-name" targets="Variable pike.core.Frame.context=pike.core.Frame-class.html#context"><a title="pike.core.Frame.context" class="py-name" href="#" onclick="return doclink('link-6', 'context', 'link-6');">context</a></tt><tt class="py-op">)</tt> <tt class="py-op">=</tt> <tt id="link-7" class="py-name"><a title="pike.auth.kerberos" class="py-name" href="#" onclick="return doclink('link-7', 'kerberos', 'link-0');">kerberos</a></tt><tt class="py-op">.</tt><tt class="py-name">authGSSClientInit</tt><tt class="py-op">(</tt> </tt>
+<a name="L70"></a><tt class="py-lineno"> 70</tt>  <tt class="py-line">                <tt class="py-string">"cifs/"</tt> <tt class="py-op">+</tt> <tt class="py-name">conn</tt><tt class="py-op">.</tt><tt class="py-name">server</tt><tt class="py-op">,</tt> </tt>
+<a name="L71"></a><tt class="py-lineno"> 71</tt>  <tt class="py-line">                <tt class="py-name">gssmech</tt><tt class="py-op">=</tt><tt class="py-number">2</tt><tt class="py-op">,</tt> </tt>
+<a name="L72"></a><tt class="py-lineno"> 72</tt>  <tt class="py-line">                <tt class="py-name">user</tt><tt class="py-op">=</tt><tt class="py-name">user</tt><tt class="py-op">,</tt> </tt>
+<a name="L73"></a><tt class="py-lineno"> 73</tt>  <tt class="py-line">                <tt class="py-name">password</tt><tt class="py-op">=</tt><tt class="py-name">password</tt><tt class="py-op">,</tt> </tt>
+<a name="L74"></a><tt class="py-lineno"> 74</tt>  <tt class="py-line">                <tt class="py-name">domain</tt><tt class="py-op">=</tt><tt class="py-name">domain</tt><tt class="py-op">)</tt> </tt>
+<a name="L75"></a><tt class="py-lineno"> 75</tt>  <tt class="py-line">        <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L76"></a><tt class="py-lineno"> 76</tt>  <tt class="py-line">            <tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-8" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-8', 'result', 'link-5');">result</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L77"></a><tt class="py-lineno"> 77</tt>  <tt class="py-line">             <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-9" class="py-name"><a title="pike.core.Frame.context" class="py-name" href="#" onclick="return doclink('link-9', 'context', 'link-6');">context</a></tt><tt class="py-op">)</tt> <tt class="py-op">=</tt> <tt id="link-10" class="py-name"><a title="pike.auth.kerberos" class="py-name" href="#" onclick="return doclink('link-10', 'kerberos', 'link-0');">kerberos</a></tt><tt class="py-op">.</tt><tt class="py-name">authGSSClientInit</tt><tt class="py-op">(</tt><tt class="py-string">"cifs/"</tt> <tt class="py-op">+</tt> <tt class="py-name">conn</tt><tt class="py-op">.</tt><tt class="py-name">server</tt><tt class="py-op">,</tt> </tt>
+<a name="L78"></a><tt class="py-lineno"> 78</tt>  <tt class="py-line">                                                        <tt class="py-name">gssmech</tt><tt class="py-op">=</tt><tt class="py-number">1</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line"> </tt>
+<a name="KerberosProvider.step"></a><div id="KerberosProvider.step-def"><a name="L80"></a><tt class="py-lineno"> 80</tt> <a class="py-toggle" href="#" id="KerberosProvider.step-toggle" onclick="return toggle('KerberosProvider.step');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.auth.KerberosProvider-class.html#step">step</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">sec_buf</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="KerberosProvider.step-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="KerberosProvider.step-expanded"><a name="L81"></a><tt class="py-lineno"> 81</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-11" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-11', 'result', 'link-5');">result</a></tt> <tt class="py-op">=</tt> <tt id="link-12" class="py-name"><a title="pike.auth.kerberos" class="py-name" href="#" onclick="return doclink('link-12', 'kerberos', 'link-0');">kerberos</a></tt><tt class="py-op">.</tt><tt class="py-name">authGSSClientStep</tt><tt class="py-op">(</tt> </tt>
+<a name="L82"></a><tt class="py-lineno"> 82</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-13" class="py-name"><a title="pike.core.Frame.context" class="py-name" href="#" onclick="return doclink('link-13', 'context', 'link-6');">context</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line">                <tt class="py-name">sec_buf</tt><tt class="py-op">.</tt><tt class="py-name">tostring</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-14" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-14', 'result', 'link-5');">result</a></tt> <tt class="py-op">==</tt> <tt class="py-number">0</tt><tt class="py-op">:</tt> </tt>
+<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> <tt class="py-op">(</tt><tt class="py-name">array</tt><tt class="py-op">.</tt><tt class="py-name">array</tt><tt class="py-op">(</tt> </tt>
+<a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line">                    <tt class="py-string">'B'</tt><tt class="py-op">,</tt> </tt>
+<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line">                    <tt id="link-15" class="py-name"><a title="pike.auth.kerberos" class="py-name" href="#" onclick="return doclink('link-15', 'kerberos', 'link-0');">kerberos</a></tt><tt class="py-op">.</tt><tt class="py-name">authGSSClientResponse</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-16" class="py-name"><a title="pike.core.Frame.context" class="py-name" href="#" onclick="return doclink('link-16', 'context', 'link-6');">context</a></tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> </tt>
+<a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line">                    <tt class="py-name">None</tt><tt class="py-op">)</tt> </tt>
+<a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line">        <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line">            <tt id="link-17" class="py-name"><a title="pike.auth.kerberos" class="py-name" href="#" onclick="return doclink('link-17', 'kerberos', 'link-0');">kerberos</a></tt><tt class="py-op">.</tt><tt class="py-name">authGSSClientSessionKey</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-18" class="py-name"><a title="pike.core.Frame.context" class="py-name" href="#" onclick="return doclink('link-18', 'context', 'link-6');">context</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> <tt class="py-op">(</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> </tt>
+<a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line">                    <tt class="py-name">array</tt><tt class="py-op">.</tt><tt class="py-name">array</tt><tt class="py-op">(</tt><tt class="py-string">'B'</tt><tt class="py-op">,</tt> </tt>
+<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line">                        <tt id="link-19" class="py-name"><a title="pike.auth.kerberos" class="py-name" href="#" onclick="return doclink('link-19', 'kerberos', 'link-0');">kerberos</a></tt><tt class="py-op">.</tt><tt class="py-name">authGSSClientResponse</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-20" class="py-name"><a title="pike.core.Frame.context" class="py-name" href="#" onclick="return doclink('link-20', 'context', 'link-6');">context</a></tt><tt class="py-op">)</tt><tt class="py-op">[</tt><tt class="py-op">:</tt><tt class="py-number">16</tt><tt class="py-op">]</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line"> </tt>
+<a name="KerberosProvider.username"></a><div id="KerberosProvider.username-def"><a name="L95"></a><tt class="py-lineno"> 95</tt> <a class="py-toggle" href="#" id="KerberosProvider.username-toggle" onclick="return toggle('KerberosProvider.username');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.auth.KerberosProvider-class.html#username">username</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="KerberosProvider.username-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="KerberosProvider.username-expanded"><a name="L96"></a><tt class="py-lineno"> 96</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt id="link-21" class="py-name"><a title="pike.auth.kerberos" class="py-name" href="#" onclick="return doclink('link-21', 'kerberos', 'link-0');">kerberos</a></tt><tt class="py-op">.</tt><tt class="py-name">authGSSClientUserName</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-22" class="py-name"><a title="pike.core.Frame.context" class="py-name" href="#" onclick="return doclink('link-22', 'context', 'link-6');">context</a></tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line"> </tt>
+<a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line"> </tt>
+<a name="NtlmProvider"></a><div id="NtlmProvider-def"><a name="L99"></a><tt class="py-lineno"> 99</tt> <a class="py-toggle" href="#" id="NtlmProvider-toggle" onclick="return toggle('NtlmProvider');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="pike.auth.NtlmProvider-class.html">NtlmProvider</a><tt class="py-op">(</tt><tt class="py-base-class">object</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="NtlmProvider-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="NtlmProvider-expanded"><a name="NtlmProvider.__init__"></a><div id="NtlmProvider.__init__-def"><a name="L100"></a><tt class="py-lineno">100</tt> <a class="py-toggle" href="#" id="NtlmProvider.__init__-toggle" onclick="return toggle('NtlmProvider.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.auth.NtlmProvider-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">conn</tt><tt class="py-op">,</tt> <tt class="py-param">creds</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="NtlmProvider.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="NtlmProvider.__init__-expanded"><a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">authenticator</tt> <tt class="py-op">=</tt> <tt id="link-23" class="py-name"><a title="pike.ntlm" class="py-name" href="#" onclick="return doclink('link-23', 'ntlm', 'link-2');">ntlm</a></tt><tt class="py-op">.</tt><tt id="link-24" class="py-name" targets="Class pike.ntlm.NtlmAuthenticator=pike.ntlm.NtlmAuthenticator-class.html"><a title="pike.ntlm.NtlmAuthenticator" class="py-name" href="#" onclick="return doclink('link-24', 'NtlmAuthenticator', 'link-24');">NtlmAuthenticator</a></tt><tt class="py-op">(</tt><tt class="py-op">*</tt><tt id="link-25" class="py-name"><a title="pike.auth.split_credentials" class="py-name" href="#" onclick="return doclink('link-25', 'split_credentials', 'link-4');">split_credentials</a></tt><tt class="py-op">(</tt><tt class="py-name">creds</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line"> </tt>
+<a name="NtlmProvider.step"></a><div id="NtlmProvider.step-def"><a name="L103"></a><tt class="py-lineno">103</tt> <a class="py-toggle" href="#" id="NtlmProvider.step-toggle" onclick="return toggle('NtlmProvider.step');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.auth.NtlmProvider-class.html#step">step</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">sec_buf</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="NtlmProvider.step-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="NtlmProvider.step-expanded"><a name="L104"></a><tt class="py-lineno">104</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">authenticator</tt><tt class="py-op">.</tt><tt class="py-name">negotiate_message</tt> <tt class="py-keyword">is</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L105"></a><tt class="py-lineno">105</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> <tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">authenticator</tt><tt class="py-op">.</tt><tt id="link-26" class="py-name" targets="Method pike.model.Connection.negotiate()=pike.model.Connection-class.html#negotiate,Method pike.ntlm.NtlmAuthenticator.negotiate()=pike.ntlm.NtlmAuthenticator-class.html#negotiate,Module pike.test.negotiate=pike.test.negotiate-module.html,Method pike.test.negotiate.CapTest.negotiate()=pike.test.negotiate.CapTest-class.html#negotiate,Method pike.test.negotiate.NegotiateContext.negotiate()=pike.test.negotiate.NegotiateContext-class.html#negotiate"><a title="pike.model.Connection.negotiate
+pike.ntlm.NtlmAuthenticator.negotiate
+pike.test.negotiate
+pike.test.negotiate.CapTest.negotiate
+pike.test.negotiate.NegotiateContext.negotiate" class="py-name" href="#" onclick="return doclink('link-26', 'negotiate', 'link-26');">negotiate</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-name">None</tt><tt class="py-op">)</tt> </tt>
+<a name="L106"></a><tt class="py-lineno">106</tt>  <tt class="py-line">        <tt class="py-keyword">elif</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">authenticator</tt><tt class="py-op">.</tt><tt class="py-name">challenge_message</tt> <tt class="py-keyword">is</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L107"></a><tt class="py-lineno">107</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">authenticator</tt><tt class="py-op">.</tt><tt id="link-27" class="py-name" targets="Method pike.ntlm.NtlmAuthenticator.authenticate()=pike.ntlm.NtlmAuthenticator-class.html#authenticate"><a title="pike.ntlm.NtlmAuthenticator.authenticate" class="py-name" href="#" onclick="return doclink('link-27', 'authenticate', 'link-27');">authenticate</a></tt><tt class="py-op">(</tt><tt class="py-name">sec_buf</tt><tt class="py-op">)</tt> </tt>
+<a name="L108"></a><tt class="py-lineno">108</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">authenticator</tt><tt class="py-op">.</tt><tt class="py-name">authenticate_buffer</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">authenticator</tt><tt class="py-op">.</tt><tt class="py-name">exported_session_key</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L109"></a><tt class="py-lineno">109</tt>  <tt class="py-line"> </tt>
+<a name="NtlmProvider.username"></a><div id="NtlmProvider.username-def"><a name="L110"></a><tt class="py-lineno">110</tt> <a class="py-toggle" href="#" id="NtlmProvider.username-toggle" onclick="return toggle('NtlmProvider.username');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.auth.NtlmProvider-class.html#username">username</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="NtlmProvider.username-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="NtlmProvider.username-expanded"><a name="L111"></a><tt class="py-lineno">111</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-string">'{0}\{1}'</tt><tt class="py-op">.</tt><tt class="py-name">format</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">authenticator</tt><tt class="py-op">.</tt><tt class="py-name">domain</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">authenticator</tt><tt class="py-op">.</tt><tt id="link-28" class="py-name" targets="Method pike.auth.KerberosProvider.username()=pike.auth.KerberosProvider-class.html#username,Method pike.auth.NtlmProvider.username()=pike.auth.NtlmProvider-class.html#username"><a title="pike.auth.KerberosProvider.username
+pike.auth.NtlmProvider.username" class="py-name" href="#" onclick="return doclink('link-28', 'username', 'link-28');">username</a></tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L112"></a><tt class="py-lineno">112</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="pike-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Thu Jun 29 08:51:24 2017
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

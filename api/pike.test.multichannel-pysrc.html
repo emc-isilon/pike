@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>pike.test.multichannel</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="pike-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="pike-module.html">Package&nbsp;pike</a> ::
+        <a href="pike.test-module.html">Package&nbsp;test</a> ::
+        Module&nbsp;multichannel
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="pike.test.multichannel-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="pike.test.multichannel-module.html">Module pike.test.multichannel</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"><tt class="py-comment"># Copyright (c) 2013, EMC Corporation</tt> </tt>
+<a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"><tt class="py-comment"># All rights reserved.</tt> </tt>
+<a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"><tt class="py-comment"># Redistribution and use in source and binary forms, with or without</tt> </tt>
+<a name="L6"></a><tt class="py-lineno">  6</tt>  <tt class="py-line"><tt class="py-comment"># modification, are permitted provided that the following conditions are met:</tt> </tt>
+<a name="L7"></a><tt class="py-lineno">  7</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L8"></a><tt class="py-lineno">  8</tt>  <tt class="py-line"><tt class="py-comment"># 1. Redistributions of source code must retain the above copyright notice,</tt> </tt>
+<a name="L9"></a><tt class="py-lineno">  9</tt>  <tt class="py-line"><tt class="py-comment"># this list of conditions and the following disclaimer.</tt> </tt>
+<a name="L10"></a><tt class="py-lineno"> 10</tt>  <tt class="py-line"><tt class="py-comment"># 2. Redistributions in binary form must reproduce the above copyright notice,</tt> </tt>
+<a name="L11"></a><tt class="py-lineno"> 11</tt>  <tt class="py-line"><tt class="py-comment"># this list of conditions and the following disclaimer in the documentation</tt> </tt>
+<a name="L12"></a><tt class="py-lineno"> 12</tt>  <tt class="py-line"><tt class="py-comment"># and/or other materials provided with the distribution.</tt> </tt>
+<a name="L13"></a><tt class="py-lineno"> 13</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L14"></a><tt class="py-lineno"> 14</tt>  <tt class="py-line"><tt class="py-comment"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"</tt> </tt>
+<a name="L15"></a><tt class="py-lineno"> 15</tt>  <tt class="py-line"><tt class="py-comment"># AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</tt> </tt>
+<a name="L16"></a><tt class="py-lineno"> 16</tt>  <tt class="py-line"><tt class="py-comment"># IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</tt> </tt>
+<a name="L17"></a><tt class="py-lineno"> 17</tt>  <tt class="py-line"><tt class="py-comment"># ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE</tt> </tt>
+<a name="L18"></a><tt class="py-lineno"> 18</tt>  <tt class="py-line"><tt class="py-comment"># LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</tt> </tt>
+<a name="L19"></a><tt class="py-lineno"> 19</tt>  <tt class="py-line"><tt class="py-comment"># CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</tt> </tt>
+<a name="L20"></a><tt class="py-lineno"> 20</tt>  <tt class="py-line"><tt class="py-comment"># SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</tt> </tt>
+<a name="L21"></a><tt class="py-lineno"> 21</tt>  <tt class="py-line"><tt class="py-comment"># INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</tt> </tt>
+<a name="L22"></a><tt class="py-lineno"> 22</tt>  <tt class="py-line"><tt class="py-comment"># CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</tt> </tt>
+<a name="L23"></a><tt class="py-lineno"> 23</tt>  <tt class="py-line"><tt class="py-comment"># ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</tt> </tt>
+<a name="L24"></a><tt class="py-lineno"> 24</tt>  <tt class="py-line"><tt class="py-comment"># POSSIBILITY OF SUCH DAMAGE.</tt> </tt>
+<a name="L25"></a><tt class="py-lineno"> 25</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line"><tt class="py-comment"># Module Name:</tt> </tt>
+<a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L28"></a><tt class="py-lineno"> 28</tt>  <tt class="py-line"><tt class="py-comment">#        multichannel.py</tt> </tt>
+<a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line"><tt class="py-comment"># Abstract:</tt> </tt>
+<a name="L31"></a><tt class="py-lineno"> 31</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line"><tt class="py-comment">#        Multichannel tests</tt> </tt>
+<a name="L33"></a><tt class="py-lineno"> 33</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L34"></a><tt class="py-lineno"> 34</tt>  <tt class="py-line"><tt class="py-comment"># Authors: Brian Koropoff (brian.koropoff@emc.com)</tt> </tt>
+<a name="L35"></a><tt class="py-lineno"> 35</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L36"></a><tt class="py-lineno"> 36</tt>  <tt class="py-line"> </tt>
+<a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-0" class="py-name" targets="Package pike=pike-module.html"><a title="pike" class="py-name" href="#" onclick="return doclink('link-0', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-1" class="py-name" targets="Module pike.model=pike.model-module.html"><a title="pike.model" class="py-name" href="#" onclick="return doclink('link-1', 'model', 'link-1');">model</a></tt> </tt>
+<a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-2" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-2', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-3" class="py-name" targets="Module pike.smb2=pike.smb2-module.html"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-3', 'smb2', 'link-3');">smb2</a></tt> </tt>
+<a name="L39"></a><tt class="py-lineno"> 39</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-4" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-4', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-5" class="py-name" targets="Package pike.test=pike.test-module.html"><a title="pike.test" class="py-name" href="#" onclick="return doclink('link-5', 'test', 'link-5');">test</a></tt> </tt>
+<a name="L40"></a><tt class="py-lineno"> 40</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-6" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-6', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-7" class="py-name" targets="Module pike.ntstatus=pike.ntstatus-module.html"><a title="pike.ntstatus" class="py-name" href="#" onclick="return doclink('link-7', 'ntstatus', 'link-7');">ntstatus</a></tt> </tt>
+<a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line"> </tt>
+<a name="L42"></a><tt class="py-lineno"> 42</tt>  <tt class="py-line"><tt class="py-decorator">@</tt><tt class="py-decorator">pike</tt><tt class="py-op">.</tt><tt id="link-8" class="py-name"><a title="pike.test" class="py-name" href="#" onclick="return doclink('link-8', 'test', 'link-5');">test</a></tt><tt class="py-op">.</tt><tt id="link-9" class="py-name" targets="Class pike.test.RequireDialect=pike.test.RequireDialect-class.html"><a title="pike.test.RequireDialect" class="py-name" href="#" onclick="return doclink('link-9', 'RequireDialect', 'link-9');">RequireDialect</a></tt><tt class="py-op">(</tt><tt id="link-10" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-10', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-11" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-11', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-12" class="py-name" targets="Variable pike.smb2.DIALECT_SMB3_0=pike.smb2-module.html#DIALECT_SMB3_0,Variable pike.smb2.Dialect.DIALECT_SMB3_0=pike.smb2.Dialect-class.html#DIALECT_SMB3_0"><a title="pike.smb2.DIALECT_SMB3_0
+pike.smb2.Dialect.DIALECT_SMB3_0" class="py-name" href="#" onclick="return doclink('link-12', 'DIALECT_SMB3_0', 'link-12');">DIALECT_SMB3_0</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L43"></a><tt class="py-lineno"> 43</tt>  <tt class="py-line"><tt class="py-decorator">@</tt><tt class="py-decorator">pike</tt><tt class="py-op">.</tt><tt id="link-13" class="py-name"><a title="pike.test" class="py-name" href="#" onclick="return doclink('link-13', 'test', 'link-5');">test</a></tt><tt class="py-op">.</tt><tt id="link-14" class="py-name" targets="Class pike.test.RequireCapabilities=pike.test.RequireCapabilities-class.html"><a title="pike.test.RequireCapabilities" class="py-name" href="#" onclick="return doclink('link-14', 'RequireCapabilities', 'link-14');">RequireCapabilities</a></tt><tt class="py-op">(</tt><tt id="link-15" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-15', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-16" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-16', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-17" class="py-name" targets="Variable pike.smb2.GlobalCaps.SMB2_GLOBAL_CAP_MULTI_CHANNEL=pike.smb2.GlobalCaps-class.html#SMB2_GLOBAL_CAP_MULTI_CHANNEL,Variable pike.smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL=pike.smb2-module.html#SMB2_GLOBAL_CAP_MULTI_CHANNEL"><a title="pike.smb2.GlobalCaps.SMB2_GLOBAL_CAP_MULTI_CHANNEL
+pike.smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL" class="py-name" href="#" onclick="return doclink('link-17', 'SMB2_GLOBAL_CAP_MULTI_CHANNEL', 'link-17');">SMB2_GLOBAL_CAP_MULTI_CHANNEL</a></tt><tt class="py-op">)</tt> </tt>
+<a name="MultiChannelTest"></a><div id="MultiChannelTest-def"><a name="L44"></a><tt class="py-lineno"> 44</tt> <a class="py-toggle" href="#" id="MultiChannelTest-toggle" onclick="return toggle('MultiChannelTest');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="pike.test.multichannel.MultiChannelTest-class.html">MultiChannelTest</a><tt class="py-op">(</tt><tt class="py-base-class">pike</tt><tt class="py-op">.</tt><tt class="py-base-class">test</tt><tt class="py-op">.</tt><tt class="py-base-class">PikeTest</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="MultiChannelTest-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="MultiChannelTest-expanded"><a name="MultiChannelTest.session_bind"></a><div id="MultiChannelTest.session_bind-def"><a name="L45"></a><tt class="py-lineno"> 45</tt> <a class="py-toggle" href="#" id="MultiChannelTest.session_bind-toggle" onclick="return toggle('MultiChannelTest.session_bind');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.multichannel.MultiChannelTest-class.html#session_bind">session_bind</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">chan</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="MultiChannelTest.session_bind-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="MultiChannelTest.session_bind-expanded"><a name="L46"></a><tt class="py-lineno"> 46</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt class="py-name">connection</tt><tt class="py-op">.</tt><tt class="py-name">client</tt><tt class="py-op">.</tt><tt id="link-18" class="py-name" targets="Method pike.model.Client.connect()=pike.model.Client-class.html#connect,Method pike.transport.Transport.connect()=pike.transport.Transport-class.html#connect"><a title="pike.model.Client.connect
+pike.transport.Transport.connect" class="py-name" href="#" onclick="return doclink('link-18', 'connect', 'link-18');">connect</a></tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">server</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-19" class="py-name" targets="Method pike.model.Connection.negotiate()=pike.model.Connection-class.html#negotiate,Method pike.ntlm.NtlmAuthenticator.negotiate()=pike.ntlm.NtlmAuthenticator-class.html#negotiate,Module pike.test.negotiate=pike.test.negotiate-module.html,Method pike.test.negotiate.CapTest.negotiate()=pike.test.negotiate.CapTest-class.html#negotiate,Method pike.test.negotiate.NegotiateContext.negotiate()=pike.test.negotiate.NegotiateContext-class.html#negotiate"><a title="pike.model.Connection.negotiate
+pike.ntlm.NtlmAuthenticator.negotiate
+pike.test.negotiate
+pike.test.negotiate.CapTest.negotiate
+pike.test.negotiate.NegotiateContext.negotiate" class="py-name" href="#" onclick="return doclink('link-19', 'negotiate', 'link-19');">negotiate</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-20" class="py-name" targets="Method pike.model.Connection.session_setup()=pike.model.Connection-class.html#session_setup"><a title="pike.model.Connection.session_setup" class="py-name" href="#" onclick="return doclink('link-20', 'session_setup', 'link-20');">session_setup</a></tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">creds</tt><tt class="py-op">,</tt> <tt class="py-name">bind</tt><tt class="py-op">=</tt><tt class="py-name">chan</tt><tt class="py-op">.</tt><tt id="link-21" class="py-name" targets="Method pike.model.Connection.session()=pike.model.Connection-class.html#session,Module pike.test.session=pike.test.session-module.html"><a title="pike.model.Connection.session
+pike.test.session" class="py-name" href="#" onclick="return doclink('link-21', 'session', 'link-21');">session</a></tt><tt class="py-op">)</tt> </tt>
+</div><a name="L47"></a><tt class="py-lineno"> 47</tt>  <tt class="py-line"> </tt>
+<a name="L48"></a><tt class="py-lineno"> 48</tt>  <tt class="py-line">    <tt class="py-comment"># Open a file, binding session to second channel, and close it there</tt> </tt>
+<a name="MultiChannelTest.test_open_bind_close"></a><div id="MultiChannelTest.test_open_bind_close-def"><a name="L49"></a><tt class="py-lineno"> 49</tt> <a class="py-toggle" href="#" id="MultiChannelTest.test_open_bind_close-toggle" onclick="return toggle('MultiChannelTest.test_open_bind_close');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.multichannel.MultiChannelTest-class.html#test_open_bind_close">test_open_bind_close</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="MultiChannelTest.test_open_bind_close-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="MultiChannelTest.test_open_bind_close-expanded"><a name="L50"></a><tt class="py-lineno"> 50</tt>  <tt class="py-line">        <tt class="py-name">chan</tt><tt class="py-op">,</tt> <tt id="link-22" class="py-name" targets="Method pike.model.Session.tree()=pike.model.Session-class.html#tree,Module pike.test.tree=pike.test.tree-module.html"><a title="pike.model.Session.tree
+pike.test.tree" class="py-name" href="#" onclick="return doclink('link-22', 'tree', 'link-22');">tree</a></tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-23" class="py-name" targets="Method pike.model.Channel.tree_connect()=pike.model.Channel-class.html#tree_connect,Method pike.test.PikeTest.tree_connect()=pike.test.PikeTest-class.html#tree_connect"><a title="pike.model.Channel.tree_connect
+pike.test.PikeTest.tree_connect" class="py-name" href="#" onclick="return doclink('link-23', 'tree_connect', 'link-23');">tree_connect</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L51"></a><tt class="py-lineno"> 51</tt>  <tt class="py-line">        <tt class="py-name">handle</tt> <tt class="py-op">=</tt> <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt id="link-24" class="py-name" targets="Method pike.model.Channel.create()=pike.model.Channel-class.html#create,Method pike.test.durable.DurableHandleTest.create()=pike.test.durable.DurableHandleTest-class.html#create"><a title="pike.model.Channel.create
+pike.test.durable.DurableHandleTest.create" class="py-name" href="#" onclick="return doclink('link-24', 'create', 'link-24');">create</a></tt><tt class="py-op">(</tt><tt id="link-25" class="py-name"><a title="pike.model.Session.tree
+pike.test.tree" class="py-name" href="#" onclick="return doclink('link-25', 'tree', 'link-22');">tree</a></tt><tt class="py-op">,</tt> <tt class="py-string">'hello.txt'</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-26" class="py-name" targets="Method pike.model.Future.result()=pike.model.Future-class.html#result"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-26', 'result', 'link-26');">result</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L52"></a><tt class="py-lineno"> 52</tt>  <tt class="py-line"> </tt>
+<a name="L53"></a><tt class="py-lineno"> 53</tt>  <tt class="py-line">        <tt class="py-comment"># Open a second channel and bind the session</tt> </tt>
+<a name="L54"></a><tt class="py-lineno"> 54</tt>  <tt class="py-line">        <tt class="py-name">chan2</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-27" class="py-name" targets="Method pike.test.multichannel.MultiChannelTest.session_bind()=pike.test.multichannel.MultiChannelTest-class.html#session_bind"><a title="pike.test.multichannel.MultiChannelTest.session_bind" class="py-name" href="#" onclick="return doclink('link-27', 'session_bind', 'link-27');">session_bind</a></tt><tt class="py-op">(</tt><tt class="py-name">chan</tt><tt class="py-op">)</tt> </tt>
+<a name="L55"></a><tt class="py-lineno"> 55</tt>  <tt class="py-line">     </tt>
+<a name="L56"></a><tt class="py-lineno"> 56</tt>  <tt class="py-line">        <tt class="py-comment"># Close the handle on the second channel</tt> </tt>
+<a name="L57"></a><tt class="py-lineno"> 57</tt>  <tt class="py-line">        <tt class="py-name">chan2</tt><tt class="py-op">.</tt><tt id="link-28" class="py-name" targets="Method pike.model.Channel.close()=pike.model.Channel-class.html#close,Method pike.model.Connection.close()=pike.model.Connection-class.html#close,Method pike.transport.Transport.close()=pike.transport.Transport-class.html#close"><a title="pike.model.Channel.close
+pike.model.Connection.close
+pike.transport.Transport.close" class="py-name" href="#" onclick="return doclink('link-28', 'close', 'link-28');">close</a></tt><tt class="py-op">(</tt><tt class="py-name">handle</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L58"></a><tt class="py-lineno"> 58</tt>  <tt class="py-line"> </tt>
+<a name="L59"></a><tt class="py-lineno"> 59</tt>  <tt class="py-line">    <tt class="py-comment"># Simulate a channel failover during a write and confirm that a</tt> </tt>
+<a name="L60"></a><tt class="py-lineno"> 60</tt>  <tt class="py-line">    <tt class="py-comment"># stale write sent on the original channel is rejected</tt> </tt>
+<a name="MultiChannelTest.test_write_fence_reject_stale"></a><div id="MultiChannelTest.test_write_fence_reject_stale-def"><a name="L61"></a><tt class="py-lineno"> 61</tt> <a class="py-toggle" href="#" id="MultiChannelTest.test_write_fence_reject_stale-toggle" onclick="return toggle('MultiChannelTest.test_write_fence_reject_stale');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.multichannel.MultiChannelTest-class.html#test_write_fence_reject_stale">test_write_fence_reject_stale</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="MultiChannelTest.test_write_fence_reject_stale-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="MultiChannelTest.test_write_fence_reject_stale-expanded"><a name="L62"></a><tt class="py-lineno"> 62</tt>  <tt class="py-line">        <tt class="py-name">data_stale</tt> <tt class="py-op">=</tt> <tt class="py-string">'stale'</tt> </tt>
+<a name="L63"></a><tt class="py-lineno"> 63</tt>  <tt class="py-line">        <tt class="py-name">data_fresh</tt> <tt class="py-op">=</tt> <tt class="py-string">'fresh'</tt> </tt>
+<a name="L64"></a><tt class="py-lineno"> 64</tt>  <tt class="py-line">        <tt class="py-name">chan</tt><tt class="py-op">,</tt> <tt id="link-29" class="py-name"><a title="pike.model.Session.tree
+pike.test.tree" class="py-name" href="#" onclick="return doclink('link-29', 'tree', 'link-22');">tree</a></tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-30" class="py-name"><a title="pike.model.Channel.tree_connect
+pike.test.PikeTest.tree_connect" class="py-name" href="#" onclick="return doclink('link-30', 'tree_connect', 'link-23');">tree_connect</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L65"></a><tt class="py-lineno"> 65</tt>  <tt class="py-line">        <tt class="py-name">client</tt> <tt class="py-op">=</tt> <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt class="py-name">connection</tt><tt class="py-op">.</tt><tt class="py-name">client</tt> </tt>
+<a name="L66"></a><tt class="py-lineno"> 66</tt>  <tt class="py-line">         </tt>
+<a name="L67"></a><tt class="py-lineno"> 67</tt>  <tt class="py-line">        <tt class="py-comment"># Open a file</tt> </tt>
+<a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line">        <tt class="py-name">handle</tt> <tt class="py-op">=</tt> <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt id="link-31" class="py-name"><a title="pike.model.Channel.create
+pike.test.durable.DurableHandleTest.create" class="py-name" href="#" onclick="return doclink('link-31', 'create', 'link-24');">create</a></tt><tt class="py-op">(</tt><tt id="link-32" class="py-name"><a title="pike.model.Session.tree
+pike.test.tree" class="py-name" href="#" onclick="return doclink('link-32', 'tree', 'link-22');">tree</a></tt><tt class="py-op">,</tt> <tt class="py-string">'hello.txt'</tt><tt class="py-op">,</tt> <tt class="py-name">disposition</tt><tt class="py-op">=</tt><tt id="link-33" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-33', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-34" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-34', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-35" class="py-name" targets="Variable pike.smb2.CreateDisposition.FILE_SUPERSEDE=pike.smb2.CreateDisposition-class.html#FILE_SUPERSEDE,Variable pike.smb2.FILE_SUPERSEDE=pike.smb2-module.html#FILE_SUPERSEDE"><a title="pike.smb2.CreateDisposition.FILE_SUPERSEDE
+pike.smb2.FILE_SUPERSEDE" class="py-name" href="#" onclick="return doclink('link-35', 'FILE_SUPERSEDE', 'link-35');">FILE_SUPERSEDE</a></tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-36" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-36', 'result', 'link-26');">result</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L69"></a><tt class="py-lineno"> 69</tt>  <tt class="py-line"> </tt>
+<a name="L70"></a><tt class="py-lineno"> 70</tt>  <tt class="py-line">        <tt class="py-comment"># Open a second channel</tt> </tt>
+<a name="L71"></a><tt class="py-lineno"> 71</tt>  <tt class="py-line">        <tt class="py-name">chan2</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-37" class="py-name"><a title="pike.test.multichannel.MultiChannelTest.session_bind" class="py-name" href="#" onclick="return doclink('link-37', 'session_bind', 'link-27');">session_bind</a></tt><tt class="py-op">(</tt><tt class="py-name">chan</tt><tt class="py-op">)</tt> </tt>
+<a name="L72"></a><tt class="py-lineno"> 72</tt>  <tt class="py-line"> </tt>
+<a name="L73"></a><tt class="py-lineno"> 73</tt>  <tt class="py-line">        <tt class="py-comment"># Pretend channel failover occured</tt> </tt>
+<a name="L74"></a><tt class="py-lineno"> 74</tt>  <tt class="py-line">        <tt class="py-name">client</tt><tt class="py-op">.</tt><tt class="py-name">channel_sequence</tt> <tt class="py-op">=</tt> <tt class="py-number">1</tt> </tt>
+<a name="L75"></a><tt class="py-lineno"> 75</tt>  <tt class="py-line"> </tt>
+<a name="L76"></a><tt class="py-lineno"> 76</tt>  <tt class="py-line">        <tt class="py-comment"># Send write replay</tt> </tt>
+<a name="L77"></a><tt class="py-lineno"> 77</tt>  <tt class="py-line">        <tt class="py-keyword">with</tt> <tt class="py-name">chan2</tt><tt class="py-op">.</tt><tt id="link-38" class="py-name" targets="Method pike.model.Channel.let()=pike.model.Channel-class.html#let,Method pike.model.Connection.SessionSetupContext.let()=pike.model.Connection.SessionSetupContext-class.html#let,Method pike.model.Connection.let()=pike.model.Connection-class.html#let"><a title="pike.model.Channel.let
+pike.model.Connection.SessionSetupContext.let
+pike.model.Connection.let" class="py-name" href="#" onclick="return doclink('link-38', 'let', 'link-38');">let</a></tt><tt class="py-op">(</tt><tt class="py-name">flags</tt><tt class="py-op">=</tt><tt id="link-39" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-39', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-40" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-40', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-41" class="py-name" targets="Variable pike.smb2.Flags.SMB2_FLAGS_REPLAY_OPERATION=pike.smb2.Flags-class.html#SMB2_FLAGS_REPLAY_OPERATION,Variable pike.smb2.SMB2_FLAGS_REPLAY_OPERATION=pike.smb2-module.html#SMB2_FLAGS_REPLAY_OPERATION"><a title="pike.smb2.Flags.SMB2_FLAGS_REPLAY_OPERATION
+pike.smb2.SMB2_FLAGS_REPLAY_OPERATION" class="py-name" href="#" onclick="return doclink('link-41', 'SMB2_FLAGS_REPLAY_OPERATION', 'link-41');">SMB2_FLAGS_REPLAY_OPERATION</a></tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L78"></a><tt class="py-lineno"> 78</tt>  <tt class="py-line">            <tt class="py-name">chan2</tt><tt class="py-op">.</tt><tt id="link-42" class="py-name" targets="Method pike.model.Channel.write()=pike.model.Channel-class.html#write"><a title="pike.model.Channel.write" class="py-name" href="#" onclick="return doclink('link-42', 'write', 'link-42');">write</a></tt><tt class="py-op">(</tt><tt class="py-name">handle</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-name">data_stale</tt><tt class="py-op">)</tt> </tt>
+<a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line"> </tt>
+<a name="L80"></a><tt class="py-lineno"> 80</tt>  <tt class="py-line">        <tt class="py-comment"># Send normal write</tt> </tt>
+<a name="L81"></a><tt class="py-lineno"> 81</tt>  <tt class="py-line">        <tt class="py-name">chan2</tt><tt class="py-op">.</tt><tt id="link-43" class="py-name"><a title="pike.model.Channel.write" class="py-name" href="#" onclick="return doclink('link-43', 'write', 'link-42');">write</a></tt><tt class="py-op">(</tt><tt class="py-name">handle</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-name">data_fresh</tt><tt class="py-op">)</tt> </tt>
+<a name="L82"></a><tt class="py-lineno"> 82</tt>  <tt class="py-line"> </tt>
+<a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line">        <tt class="py-comment"># Send stale write on original channel, which should fail.</tt> </tt>
+<a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line">        <tt class="py-comment"># Spec is ambiguous as to status code, but Windows Server 2012</tt> </tt>
+<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line">        <tt class="py-comment"># seems to return STATUS_FILE_NOT_AVAILABLE</tt> </tt>
+<a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line">        <tt class="py-keyword">with</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-44" class="py-name" targets="Method pike.test.PikeTest.assert_error()=pike.test.PikeTest-class.html#assert_error"><a title="pike.test.PikeTest.assert_error" class="py-name" href="#" onclick="return doclink('link-44', 'assert_error', 'link-44');">assert_error</a></tt><tt class="py-op">(</tt><tt id="link-45" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-45', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-46" class="py-name"><a title="pike.ntstatus" class="py-name" href="#" onclick="return doclink('link-46', 'ntstatus', 'link-7');">ntstatus</a></tt><tt class="py-op">.</tt><tt id="link-47" class="py-name" targets="Variable pike.ntstatus.STATUS_FILE_NOT_AVAILABLE=pike.ntstatus-module.html#STATUS_FILE_NOT_AVAILABLE,Variable pike.ntstatus.Status.STATUS_FILE_NOT_AVAILABLE=pike.ntstatus.Status-class.html#STATUS_FILE_NOT_AVAILABLE"><a title="pike.ntstatus.STATUS_FILE_NOT_AVAILABLE
+pike.ntstatus.Status.STATUS_FILE_NOT_AVAILABLE" class="py-name" href="#" onclick="return doclink('link-47', 'STATUS_FILE_NOT_AVAILABLE', 'link-47');">STATUS_FILE_NOT_AVAILABLE</a></tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line">            <tt class="py-keyword">with</tt> <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt id="link-48" class="py-name"><a title="pike.model.Channel.let
+pike.model.Connection.SessionSetupContext.let
+pike.model.Connection.let" class="py-name" href="#" onclick="return doclink('link-48', 'let', 'link-38');">let</a></tt><tt class="py-op">(</tt><tt class="py-name">channel_sequence</tt><tt class="py-op">=</tt><tt class="py-number">0</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line">                <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt id="link-49" class="py-name"><a title="pike.model.Channel.write" class="py-name" href="#" onclick="return doclink('link-49', 'write', 'link-42');">write</a></tt><tt class="py-op">(</tt><tt class="py-name">handle</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-name">data_stale</tt><tt class="py-op">)</tt> </tt>
+<a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line"> </tt>
+<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line">        <tt class="py-comment"># Read back data to ensure it is not stale value</tt> </tt>
+<a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line">        <tt id="link-50" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-50', 'result', 'link-26');">result</a></tt> <tt class="py-op">=</tt> <tt class="py-name">chan2</tt><tt class="py-op">.</tt><tt id="link-51" class="py-name" targets="Method pike.model.Channel.read()=pike.model.Channel-class.html#read"><a title="pike.model.Channel.read" class="py-name" href="#" onclick="return doclink('link-51', 'read', 'link-51');">read</a></tt><tt class="py-op">(</tt><tt class="py-name">handle</tt><tt class="py-op">,</tt> <tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">data_fresh</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt class="py-name">tostring</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">assertEquals</tt><tt class="py-op">(</tt><tt id="link-52" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-52', 'result', 'link-26');">result</a></tt><tt class="py-op">,</tt> <tt class="py-name">data_fresh</tt><tt class="py-op">)</tt> </tt>
+<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line"> </tt>
+<a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line">        <tt class="py-comment"># Close handle</tt> </tt>
+<a name="L95"></a><tt class="py-lineno"> 95</tt>  <tt class="py-line">        <tt class="py-name">chan2</tt><tt class="py-op">.</tt><tt id="link-53" class="py-name"><a title="pike.model.Channel.close
+pike.model.Connection.close
+pike.transport.Transport.close" class="py-name" href="#" onclick="return doclink('link-53', 'close', 'link-28');">close</a></tt><tt class="py-op">(</tt><tt class="py-name">handle</tt><tt class="py-op">)</tt> </tt>
+<a name="L96"></a><tt class="py-lineno"> 96</tt>  <tt class="py-line"> </tt>
+<a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line">        <tt class="py-comment"># Close second connection</tt> </tt>
+<a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line">        <tt class="py-name">chan2</tt><tt class="py-op">.</tt><tt class="py-name">connection</tt><tt class="py-op">.</tt><tt id="link-54" class="py-name"><a title="pike.model.Channel.close
+pike.model.Connection.close
+pike.transport.Transport.close" class="py-name" href="#" onclick="return doclink('link-54', 'close', 'link-28');">close</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L99"></a><tt class="py-lineno"> 99</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="pike-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Thu Jun 29 08:51:27 2017
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

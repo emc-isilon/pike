@@ -45,6 +45,8 @@
     <td>
       <table cellpadding="0" cellspacing="0">
         <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
             >]&nbsp;|&nbsp;<a href="pike.model.Open-class.html"
@@ -67,8 +69,17 @@ object --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Instance Methods</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
@@ -97,10 +108,47 @@ object --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="on_oplock_break"></a><span class="summary-sig-name">on_oplock_break</span>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">cb</span>)</span></td>
+          <td><span class="summary-sig"><a href="pike.model.Open-class.html#arm_oplock_future" class="summary-sig-name">arm_oplock_future</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      (Re)arm the oplock future for this open.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Open.arm_oplock_future">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="pike.model.Open-class.html#on_oplock_break" class="summary-sig-name">on_oplock_break</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">cb</span>)</span><br />
+      Simple oplock break callback handler.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Open.on_oplock_break">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="pike.model.Open-class.html#on_oplock_break_request" class="summary-sig-name">on_oplock_break_request</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">cb</span>,
+        <span class="summary-sig-arg">cb_ctx</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Complex oplock break callback handler.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Open.on_oplock_break_request">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -148,8 +196,17 @@ object --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Properties</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
   <tr>
     <td colspan="2" class="summary">
@@ -164,8 +221,17 @@ object --+
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Method Details</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 </table>
 <a name="__init__"></a>
@@ -196,6 +262,84 @@ object --+
   </dl>
 </td></tr></table>
 </div>
+<a name="arm_oplock_future"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">arm_oplock_future</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pike.model-pysrc.html#Open.arm_oplock_future">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>(Re)arm the oplock future for this open. This function should be 
+  called when an oplock changes level to anything except 
+  SMB2_OPLOCK_LEVEL_NONE</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="on_oplock_break"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">on_oplock_break</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">cb</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pike.model-pysrc.html#Open.on_oplock_break">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Simple oplock break callback handler.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>cb</code></strong> - callable taking 1 parameter: the break request oplock level 
+          should return the desired oplock level to break to</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="on_oplock_break_request"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">on_oplock_break_request</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">cb</span>,
+        <span class="sig-arg">cb_ctx</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pike.model-pysrc.html#Open.on_oplock_break_request">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <pre class="literalblock">
+
+Complex oplock break callback handler.
+@param cb: callable taking 3 parameters:
+                L{Open}
+                L{Smb2} containing the break request
+                L{object} arbitrary context
+           should handle breaking the oplock in some way
+           callback is also responsible for re-arming the future
+           and updating the oplock_level (if changed)
+
+</pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
 <br />
 <!-- ==================== NAVIGATION BAR ==================== -->
 <table class="navbar" border="0" width="100%" cellpadding="0"
@@ -223,7 +367,7 @@ object --+
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Sep 19 09:27:43 2013
+    Generated by Epydoc 3.0.1 on Thu Jun 29 08:51:17 2017
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

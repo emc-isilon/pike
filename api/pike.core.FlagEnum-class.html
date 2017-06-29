@@ -45,6 +45,8 @@
     <td>
       <table cellpadding="0" cellspacing="0">
         <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
             >]&nbsp;|&nbsp;<a href="pike.core.FlagEnum-class.html"
@@ -68,7 +70,7 @@ object --+
 <dl><dt>Known Subclasses:</dt>
 <dd>
       <ul class="subclass-list">
-<li><a href="pike.smb2.Access-class.html">smb2.Access</a></li><li>, <a href="pike.smb2.BreakLeaseFlags-class.html">smb2.BreakLeaseFlags</a></li><li>, <a href="pike.smb2.CloseFlags-class.html">smb2.CloseFlags</a></li><li>, <a href="pike.smb2.CreateOptions-class.html">smb2.CreateOptions</a></li><li>, <a href="pike.smb2.DurableFlags-class.html">smb2.DurableFlags</a></li><li>, <a href="pike.smb2.FileAttributes-class.html">smb2.FileAttributes</a></li><li>, <a href="pike.smb2.Flags-class.html">smb2.Flags</a></li><li>, <a href="pike.smb2.GlobalCaps-class.html">smb2.GlobalCaps</a></li><li>, <a href="pike.smb2.IoctlFlags-class.html">smb2.IoctlFlags</a></li><li>, <a href="pike.smb2.LeaseFlags-class.html">smb2.LeaseFlags</a></li><li>, <a href="pike.smb2.LeaseState-class.html">smb2.LeaseState</a></li><li>, <a href="pike.smb2.LockFlags-class.html">smb2.LockFlags</a></li><li>, <a href="pike.smb2.ScanFlags-class.html">smb2.ScanFlags</a></li><li>, <a href="pike.smb2.SecurityInformation-class.html">smb2.SecurityInformation</a></li><li>, <a href="pike.smb2.SecurityMode-class.html">smb2.SecurityMode</a></li><li>, <a href="pike.smb2.SessionFlags-class.html">smb2.SessionFlags</a></li><li>, <a href="pike.smb2.ShareAccess-class.html">smb2.ShareAccess</a></li><li>, <a href="pike.smb2.ShareCaps-class.html">smb2.ShareCaps</a></li><li>, <a href="pike.smb2.WriteFlags-class.html">smb2.WriteFlags</a></li>  </ul>
+<li><a href="pike.smb2.Access-class.html">smb2.Access</a></li><li>, <a href="pike.smb2.AceFlags-class.html">smb2.AceFlags</a></li><li>, <a href="pike.smb2.BreakLeaseFlags-class.html">smb2.BreakLeaseFlags</a></li><li>, <a href="pike.smb2.ChangeNotifyFlags-class.html">smb2.ChangeNotifyFlags</a></li><li>, <a href="pike.smb2.Characteristics-class.html">smb2.Characteristics</a></li><li>, <a href="pike.smb2.CloseFlags-class.html">smb2.CloseFlags</a></li><li>, <a href="pike.smb2.CompletionFilter-class.html">smb2.CompletionFilter</a></li><li>, <a href="pike.smb2.CreateOptions-class.html">smb2.CreateOptions</a></li><li>, <a href="pike.smb2.DurableFlags-class.html">smb2.DurableFlags</a></li><li>, <a href="pike.smb2.FileAttributes-class.html">smb2.FileAttributes</a></li><li>, <a href="pike.smb2.FileSystemAtrribute-class.html">smb2.FileSystemAtrribute</a></li><li>, <a href="pike.smb2.FileSystemControlFlags-class.html">smb2.FileSystemControlFlags</a></li><li>, <a href="pike.smb2.Flags-class.html">smb2.Flags</a></li><li>, <a href="pike.smb2.GlobalCaps-class.html">smb2.GlobalCaps</a></li><li>, <a href="pike.smb2.IoctlFlags-class.html">smb2.IoctlFlags</a></li><li>, <a href="pike.smb2.LeaseFlags-class.html">smb2.LeaseFlags</a></li><li>, <a href="pike.smb2.LeaseState-class.html">smb2.LeaseState</a></li><li>, <a href="pike.smb2.LockFlags-class.html">smb2.LockFlags</a></li><li>, <a href="pike.smb2.ScanFlags-class.html">smb2.ScanFlags</a></li><li>, <a href="pike.smb2.SecurityInformation-class.html">smb2.SecurityInformation</a></li><li>, <a href="pike.smb2.SecurityMode-class.html">smb2.SecurityMode</a></li><li>, <a href="pike.smb2.SessionFlags-class.html">smb2.SessionFlags</a></li><li>, <a href="pike.smb2.ShareAccess-class.html">smb2.ShareAccess</a></li><li>, <a href="pike.smb2.ShareCaps-class.html">smb2.ShareCaps</a></li><li>, <a href="pike.smb2.ShareFlags-class.html">smb2.ShareFlags</a></li><li>, <a href="pike.smb2.SymbolicLinkFlags-class.html">smb2.SymbolicLinkFlags</a></li><li>, <a href="pike.smb2.WriteFlags-class.html">smb2.WriteFlags</a></li><li>, <a href="pike.ntlm.NegotiateFlags-class.html">ntlm.NegotiateFlags</a></li>  </ul>
 </dd></dl>
 
 <hr />
@@ -90,8 +92,17 @@ object --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Nested Classes</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Nested Classes</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-NestedClasses"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
   <tr>
     <td colspan="2" class="summary">
@@ -106,8 +117,17 @@ object --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Instance Methods</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
@@ -232,8 +252,17 @@ object --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Class Methods</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
@@ -269,8 +298,17 @@ object --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Static Methods</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Static Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-StaticMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
   <tr>
     <td colspan="2" class="summary">
@@ -280,13 +318,48 @@ object --+
     </td>
   </tr>
 </table>
+<!-- ==================== CLASS VARIABLES ==================== -->
+<a name="section-ClassVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <div class="private">    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="pike.core.Enum-class.html">Enum</a></code></b> (private):
+      <code><a href="pike.core.Enum-class.html#_nametoval" onclick="show_private();">_nametoval</a></code>,
+      <code><a href="pike.core.Enum-class.html#_valtoname" onclick="show_private();">_valtoname</a></code>
+      </p></div>
+    </td>
+  </tr>
+</table>
 <!-- ==================== PROPERTIES ==================== -->
 <a name="section-Properties"></a>
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Properties</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
   <tr>
     <td colspan="2" class="summary">
@@ -307,8 +380,17 @@ object --+
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Method Details</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 </table>
 <a name="__and__"></a>
@@ -442,7 +524,7 @@ object --+
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Sep 19 09:27:43 2013
+    Generated by Epydoc 3.0.1 on Thu Jun 29 08:51:16 2017
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

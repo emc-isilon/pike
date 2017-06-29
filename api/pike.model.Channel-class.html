@@ -45,6 +45,8 @@
     <td>
       <table cellpadding="0" cellspacing="0">
         <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
             >]&nbsp;|&nbsp;<a href="pike.model.Channel-class.html"
@@ -67,8 +69,17 @@ object --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Instance Methods</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
@@ -83,6 +94,23 @@ object --+
       x.__init__(...) initializes x; see help(type(x)) for signature</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Channel.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="cancel_request"></a><span class="summary-sig-name">cancel_request</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">future</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.cancel_request">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -113,10 +141,61 @@ object --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
+          <td><span class="summary-sig"><a name="tree_connect_request"></a><span class="summary-sig-name">tree_connect_request</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">path</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.tree_connect_request">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="tree_connect_submit"></a><span class="summary-sig-name">tree_connect_submit</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">tree_req</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.tree_connect_submit">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
           <td><span class="summary-sig"><a name="tree_connect"></a><span class="summary-sig-name">tree_connect</span>(<span class="summary-sig-arg">self</span>,
         <span class="summary-sig-arg">path</span>)</span></td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Channel.tree_connect">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="tree_disconnect_request"></a><span class="summary-sig-name">tree_disconnect_request</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">tree</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.tree_disconnect_request">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -147,9 +226,93 @@ object --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
+          <td><span class="summary-sig"><a name="logoff_request"></a><span class="summary-sig-name">logoff_request</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.logoff_request">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="logoff_submit"></a><span class="summary-sig-name">logoff_submit</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">logoff_req</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.logoff_submit">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
           <td><span class="summary-sig"><a name="logoff"></a><span class="summary-sig-name">logoff</span>(<span class="summary-sig-arg">self</span>)</span></td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Channel.logoff">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="create_request"></a><span class="summary-sig-name">create_request</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">tree</span>,
+        <span class="summary-sig-arg">path</span>,
+        <span class="summary-sig-arg">access</span>=<span class="summary-sig-default">GENERIC_READ | GENERIC_WRITE</span>,
+        <span class="summary-sig-arg">attributes</span>=<span class="summary-sig-default">FILE_ATTRIBUTE_NORMAL</span>,
+        <span class="summary-sig-arg">share</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">disposition</span>=<span class="summary-sig-default">FILE_OPEN_IF</span>,
+        <span class="summary-sig-arg">options</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">maximal_access</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">oplock_level</span>=<span class="summary-sig-default">SMB2_OPLOCK_LEVEL_NONE</span>,
+        <span class="summary-sig-arg">lease_key</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">lease_state</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">durable</span>=<span class="summary-sig-default">False</span>,
+        <span class="summary-sig-arg">persistent</span>=<span class="summary-sig-default">False</span>,
+        <span class="summary-sig-arg">create_guid</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">app_instance_id</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">query_on_disk_id</span>=<span class="summary-sig-default">False</span>,
+        <span class="summary-sig-arg">extended_attributes</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">timewarp</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.create_request">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="create_submit"></a><span class="summary-sig-name">create_submit</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">create_req</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.create_submit">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -178,9 +341,46 @@ object --+
         <span class="summary-sig-arg">durable</span>=<span class="summary-sig-default">False</span>,
         <span class="summary-sig-arg">persistent</span>=<span class="summary-sig-default">False</span>,
         <span class="summary-sig-arg">create_guid</span>=<span class="summary-sig-default">None</span>,
-        <span class="summary-sig-arg">app_instance_id</span>=<span class="summary-sig-default">None</span>)</span></td>
+        <span class="summary-sig-arg">app_instance_id</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">query_on_disk_id</span>=<span class="summary-sig-default">False</span>,
+        <span class="summary-sig-arg">extended_attributes</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">timewarp</span>=<span class="summary-sig-default">None</span>)</span></td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Channel.create">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="close_request"></a><span class="summary-sig-name">close_request</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">handle</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.close_request">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="close_submit"></a><span class="summary-sig-name">close_submit</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">close_req</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.close_submit">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -198,6 +398,28 @@ object --+
         <span class="summary-sig-arg">handle</span>)</span></td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Channel.close">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="query_directory_request"></a><span class="summary-sig-name">query_directory_request</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">handle</span>,
+        <span class="summary-sig-arg">file_information_class</span>=<span class="summary-sig-default">FILE_DIRECTORY_INFORMATION</span>,
+        <span class="summary-sig-arg">flags</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">file_index</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">file_name</span>=<span class="summary-sig-default"><code class="variable-quote">'</code><code class="variable-string">*</code><code class="variable-quote">'</code></span>,
+        <span class="summary-sig-arg">output_buffer_length</span>=<span class="summary-sig-default">8192</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.query_directory_request">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -253,13 +475,56 @@ object --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
+          <td><span class="summary-sig"><a name="query_file_info_request"></a><span class="summary-sig-name">query_file_info_request</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">create_res</span>,
+        <span class="summary-sig-arg">file_information_class</span>=<span class="summary-sig-default">FILE_BASIC_INFORMATION</span>,
+        <span class="summary-sig-arg">info_type</span>=<span class="summary-sig-default">SMB2_0_INFO_FILE</span>,
+        <span class="summary-sig-arg">output_buffer_length</span>=<span class="summary-sig-default">4096</span>,
+        <span class="summary-sig-arg">additional_information</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.query_file_info_request">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
           <td><span class="summary-sig"><a name="query_file_info"></a><span class="summary-sig-name">query_file_info</span>(<span class="summary-sig-arg">self</span>,
         <span class="summary-sig-arg">create_res</span>,
         <span class="summary-sig-arg">file_information_class</span>=<span class="summary-sig-default">FILE_BASIC_INFORMATION</span>,
         <span class="summary-sig-arg">info_type</span>=<span class="summary-sig-default">SMB2_0_INFO_FILE</span>,
-        <span class="summary-sig-arg">output_buffer_length</span>=<span class="summary-sig-default">4096</span>)</span></td>
+        <span class="summary-sig-arg">output_buffer_length</span>=<span class="summary-sig-default">4096</span>,
+        <span class="summary-sig-arg">additional_information</span>=<span class="summary-sig-default">None</span>)</span></td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Channel.query_file_info">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="set_file_info_request"></a><span class="summary-sig-name">set_file_info_request</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">handle</span>,
+        <span class="summary-sig-arg">file_information_class</span>=<span class="summary-sig-default">FILE_BASIC_INFORMATION</span>,
+        <span class="summary-sig-arg">info_type</span>=<span class="summary-sig-default">SMB2_0_INFO_FILE</span>,
+        <span class="summary-sig-arg">input_buffer_length</span>=<span class="summary-sig-default">4096</span>,
+        <span class="summary-sig-arg">additional_information</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.set_file_info_request">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -290,9 +555,104 @@ object --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
+          <td><span class="summary-sig"><a name="change_notify_request"></a><span class="summary-sig-name">change_notify_request</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">handle</span>,
+        <span class="summary-sig-arg">completion_filter</span>=<span class="summary-sig-default">SMB2_NOTIFY_CHANGE_CREATION</span>,
+        <span class="summary-sig-arg">flags</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">buffer_length</span>=<span class="summary-sig-default">4096</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.change_notify_request">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="change_notify"></a><span class="summary-sig-name">change_notify</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">handle</span>,
+        <span class="summary-sig-arg">completion_filter</span>=<span class="summary-sig-default">SMB2_NOTIFY_CHANGE_CREATION</span>,
+        <span class="summary-sig-arg">flags</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">buffer_length</span>=<span class="summary-sig-default">4096</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.change_notify">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
           <td><span class="summary-sig"><a name="echo"></a><span class="summary-sig-name">echo</span>(<span class="summary-sig-arg">self</span>)</span></td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Channel.echo">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="flush_request"></a><span class="summary-sig-name">flush_request</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">file</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.flush_request">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="flush"></a><span class="summary-sig-name">flush</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">file</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.flush">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="read_request"></a><span class="summary-sig-name">read_request</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">file</span>,
+        <span class="summary-sig-arg">length</span>,
+        <span class="summary-sig-arg">offset</span>,
+        <span class="summary-sig-arg">minimum_count</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">remaining_bytes</span>=<span class="summary-sig-default">0</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.read_request">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -327,6 +687,27 @@ object --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
+          <td><span class="summary-sig"><a name="write_request"></a><span class="summary-sig-name">write_request</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">file</span>,
+        <span class="summary-sig-arg">offset</span>,
+        <span class="summary-sig-arg">buffer</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">remaining_bytes</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">flags</span>=<span class="summary-sig-default">0</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.write_request">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
           <td><span class="summary-sig"><a name="write"></a><span class="summary-sig-name">write</span>(<span class="summary-sig-arg">self</span>,
         <span class="summary-sig-arg">file</span>,
         <span class="summary-sig-arg">offset</span>,
@@ -335,6 +716,25 @@ object --+
         <span class="summary-sig-arg">flags</span>=<span class="summary-sig-default">0</span>)</span></td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Channel.write">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="pike.model.Channel-class.html#lock_request" class="summary-sig-name">lock_request</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">handle</span>,
+        <span class="summary-sig-arg">locks</span>,
+        <span class="summary-sig-arg">sequence</span>=<span class="summary-sig-default">0</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.lock_request">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -384,6 +784,221 @@ object --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
+          <td><span class="summary-sig"><a name="resume_key"></a><span class="summary-sig-name">resume_key</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">file</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.resume_key">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="pike.model.Channel-class.html#copychunk_request" class="summary-sig-name">copychunk_request</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">source_file</span>,
+        <span class="summary-sig-arg">target_file</span>,
+        <span class="summary-sig-arg">chunks</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.copychunk_request">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="pike.model.Channel-class.html#copychunk" class="summary-sig-name">copychunk</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">source_file</span>,
+        <span class="summary-sig-arg">target_file</span>,
+        <span class="summary-sig-arg">chunks</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.copychunk">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="set_symlink_request"></a><span class="summary-sig-name">set_symlink_request</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">file</span>,
+        <span class="summary-sig-arg">target_name</span>,
+        <span class="summary-sig-arg">flags</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.set_symlink_request">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="set_symlink"></a><span class="summary-sig-name">set_symlink</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">file</span>,
+        <span class="summary-sig-arg">target_name</span>,
+        <span class="summary-sig-arg">flags</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.set_symlink">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="get_symlink_request"></a><span class="summary-sig-name">get_symlink_request</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">file</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.get_symlink_request">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="get_symlink"></a><span class="summary-sig-name">get_symlink</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">file</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.get_symlink">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="enumerate_snapshots_request"></a><span class="summary-sig-name">enumerate_snapshots_request</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">fh</span>,
+        <span class="summary-sig-arg">max_output_response</span>=<span class="summary-sig-default">16384</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.enumerate_snapshots_request">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="enumerate_snapshots"></a><span class="summary-sig-name">enumerate_snapshots</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">fh</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.enumerate_snapshots">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="enumerate_snapshots_list"></a><span class="summary-sig-name">enumerate_snapshots_list</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">fh</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.enumerate_snapshots_list">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="pike.model.Channel-class.html#lease_break_acknowledgement" class="summary-sig-name">lease_break_acknowledgement</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">tree</span>,
+        <span class="summary-sig-arg">notify</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.lease_break_acknowledgement">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="pike.model.Channel-class.html#oplock_break_acknowledgement" class="summary-sig-name">oplock_break_acknowledgement</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">fh</span>,
+        <span class="summary-sig-arg">notify</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Channel.oplock_break_acknowledgement">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
           <td><span class="summary-sig"><a name="frame"></a><span class="summary-sig-name">frame</span>(<span class="summary-sig-arg">self</span>)</span></td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Channel.frame">source&nbsp;code</a></span>
@@ -402,7 +1017,8 @@ object --+
         <tr>
           <td><span class="summary-sig"><a name="request"></a><span class="summary-sig-name">request</span>(<span class="summary-sig-arg">self</span>,
         <span class="summary-sig-arg">nb</span>=<span class="summary-sig-default">None</span>,
-        <span class="summary-sig-arg">obj</span>=<span class="summary-sig-default">None</span>)</span></td>
+        <span class="summary-sig-arg">obj</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">encrypt_data</span>=<span class="summary-sig-default">None</span>)</span></td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Channel.request">source&nbsp;code</a></span>
             
@@ -453,8 +1069,17 @@ object --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Properties</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
   <tr>
     <td colspan="2" class="summary">
@@ -469,8 +1094,17 @@ object --+
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Method Details</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 </table>
 <a name="__init__"></a>
@@ -524,6 +1158,33 @@ object --+
   </dl>
 </td></tr></table>
 </div>
+<a name="lock_request"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">lock_request</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">handle</span>,
+        <span class="sig-arg">locks</span>,
+        <span class="sig-arg">sequence</span>=<span class="sig-default">0</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pike.model-pysrc.html#Channel.lock_request">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>locks</code></strong> - A list of lock tuples, each of which consists of (offset, length,
+          flags).</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
 <a name="lock"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -547,6 +1208,120 @@ object --+
     <dd><ul class="nomargin-top">
         <li><strong class="pname"><code>locks</code></strong> - A list of lock tuples, each of which consists of (offset, length,
           flags).</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="copychunk_request"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">copychunk_request</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">source_file</span>,
+        <span class="sig-arg">target_file</span>,
+        <span class="sig-arg">chunks</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pike.model-pysrc.html#Channel.copychunk_request">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>source_file</code></strong> - <a href="pike.model.Open-class.html" class="link">Open</a></li>
+        <li><strong class="pname"><code>target_file</code></strong> - <a href="pike.model.Open-class.html" class="link">Open</a></li>
+        <li><strong class="pname"><code>chunks</code></strong> - sequence of tuples (source_offset, target_offset, length)</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="copychunk"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">copychunk</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">source_file</span>,
+        <span class="sig-arg">target_file</span>,
+        <span class="sig-arg">chunks</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pike.model-pysrc.html#Channel.copychunk">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>source_file</code></strong> - <a href="pike.model.Open-class.html" class="link">Open</a></li>
+        <li><strong class="pname"><code>target_file</code></strong> - <a href="pike.model.Open-class.html" class="link">Open</a></li>
+        <li><strong class="pname"><code>chunks</code></strong> - sequence of tuples (source_offset, target_offset, length)</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="lease_break_acknowledgement"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">lease_break_acknowledgement</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">tree</span>,
+        <span class="sig-arg">notify</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pike.model-pysrc.html#Channel.lease_break_acknowledgement">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>tree</code></strong> - <a href="pike.model.Tree-class.html" class="link">Tree</a> which 
+          the lease is taken against</li>
+        <li><strong class="pname"><code>notify</code></strong> - <a href="pike.smb2.Smb2-class.html" class="link">Smb2</a> frame 
+          containing a LeaseBreakRequest return a LeaseBreakAcknowledgement
+          with some fields pre-populated</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="oplock_break_acknowledgement"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">oplock_break_acknowledgement</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">fh</span>,
+        <span class="sig-arg">notify</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pike.model-pysrc.html#Channel.oplock_break_acknowledgement">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>fh</code></strong> - Acknowledge break on this <a href="pike.model.Open-class.html" 
+          class="link">Open</a></li>
+        <li><strong class="pname"><code>notify</code></strong> - <a href="pike.smb2.Smb2-class.html" class="link">Smb2</a> frame 
+          containing a OplockBreakRequest return a 
+          OplockBreakAcknowledgement with some fields pre-populated</li>
     </ul></dd>
   </dl>
 </td></tr></table>
@@ -578,7 +1353,7 @@ object --+
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Sep 19 09:27:43 2013
+    Generated by Epydoc 3.0.1 on Thu Jun 29 08:51:17 2017
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"
