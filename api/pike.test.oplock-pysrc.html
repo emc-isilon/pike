@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>pike.test.oplock</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="pike-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="pike-module.html">Package&nbsp;pike</a> ::
+        <a href="pike.test-module.html">Package&nbsp;test</a> ::
+        Module&nbsp;oplock
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="pike.test.oplock-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="pike.test.oplock-module.html">Module pike.test.oplock</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno"> 1</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L2"></a><tt class="py-lineno"> 2</tt>  <tt class="py-line"><tt class="py-comment"># Copyright (c) 2013, EMC Corporation</tt> </tt>
+<a name="L3"></a><tt class="py-lineno"> 3</tt>  <tt class="py-line"><tt class="py-comment"># All rights reserved.</tt> </tt>
+<a name="L4"></a><tt class="py-lineno"> 4</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L5"></a><tt class="py-lineno"> 5</tt>  <tt class="py-line"><tt class="py-comment"># Redistribution and use in source and binary forms, with or without</tt> </tt>
+<a name="L6"></a><tt class="py-lineno"> 6</tt>  <tt class="py-line"><tt class="py-comment"># modification, are permitted provided that the following conditions are met:</tt> </tt>
+<a name="L7"></a><tt class="py-lineno"> 7</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L8"></a><tt class="py-lineno"> 8</tt>  <tt class="py-line"><tt class="py-comment"># 1. Redistributions of source code must retain the above copyright notice,</tt> </tt>
+<a name="L9"></a><tt class="py-lineno"> 9</tt>  <tt class="py-line"><tt class="py-comment"># this list of conditions and the following disclaimer.</tt> </tt>
+<a name="L10"></a><tt class="py-lineno">10</tt>  <tt class="py-line"><tt class="py-comment"># 2. Redistributions in binary form must reproduce the above copyright notice,</tt> </tt>
+<a name="L11"></a><tt class="py-lineno">11</tt>  <tt class="py-line"><tt class="py-comment"># this list of conditions and the following disclaimer in the documentation</tt> </tt>
+<a name="L12"></a><tt class="py-lineno">12</tt>  <tt class="py-line"><tt class="py-comment"># and/or other materials provided with the distribution.</tt> </tt>
+<a name="L13"></a><tt class="py-lineno">13</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L14"></a><tt class="py-lineno">14</tt>  <tt class="py-line"><tt class="py-comment"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"</tt> </tt>
+<a name="L15"></a><tt class="py-lineno">15</tt>  <tt class="py-line"><tt class="py-comment"># AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</tt> </tt>
+<a name="L16"></a><tt class="py-lineno">16</tt>  <tt class="py-line"><tt class="py-comment"># IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</tt> </tt>
+<a name="L17"></a><tt class="py-lineno">17</tt>  <tt class="py-line"><tt class="py-comment"># ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE</tt> </tt>
+<a name="L18"></a><tt class="py-lineno">18</tt>  <tt class="py-line"><tt class="py-comment"># LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</tt> </tt>
+<a name="L19"></a><tt class="py-lineno">19</tt>  <tt class="py-line"><tt class="py-comment"># CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</tt> </tt>
+<a name="L20"></a><tt class="py-lineno">20</tt>  <tt class="py-line"><tt class="py-comment"># SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</tt> </tt>
+<a name="L21"></a><tt class="py-lineno">21</tt>  <tt class="py-line"><tt class="py-comment"># INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</tt> </tt>
+<a name="L22"></a><tt class="py-lineno">22</tt>  <tt class="py-line"><tt class="py-comment"># CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</tt> </tt>
+<a name="L23"></a><tt class="py-lineno">23</tt>  <tt class="py-line"><tt class="py-comment"># ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</tt> </tt>
+<a name="L24"></a><tt class="py-lineno">24</tt>  <tt class="py-line"><tt class="py-comment"># POSSIBILITY OF SUCH DAMAGE.</tt> </tt>
+<a name="L25"></a><tt class="py-lineno">25</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L26"></a><tt class="py-lineno">26</tt>  <tt class="py-line"><tt class="py-comment"># Module Name:</tt> </tt>
+<a name="L27"></a><tt class="py-lineno">27</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L28"></a><tt class="py-lineno">28</tt>  <tt class="py-line"><tt class="py-comment">#        oplock.py</tt> </tt>
+<a name="L29"></a><tt class="py-lineno">29</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L30"></a><tt class="py-lineno">30</tt>  <tt class="py-line"><tt class="py-comment"># Abstract:</tt> </tt>
+<a name="L31"></a><tt class="py-lineno">31</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L32"></a><tt class="py-lineno">32</tt>  <tt class="py-line"><tt class="py-comment">#        Oplock tests</tt> </tt>
+<a name="L33"></a><tt class="py-lineno">33</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L34"></a><tt class="py-lineno">34</tt>  <tt class="py-line"><tt class="py-comment"># Authors: Brian Koropoff (brian.koropoff@emc.com)</tt> </tt>
+<a name="L35"></a><tt class="py-lineno">35</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L36"></a><tt class="py-lineno">36</tt>  <tt class="py-line"> </tt>
+<a name="L37"></a><tt class="py-lineno">37</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-0" class="py-name" targets="Package pike=pike-module.html"><a title="pike" class="py-name" href="#" onclick="return doclink('link-0', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-1" class="py-name" targets="Module pike.model=pike.model-module.html"><a title="pike.model" class="py-name" href="#" onclick="return doclink('link-1', 'model', 'link-1');">model</a></tt> </tt>
+<a name="L38"></a><tt class="py-lineno">38</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-2" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-2', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-3" class="py-name" targets="Module pike.smb2=pike.smb2-module.html"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-3', 'smb2', 'link-3');">smb2</a></tt> </tt>
+<a name="L39"></a><tt class="py-lineno">39</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-4" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-4', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-5" class="py-name" targets="Package pike.test=pike.test-module.html"><a title="pike.test" class="py-name" href="#" onclick="return doclink('link-5', 'test', 'link-5');">test</a></tt> </tt>
+<a name="L40"></a><tt class="py-lineno">40</tt>  <tt class="py-line"> </tt>
+<a name="OplockTest"></a><div id="OplockTest-def"><a name="L41"></a><tt class="py-lineno">41</tt> <a class="py-toggle" href="#" id="OplockTest-toggle" onclick="return toggle('OplockTest');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="pike.test.oplock.OplockTest-class.html">OplockTest</a><tt class="py-op">(</tt><tt class="py-base-class">pike</tt><tt class="py-op">.</tt><tt class="py-base-class">test</tt><tt class="py-op">.</tt><tt class="py-base-class">PikeTest</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="OplockTest-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="OplockTest-expanded"><a name="L42"></a><tt class="py-lineno">42</tt>  <tt class="py-line">    <tt class="py-comment"># Open a handle with an oplock and break it</tt> </tt>
+<a name="OplockTest.test_oplock_break"></a><div id="OplockTest.test_oplock_break-def"><a name="L43"></a><tt class="py-lineno">43</tt> <a class="py-toggle" href="#" id="OplockTest.test_oplock_break-toggle" onclick="return toggle('OplockTest.test_oplock_break');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.oplock.OplockTest-class.html#test_oplock_break">test_oplock_break</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="OplockTest.test_oplock_break-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="OplockTest.test_oplock_break-expanded"><a name="L44"></a><tt class="py-lineno">44</tt>  <tt class="py-line">        <tt class="py-name">chan</tt><tt class="py-op">,</tt> <tt id="link-6" class="py-name" targets="Method pike.model.Session.tree()=pike.model.Session-class.html#tree,Module pike.test.tree=pike.test.tree-module.html"><a title="pike.model.Session.tree
+pike.test.tree" class="py-name" href="#" onclick="return doclink('link-6', 'tree', 'link-6');">tree</a></tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-7" class="py-name" targets="Method pike.model.Channel.tree_connect()=pike.model.Channel-class.html#tree_connect,Method pike.test.PikeTest.tree_connect()=pike.test.PikeTest-class.html#tree_connect"><a title="pike.model.Channel.tree_connect
+pike.test.PikeTest.tree_connect" class="py-name" href="#" onclick="return doclink('link-7', 'tree_connect', 'link-7');">tree_connect</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L45"></a><tt class="py-lineno">45</tt>  <tt class="py-line"> </tt>
+<a name="L46"></a><tt class="py-lineno">46</tt>  <tt class="py-line">        <tt id="link-8" class="py-name" targets="Variable pike.test.copychunk.share_all=pike.test.copychunk-module.html#share_all,Variable pike.test.credit.share_all=pike.test.credit-module.html#share_all,Variable pike.test.durable.DurableHandleTest.share_all=pike.test.durable.DurableHandleTest-class.html#share_all,Variable pike.test.queryondiskid.share_all=pike.test.queryondiskid-module.html#share_all,Variable pike.test.reparse.share_all=pike.test.reparse-module.html#share_all"><a title="pike.test.copychunk.share_all
+pike.test.credit.share_all
+pike.test.durable.DurableHandleTest.share_all
+pike.test.queryondiskid.share_all
+pike.test.reparse.share_all" class="py-name" href="#" onclick="return doclink('link-8', 'share_all', 'link-8');">share_all</a></tt> <tt class="py-op">=</tt> <tt id="link-9" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-9', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-10" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-10', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-11" class="py-name" targets="Variable pike.smb2.FILE_SHARE_READ=pike.smb2-module.html#FILE_SHARE_READ,Variable pike.smb2.ShareAccess.FILE_SHARE_READ=pike.smb2.ShareAccess-class.html#FILE_SHARE_READ"><a title="pike.smb2.FILE_SHARE_READ
+pike.smb2.ShareAccess.FILE_SHARE_READ" class="py-name" href="#" onclick="return doclink('link-11', 'FILE_SHARE_READ', 'link-11');">FILE_SHARE_READ</a></tt> <tt class="py-op">|</tt> <tt id="link-12" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-12', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-13" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-13', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-14" class="py-name" targets="Variable pike.smb2.FILE_SHARE_WRITE=pike.smb2-module.html#FILE_SHARE_WRITE,Variable pike.smb2.ShareAccess.FILE_SHARE_WRITE=pike.smb2.ShareAccess-class.html#FILE_SHARE_WRITE"><a title="pike.smb2.FILE_SHARE_WRITE
+pike.smb2.ShareAccess.FILE_SHARE_WRITE" class="py-name" href="#" onclick="return doclink('link-14', 'FILE_SHARE_WRITE', 'link-14');">FILE_SHARE_WRITE</a></tt> <tt class="py-op">|</tt> <tt id="link-15" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-15', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-16" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-16', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-17" class="py-name" targets="Variable pike.smb2.FILE_SHARE_DELETE=pike.smb2-module.html#FILE_SHARE_DELETE,Variable pike.smb2.ShareAccess.FILE_SHARE_DELETE=pike.smb2.ShareAccess-class.html#FILE_SHARE_DELETE"><a title="pike.smb2.FILE_SHARE_DELETE
+pike.smb2.ShareAccess.FILE_SHARE_DELETE" class="py-name" href="#" onclick="return doclink('link-17', 'FILE_SHARE_DELETE', 'link-17');">FILE_SHARE_DELETE</a></tt> </tt>
+<a name="L47"></a><tt class="py-lineno">47</tt>  <tt class="py-line"> </tt>
+<a name="L48"></a><tt class="py-lineno">48</tt>  <tt class="py-line">        <tt class="py-name">handle1</tt> <tt class="py-op">=</tt> <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt id="link-18" class="py-name" targets="Method pike.model.Channel.create()=pike.model.Channel-class.html#create,Method pike.test.durable.DurableHandleTest.create()=pike.test.durable.DurableHandleTest-class.html#create"><a title="pike.model.Channel.create
+pike.test.durable.DurableHandleTest.create" class="py-name" href="#" onclick="return doclink('link-18', 'create', 'link-18');">create</a></tt><tt class="py-op">(</tt><tt id="link-19" class="py-name"><a title="pike.model.Session.tree
+pike.test.tree" class="py-name" href="#" onclick="return doclink('link-19', 'tree', 'link-6');">tree</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L49"></a><tt class="py-lineno">49</tt>  <tt class="py-line">                              <tt class="py-string">'oplock.txt'</tt><tt class="py-op">,</tt> </tt>
+<a name="L50"></a><tt class="py-lineno">50</tt>  <tt class="py-line">                              <tt class="py-name">share</tt><tt class="py-op">=</tt><tt id="link-20" class="py-name"><a title="pike.test.copychunk.share_all
+pike.test.credit.share_all
+pike.test.durable.DurableHandleTest.share_all
+pike.test.queryondiskid.share_all
+pike.test.reparse.share_all" class="py-name" href="#" onclick="return doclink('link-20', 'share_all', 'link-8');">share_all</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L51"></a><tt class="py-lineno">51</tt>  <tt class="py-line">                              <tt class="py-name">oplock_level</tt><tt class="py-op">=</tt><tt id="link-21" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-21', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-22" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-22', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-23" class="py-name" targets="Variable pike.smb2.OplockLevel.SMB2_OPLOCK_LEVEL_EXCLUSIVE=pike.smb2.OplockLevel-class.html#SMB2_OPLOCK_LEVEL_EXCLUSIVE,Variable pike.smb2.SMB2_OPLOCK_LEVEL_EXCLUSIVE=pike.smb2-module.html#SMB2_OPLOCK_LEVEL_EXCLUSIVE"><a title="pike.smb2.OplockLevel.SMB2_OPLOCK_LEVEL_EXCLUSIVE
+pike.smb2.SMB2_OPLOCK_LEVEL_EXCLUSIVE" class="py-name" href="#" onclick="return doclink('link-23', 'SMB2_OPLOCK_LEVEL_EXCLUSIVE', 'link-23');">SMB2_OPLOCK_LEVEL_EXCLUSIVE</a></tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-24" class="py-name" targets="Method pike.model.Future.result()=pike.model.Future-class.html#result"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-24', 'result', 'link-24');">result</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L52"></a><tt class="py-lineno">52</tt>  <tt class="py-line">         </tt>
+<a name="L53"></a><tt class="py-lineno">53</tt>  <tt class="py-line">        <tt class="py-name">handle1</tt><tt class="py-op">.</tt><tt id="link-25" class="py-name" targets="Method pike.model.Open.on_oplock_break()=pike.model.Open-class.html#on_oplock_break"><a title="pike.model.Open.on_oplock_break" class="py-name" href="#" onclick="return doclink('link-25', 'on_oplock_break', 'link-25');">on_oplock_break</a></tt><tt class="py-op">(</tt><tt class="py-keyword">lambda</tt> <tt class="py-name">level</tt><tt class="py-op">:</tt> <tt class="py-name">level</tt><tt class="py-op">)</tt> </tt>
+<a name="L54"></a><tt class="py-lineno">54</tt>  <tt class="py-line">         </tt>
+<a name="L55"></a><tt class="py-lineno">55</tt>  <tt class="py-line">        <tt class="py-name">handle2</tt> <tt class="py-op">=</tt> <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt id="link-26" class="py-name"><a title="pike.model.Channel.create
+pike.test.durable.DurableHandleTest.create" class="py-name" href="#" onclick="return doclink('link-26', 'create', 'link-18');">create</a></tt><tt class="py-op">(</tt><tt id="link-27" class="py-name"><a title="pike.model.Session.tree
+pike.test.tree" class="py-name" href="#" onclick="return doclink('link-27', 'tree', 'link-6');">tree</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L56"></a><tt class="py-lineno">56</tt>  <tt class="py-line">                              <tt class="py-string">'oplock.txt'</tt><tt class="py-op">,</tt> </tt>
+<a name="L57"></a><tt class="py-lineno">57</tt>  <tt class="py-line">                              <tt class="py-name">share</tt><tt class="py-op">=</tt><tt id="link-28" class="py-name"><a title="pike.test.copychunk.share_all
+pike.test.credit.share_all
+pike.test.durable.DurableHandleTest.share_all
+pike.test.queryondiskid.share_all
+pike.test.reparse.share_all" class="py-name" href="#" onclick="return doclink('link-28', 'share_all', 'link-8');">share_all</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L58"></a><tt class="py-lineno">58</tt>  <tt class="py-line">                              <tt class="py-name">oplock_level</tt><tt class="py-op">=</tt><tt id="link-29" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-29', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-30" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-30', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-31" class="py-name" targets="Variable pike.smb2.OplockLevel.SMB2_OPLOCK_LEVEL_II=pike.smb2.OplockLevel-class.html#SMB2_OPLOCK_LEVEL_II,Variable pike.smb2.SMB2_OPLOCK_LEVEL_II=pike.smb2-module.html#SMB2_OPLOCK_LEVEL_II"><a title="pike.smb2.OplockLevel.SMB2_OPLOCK_LEVEL_II
+pike.smb2.SMB2_OPLOCK_LEVEL_II" class="py-name" href="#" onclick="return doclink('link-31', 'SMB2_OPLOCK_LEVEL_II', 'link-31');">SMB2_OPLOCK_LEVEL_II</a></tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-32" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-32', 'result', 'link-24');">result</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L59"></a><tt class="py-lineno">59</tt>  <tt class="py-line">         </tt>
+<a name="L60"></a><tt class="py-lineno">60</tt>  <tt class="py-line">        <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt id="link-33" class="py-name" targets="Method pike.model.Channel.close()=pike.model.Channel-class.html#close,Method pike.model.Connection.close()=pike.model.Connection-class.html#close,Method pike.transport.Transport.close()=pike.transport.Transport-class.html#close"><a title="pike.model.Channel.close
+pike.model.Connection.close
+pike.transport.Transport.close" class="py-name" href="#" onclick="return doclink('link-33', 'close', 'link-33');">close</a></tt><tt class="py-op">(</tt><tt class="py-name">handle1</tt><tt class="py-op">)</tt> </tt>
+<a name="L61"></a><tt class="py-lineno">61</tt>  <tt class="py-line">        <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt id="link-34" class="py-name"><a title="pike.model.Channel.close
+pike.model.Connection.close
+pike.transport.Transport.close" class="py-name" href="#" onclick="return doclink('link-34', 'close', 'link-33');">close</a></tt><tt class="py-op">(</tt><tt class="py-name">handle2</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L62"></a><tt class="py-lineno">62</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="pike-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Thu Jun 29 08:51:26 2017
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

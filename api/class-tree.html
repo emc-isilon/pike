@@ -39,6 +39,8 @@
     <td>
       <table cellpadding="0" cellspacing="0">
         <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
             >]&nbsp;|&nbsp;<a href="class-tree.html"
@@ -53,13 +55,6 @@
 </b></center><br />
 <h1 class="epydoc">Class Hierarchy</h1>
 <ul class="nomargin-top">
-    <li> <strong class="uidlink">asyncore.dispatcher</strong>
-    <ul>
-    <li> <strong class="uidlink"><a href="pike.model.Connection-class.html">pike.model.Connection</a></strong>:
-      <em class="summary">Connection to server.</em>
-    </li>
-    </ul>
-    </li>
     <li> <strong class="uidlink">object</strong>:
       <em class="summary">The most base type</em>
     <ul>
@@ -73,6 +68,10 @@
     </li>
     <li> <strong class="uidlink"><a href="pike.core.BufferOverrun-class.html">pike.core.BufferOverrun</a></strong>:
       <em class="summary">Buffer overrun exception</em>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.crypto.CipherMismatch-class.html">pike.crypto.CipherMismatch</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.model.CreditError-class.html">pike.model.CreditError</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.model.ResponseError-class.html">pike.model.ResponseError</a></strong>
     </li>
@@ -93,6 +92,37 @@
     </li>
     </ul>
     </li>
+    <li> <strong class="uidlink"><a href="pike.transport.BasePoller-class.html">pike.transport.BasePoller</a></strong>:
+      <em class="summary">A poller is an underlying event monitoring system.</em>
+    <ul>
+    <li> <strong class="uidlink"><a href="pike.transport.KQueuePoller-class.html">pike.transport.KQueuePoller</a></strong>:
+      <em class="summary">Implementation of KQueue, available on Mac OS and BSD derivatives</em>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.transport.PollPoller-class.html">pike.transport.PollPoller</a></strong>:
+      <em class="summary">Implementation of poll, available on Linux</em>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.transport.SelectPoller-class.html">pike.transport.SelectPoller</a></strong>:
+      <em class="summary">Implementation of select, available on most platforms as a 
+        fallback.</em>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink">unittest.suite.BaseTestSuite</strong>:
+      <em class="summary">A simple test suite that doesn't provide class or module shared 
+        fixtures.</em>
+    <ul>
+    <li> <strong class="uidlink">unittest.suite.TestSuite</strong>:
+      <em class="summary">A test suite is a composite test consisting of a number of 
+        TestCases.</em>
+    <ul>
+    <li> <strong class="uidlink"><a href="pike.test.PikeTestSuite-class.html">pike.test.PikeTestSuite</a></strong>:
+      <em class="summary">Custom test suite for easily patching in skip tests in downstream 
+        distributions of these test cases</em>
+    </li>
+    </ul>
+    </li>
+    </ul>
+    </li>
     <li> <strong class="uidlink"><a href="pike.core.Cursor.Bounds-class.html">pike.core.Cursor.Bounds</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.model.Channel-class.html">pike.model.Channel</a></strong>
@@ -100,11 +130,23 @@
     <li> <strong class="uidlink"><a href="pike.model.Client-class.html">pike.model.Client</a></strong>:
       <em class="summary">Client</em>
     </li>
+    <li> <strong class="uidlink"><a href="pike.crypto.CryptoKeys300-class.html">pike.crypto.CryptoKeys300</a></strong>:
+      <em class="summary">Key generation for SMB 0x300 and 0x302</em>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.crypto.CryptoKeys311-class.html">pike.crypto.CryptoKeys311</a></strong>:
+      <em class="summary">Key generation for SMB 0x311 +</em>
+    </li>
     <li> <strong class="uidlink"><a href="pike.core.Cursor-class.html">pike.core.Cursor</a></strong>:
       <em class="summary">Byte array cursor</em>
     </li>
+    <li> <strong class="uidlink"><a href="pike.crypto.EncryptionContext-class.html">pike.crypto.EncryptionContext</a></strong>:
+      <em class="summary">Encapsulates all information needed to encrypt and decrypt 
+        messages.</em>
+    </li>
     <li> <strong class="uidlink"><a href="pike.core.Frame-class.html">pike.core.Frame</a></strong>
     <ul>
+    <li> <strong class="uidlink"><a href="pike.ntlm.AvPair-class.html">pike.ntlm.AvPair</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.Command-class.html">pike.smb2.Command</a></strong>
     <ul>
     <li> <strong class="uidlink"><a href="pike.smb2.ErrorResponse-class.html">pike.smb2.ErrorResponse</a></strong>
@@ -121,11 +163,15 @@
     <ul>
     <li> <strong class="uidlink"><a href="pike.smb2.Cancel-class.html">pike.smb2.Cancel</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.ChangeNotifyRequest-class.html">pike.smb2.ChangeNotifyRequest</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.CloseRequest-class.html">pike.smb2.CloseRequest</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.CreateRequest-class.html">pike.smb2.CreateRequest</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.EchoRequest-class.html">pike.smb2.EchoRequest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FlushRequest-class.html">pike.smb2.FlushRequest</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.IoctlRequest-class.html">pike.smb2.IoctlRequest</a></strong>
     </li>
@@ -159,11 +205,15 @@
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.Response-class.html">pike.smb2.Response</a></strong>
     <ul>
+    <li> <strong class="uidlink"><a href="pike.smb2.ChangeNotifyResponse-class.html">pike.smb2.ChangeNotifyResponse</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.CloseResponse-class.html">pike.smb2.CloseResponse</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.CreateResponse-class.html">pike.smb2.CreateResponse</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.EchoResponse-class.html">pike.smb2.EchoResponse</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FlushResponse-class.html">pike.smb2.FlushResponse</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.IoctlResponse-class.html">pike.smb2.IoctlResponse</a></strong>
     </li>
@@ -197,8 +247,12 @@
     </li>
     </ul>
     </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.CopyChunk-class.html">pike.smb2.CopyChunk</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.CreateRequestContext-class.html">pike.smb2.CreateRequestContext</a></strong>
     <ul>
+    <li> <strong class="uidlink"><a href="pike.smb2.AllocationSizeRequest-class.html">pike.smb2.AllocationSizeRequest</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.AppInstanceIdRequest-class.html">pike.smb2.AppInstanceIdRequest</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.DurableHandleReconnectRequest-class.html">pike.smb2.DurableHandleReconnectRequest</a></strong>
@@ -209,9 +263,17 @@
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.DurableHandleV2Request-class.html">pike.smb2.DurableHandleV2Request</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.ExtendedAttributeRequest-class.html">pike.smb2.ExtendedAttributeRequest</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.LeaseRequest-class.html">pike.smb2.LeaseRequest</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.MaximalAccessRequest-class.html">pike.smb2.MaximalAccessRequest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.QueryOnDiskIDRequest-class.html">pike.smb2.QueryOnDiskIDRequest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.SecurityDescriptorRequest-class.html">pike.smb2.SecurityDescriptorRequest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.TimewarpTokenRequest-class.html">pike.smb2.TimewarpTokenRequest</a></strong>
     </li>
     </ul>
     </li>
@@ -225,8 +287,33 @@
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.MaximalAccessResponse-class.html">pike.smb2.MaximalAccessResponse</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.QueryOnDiskIDResponse-class.html">pike.smb2.QueryOnDiskIDResponse</a></strong>
+    </li>
     </ul>
     </li>
+    <li> <strong class="uidlink"><a href="pike.crypto.EncryptionCapabilities-class.html">pike.crypto.EncryptionCapabilities</a></strong>
+    <ul>
+    <li> <strong class="uidlink"><a href="pike.crypto.EncryptionCapabilitiesRequest-class.html">pike.crypto.EncryptionCapabilitiesRequest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.crypto.EncryptionCapabilitiesResponse-class.html">pike.crypto.EncryptionCapabilitiesResponse</a></strong>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.ErrorResponseContext-class.html">pike.smb2.ErrorResponseContext</a></strong>
+    <ul>
+    <li> <strong class="uidlink"><a href="pike.smb2.ErrorResponseDefault-class.html">pike.smb2.ErrorResponseDefault</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.ErrorResponseDefaultBufferSize-class.html">pike.smb2.ErrorResponseDefaultBufferSize</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.SymbolicLinkErrorResponse-class.html">pike.smb2.SymbolicLinkErrorResponse</a></strong>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileNotifyInformation-class.html">pike.smb2.FileNotifyInformation</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.Information-class.html">pike.smb2.Information</a></strong>:
+      <em class="summary">Base class for all info frames.</em>
+    <ul>
     <li> <strong class="uidlink"><a href="pike.smb2.FileInformation-class.html">pike.smb2.FileInformation</a></strong>
     <ul>
     <li> <strong class="uidlink"><a href="pike.smb2.FileAccessInformation-class.html">pike.smb2.FileAccessInformation</a></strong>
@@ -235,11 +322,27 @@
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.FileAllInformation-class.html">pike.smb2.FileAllInformation</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileAllocationInformation-class.html">pike.smb2.FileAllocationInformation</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileAttributeTagInformation-class.html">pike.smb2.FileAttributeTagInformation</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.FileBasicInformation-class.html">pike.smb2.FileBasicInformation</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileCompressionInformation-class.html">pike.smb2.FileCompressionInformation</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.FileDirectoryInformation-class.html">pike.smb2.FileDirectoryInformation</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileDispositionInformation-class.html">pike.smb2.FileDispositionInformation</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.FileEaInformation-class.html">pike.smb2.FileEaInformation</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileEndOfFileInformation-class.html">pike.smb2.FileEndOfFileInformation</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileFullDirectoryInformation-class.html">pike.smb2.FileFullDirectoryInformation</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileIdBothDirectoryInformation-class.html">pike.smb2.FileIdBothDirectoryInformation</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileIdFullDirectoryInformation-class.html">pike.smb2.FileIdFullDirectoryInformation</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.FileInternalInformation-class.html">pike.smb2.FileInternalInformation</a></strong>
     </li>
@@ -249,27 +352,123 @@
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.FileNamesInformation-class.html">pike.smb2.FileNamesInformation</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileNetworkOpenInformation-class.html">pike.smb2.FileNetworkOpenInformation</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.FilePositionInformation-class.html">pike.smb2.FilePositionInformation</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileRenameInformation-class.html">pike.smb2.FileRenameInformation</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.FileStandardInformation-class.html">pike.smb2.FileStandardInformation</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileStreamInformation-class.html">pike.smb2.FileStreamInformation</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileValidDataLengthInformation-class.html">pike.smb2.FileValidDataLengthInformation</a></strong>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileSystemInformation-class.html">pike.smb2.FileSystemInformation</a></strong>
+    <ul>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileFsAttributeInformation-class.html">pike.smb2.FileFsAttributeInformation</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileFsControlInformation-class.html">pike.smb2.FileFsControlInformation</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileFsDeviceInformation-class.html">pike.smb2.FileFsDeviceInformation</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileFsFullSizeInformation-class.html">pike.smb2.FileFsFullSizeInformation</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileFsObjectIdInformation-class.html">pike.smb2.FileFsObjectIdInformation</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileFsSizeInformation-class.html">pike.smb2.FileFsSizeInformation</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileFsVolumeInformation-class.html">pike.smb2.FileFsVolumeInformation</a></strong>
+    </li>
+    </ul>
     </li>
     </ul>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.IoctlInput-class.html">pike.smb2.IoctlInput</a></strong>
     <ul>
+    <li> <strong class="uidlink"><a href="pike.smb2.CopyChunkCopyRequest-class.html">pike.smb2.CopyChunkCopyRequest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.EnumerateSnapshotsRequest-class.html">pike.smb2.EnumerateSnapshotsRequest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.GetReparsePointRequest-class.html">pike.smb2.GetReparsePointRequest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.RequestResumeKeyRequest-class.html">pike.smb2.RequestResumeKeyRequest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.SetReparsePointRequest-class.html">pike.smb2.SetReparsePointRequest</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.ValidateNegotiateInfoRequest-class.html">pike.smb2.ValidateNegotiateInfoRequest</a></strong>
     </li>
     </ul>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.IoctlOutput-class.html">pike.smb2.IoctlOutput</a></strong>
     <ul>
+    <li> <strong class="uidlink"><a href="pike.smb2.CopyChunkCopyResponse-class.html">pike.smb2.CopyChunkCopyResponse</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.EnumerateSnapshotsResponse-class.html">pike.smb2.EnumerateSnapshotsResponse</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.GetReparsePointResponse-class.html">pike.smb2.GetReparsePointResponse</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.RequestResumeKeyResponse-class.html">pike.smb2.RequestResumeKeyResponse</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.SetReparsePointResponse-class.html">pike.smb2.SetReparsePointResponse</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.ValidateNegotiateInfoResponse-class.html">pike.smb2.ValidateNegotiateInfoResponse</a></strong>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.ntlm.NTLMv2ClientChallenge-class.html">pike.ntlm.NTLMv2ClientChallenge</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.ntlm.NTLMv2Response-class.html">pike.ntlm.NTLMv2Response</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.NegotiateRequestContext-class.html">pike.smb2.NegotiateRequestContext</a></strong>
+    <ul>
+    <li> <strong class="uidlink"><a href="pike.crypto.EncryptionCapabilitiesRequest-class.html">pike.crypto.EncryptionCapabilitiesRequest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.PreauthIntegrityCapabilitiesRequest-class.html">pike.smb2.PreauthIntegrityCapabilitiesRequest</a></strong>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.NegotiateResponseContext-class.html">pike.smb2.NegotiateResponseContext</a></strong>
+    <ul>
+    <li> <strong class="uidlink"><a href="pike.crypto.EncryptionCapabilitiesResponse-class.html">pike.crypto.EncryptionCapabilitiesResponse</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.PreauthIntegrityCapabilitiesResponse-class.html">pike.smb2.PreauthIntegrityCapabilitiesResponse</a></strong>
     </li>
     </ul>
     </li>
     <li> <strong class="uidlink"><a href="pike.netbios.Netbios-class.html">pike.netbios.Netbios</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.ntlm.NtLmAuthenticateMessage-class.html">pike.ntlm.NtLmAuthenticateMessage</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.ntlm.NtLmChallengeMessage-class.html">pike.ntlm.NtLmChallengeMessage</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.ntlm.NtLmNegotiateMessage-class.html">pike.ntlm.NtLmNegotiateMessage</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.ntlm.Ntlm-class.html">pike.ntlm.Ntlm</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.PreauthIntegrityCapabilities-class.html">pike.smb2.PreauthIntegrityCapabilities</a></strong>
+    <ul>
+    <li> <strong class="uidlink"><a href="pike.smb2.PreauthIntegrityCapabilitiesRequest-class.html">pike.smb2.PreauthIntegrityCapabilitiesRequest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.PreauthIntegrityCapabilitiesResponse-class.html">pike.smb2.PreauthIntegrityCapabilitiesResponse</a></strong>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.ReparseDataBuffer-class.html">pike.smb2.ReparseDataBuffer</a></strong>
+    <ul>
+    <li> <strong class="uidlink"><a href="pike.smb2.SymbolicLinkReparseBuffer-class.html">pike.smb2.SymbolicLinkReparseBuffer</a></strong>
+    </li>
+    </ul>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.Smb2-class.html">pike.smb2.Smb2</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.crypto.TransformHeader-class.html">pike.crypto.TransformHeader</a></strong>:
+      <em class="summary">TransformHeader is designed to be a transparent slip attached to a 
+        Netbios frame object (specified as parent).</em>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.ntlm.Version-class.html">pike.ntlm.Version</a></strong>
     </li>
     </ul>
     </li>
@@ -278,30 +477,143 @@
     </li>
     <li> <strong class="uidlink"><a href="pike.core.Cursor.Hole-class.html">pike.core.Cursor.Hole</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.auth.KerberosProvider-class.html">pike.auth.KerberosProvider</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.model.Lease-class.html">pike.model.Lease</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.core.Let-class.html">pike.core.Let</a></strong>:
+      <em class="summary">A Let allows for temporarily storing passed arguments in the _settings
+member of a target object for the duration of the contextmanager's scope</em>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.ntlm.NtlmAuthenticator-class.html">pike.ntlm.NtlmAuthenticator</a></strong>:
+      <em class="summary">State machine for conducting ntlm authentication</em>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.auth.NtlmProvider-class.html">pike.auth.NtlmProvider</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.model.Open-class.html">pike.model.Open</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.test_smb3_encryption_vector.PAIntegrity-class.html">pike.test.test_smb3_encryption_vector.PAIntegrity</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.core.Register-class.html">pike.core.Register</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.model.Session-class.html">pike.model.Session</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.model.Connection.SessionSetupContext-class.html">pike.model.Connection.SessionSetupContext</a></strong>
+    </li>
     <li> <strong class="uidlink">unittest.case.TestCase</strong>:
       <em class="summary">A class whose instances are single test cases.</em>
     <ul>
     <li> <strong class="uidlink"><a href="pike.test.PikeTest-class.html">pike.test.PikeTest</a></strong>
+    <ul>
+    <li> <strong class="uidlink"><a href="pike.test.appinstanceid.AppInstanceIdTest-class.html">pike.test.appinstanceid.AppInstanceIdTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.negotiate.CapTest-class.html">pike.test.negotiate.CapTest</a></strong>
+    <ul>
+    <li> <strong class="uidlink"><a href="pike.test.negotiate.CapMultichannel-class.html">pike.test.negotiate.CapMultichannel</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.negotiate.CapMulticredit-class.html">pike.test.negotiate.CapMulticredit</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.negotiate.CapPersistent-class.html">pike.test.negotiate.CapPersistent</a></strong>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.changenotify.ChangeNotifyTest-class.html">pike.test.changenotify.ChangeNotifyTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.compound.CompoundTest-class.html">pike.test.compound.CompoundTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.credit.CreditTest-class.html">pike.test.credit.CreditTest</a></strong>
+    <ul>
+    <li> <strong class="uidlink"><a href="pike.test.credit.AsyncCreditTest-class.html">pike.test.credit.AsyncCreditTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.credit.EdgeCreditTest-class.html">pike.test.credit.EdgeCreditTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.credit.PowerOf2CreditTest-class.html">pike.test.credit.PowerOf2CreditTest</a></strong>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.durable.DurableHandleTest-class.html">pike.test.durable.DurableHandleTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.echo.EchoTest-class.html">pike.test.echo.EchoTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.lease.LeaseTest-class.html">pike.test.lease.LeaseTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.lock.LockTest-class.html">pike.test.lock.LockTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.multichannel.MultiChannelTest-class.html">pike.test.multichannel.MultiChannelTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.negotiate.NegotiateContext-class.html">pike.test.negotiate.NegotiateContext</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.oplock.OplockTest-class.html">pike.test.oplock.OplockTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.persistent.Persistent-class.html">pike.test.persistent.Persistent</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.querydirectory.QueryDirectoryTest-class.html">pike.test.querydirectory.QueryDirectoryTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.query.QueryTest-class.html">pike.test.query.QueryTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.readwrite.ReadWriteTest-class.html">pike.test.readwrite.ReadWriteTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.session.SessionTest-class.html">pike.test.session.SessionTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.set.SetTest-class.html">pike.test.set.SetTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.internal.test_callbacks.TestClientCallbacks-class.html">pike.test.internal.test_callbacks.TestClientCallbacks</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.internal.test_callbacks.TestConnectionCallbacks-class.html">pike.test.internal.test_callbacks.TestConnectionCallbacks</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.encryption.TestEncryption-class.html">pike.test.encryption.TestEncryption</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.queryondiskid.TestQueryOnDiskID-class.html">pike.test.queryondiskid.TestQueryOnDiskID</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.reparse.TestReparsePoint-class.html">pike.test.reparse.TestReparsePoint</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.copychunk.TestServerSideCopy-class.html">pike.test.copychunk.TestServerSideCopy</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.tree.TreeTest-class.html">pike.test.tree.TreeTest</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.ioctl.ValidateNegotiateInfo-class.html">pike.test.ioctl.ValidateNegotiateInfo</a></strong>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.test_smb3_encryption_vector.TestVector-class.html">pike.test.test_smb3_encryption_vector.TestVector</a></strong>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.credit.TestCaseGenerator-class.html">pike.test.credit.TestCaseGenerator</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.transport.Transport-class.html">pike.transport.Transport</a></strong>:
+      <em class="summary">Transport is responsible for managing the underlying socket, 
+        registering for socket events, dispatching read, write, and errors 
+        to higher layers.</em>
+    <ul>
+    <li> <strong class="uidlink"><a href="pike.model.Connection-class.html">pike.model.Connection</a></strong>:
+      <em class="summary">Connection to server.</em>
     </li>
     </ul>
     </li>
     <li> <strong class="uidlink"><a href="pike.model.Tree-class.html">pike.model.Tree</a></strong>
     </li>
-    <li> <strong class="uidlink">pike.test._Decorator</strong>
+    <li> <strong class="uidlink"><a href="pike.test.PikeTest._AssertErrorContext-class.html" onclick="show_private();">pike.test.PikeTest._AssertErrorContext</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test._Decorator-class.html">pike.test._Decorator</a></strong>
     <ul>
     <li> <strong class="uidlink"><a href="pike.test.RequireCapabilities-class.html">pike.test.RequireCapabilities</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.test.RequireShareCapabilities-class.html">pike.test.RequireShareCapabilities</a></strong>
+    </li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test._RangeDecorator-class.html">pike.test._RangeDecorator</a></strong>
+    <ul>
     <li> <strong class="uidlink"><a href="pike.test.RequireDialect-class.html">pike.test.RequireDialect</a></strong>
     </li>
-    <li> <strong class="uidlink"><a href="pike.test.RequireShareCapabilities-class.html">pike.test.RequireShareCapabilities</a></strong>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.test_smb3_encryption_vector.bogus_connection-class.html">pike.test.test_smb3_encryption_vector.bogus_connection</a></strong>
+    <ul>
+    <li> <strong class="uidlink"><a href="pike.test.test_smb3_encryption_vector.bogus_300_connection-class.html">pike.test.test_smb3_encryption_vector.bogus_300_connection</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.test.test_smb3_encryption_vector.bogus_311_connection-class.html">pike.test.test_smb3_encryption_vector.bogus_311_connection</a></strong>
     </li>
     </ul>
     </li>
@@ -316,15 +628,27 @@
     <ul>
     <li> <strong class="uidlink"><a href="pike.smb2.Access-class.html">pike.smb2.Access</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.AceFlags-class.html">pike.smb2.AceFlags</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.BreakLeaseFlags-class.html">pike.smb2.BreakLeaseFlags</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.ChangeNotifyFlags-class.html">pike.smb2.ChangeNotifyFlags</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.Characteristics-class.html">pike.smb2.Characteristics</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.CloseFlags-class.html">pike.smb2.CloseFlags</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.CompletionFilter-class.html">pike.smb2.CompletionFilter</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.CreateOptions-class.html">pike.smb2.CreateOptions</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.DurableFlags-class.html">pike.smb2.DurableFlags</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.FileAttributes-class.html">pike.smb2.FileAttributes</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileSystemAtrribute-class.html">pike.smb2.FileSystemAtrribute</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileSystemControlFlags-class.html">pike.smb2.FileSystemControlFlags</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.Flags-class.html">pike.smb2.Flags</a></strong>
     </li>
@@ -338,6 +662,8 @@
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.LockFlags-class.html">pike.smb2.LockFlags</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.ntlm.NegotiateFlags-class.html">pike.ntlm.NegotiateFlags</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.ScanFlags-class.html">pike.smb2.ScanFlags</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.SecurityInformation-class.html">pike.smb2.SecurityInformation</a></strong>
@@ -350,6 +676,10 @@
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.ShareCaps-class.html">pike.smb2.ShareCaps</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.ShareFlags-class.html">pike.smb2.ShareFlags</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.SymbolicLinkFlags-class.html">pike.smb2.SymbolicLinkFlags</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.WriteFlags-class.html">pike.smb2.WriteFlags</a></strong>
     </li>
     </ul>
@@ -357,21 +687,56 @@
     <li> <strong class="uidlink"><a href="pike.core.ValueEnum-class.html">pike.core.ValueEnum</a></strong>:
       <em class="summary">Value Enumeration</em>
     <ul>
+    <li> <strong class="uidlink"><a href="pike.smb2.AceType-class.html">pike.smb2.AceType</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.AclRevision-class.html">pike.smb2.AclRevision</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.Alignment-class.html">pike.smb2.Alignment</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.ntlm.AvId-class.html">pike.ntlm.AvId</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.crypto.Ciphers-class.html">pike.crypto.Ciphers</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.CommandId-class.html">pike.smb2.CommandId</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.CompressionFormat-class.html">pike.smb2.CompressionFormat</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.CreateDisposition-class.html">pike.smb2.CreateDisposition</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.DeviceType-class.html">pike.smb2.DeviceType</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.Dialect-class.html">pike.smb2.Dialect</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.ErrorId-class.html">pike.smb2.ErrorId</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.model.Events-class.html">pike.model.Events</a></strong>:
+      <em class="summary">Events used for callback functions</em>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.FileInformationClass-class.html">pike.smb2.FileInformationClass</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileNotifyInfoAction-class.html">pike.smb2.FileNotifyInfoAction</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.FileSystemInformationClass-class.html">pike.smb2.FileSystemInformationClass</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.HashAlgorithms-class.html">pike.smb2.HashAlgorithms</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.InfoType-class.html">pike.smb2.InfoType</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.smb2.IoctlCode-class.html">pike.smb2.IoctlCode</a></strong>
     </li>
+    <li> <strong class="uidlink"><a href="pike.ntlm.MessageType-class.html">pike.ntlm.MessageType</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.ntlm.NTLMRevisionCurrentFlags-class.html">pike.ntlm.NTLMRevisionCurrentFlags</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.smb2.NegotiateContextType-class.html">pike.smb2.NegotiateContextType</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.ntlm.NtlmVersion-class.html">pike.ntlm.NtlmVersion</a></strong>
+    </li>
     <li> <strong class="uidlink"><a href="pike.smb2.OplockLevel-class.html">pike.smb2.OplockLevel</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.ntlm.ProductMajorVersionFlags-class.html">pike.ntlm.ProductMajorVersionFlags</a></strong>
+    </li>
+    <li> <strong class="uidlink"><a href="pike.ntlm.ProductMinorVersionFlags-class.html">pike.ntlm.ProductMinorVersionFlags</a></strong>
     </li>
     <li> <strong class="uidlink"><a href="pike.ntstatus.Status-class.html">pike.ntstatus.Status</a></strong>
     </li>
@@ -379,7 +744,8 @@
     </li>
     </ul>
     </li>
-    <li> <strong class="uidlink"><a href="pike.nttime.NtTime-class.html">pike.nttime.NtTime</a></strong>
+    <li> <strong class="uidlink"><a href="pike.nttime.NtTime-class.html">pike.nttime.NtTime</a></strong>:
+      <em class="summary">NtTime may be initialized with any of the following values...</em>
     </li>
     </ul>
     </li>
@@ -422,7 +788,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Sep 19 09:27:42 2013
+    Generated by Epydoc 3.0.1 on Thu Jun 29 08:51:13 2017
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

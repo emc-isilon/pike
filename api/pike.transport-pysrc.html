@@ -1,0 +1,969 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>pike.transport</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="pike-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="pike-module.html">Package&nbsp;pike</a> ::
+        Module&nbsp;transport
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="pike.transport-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="pike.transport-module.html">Module pike.transport</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"><tt class="py-comment"># Copyright (c) 2016, Dell Technologies</tt> </tt>
+<a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"><tt class="py-comment"># All rights reserved.</tt> </tt>
+<a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"><tt class="py-comment"># Redistribution and use in source and binary forms, with or without</tt> </tt>
+<a name="L6"></a><tt class="py-lineno">  6</tt>  <tt class="py-line"><tt class="py-comment"># modification, are permitted provided that the following conditions are met:</tt> </tt>
+<a name="L7"></a><tt class="py-lineno">  7</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L8"></a><tt class="py-lineno">  8</tt>  <tt class="py-line"><tt class="py-comment"># 1. Redistributions of source code must retain the above copyright notice,</tt> </tt>
+<a name="L9"></a><tt class="py-lineno">  9</tt>  <tt class="py-line"><tt class="py-comment"># this list of conditions and the following disclaimer.</tt> </tt>
+<a name="L10"></a><tt class="py-lineno"> 10</tt>  <tt class="py-line"><tt class="py-comment"># 2. Redistributions in binary form must reproduce the above copyright notice,</tt> </tt>
+<a name="L11"></a><tt class="py-lineno"> 11</tt>  <tt class="py-line"><tt class="py-comment"># this list of conditions and the following disclaimer in the documentation</tt> </tt>
+<a name="L12"></a><tt class="py-lineno"> 12</tt>  <tt class="py-line"><tt class="py-comment"># and/or other materials provided with the distribution.</tt> </tt>
+<a name="L13"></a><tt class="py-lineno"> 13</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L14"></a><tt class="py-lineno"> 14</tt>  <tt class="py-line"><tt class="py-comment"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"</tt> </tt>
+<a name="L15"></a><tt class="py-lineno"> 15</tt>  <tt class="py-line"><tt class="py-comment"># AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</tt> </tt>
+<a name="L16"></a><tt class="py-lineno"> 16</tt>  <tt class="py-line"><tt class="py-comment"># IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</tt> </tt>
+<a name="L17"></a><tt class="py-lineno"> 17</tt>  <tt class="py-line"><tt class="py-comment"># ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE</tt> </tt>
+<a name="L18"></a><tt class="py-lineno"> 18</tt>  <tt class="py-line"><tt class="py-comment"># LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</tt> </tt>
+<a name="L19"></a><tt class="py-lineno"> 19</tt>  <tt class="py-line"><tt class="py-comment"># CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</tt> </tt>
+<a name="L20"></a><tt class="py-lineno"> 20</tt>  <tt class="py-line"><tt class="py-comment"># SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</tt> </tt>
+<a name="L21"></a><tt class="py-lineno"> 21</tt>  <tt class="py-line"><tt class="py-comment"># INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</tt> </tt>
+<a name="L22"></a><tt class="py-lineno"> 22</tt>  <tt class="py-line"><tt class="py-comment"># CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</tt> </tt>
+<a name="L23"></a><tt class="py-lineno"> 23</tt>  <tt class="py-line"><tt class="py-comment"># ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</tt> </tt>
+<a name="L24"></a><tt class="py-lineno"> 24</tt>  <tt class="py-line"><tt class="py-comment"># POSSIBILITY OF SUCH DAMAGE.</tt> </tt>
+<a name="L25"></a><tt class="py-lineno"> 25</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line"><tt class="py-comment"># Module Name:</tt> </tt>
+<a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L28"></a><tt class="py-lineno"> 28</tt>  <tt class="py-line"><tt class="py-comment">#        transport.py</tt> </tt>
+<a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line"><tt class="py-comment"># Abstract:</tt> </tt>
+<a name="L31"></a><tt class="py-lineno"> 31</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line"><tt class="py-comment">#        Async event loop, socket handling, and polling mechanisms</tt> </tt>
+<a name="L33"></a><tt class="py-lineno"> 33</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L34"></a><tt class="py-lineno"> 34</tt>  <tt class="py-line"><tt class="py-comment"># Authors: Masen Furer (masen.furer@dell.com)</tt> </tt>
+<a name="L35"></a><tt class="py-lineno"> 35</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L36"></a><tt class="py-lineno"> 36</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">errno</tt> <tt class="py-keyword">import</tt> <tt class="py-name">errorcode</tt><tt class="py-op">,</tt> <tt class="py-name">EBADF</tt><tt class="py-op">,</tt> <tt class="py-name">ECONNRESET</tt><tt class="py-op">,</tt> <tt class="py-name">ENOTCONN</tt><tt class="py-op">,</tt> <tt class="py-name">ESHUTDOWN</tt><tt class="py-op">,</tt> \ </tt>
+<a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line">                  <tt class="py-name">ECONNABORTED</tt><tt class="py-op">,</tt> <tt class="py-name">EISCONN</tt><tt class="py-op">,</tt> <tt class="py-name">EINPROGRESS</tt><tt class="py-op">,</tt> <tt class="py-name">EALREADY</tt><tt class="py-op">,</tt> <tt class="py-name">EWOULDBLOCK</tt><tt class="py-op">,</tt> \ </tt>
+<a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line">                  <tt class="py-name">EAGAIN</tt> </tt>
+<a name="L39"></a><tt class="py-lineno"> 39</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">select</tt> </tt>
+<a name="L40"></a><tt class="py-lineno"> 40</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">socket</tt> </tt>
+<a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">time</tt> </tt>
+<a name="L42"></a><tt class="py-lineno"> 42</tt>  <tt class="py-line"> </tt>
+<a name="L43"></a><tt class="py-lineno"> 43</tt>  <tt class="py-line"><tt id="link-0" class="py-name" targets="Variable pike.transport._reraised_exceptions=pike.transport-module.html#_reraised_exceptions"><a title="pike.transport._reraised_exceptions" class="py-name" href="#" onclick="return doclink('link-0', '_reraised_exceptions', 'link-0');">_reraised_exceptions</a></tt> <tt class="py-op">=</tt> <tt class="py-op">(</tt><tt class="py-name">KeyboardInterrupt</tt><tt class="py-op">,</tt> <tt class="py-name">SystemExit</tt><tt class="py-op">)</tt> </tt>
+<a name="L44"></a><tt class="py-lineno"> 44</tt>  <tt class="py-line"> </tt>
+<a name="L45"></a><tt class="py-lineno"> 45</tt>  <tt class="py-line"> </tt>
+<a name="Transport"></a><div id="Transport-def"><a name="L46"></a><tt class="py-lineno"> 46</tt> <a class="py-toggle" href="#" id="Transport-toggle" onclick="return toggle('Transport');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="pike.transport.Transport-class.html">Transport</a><tt class="py-op">(</tt><tt class="py-base-class">object</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Transport-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Transport-expanded"><a name="L47"></a><tt class="py-lineno"> 47</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L48"></a><tt class="py-lineno"> 48</tt>  <tt class="py-line"><tt class="py-docstring">    Transport is responsible for managing the underlying socket, registering</tt> </tt>
+<a name="L49"></a><tt class="py-lineno"> 49</tt>  <tt class="py-line"><tt class="py-docstring">    for socket events, dispatching read, write, and errors to higher layers.</tt> </tt>
+<a name="L50"></a><tt class="py-lineno"> 50</tt>  <tt class="py-line"><tt class="py-docstring">    It is analogous to asyncore.dispatcher and is a drop in replacement for</tt> </tt>
+<a name="L51"></a><tt class="py-lineno"> 51</tt>  <tt class="py-line"><tt class="py-docstring">    most purposes.</tt> </tt>
+<a name="L52"></a><tt class="py-lineno"> 52</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L53"></a><tt class="py-lineno"> 53</tt>  <tt class="py-line"><tt class="py-docstring">    If the alternate_poller is specified on instantiation, then the connection</tt> </tt>
+<a name="L54"></a><tt class="py-lineno"> 54</tt>  <tt class="py-line"><tt class="py-docstring">    will register for events on that poller as opposed to the global poller.</tt> </tt>
+<a name="L55"></a><tt class="py-lineno"> 55</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="Transport.__init__"></a><div id="Transport.__init__-def"><a name="L56"></a><tt class="py-lineno"> 56</tt> <a class="py-toggle" href="#" id="Transport.__init__-toggle" onclick="return toggle('Transport.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.Transport-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">alternate_poller</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Transport.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Transport.__init__-expanded"><a name="L57"></a><tt class="py-lineno"> 57</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">addr</tt> <tt class="py-op">=</tt> <tt class="py-name">None</tt> </tt>
+<a name="L58"></a><tt class="py-lineno"> 58</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">connected</tt> <tt class="py-op">=</tt> <tt class="py-name">False</tt> </tt>
+<a name="L59"></a><tt class="py-lineno"> 59</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">socket</tt> <tt class="py-op">=</tt> <tt class="py-name">None</tt> </tt>
+<a name="L60"></a><tt class="py-lineno"> 60</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_fileno</tt> <tt class="py-op">=</tt> <tt class="py-name">None</tt> </tt>
+<a name="L61"></a><tt class="py-lineno"> 61</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">alternate_poller</tt> <tt class="py-keyword">is</tt> <tt class="py-keyword">not</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L62"></a><tt class="py-lineno"> 62</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-1" class="py-name" targets="Variable pike.transport.poller=pike.transport-module.html#poller"><a title="pike.transport.poller" class="py-name" href="#" onclick="return doclink('link-1', 'poller', 'link-1');">poller</a></tt> <tt class="py-op">=</tt> <tt class="py-name">alternate_poller</tt> </tt>
+<a name="L63"></a><tt class="py-lineno"> 63</tt>  <tt class="py-line">        <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L64"></a><tt class="py-lineno"> 64</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-2" class="py-name"><a title="pike.transport.poller" class="py-name" href="#" onclick="return doclink('link-2', 'poller', 'link-1');">poller</a></tt> <tt class="py-op">=</tt> <tt id="link-3" class="py-name"><a title="pike.transport.poller" class="py-name" href="#" onclick="return doclink('link-3', 'poller', 'link-1');">poller</a></tt>    <tt class="py-comment"># global poller</tt> </tt>
+</div><a name="L65"></a><tt class="py-lineno"> 65</tt>  <tt class="py-line"> </tt>
+<a name="Transport.create_socket"></a><div id="Transport.create_socket-def"><a name="L66"></a><tt class="py-lineno"> 66</tt> <a class="py-toggle" href="#" id="Transport.create_socket-toggle" onclick="return toggle('Transport.create_socket');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.Transport-class.html#create_socket">create_socket</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">family</tt><tt class="py-op">,</tt> <tt class="py-param">type</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Transport.create_socket-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Transport.create_socket-expanded"><a name="L67"></a><tt class="py-lineno"> 67</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line"><tt class="py-docstring">        Creates the underlying non-blocking socket and associates it with this</tt> </tt>
+<a name="L69"></a><tt class="py-lineno"> 69</tt>  <tt class="py-line"><tt class="py-docstring">        Transport's underlying poller</tt> </tt>
+<a name="L70"></a><tt class="py-lineno"> 70</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L71"></a><tt class="py-lineno"> 71</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">family_and_type</tt> <tt class="py-op">=</tt> <tt class="py-name">family</tt><tt class="py-op">,</tt> <tt class="py-name">type</tt> </tt>
+<a name="L72"></a><tt class="py-lineno"> 72</tt>  <tt class="py-line">        <tt class="py-name">sock</tt> <tt class="py-op">=</tt> <tt class="py-name">socket</tt><tt class="py-op">.</tt><tt class="py-name">socket</tt><tt class="py-op">(</tt><tt class="py-name">family</tt><tt class="py-op">,</tt> <tt class="py-name">type</tt><tt class="py-op">)</tt> </tt>
+<a name="L73"></a><tt class="py-lineno"> 73</tt>  <tt class="py-line">        <tt class="py-name">sock</tt><tt class="py-op">.</tt><tt class="py-name">setblocking</tt><tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">)</tt> </tt>
+<a name="L74"></a><tt class="py-lineno"> 74</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-4" class="py-name" targets="Method pike.transport.Transport.set_socket()=pike.transport.Transport-class.html#set_socket"><a title="pike.transport.Transport.set_socket" class="py-name" href="#" onclick="return doclink('link-4', 'set_socket', 'link-4');">set_socket</a></tt><tt class="py-op">(</tt><tt class="py-name">sock</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L75"></a><tt class="py-lineno"> 75</tt>  <tt class="py-line"> </tt>
+<a name="Transport.set_socket"></a><div id="Transport.set_socket-def"><a name="L76"></a><tt class="py-lineno"> 76</tt> <a class="py-toggle" href="#" id="Transport.set_socket-toggle" onclick="return toggle('Transport.set_socket');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.Transport-class.html#set_socket">set_socket</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">sock</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Transport.set_socket-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Transport.set_socket-expanded"><a name="L77"></a><tt class="py-lineno"> 77</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L78"></a><tt class="py-lineno"> 78</tt>  <tt class="py-line"><tt class="py-docstring">        mirror the given Socket sock's file descriptor on the Transport and</tt> </tt>
+<a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line"><tt class="py-docstring">        register this Transport with the underlying poller</tt> </tt>
+<a name="L80"></a><tt class="py-lineno"> 80</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L81"></a><tt class="py-lineno"> 81</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">socket</tt> <tt class="py-op">=</tt> <tt class="py-name">sock</tt> </tt>
+<a name="L82"></a><tt class="py-lineno"> 82</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_fileno</tt> <tt class="py-op">=</tt> <tt class="py-name">sock</tt><tt class="py-op">.</tt><tt class="py-name">fileno</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-5" class="py-name"><a title="pike.transport.poller" class="py-name" href="#" onclick="return doclink('link-5', 'poller', 'link-1');">poller</a></tt><tt class="py-op">.</tt><tt id="link-6" class="py-name" targets="Method pike.transport.BasePoller.add_channel()=pike.transport.BasePoller-class.html#add_channel,Method pike.transport.KQueuePoller.add_channel()=pike.transport.KQueuePoller-class.html#add_channel,Method pike.transport.PollPoller.add_channel()=pike.transport.PollPoller-class.html#add_channel"><a title="pike.transport.BasePoller.add_channel
+pike.transport.KQueuePoller.add_channel
+pike.transport.PollPoller.add_channel" class="py-name" href="#" onclick="return doclink('link-6', 'add_channel', 'link-6');">add_channel</a></tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line"> </tt>
+<a name="Transport.connect"></a><div id="Transport.connect-def"><a name="L85"></a><tt class="py-lineno"> 85</tt> <a class="py-toggle" href="#" id="Transport.connect-toggle" onclick="return toggle('Transport.connect');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.Transport-class.html#connect">connect</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">address</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Transport.connect-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Transport.connect-expanded"><a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line"><tt class="py-docstring">        begin establishing a connection to the (host, port) address tuple.</tt> </tt>
+<a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line"><tt class="py-docstring">        must call create_socket first. if the underlying socket is non-blocking</tt> </tt>
+<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line"><tt class="py-docstring">        then this command may return before the connection is established.</tt> </tt>
+<a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line"><tt class="py-docstring">        higher level code should wait for the handle_connect event to signal</tt> </tt>
+<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line"><tt class="py-docstring">        that the endpoint is successfully connected</tt> </tt>
+<a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L95"></a><tt class="py-lineno"> 95</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">connected</tt> <tt class="py-op">=</tt> <tt class="py-name">False</tt> </tt>
+<a name="L96"></a><tt class="py-lineno"> 96</tt>  <tt class="py-line">        <tt class="py-name">err</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">socket</tt><tt class="py-op">.</tt><tt class="py-name">connect_ex</tt><tt class="py-op">(</tt><tt class="py-name">address</tt><tt class="py-op">)</tt> </tt>
+<a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">err</tt> <tt class="py-keyword">in</tt> <tt class="py-op">(</tt><tt class="py-name">EINPROGRESS</tt><tt class="py-op">,</tt> <tt class="py-name">EALREADY</tt><tt class="py-op">,</tt> <tt class="py-name">EWOULDBLOCK</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> </tt>
+<a name="L99"></a><tt class="py-lineno"> 99</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">err</tt> <tt class="py-keyword">in</tt> <tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-name">EISCONN</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L100"></a><tt class="py-lineno">100</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">addr</tt> <tt class="py-op">=</tt> <tt class="py-name">address</tt> </tt>
+<a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-7" class="py-name" targets="Method pike.transport.Transport.handle_connect_event()=pike.transport.Transport-class.html#handle_connect_event"><a title="pike.transport.Transport.handle_connect_event" class="py-name" href="#" onclick="return doclink('link-7', 'handle_connect_event', 'link-7');">handle_connect_event</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line">        <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L103"></a><tt class="py-lineno">103</tt>  <tt class="py-line">            <tt class="py-keyword">raise</tt> <tt class="py-name">socket</tt><tt class="py-op">.</tt><tt id="link-8" class="py-name" targets="Method pike.test.PikeTest.error()=pike.test.PikeTest-class.html#error"><a title="pike.test.PikeTest.error" class="py-name" href="#" onclick="return doclink('link-8', 'error', 'link-8');">error</a></tt><tt class="py-op">(</tt><tt class="py-name">err</tt><tt class="py-op">,</tt> <tt class="py-name">errorcode</tt><tt class="py-op">[</tt><tt class="py-name">err</tt><tt class="py-op">]</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L104"></a><tt class="py-lineno">104</tt>  <tt class="py-line"> </tt>
+<a name="Transport.close"></a><div id="Transport.close-def"><a name="L105"></a><tt class="py-lineno">105</tt> <a class="py-toggle" href="#" id="Transport.close-toggle" onclick="return toggle('Transport.close');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.Transport-class.html#close">close</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Transport.close-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Transport.close-expanded"><a name="L106"></a><tt class="py-lineno">106</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L107"></a><tt class="py-lineno">107</tt>  <tt class="py-line"><tt class="py-docstring">        close the underlying socket connection and unregister this Transport</tt> </tt>
+<a name="L108"></a><tt class="py-lineno">108</tt>  <tt class="py-line"><tt class="py-docstring">        from the underlying poller</tt> </tt>
+<a name="L109"></a><tt class="py-lineno">109</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L110"></a><tt class="py-lineno">110</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">socket</tt><tt class="py-op">.</tt><tt id="link-9" class="py-name" targets="Method pike.model.Channel.close()=pike.model.Channel-class.html#close,Method pike.model.Connection.close()=pike.model.Connection-class.html#close,Method pike.transport.Transport.close()=pike.transport.Transport-class.html#close"><a title="pike.model.Channel.close
+pike.model.Connection.close
+pike.transport.Transport.close" class="py-name" href="#" onclick="return doclink('link-9', 'close', 'link-9');">close</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L111"></a><tt class="py-lineno">111</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">connected</tt> <tt class="py-op">=</tt> <tt class="py-name">False</tt> </tt>
+<a name="L112"></a><tt class="py-lineno">112</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-10" class="py-name"><a title="pike.transport.poller" class="py-name" href="#" onclick="return doclink('link-10', 'poller', 'link-1');">poller</a></tt><tt class="py-op">.</tt><tt id="link-11" class="py-name" targets="Method pike.transport.BasePoller.del_channel()=pike.transport.BasePoller-class.html#del_channel,Method pike.transport.PollPoller.del_channel()=pike.transport.PollPoller-class.html#del_channel"><a title="pike.transport.BasePoller.del_channel
+pike.transport.PollPoller.del_channel" class="py-name" href="#" onclick="return doclink('link-11', 'del_channel', 'link-11');">del_channel</a></tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L113"></a><tt class="py-lineno">113</tt>  <tt class="py-line"> </tt>
+<a name="Transport.send"></a><div id="Transport.send-def"><a name="L114"></a><tt class="py-lineno">114</tt> <a class="py-toggle" href="#" id="Transport.send-toggle" onclick="return toggle('Transport.send');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.Transport-class.html#send">send</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">data</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Transport.send-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Transport.send-expanded"><a name="L115"></a><tt class="py-lineno">115</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L116"></a><tt class="py-lineno">116</tt>  <tt class="py-line"><tt class="py-docstring">        send data bytes over the connection. if the socket would block,</tt> </tt>
+<a name="L117"></a><tt class="py-lineno">117</tt>  <tt class="py-line"><tt class="py-docstring">        schedule this Transport to be notified when the socket is available</tt> </tt>
+<a name="L118"></a><tt class="py-lineno">118</tt>  <tt class="py-line"><tt class="py-docstring">        for writing. handle_write will be called in this case.</tt> </tt>
+<a name="L119"></a><tt class="py-lineno">119</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L120"></a><tt class="py-lineno">120</tt>  <tt class="py-line"><tt class="py-docstring">        returns the number of bytes sent or zero if the write would block</tt> </tt>
+<a name="L121"></a><tt class="py-lineno">121</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L122"></a><tt class="py-lineno">122</tt>  <tt class="py-line">        <tt id="link-12" class="py-name" targets="Method pike.model.Future.result()=pike.model.Future-class.html#result"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-12', 'result', 'link-12');">result</a></tt> <tt class="py-op">=</tt> <tt class="py-number">0</tt> </tt>
+<a name="L123"></a><tt class="py-lineno">123</tt>  <tt class="py-line">        <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L124"></a><tt class="py-lineno">124</tt>  <tt class="py-line">            <tt id="link-13" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-13', 'result', 'link-12');">result</a></tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">socket</tt><tt class="py-op">.</tt><tt id="link-14" class="py-name" targets="Method pike.transport.Transport.send()=pike.transport.Transport-class.html#send"><a title="pike.transport.Transport.send" class="py-name" href="#" onclick="return doclink('link-14', 'send', 'link-14');">send</a></tt><tt class="py-op">(</tt><tt class="py-name">data</tt><tt class="py-op">)</tt> </tt>
+<a name="L125"></a><tt class="py-lineno">125</tt>  <tt class="py-line">        <tt class="py-keyword">except</tt> <tt class="py-name">socket</tt><tt class="py-op">.</tt><tt id="link-15" class="py-name"><a title="pike.test.PikeTest.error" class="py-name" href="#" onclick="return doclink('link-15', 'error', 'link-8');">error</a></tt> <tt class="py-keyword">as</tt> <tt class="py-name">err</tt><tt class="py-op">:</tt> </tt>
+<a name="L126"></a><tt class="py-lineno">126</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">err</tt><tt class="py-op">.</tt><tt class="py-name">errno</tt> <tt class="py-op">==</tt> <tt class="py-name">EAGAIN</tt><tt class="py-op">:</tt> </tt>
+<a name="L127"></a><tt class="py-lineno">127</tt>  <tt class="py-line">                <tt class="py-comment"># reschedule the send when the socket is ready</tt> </tt>
+<a name="L128"></a><tt class="py-lineno">128</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-16" class="py-name"><a title="pike.transport.poller" class="py-name" href="#" onclick="return doclink('link-16', 'poller', 'link-1');">poller</a></tt><tt class="py-op">.</tt><tt id="link-17" class="py-name" targets="Method pike.transport.BasePoller.defer_write()=pike.transport.BasePoller-class.html#defer_write,Method pike.transport.KQueuePoller.defer_write()=pike.transport.KQueuePoller-class.html#defer_write,Method pike.transport.PollPoller.defer_write()=pike.transport.PollPoller-class.html#defer_write"><a title="pike.transport.BasePoller.defer_write
+pike.transport.KQueuePoller.defer_write
+pike.transport.PollPoller.defer_write" class="py-name" href="#" onclick="return doclink('link-17', 'defer_write', 'link-17');">defer_write</a></tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">)</tt> </tt>
+<a name="L129"></a><tt class="py-lineno">129</tt>  <tt class="py-line">            <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L130"></a><tt class="py-lineno">130</tt>  <tt class="py-line">                <tt class="py-comment"># raise non-retryable errors</tt> </tt>
+<a name="L131"></a><tt class="py-lineno">131</tt>  <tt class="py-line">                <tt class="py-keyword">raise</tt> </tt>
+<a name="L132"></a><tt class="py-lineno">132</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt id="link-18" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-18', 'result', 'link-12');">result</a></tt> </tt>
+</div><a name="L133"></a><tt class="py-lineno">133</tt>  <tt class="py-line"> </tt>
+<a name="Transport.recv"></a><div id="Transport.recv-def"><a name="L134"></a><tt class="py-lineno">134</tt> <a class="py-toggle" href="#" id="Transport.recv-toggle" onclick="return toggle('Transport.recv');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.Transport-class.html#recv">recv</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">bufsize</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Transport.recv-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Transport.recv-expanded"><a name="L135"></a><tt class="py-lineno">135</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L136"></a><tt class="py-lineno">136</tt>  <tt class="py-line"><tt class="py-docstring">        recv bufsize bytes over the connection. if the socket would block,</tt> </tt>
+<a name="L137"></a><tt class="py-lineno">137</tt>  <tt class="py-line"><tt class="py-docstring">        then return an empty buffer. When the socket is available for reading</tt> </tt>
+<a name="L138"></a><tt class="py-lineno">138</tt>  <tt class="py-line"><tt class="py-docstring">        handle_read will be called.</tt> </tt>
+<a name="L139"></a><tt class="py-lineno">139</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L140"></a><tt class="py-lineno">140</tt>  <tt class="py-line"><tt class="py-docstring">        returns a string representing the bytes received</tt> </tt>
+<a name="L141"></a><tt class="py-lineno">141</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L142"></a><tt class="py-lineno">142</tt>  <tt class="py-line">        <tt id="link-19" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-19', 'result', 'link-12');">result</a></tt> <tt class="py-op">=</tt> <tt class="py-string">''</tt> </tt>
+<a name="L143"></a><tt class="py-lineno">143</tt>  <tt class="py-line">        <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L144"></a><tt class="py-lineno">144</tt>  <tt class="py-line">            <tt id="link-20" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-20', 'result', 'link-12');">result</a></tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">socket</tt><tt class="py-op">.</tt><tt id="link-21" class="py-name" targets="Method pike.transport.Transport.recv()=pike.transport.Transport-class.html#recv"><a title="pike.transport.Transport.recv" class="py-name" href="#" onclick="return doclink('link-21', 'recv', 'link-21');">recv</a></tt><tt class="py-op">(</tt><tt class="py-name">bufsize</tt><tt class="py-op">)</tt> </tt>
+<a name="L145"></a><tt class="py-lineno">145</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt id="link-22" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-22', 'result', 'link-12');">result</a></tt> <tt class="py-op">==</tt> <tt class="py-string">''</tt><tt class="py-op">:</tt> </tt>
+<a name="L146"></a><tt class="py-lineno">146</tt>  <tt class="py-line">                <tt class="py-keyword">raise</tt> <tt class="py-name">EOFError</tt><tt class="py-op">(</tt><tt class="py-string">"Remote host closed connection"</tt><tt class="py-op">)</tt> </tt>
+<a name="L147"></a><tt class="py-lineno">147</tt>  <tt class="py-line">        <tt class="py-keyword">except</tt> <tt class="py-name">socket</tt><tt class="py-op">.</tt><tt id="link-23" class="py-name"><a title="pike.test.PikeTest.error" class="py-name" href="#" onclick="return doclink('link-23', 'error', 'link-8');">error</a></tt> <tt class="py-keyword">as</tt> <tt class="py-name">err</tt><tt class="py-op">:</tt> </tt>
+<a name="L148"></a><tt class="py-lineno">148</tt>  <tt class="py-line">            <tt class="py-comment"># raise non-retryable errors</tt> </tt>
+<a name="L149"></a><tt class="py-lineno">149</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">err</tt><tt class="py-op">.</tt><tt class="py-name">errno</tt> <tt class="py-op">!=</tt> <tt class="py-name">EAGAIN</tt><tt class="py-op">:</tt> </tt>
+<a name="L150"></a><tt class="py-lineno">150</tt>  <tt class="py-line">                <tt class="py-keyword">raise</tt> </tt>
+<a name="L151"></a><tt class="py-lineno">151</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt id="link-24" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-24', 'result', 'link-12');">result</a></tt> </tt>
+</div><a name="L152"></a><tt class="py-lineno">152</tt>  <tt class="py-line"> </tt>
+<a name="Transport.handle_connect_event"></a><div id="Transport.handle_connect_event-def"><a name="L153"></a><tt class="py-lineno">153</tt> <a class="py-toggle" href="#" id="Transport.handle_connect_event-toggle" onclick="return toggle('Transport.handle_connect_event');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.Transport-class.html#handle_connect_event">handle_connect_event</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Transport.handle_connect_event-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Transport.handle_connect_event-expanded"><a name="L154"></a><tt class="py-lineno">154</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L155"></a><tt class="py-lineno">155</tt>  <tt class="py-line"><tt class="py-docstring">        called internally when the socket becomes connected</tt> </tt>
+<a name="L156"></a><tt class="py-lineno">156</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L157"></a><tt class="py-lineno">157</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">connected</tt> <tt class="py-op">=</tt> <tt class="py-name">True</tt> </tt>
+<a name="L158"></a><tt class="py-lineno">158</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-25" class="py-name" targets="Method pike.model.Connection.handle_connect()=pike.model.Connection-class.html#handle_connect,Method pike.transport.Transport.handle_connect()=pike.transport.Transport-class.html#handle_connect"><a title="pike.model.Connection.handle_connect
+pike.transport.Transport.handle_connect" class="py-name" href="#" onclick="return doclink('link-25', 'handle_connect', 'link-25');">handle_connect</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L159"></a><tt class="py-lineno">159</tt>  <tt class="py-line"> </tt>
+<a name="Transport.handle_connect"></a><div id="Transport.handle_connect-def"><a name="L160"></a><tt class="py-lineno">160</tt> <a class="py-toggle" href="#" id="Transport.handle_connect-toggle" onclick="return toggle('Transport.handle_connect');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.Transport-class.html#handle_connect">handle_connect</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Transport.handle_connect-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Transport.handle_connect-expanded"><a name="L161"></a><tt class="py-lineno">161</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L162"></a><tt class="py-lineno">162</tt>  <tt class="py-line"><tt class="py-docstring">        callback fired when connection is established</tt> </tt>
+<a name="L163"></a><tt class="py-lineno">163</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L164"></a><tt class="py-lineno">164</tt>  <tt class="py-line">        <tt class="py-keyword">pass</tt> </tt>
+</div><a name="L165"></a><tt class="py-lineno">165</tt>  <tt class="py-line"> </tt>
+<a name="Transport.handle_read"></a><div id="Transport.handle_read-def"><a name="L166"></a><tt class="py-lineno">166</tt> <a class="py-toggle" href="#" id="Transport.handle_read-toggle" onclick="return toggle('Transport.handle_read');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.Transport-class.html#handle_read">handle_read</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Transport.handle_read-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Transport.handle_read-expanded"><a name="L167"></a><tt class="py-lineno">167</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L168"></a><tt class="py-lineno">168</tt>  <tt class="py-line"><tt class="py-docstring">        callback fired when the socket has data available</tt> </tt>
+<a name="L169"></a><tt class="py-lineno">169</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L170"></a><tt class="py-lineno">170</tt>  <tt class="py-line">        <tt class="py-keyword">pass</tt> </tt>
+</div><a name="L171"></a><tt class="py-lineno">171</tt>  <tt class="py-line"> </tt>
+<a name="Transport.handle_write"></a><div id="Transport.handle_write-def"><a name="L172"></a><tt class="py-lineno">172</tt> <a class="py-toggle" href="#" id="Transport.handle_write-toggle" onclick="return toggle('Transport.handle_write');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.Transport-class.html#handle_write">handle_write</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Transport.handle_write-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Transport.handle_write-expanded"><a name="L173"></a><tt class="py-lineno">173</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L174"></a><tt class="py-lineno">174</tt>  <tt class="py-line"><tt class="py-docstring">        callback fired when the socket is available for writing</tt> </tt>
+<a name="L175"></a><tt class="py-lineno">175</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L176"></a><tt class="py-lineno">176</tt>  <tt class="py-line"><tt class="py-docstring">        note: unlike asyncore, write notifications are not provided by default.</tt> </tt>
+<a name="L177"></a><tt class="py-lineno">177</tt>  <tt class="py-line"><tt class="py-docstring">        this is a performance optimization because the socket is usually</tt> </tt>
+<a name="L178"></a><tt class="py-lineno">178</tt>  <tt class="py-line"><tt class="py-docstring">        available for writing, and the application usually knows when it wants</tt> </tt>
+<a name="L179"></a><tt class="py-lineno">179</tt>  <tt class="py-line"><tt class="py-docstring">        to write. There is no point in filling the event queues with</tt> </tt>
+<a name="L180"></a><tt class="py-lineno">180</tt>  <tt class="py-line"><tt class="py-docstring">        write ready messages that will be ignored if the client has no data to</tt> </tt>
+<a name="L181"></a><tt class="py-lineno">181</tt>  <tt class="py-line"><tt class="py-docstring">        send.</tt> </tt>
+<a name="L182"></a><tt class="py-lineno">182</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L183"></a><tt class="py-lineno">183</tt>  <tt class="py-line"><tt class="py-docstring">        Instead, applications are expected to implement handle_write, but to</tt> </tt>
+<a name="L184"></a><tt class="py-lineno">184</tt>  <tt class="py-line"><tt class="py-docstring">        call it directly when data is to be sent. IF the socket would block,</tt> </tt>
+<a name="L185"></a><tt class="py-lineno">185</tt>  <tt class="py-line"><tt class="py-docstring">        EALREADY will be handled by the Transport. The Transport requests a</tt> </tt>
+<a name="L186"></a><tt class="py-lineno">186</tt>  <tt class="py-line"><tt class="py-docstring">        single write notification from the pollwer; when received, handle_write</tt> </tt>
+<a name="L187"></a><tt class="py-lineno">187</tt>  <tt class="py-line"><tt class="py-docstring">        will be called once signalling that the socket may now be ready to retry</tt> </tt>
+<a name="L188"></a><tt class="py-lineno">188</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L189"></a><tt class="py-lineno">189</tt>  <tt class="py-line"><tt class="py-docstring">        If the application would prefer to be notified when the socket is ready</tt> </tt>
+<a name="L190"></a><tt class="py-lineno">190</tt>  <tt class="py-line"><tt class="py-docstring">        to write, transport.poller.defer_write(transport) may be called to</tt> </tt>
+<a name="L191"></a><tt class="py-lineno">191</tt>  <tt class="py-line"><tt class="py-docstring">        schedule a single handle_write callback.</tt> </tt>
+<a name="L192"></a><tt class="py-lineno">192</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L193"></a><tt class="py-lineno">193</tt>  <tt class="py-line">        <tt class="py-keyword">pass</tt> </tt>
+</div><a name="L194"></a><tt class="py-lineno">194</tt>  <tt class="py-line"> </tt>
+<a name="Transport.handle_close"></a><div id="Transport.handle_close-def"><a name="L195"></a><tt class="py-lineno">195</tt> <a class="py-toggle" href="#" id="Transport.handle_close-toggle" onclick="return toggle('Transport.handle_close');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.Transport-class.html#handle_close">handle_close</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Transport.handle_close-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Transport.handle_close-expanded"><a name="L196"></a><tt class="py-lineno">196</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L197"></a><tt class="py-lineno">197</tt>  <tt class="py-line"><tt class="py-docstring">        callback fired when the socket is closed</tt> </tt>
+<a name="L198"></a><tt class="py-lineno">198</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L199"></a><tt class="py-lineno">199</tt>  <tt class="py-line">        <tt class="py-keyword">pass</tt> </tt>
+</div><a name="L200"></a><tt class="py-lineno">200</tt>  <tt class="py-line"> </tt>
+<a name="Transport.handle_error"></a><div id="Transport.handle_error-def"><a name="L201"></a><tt class="py-lineno">201</tt> <a class="py-toggle" href="#" id="Transport.handle_error-toggle" onclick="return toggle('Transport.handle_error');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.Transport-class.html#handle_error">handle_error</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Transport.handle_error-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Transport.handle_error-expanded"><a name="L202"></a><tt class="py-lineno">202</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L203"></a><tt class="py-lineno">203</tt>  <tt class="py-line"><tt class="py-docstring">        callback fired if a non-recoverable exception is raised</tt> </tt>
+<a name="L204"></a><tt class="py-lineno">204</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L205"></a><tt class="py-lineno">205</tt>  <tt class="py-line">        <tt class="py-keyword">pass</tt> </tt>
+</div></div><a name="L206"></a><tt class="py-lineno">206</tt>  <tt class="py-line"> </tt>
+<a name="L207"></a><tt class="py-lineno">207</tt>  <tt class="py-line"> </tt>
+<a name="BasePoller"></a><div id="BasePoller-def"><a name="L208"></a><tt class="py-lineno">208</tt> <a class="py-toggle" href="#" id="BasePoller-toggle" onclick="return toggle('BasePoller');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="pike.transport.BasePoller-class.html">BasePoller</a><tt class="py-op">(</tt><tt class="py-base-class">object</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="BasePoller-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="BasePoller-expanded"><a name="L209"></a><tt class="py-lineno">209</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L210"></a><tt class="py-lineno">210</tt>  <tt class="py-line"><tt class="py-docstring">    A poller is an underlying event monitoring system. This generic class</tt> </tt>
+<a name="L211"></a><tt class="py-lineno">211</tt>  <tt class="py-line"><tt class="py-docstring">    can be built upon to implement efficient file descriptor polling methods</tt> </tt>
+<a name="L212"></a><tt class="py-lineno">212</tt>  <tt class="py-line"><tt class="py-docstring">    which are available on various platforms.</tt> </tt>
+<a name="L213"></a><tt class="py-lineno">213</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L214"></a><tt class="py-lineno">214</tt>  <tt class="py-line"><tt class="py-docstring">    A minimal subclass must implement the poll() function which performs a</tt> </tt>
+<a name="L215"></a><tt class="py-lineno">215</tt>  <tt class="py-line"><tt class="py-docstring">    single iteration of the event loop across all monitored Transports and</tt> </tt>
+<a name="L216"></a><tt class="py-lineno">216</tt>  <tt class="py-line"><tt class="py-docstring">    calls process_readables and process_writables with the correct values.</tt> </tt>
+<a name="L217"></a><tt class="py-lineno">217</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L218"></a><tt class="py-lineno">218</tt>  <tt class="py-line"><tt class="py-docstring">    Subclasses should, in most cases call, into BasePoller methods in order</tt> </tt>
+<a name="L219"></a><tt class="py-lineno">219</tt>  <tt class="py-line"><tt class="py-docstring">    to maintain proper accounting structures. The exception is when the poller</tt> </tt>
+<a name="L220"></a><tt class="py-lineno">220</tt>  <tt class="py-line"><tt class="py-docstring">    handles accounting itself.</tt> </tt>
+<a name="L221"></a><tt class="py-lineno">221</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="BasePoller.__init__"></a><div id="BasePoller.__init__-def"><a name="L222"></a><tt class="py-lineno">222</tt> <a class="py-toggle" href="#" id="BasePoller.__init__-toggle" onclick="return toggle('BasePoller.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.BasePoller-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="BasePoller.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="BasePoller.__init__-expanded"><a name="L223"></a><tt class="py-lineno">223</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L224"></a><tt class="py-lineno">224</tt>  <tt class="py-line"><tt class="py-docstring">        initialize the poller and register any kernel global structures</tt> </tt>
+<a name="L225"></a><tt class="py-lineno">225</tt>  <tt class="py-line"><tt class="py-docstring">        necessary to monitor the file descriptors</tt> </tt>
+<a name="L226"></a><tt class="py-lineno">226</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L227"></a><tt class="py-lineno">227</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">connections</tt> <tt class="py-op">=</tt> <tt class="py-op">{</tt><tt class="py-op">}</tt> </tt>
+<a name="L228"></a><tt class="py-lineno">228</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">deferred_writers</tt> <tt class="py-op">=</tt> <tt id="link-26" class="py-name" targets="Module pike.test.set=pike.test.set-module.html"><a title="pike.test.set" class="py-name" href="#" onclick="return doclink('link-26', 'set', 'link-26');">set</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L229"></a><tt class="py-lineno">229</tt>  <tt class="py-line"> </tt>
+<a name="BasePoller.add_channel"></a><div id="BasePoller.add_channel-def"><a name="L230"></a><tt class="py-lineno">230</tt> <a class="py-toggle" href="#" id="BasePoller.add_channel-toggle" onclick="return toggle('BasePoller.add_channel');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.BasePoller-class.html#add_channel">add_channel</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">transport</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="BasePoller.add_channel-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="BasePoller.add_channel-expanded"><a name="L231"></a><tt class="py-lineno">231</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L232"></a><tt class="py-lineno">232</tt>  <tt class="py-line"><tt class="py-docstring">        begin monitoring the transport socket for read/connect events</tt> </tt>
+<a name="L233"></a><tt class="py-lineno">233</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L234"></a><tt class="py-lineno">234</tt>  <tt class="py-line"><tt class="py-docstring">        the underlying poller should not monitor Transports for writability</tt> </tt>
+<a name="L235"></a><tt class="py-lineno">235</tt>  <tt class="py-line"><tt class="py-docstring">        except when:</tt> </tt>
+<a name="L236"></a><tt class="py-lineno">236</tt>  <tt class="py-line"><tt class="py-docstring">            * the Transport's connection has not yet been established</tt> </tt>
+<a name="L237"></a><tt class="py-lineno">237</tt>  <tt class="py-line"><tt class="py-docstring">            * the Transport has been passed as an argument to defer_write</tt> </tt>
+<a name="L238"></a><tt class="py-lineno">238</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L239"></a><tt class="py-lineno">239</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">connections</tt><tt class="py-op">[</tt><tt id="link-27" class="py-name" targets="Module pike.transport=pike.transport-module.html"><a title="pike.transport" class="py-name" href="#" onclick="return doclink('link-27', 'transport', 'link-27');">transport</a></tt><tt class="py-op">.</tt><tt class="py-name">_fileno</tt><tt class="py-op">]</tt> <tt class="py-op">=</tt> <tt id="link-28" class="py-name"><a title="pike.transport" class="py-name" href="#" onclick="return doclink('link-28', 'transport', 'link-27');">transport</a></tt> </tt>
+<a name="L240"></a><tt class="py-lineno">240</tt>  <tt class="py-line">        <tt id="link-29" class="py-name"><a title="pike.transport" class="py-name" href="#" onclick="return doclink('link-29', 'transport', 'link-27');">transport</a></tt><tt class="py-op">.</tt><tt id="link-30" class="py-name"><a title="pike.transport.poller" class="py-name" href="#" onclick="return doclink('link-30', 'poller', 'link-1');">poller</a></tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt> </tt>
+</div><a name="L241"></a><tt class="py-lineno">241</tt>  <tt class="py-line"> </tt>
+<a name="BasePoller.del_channel"></a><div id="BasePoller.del_channel-def"><a name="L242"></a><tt class="py-lineno">242</tt> <a class="py-toggle" href="#" id="BasePoller.del_channel-toggle" onclick="return toggle('BasePoller.del_channel');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.BasePoller-class.html#del_channel">del_channel</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">transport</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="BasePoller.del_channel-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="BasePoller.del_channel-expanded"><a name="L243"></a><tt class="py-lineno">243</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L244"></a><tt class="py-lineno">244</tt>  <tt class="py-line"><tt class="py-docstring">        stop monitoring the transport socket</tt> </tt>
+<a name="L245"></a><tt class="py-lineno">245</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L246"></a><tt class="py-lineno">246</tt>  <tt class="py-line">        <tt class="py-keyword">del</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">connections</tt><tt class="py-op">[</tt><tt id="link-31" class="py-name"><a title="pike.transport" class="py-name" href="#" onclick="return doclink('link-31', 'transport', 'link-27');">transport</a></tt><tt class="py-op">.</tt><tt class="py-name">_fileno</tt><tt class="py-op">]</tt> </tt>
+</div><a name="L247"></a><tt class="py-lineno">247</tt>  <tt class="py-line"> </tt>
+<a name="BasePoller.defer_write"></a><div id="BasePoller.defer_write-def"><a name="L248"></a><tt class="py-lineno">248</tt> <a class="py-toggle" href="#" id="BasePoller.defer_write-toggle" onclick="return toggle('BasePoller.defer_write');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.BasePoller-class.html#defer_write">defer_write</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">transport</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="BasePoller.defer_write-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="BasePoller.defer_write-expanded"><a name="L249"></a><tt class="py-lineno">249</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L250"></a><tt class="py-lineno">250</tt>  <tt class="py-line"><tt class="py-docstring">        defers a write on the given transport. once the async poller determines</tt> </tt>
+<a name="L251"></a><tt class="py-lineno">251</tt>  <tt class="py-line"><tt class="py-docstring">        that the transport can be written to, handle_write will be called</tt> </tt>
+<a name="L252"></a><tt class="py-lineno">252</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L253"></a><tt class="py-lineno">253</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">deferred_writers</tt><tt class="py-op">.</tt><tt class="py-name">add</tt><tt class="py-op">(</tt><tt id="link-32" class="py-name"><a title="pike.transport" class="py-name" href="#" onclick="return doclink('link-32', 'transport', 'link-27');">transport</a></tt><tt class="py-op">.</tt><tt class="py-name">_fileno</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L254"></a><tt class="py-lineno">254</tt>  <tt class="py-line"> </tt>
+<a name="BasePoller.loop"></a><div id="BasePoller.loop-def"><a name="L255"></a><tt class="py-lineno">255</tt> <a class="py-toggle" href="#" id="BasePoller.loop-toggle" onclick="return toggle('BasePoller.loop');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.BasePoller-class.html#loop">loop</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">timeout</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-param">count</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="BasePoller.loop-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="BasePoller.loop-expanded"><a name="L256"></a><tt class="py-lineno">256</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L257"></a><tt class="py-lineno">257</tt>  <tt class="py-line"><tt class="py-docstring">        enter the async event loop for the given timeout or number of iterations</tt> </tt>
+<a name="L258"></a><tt class="py-lineno">258</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L259"></a><tt class="py-lineno">259</tt>  <tt class="py-line">        <tt class="py-name">start</tt> <tt class="py-op">=</tt> <tt class="py-name">time</tt><tt class="py-op">.</tt><tt class="py-name">time</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L260"></a><tt class="py-lineno">260</tt>  <tt class="py-line">        <tt class="py-name">complete_iterations</tt> <tt class="py-op">=</tt> <tt class="py-number">0</tt> </tt>
+<a name="L261"></a><tt class="py-lineno">261</tt>  <tt class="py-line">        <tt class="py-keyword">while</tt> <tt class="py-name">True</tt><tt class="py-op">:</tt> </tt>
+<a name="L262"></a><tt class="py-lineno">262</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">count</tt> <tt class="py-keyword">is</tt> <tt class="py-keyword">not</tt> <tt class="py-name">None</tt> <tt class="py-keyword">and</tt> <tt class="py-name">complete_iterations</tt> <tt class="py-op">&gt;=</tt> <tt class="py-name">count</tt><tt class="py-op">:</tt> </tt>
+<a name="L263"></a><tt class="py-lineno">263</tt>  <tt class="py-line">                <tt class="py-keyword">break</tt> </tt>
+<a name="L264"></a><tt class="py-lineno">264</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-33" class="py-name" targets="Method pike.transport.BasePoller.poll()=pike.transport.BasePoller-class.html#poll,Method pike.transport.KQueuePoller.poll()=pike.transport.KQueuePoller-class.html#poll,Method pike.transport.PollPoller.poll()=pike.transport.PollPoller-class.html#poll,Method pike.transport.SelectPoller.poll()=pike.transport.SelectPoller-class.html#poll"><a title="pike.transport.BasePoller.poll
+pike.transport.KQueuePoller.poll
+pike.transport.PollPoller.poll
+pike.transport.SelectPoller.poll" class="py-name" href="#" onclick="return doclink('link-33', 'poll', 'link-33');">poll</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L265"></a><tt class="py-lineno">265</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">timeout</tt> <tt class="py-keyword">is</tt> <tt class="py-keyword">not</tt> <tt class="py-name">None</tt> <tt class="py-keyword">and</tt> <tt class="py-name">time</tt><tt class="py-op">.</tt><tt class="py-name">time</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> <tt class="py-op">&gt;</tt> <tt class="py-name">start</tt> <tt class="py-op">+</tt> <tt class="py-name">timeout</tt><tt class="py-op">:</tt> </tt>
+<a name="L266"></a><tt class="py-lineno">266</tt>  <tt class="py-line">                <tt class="py-keyword">break</tt> </tt>
+<a name="L267"></a><tt class="py-lineno">267</tt>  <tt class="py-line">            <tt class="py-name">complete_iterations</tt> <tt class="py-op">+=</tt> <tt class="py-number">1</tt> </tt>
+</div><a name="L268"></a><tt class="py-lineno">268</tt>  <tt class="py-line"> </tt>
+<a name="BasePoller.poll"></a><div id="BasePoller.poll-def"><a name="L269"></a><tt class="py-lineno">269</tt> <a class="py-toggle" href="#" id="BasePoller.poll-toggle" onclick="return toggle('BasePoller.poll');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.BasePoller-class.html#poll">poll</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="BasePoller.poll-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="BasePoller.poll-expanded"><a name="L270"></a><tt class="py-lineno">270</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L271"></a><tt class="py-lineno">271</tt>  <tt class="py-line"><tt class="py-docstring">        Must be implemented by subclasses to execute a single iteration of the</tt> </tt>
+<a name="L272"></a><tt class="py-lineno">272</tt>  <tt class="py-line"><tt class="py-docstring">        event loop. Based on the outcome of the events, the following actions</tt> </tt>
+<a name="L273"></a><tt class="py-lineno">273</tt>  <tt class="py-line"><tt class="py-docstring">        MUST be performed</tt> </tt>
+<a name="L274"></a><tt class="py-lineno">274</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L275"></a><tt class="py-lineno">275</tt>  <tt class="py-line"><tt class="py-docstring">            * process_readables is called with a list of file descriptors which</tt> </tt>
+<a name="L276"></a><tt class="py-lineno">276</tt>  <tt class="py-line"><tt class="py-docstring">              have data available for reading</tt> </tt>
+<a name="L277"></a><tt class="py-lineno">277</tt>  <tt class="py-line"><tt class="py-docstring">            * process_writables is called with a list of file descriptors which</tt> </tt>
+<a name="L278"></a><tt class="py-lineno">278</tt>  <tt class="py-line"><tt class="py-docstring">              have data available for writing</tt> </tt>
+<a name="L279"></a><tt class="py-lineno">279</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L280"></a><tt class="py-lineno">280</tt>  <tt class="py-line">        <tt class="py-keyword">raise</tt> <tt class="py-name">NotImplementedError</tt><tt class="py-op">(</tt><tt class="py-string">"BasePoller does not have a polling mechanism"</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L281"></a><tt class="py-lineno">281</tt>  <tt class="py-line"> </tt>
+<a name="BasePoller.process_readables"></a><div id="BasePoller.process_readables-def"><a name="L282"></a><tt class="py-lineno">282</tt> <a class="py-toggle" href="#" id="BasePoller.process_readables-toggle" onclick="return toggle('BasePoller.process_readables');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.BasePoller-class.html#process_readables">process_readables</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">readables</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="BasePoller.process_readables-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="BasePoller.process_readables-expanded"><a name="L283"></a><tt class="py-lineno">283</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L284"></a><tt class="py-lineno">284</tt>  <tt class="py-line"><tt class="py-docstring">        call handle_read on each applicable fd in the readables sequence and</tt> </tt>
+<a name="L285"></a><tt class="py-lineno">285</tt>  <tt class="py-line"><tt class="py-docstring">        subsequently handle_error if any exception is raised or handle_close</tt> </tt>
+<a name="L286"></a><tt class="py-lineno">286</tt>  <tt class="py-line"><tt class="py-docstring">        if the underlying socket is no longer connected</tt> </tt>
+<a name="L287"></a><tt class="py-lineno">287</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L288"></a><tt class="py-lineno">288</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">fileno</tt> <tt class="py-keyword">in</tt> <tt class="py-name">readables</tt><tt class="py-op">:</tt> </tt>
+<a name="L289"></a><tt class="py-lineno">289</tt>  <tt class="py-line">            <tt class="py-name">t</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">connections</tt><tt class="py-op">[</tt><tt class="py-name">fileno</tt><tt class="py-op">]</tt> </tt>
+<a name="L290"></a><tt class="py-lineno">290</tt>  <tt class="py-line">            <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L291"></a><tt class="py-lineno">291</tt>  <tt class="py-line">                <tt class="py-name">t</tt><tt class="py-op">.</tt><tt id="link-34" class="py-name" targets="Method pike.model.Connection.handle_read()=pike.model.Connection-class.html#handle_read,Method pike.transport.Transport.handle_read()=pike.transport.Transport-class.html#handle_read"><a title="pike.model.Connection.handle_read
+pike.transport.Transport.handle_read" class="py-name" href="#" onclick="return doclink('link-34', 'handle_read', 'link-34');">handle_read</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L292"></a><tt class="py-lineno">292</tt>  <tt class="py-line">            <tt class="py-keyword">except</tt> <tt class="py-name">socket</tt><tt class="py-op">.</tt><tt id="link-35" class="py-name"><a title="pike.test.PikeTest.error" class="py-name" href="#" onclick="return doclink('link-35', 'error', 'link-8');">error</a></tt><tt class="py-op">,</tt> <tt class="py-name">e</tt><tt class="py-op">:</tt> </tt>
+<a name="L293"></a><tt class="py-lineno">293</tt>  <tt class="py-line">                <tt class="py-keyword">if</tt> <tt class="py-name">e</tt><tt class="py-op">.</tt><tt class="py-name">args</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> <tt class="py-keyword">not</tt> <tt class="py-keyword">in</tt> <tt class="py-op">(</tt><tt class="py-name">EBADF</tt><tt class="py-op">,</tt> <tt class="py-name">ECONNRESET</tt><tt class="py-op">,</tt> <tt class="py-name">ENOTCONN</tt><tt class="py-op">,</tt> <tt class="py-name">ESHUTDOWN</tt><tt class="py-op">,</tt> <tt class="py-name">ECONNABORTED</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L294"></a><tt class="py-lineno">294</tt>  <tt class="py-line">                    <tt class="py-name">t</tt><tt class="py-op">.</tt><tt id="link-36" class="py-name" targets="Method pike.model.Connection.handle_error()=pike.model.Connection-class.html#handle_error,Method pike.transport.Transport.handle_error()=pike.transport.Transport-class.html#handle_error"><a title="pike.model.Connection.handle_error
+pike.transport.Transport.handle_error" class="py-name" href="#" onclick="return doclink('link-36', 'handle_error', 'link-36');">handle_error</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L295"></a><tt class="py-lineno">295</tt>  <tt class="py-line">                <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L296"></a><tt class="py-lineno">296</tt>  <tt class="py-line">                    <tt class="py-name">t</tt><tt class="py-op">.</tt><tt id="link-37" class="py-name" targets="Method pike.model.Connection.handle_close()=pike.model.Connection-class.html#handle_close,Method pike.transport.Transport.handle_close()=pike.transport.Transport-class.html#handle_close"><a title="pike.model.Connection.handle_close
+pike.transport.Transport.handle_close" class="py-name" href="#" onclick="return doclink('link-37', 'handle_close', 'link-37');">handle_close</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L297"></a><tt class="py-lineno">297</tt>  <tt class="py-line">            <tt class="py-keyword">except</tt> <tt id="link-38" class="py-name"><a title="pike.transport._reraised_exceptions" class="py-name" href="#" onclick="return doclink('link-38', '_reraised_exceptions', 'link-0');">_reraised_exceptions</a></tt><tt class="py-op">:</tt> </tt>
+<a name="L298"></a><tt class="py-lineno">298</tt>  <tt class="py-line">                <tt class="py-keyword">raise</tt> </tt>
+<a name="L299"></a><tt class="py-lineno">299</tt>  <tt class="py-line">            <tt class="py-keyword">except</tt><tt class="py-op">:</tt> </tt>
+<a name="L300"></a><tt class="py-lineno">300</tt>  <tt class="py-line">                <tt class="py-name">t</tt><tt class="py-op">.</tt><tt id="link-39" class="py-name"><a title="pike.model.Connection.handle_error
+pike.transport.Transport.handle_error" class="py-name" href="#" onclick="return doclink('link-39', 'handle_error', 'link-36');">handle_error</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L301"></a><tt class="py-lineno">301</tt>  <tt class="py-line"> </tt>
+<a name="BasePoller.process_writables"></a><div id="BasePoller.process_writables-def"><a name="L302"></a><tt class="py-lineno">302</tt> <a class="py-toggle" href="#" id="BasePoller.process_writables-toggle" onclick="return toggle('BasePoller.process_writables');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.BasePoller-class.html#process_writables">process_writables</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">writables</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="BasePoller.process_writables-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="BasePoller.process_writables-expanded"><a name="L303"></a><tt class="py-lineno">303</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L304"></a><tt class="py-lineno">304</tt>  <tt class="py-line"><tt class="py-docstring">        for each Transport t corresponding to an fd in the writables sequence,</tt> </tt>
+<a name="L305"></a><tt class="py-lineno">305</tt>  <tt class="py-line"><tt class="py-docstring">            if t is not marked as connected, call handle_connect_event</tt> </tt>
+<a name="L306"></a><tt class="py-lineno">306</tt>  <tt class="py-line"><tt class="py-docstring">            otherwise call handle_write and remove the Transport from the set</tt> </tt>
+<a name="L307"></a><tt class="py-lineno">307</tt>  <tt class="py-line"><tt class="py-docstring">            of deferred writers</tt> </tt>
+<a name="L308"></a><tt class="py-lineno">308</tt>  <tt class="py-line"><tt class="py-docstring">            process close and error events if exception is encountered</tt> </tt>
+<a name="L309"></a><tt class="py-lineno">309</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L310"></a><tt class="py-lineno">310</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">fileno</tt> <tt class="py-keyword">in</tt> <tt class="py-name">writables</tt><tt class="py-op">:</tt> </tt>
+<a name="L311"></a><tt class="py-lineno">311</tt>  <tt class="py-line">            <tt class="py-name">t</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">connections</tt><tt class="py-op">[</tt><tt class="py-name">fileno</tt><tt class="py-op">]</tt> </tt>
+<a name="L312"></a><tt class="py-lineno">312</tt>  <tt class="py-line">            <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L313"></a><tt class="py-lineno">313</tt>  <tt class="py-line">                <tt class="py-keyword">if</tt> <tt class="py-keyword">not</tt> <tt class="py-name">t</tt><tt class="py-op">.</tt><tt class="py-name">connected</tt><tt class="py-op">:</tt> </tt>
+<a name="L314"></a><tt class="py-lineno">314</tt>  <tt class="py-line">                    <tt class="py-name">t</tt><tt class="py-op">.</tt><tt id="link-40" class="py-name"><a title="pike.transport.Transport.handle_connect_event" class="py-name" href="#" onclick="return doclink('link-40', 'handle_connect_event', 'link-7');">handle_connect_event</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L315"></a><tt class="py-lineno">315</tt>  <tt class="py-line">                <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L316"></a><tt class="py-lineno">316</tt>  <tt class="py-line">                    <tt class="py-keyword">if</tt> <tt class="py-name">fileno</tt> <tt class="py-keyword">in</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">deferred_writers</tt><tt class="py-op">:</tt> </tt>
+<a name="L317"></a><tt class="py-lineno">317</tt>  <tt class="py-line">                        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">deferred_writers</tt><tt class="py-op">.</tt><tt class="py-name">remove</tt><tt class="py-op">(</tt><tt class="py-name">fileno</tt><tt class="py-op">)</tt> </tt>
+<a name="L318"></a><tt class="py-lineno">318</tt>  <tt class="py-line">                    <tt class="py-name">t</tt><tt class="py-op">.</tt><tt id="link-41" class="py-name" targets="Method pike.model.Connection.handle_write()=pike.model.Connection-class.html#handle_write,Method pike.transport.Transport.handle_write()=pike.transport.Transport-class.html#handle_write"><a title="pike.model.Connection.handle_write
+pike.transport.Transport.handle_write" class="py-name" href="#" onclick="return doclink('link-41', 'handle_write', 'link-41');">handle_write</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L319"></a><tt class="py-lineno">319</tt>  <tt class="py-line">            <tt class="py-keyword">except</tt> <tt class="py-name">socket</tt><tt class="py-op">.</tt><tt id="link-42" class="py-name"><a title="pike.test.PikeTest.error" class="py-name" href="#" onclick="return doclink('link-42', 'error', 'link-8');">error</a></tt><tt class="py-op">,</tt> <tt class="py-name">e</tt><tt class="py-op">:</tt> </tt>
+<a name="L320"></a><tt class="py-lineno">320</tt>  <tt class="py-line">                <tt class="py-keyword">if</tt> <tt class="py-name">e</tt><tt class="py-op">.</tt><tt class="py-name">args</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> <tt class="py-keyword">not</tt> <tt class="py-keyword">in</tt> <tt class="py-op">(</tt><tt class="py-name">EBADF</tt><tt class="py-op">,</tt> <tt class="py-name">ECONNRESET</tt><tt class="py-op">,</tt> <tt class="py-name">ENOTCONN</tt><tt class="py-op">,</tt> <tt class="py-name">ESHUTDOWN</tt><tt class="py-op">,</tt> <tt class="py-name">ECONNABORTED</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L321"></a><tt class="py-lineno">321</tt>  <tt class="py-line">                    <tt class="py-name">t</tt><tt class="py-op">.</tt><tt id="link-43" class="py-name"><a title="pike.model.Connection.handle_error
+pike.transport.Transport.handle_error" class="py-name" href="#" onclick="return doclink('link-43', 'handle_error', 'link-36');">handle_error</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L322"></a><tt class="py-lineno">322</tt>  <tt class="py-line">                <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L323"></a><tt class="py-lineno">323</tt>  <tt class="py-line">                    <tt class="py-name">t</tt><tt class="py-op">.</tt><tt id="link-44" class="py-name"><a title="pike.model.Connection.handle_close
+pike.transport.Transport.handle_close" class="py-name" href="#" onclick="return doclink('link-44', 'handle_close', 'link-37');">handle_close</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L324"></a><tt class="py-lineno">324</tt>  <tt class="py-line">            <tt class="py-keyword">except</tt> <tt id="link-45" class="py-name"><a title="pike.transport._reraised_exceptions" class="py-name" href="#" onclick="return doclink('link-45', '_reraised_exceptions', 'link-0');">_reraised_exceptions</a></tt><tt class="py-op">:</tt> </tt>
+<a name="L325"></a><tt class="py-lineno">325</tt>  <tt class="py-line">                <tt class="py-keyword">raise</tt> </tt>
+<a name="L326"></a><tt class="py-lineno">326</tt>  <tt class="py-line">            <tt class="py-keyword">except</tt><tt class="py-op">:</tt> </tt>
+<a name="L327"></a><tt class="py-lineno">327</tt>  <tt class="py-line">                <tt class="py-name">t</tt><tt class="py-op">.</tt><tt id="link-46" class="py-name"><a title="pike.model.Connection.handle_error
+pike.transport.Transport.handle_error" class="py-name" href="#" onclick="return doclink('link-46', 'handle_error', 'link-36');">handle_error</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L328"></a><tt class="py-lineno">328</tt>  <tt class="py-line"> </tt>
+<a name="L329"></a><tt class="py-lineno">329</tt>  <tt class="py-line"> </tt>
+<a name="KQueuePoller"></a><div id="KQueuePoller-def"><a name="L330"></a><tt class="py-lineno">330</tt> <a class="py-toggle" href="#" id="KQueuePoller-toggle" onclick="return toggle('KQueuePoller');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="pike.transport.KQueuePoller-class.html">KQueuePoller</a><tt class="py-op">(</tt><tt class="py-base-class">BasePoller</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="KQueuePoller-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="KQueuePoller-expanded"><a name="L331"></a><tt class="py-lineno">331</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L332"></a><tt class="py-lineno">332</tt>  <tt class="py-line"><tt class="py-docstring">    Implementation of KQueue, available on Mac OS and BSD derivatives</tt> </tt>
+<a name="L333"></a><tt class="py-lineno">333</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="KQueuePoller.__init__"></a><div id="KQueuePoller.__init__-def"><a name="L334"></a><tt class="py-lineno">334</tt> <a class="py-toggle" href="#" id="KQueuePoller.__init__-toggle" onclick="return toggle('KQueuePoller.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.KQueuePoller-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="KQueuePoller.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="KQueuePoller.__init__-expanded"><a name="L335"></a><tt class="py-lineno">335</tt>  <tt class="py-line">        <tt class="py-name">super</tt><tt class="py-op">(</tt><tt id="link-47" class="py-name" targets="Class pike.transport.KQueuePoller=pike.transport.KQueuePoller-class.html"><a title="pike.transport.KQueuePoller" class="py-name" href="#" onclick="return doclink('link-47', 'KQueuePoller', 'link-47');">KQueuePoller</a></tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-48" class="py-name" targets="Method pike.auth.KerberosProvider.__init__()=pike.auth.KerberosProvider-class.html#__init__,Method pike.auth.NtlmProvider.__init__()=pike.auth.NtlmProvider-class.html#__init__,Method pike.core.Cursor.Bounds.__init__()=pike.core.Cursor.Bounds-class.html#__init__,Method pike.core.Cursor.Hole.__init__()=pike.core.Cursor.Hole-class.html#__init__,Method pike.core.Cursor.__init__()=pike.core.Cursor-class.html#__init__,Method pike.core.Frame.__init__()=pike.core.Frame-class.html#__init__,Method pike.core.Let.__init__()=pike.core.Let-class.html#__init__,Method pike.core.Register.__init__()=pike.core.Register-class.html#__init__,Method pike.crypto.CryptoKeys300.__init__()=pike.crypto.CryptoKeys300-class.html#__init__,Method pike.crypto.CryptoKeys311.__init__()=pike.crypto.CryptoKeys311-class.html#__init__,Method pike.crypto.EncryptionCapabilities.__init__()=pike.crypto.EncryptionCapabilities-class.html#__init__,Method pike.crypto.EncryptionCapabilitiesRequest.__init__()=pike.crypto.EncryptionCapabilitiesRequest-class.html#__init__,Method pike.crypto.EncryptionCapabilitiesResponse.__init__()=pike.crypto.EncryptionCapabilitiesResponse-class.html#__init__,Method pike.crypto.EncryptionContext.__init__()=pike.crypto.EncryptionContext-class.html#__init__,Method pike.crypto.TransformHeader.__init__()=pike.crypto.TransformHeader-class.html#__init__,Method pike.model.Channel.__init__()=pike.model.Channel-class.html#__init__,Method pike.model.Client.__init__()=pike.model.Client-class.html#__init__,Method pike.model.Connection.SessionSetupContext.__init__()=pike.model.Connection.SessionSetupContext-class.html#__init__,Method pike.model.Connection.__init__()=pike.model.Connection-class.html#__init__,Method pike.model.Future.__init__()=pike.model.Future-class.html#__init__,Method pike.model.Lease.__init__()=pike.model.Lease-class.html#__init__,Method pike.model.Open.__init__()=pike.model.Open-class.html#__init__,Method pike.model.ResponseError.__init__()=pike.model.ResponseError-class.html#__init__,Method pike.model.Session.__init__()=pike.model.Session-class.html#__init__,Method pike.model.Tree.__init__()=pike.model.Tree-class.html#__init__,Method pike.netbios.Netbios.__init__()=pike.netbios.Netbios-class.html#__init__,Method pike.ntlm.AvPair.__init__()=pike.ntlm.AvPair-class.html#__init__,Method pike.ntlm.NTLMv2ClientChallenge.__init__()=pike.ntlm.NTLMv2ClientChallenge-class.html#__init__,Method pike.ntlm.NTLMv2Response.__init__()=pike.ntlm.NTLMv2Response-class.html#__init__,Method pike.ntlm.NtLmAuthenticateMessage.__init__()=pike.ntlm.NtLmAuthenticateMessage-class.html#__init__,Method pike.ntlm.NtLmChallengeMessage.__init__()=pike.ntlm.NtLmChallengeMessage-class.html#__init__,Method pike.ntlm.NtLmNegotiateMessage.__init__()=pike.ntlm.NtLmNegotiateMessage-class.html#__init__,Method pike.ntlm.Ntlm.__init__()=pike.ntlm.Ntlm-class.html#__init__,Method pike.ntlm.NtlmAuthenticator.__init__()=pike.ntlm.NtlmAuthenticator-class.html#__init__,Method pike.ntlm.Version.__init__()=pike.ntlm.Version-class.html#__init__,Method pike.smb2.AllocationSizeRequest.__init__()=pike.smb2.AllocationSizeRequest-class.html#__init__,Method pike.smb2.AppInstanceIdRequest.__init__()=pike.smb2.AppInstanceIdRequest-class.html#__init__,Method pike.smb2.ChangeNotifyRequest.__init__()=pike.smb2.ChangeNotifyRequest-class.html#__init__,Method pike.smb2.ChangeNotifyResponse.__init__()=pike.smb2.ChangeNotifyResponse-class.html#__init__,Method pike.smb2.CloseRequest.__init__()=pike.smb2.CloseRequest-class.html#__init__,Method pike.smb2.CloseResponse.__init__()=pike.smb2.CloseResponse-class.html#__init__,Method pike.smb2.Command.__init__()=pike.smb2.Command-class.html#__init__,Method pike.smb2.CopyChunk.__init__()=pike.smb2.CopyChunk-class.html#__init__,Method pike.smb2.CopyChunkCopyRequest.__init__()=pike.smb2.CopyChunkCopyRequest-class.html#__init__,Method pike.smb2.CopyChunkCopyResponse.__init__()=pike.smb2.CopyChunkCopyResponse-class.html#__init__,Method pike.smb2.CreateRequest.__init__()=pike.smb2.CreateRequest-class.html#__init__,Method pike.smb2.CreateRequestContext.__init__()=pike.smb2.CreateRequestContext-class.html#__init__,Method pike.smb2.CreateResponse.__init__()=pike.smb2.CreateResponse-class.html#__init__,Method pike.smb2.CreateResponseContext.__init__()=pike.smb2.CreateResponseContext-class.html#__init__,Method pike.smb2.DurableHandleReconnectRequest.__init__()=pike.smb2.DurableHandleReconnectRequest-class.html#__init__,Method pike.smb2.DurableHandleReconnectV2Request.__init__()=pike.smb2.DurableHandleReconnectV2Request-class.html#__init__,Method pike.smb2.DurableHandleRequest.__init__()=pike.smb2.DurableHandleRequest-class.html#__init__,Method pike.smb2.DurableHandleResponse.__init__()=pike.smb2.DurableHandleResponse-class.html#__init__,Method pike.smb2.DurableHandleV2Request.__init__()=pike.smb2.DurableHandleV2Request-class.html#__init__,Method pike.smb2.DurableHandleV2Response.__init__()=pike.smb2.DurableHandleV2Response-class.html#__init__,Method pike.smb2.EchoRequest.__init__()=pike.smb2.EchoRequest-class.html#__init__,Method pike.smb2.EchoResponse.__init__()=pike.smb2.EchoResponse-class.html#__init__,Method pike.smb2.EnumerateSnapshotsResponse.__init__()=pike.smb2.EnumerateSnapshotsResponse-class.html#__init__,Method pike.smb2.ErrorResponse.__init__()=pike.smb2.ErrorResponse-class.html#__init__,Method pike.smb2.ErrorResponseContext.__init__()=pike.smb2.ErrorResponseContext-class.html#__init__,Method pike.smb2.ExtendedAttributeRequest.__init__()=pike.smb2.ExtendedAttributeRequest-class.html#__init__,Method pike.smb2.FileAccessInformation.__init__()=pike.smb2.FileAccessInformation-class.html#__init__,Method pike.smb2.FileAlignmentInformation.__init__()=pike.smb2.FileAlignmentInformation-class.html#__init__,Method pike.smb2.FileAllInformation.__init__()=pike.smb2.FileAllInformation-class.html#__init__,Method pike.smb2.FileAllocationInformation.__init__()=pike.smb2.FileAllocationInformation-class.html#__init__,Method pike.smb2.FileAttributeTagInformation.__init__()=pike.smb2.FileAttributeTagInformation-class.html#__init__,Method pike.smb2.FileBasicInformation.__init__()=pike.smb2.FileBasicInformation-class.html#__init__,Method pike.smb2.FileCompressionInformation.__init__()=pike.smb2.FileCompressionInformation-class.html#__init__,Method pike.smb2.FileDirectoryInformation.__init__()=pike.smb2.FileDirectoryInformation-class.html#__init__,Method pike.smb2.FileDispositionInformation.__init__()=pike.smb2.FileDispositionInformation-class.html#__init__,Method pike.smb2.FileEaInformation.__init__()=pike.smb2.FileEaInformation-class.html#__init__,Method pike.smb2.FileEndOfFileInformation.__init__()=pike.smb2.FileEndOfFileInformation-class.html#__init__,Method pike.smb2.FileFsAttributeInformation.__init__()=pike.smb2.FileFsAttributeInformation-class.html#__init__,Method pike.smb2.FileFsControlInformation.__init__()=pike.smb2.FileFsControlInformation-class.html#__init__,Method pike.smb2.FileFsDeviceInformation.__init__()=pike.smb2.FileFsDeviceInformation-class.html#__init__,Method pike.smb2.FileFsFullSizeInformation.__init__()=pike.smb2.FileFsFullSizeInformation-class.html#__init__,Method pike.smb2.FileFsObjectIdInformation.__init__()=pike.smb2.FileFsObjectIdInformation-class.html#__init__,Method pike.smb2.FileFsSizeInformation.__init__()=pike.smb2.FileFsSizeInformation-class.html#__init__,Method pike.smb2.FileFsVolumeInformation.__init__()=pike.smb2.FileFsVolumeInformation-class.html#__init__,Method pike.smb2.FileFullDirectoryInformation.__init__()=pike.smb2.FileFullDirectoryInformation-class.html#__init__,Method pike.smb2.FileIdBothDirectoryInformation.__init__()=pike.smb2.FileIdBothDirectoryInformation-class.html#__init__,Method pike.smb2.FileIdFullDirectoryInformation.__init__()=pike.smb2.FileIdFullDirectoryInformation-class.html#__init__,Method pike.smb2.FileInternalInformation.__init__()=pike.smb2.FileInternalInformation-class.html#__init__,Method pike.smb2.FileModeInformation.__init__()=pike.smb2.FileModeInformation-class.html#__init__,Method pike.smb2.FileNameInformation.__init__()=pike.smb2.FileNameInformation-class.html#__init__,Method pike.smb2.FileNamesInformation.__init__()=pike.smb2.FileNamesInformation-class.html#__init__,Method pike.smb2.FileNetworkOpenInformation.__init__()=pike.smb2.FileNetworkOpenInformation-class.html#__init__,Method pike.smb2.FileNotifyInformation.__init__()=pike.smb2.FileNotifyInformation-class.html#__init__,Method pike.smb2.FilePositionInformation.__init__()=pike.smb2.FilePositionInformation-class.html#__init__,Method pike.smb2.FileRenameInformation.__init__()=pike.smb2.FileRenameInformation-class.html#__init__,Method pike.smb2.FileStandardInformation.__init__()=pike.smb2.FileStandardInformation-class.html#__init__,Method pike.smb2.FileStreamInformation.__init__()=pike.smb2.FileStreamInformation-class.html#__init__,Method pike.smb2.FileValidDataLengthInformation.__init__()=pike.smb2.FileValidDataLengthInformation-class.html#__init__,Method pike.smb2.FlushRequest.__init__()=pike.smb2.FlushRequest-class.html#__init__,Method pike.smb2.FlushResponse.__init__()=pike.smb2.FlushResponse-class.html#__init__,Method pike.smb2.GetReparsePointResponse.__init__()=pike.smb2.GetReparsePointResponse-class.html#__init__,Method pike.smb2.Information.__init__()=pike.smb2.Information-class.html#__init__,Method pike.smb2.IoctlInput.__init__()=pike.smb2.IoctlInput-class.html#__init__,Method pike.smb2.IoctlOutput.__init__()=pike.smb2.IoctlOutput-class.html#__init__,Method pike.smb2.IoctlRequest.__init__()=pike.smb2.IoctlRequest-class.html#__init__,Method pike.smb2.IoctlResponse.__init__()=pike.smb2.IoctlResponse-class.html#__init__,Method pike.smb2.LeaseBreakAcknowledgement.__init__()=pike.smb2.LeaseBreakAcknowledgement-class.html#__init__,Method pike.smb2.LeaseBreakNotification.__init__()=pike.smb2.LeaseBreakNotification-class.html#__init__,Method pike.smb2.LeaseBreakResponse.__init__()=pike.smb2.LeaseBreakResponse-class.html#__init__,Method pike.smb2.LeaseRequest.__init__()=pike.smb2.LeaseRequest-class.html#__init__,Method pike.smb2.LeaseResponse.__init__()=pike.smb2.LeaseResponse-class.html#__init__,Method pike.smb2.LockRequest.__init__()=pike.smb2.LockRequest-class.html#__init__,Method pike.smb2.LockResponse.__init__()=pike.smb2.LockResponse-class.html#__init__,Method pike.smb2.LogoffRequest.__init__()=pike.smb2.LogoffRequest-class.html#__init__,Method pike.smb2.LogoffResponse.__init__()=pike.smb2.LogoffResponse-class.html#__init__,Method pike.smb2.MaximalAccessRequest.__init__()=pike.smb2.MaximalAccessRequest-class.html#__init__,Method pike.smb2.MaximalAccessResponse.__init__()=pike.smb2.MaximalAccessResponse-class.html#__init__,Method pike.smb2.NegotiateRequest.__init__()=pike.smb2.NegotiateRequest-class.html#__init__,Method pike.smb2.NegotiateRequestContext.__init__()=pike.smb2.NegotiateRequestContext-class.html#__init__,Method pike.smb2.NegotiateResponse.__init__()=pike.smb2.NegotiateResponse-class.html#__init__,Method pike.smb2.NegotiateResponseContext.__init__()=pike.smb2.NegotiateResponseContext-class.html#__init__,Method pike.smb2.OplockBreakAcknowledgement.__init__()=pike.smb2.OplockBreakAcknowledgement-class.html#__init__,Method pike.smb2.OplockBreakNotification.__init__()=pike.smb2.OplockBreakNotification-class.html#__init__,Method pike.smb2.OplockBreakResponse.__init__()=pike.smb2.OplockBreakResponse-class.html#__init__,Method pike.smb2.PreauthIntegrityCapabilities.__init__()=pike.smb2.PreauthIntegrityCapabilities-class.html#__init__,Method pike.smb2.PreauthIntegrityCapabilitiesRequest.__init__()=pike.smb2.PreauthIntegrityCapabilitiesRequest-class.html#__init__,Method pike.smb2.PreauthIntegrityCapabilitiesResponse.__init__()=pike.smb2.PreauthIntegrityCapabilitiesResponse-class.html#__init__,Method pike.smb2.QueryDirectoryRequest.__init__()=pike.smb2.QueryDirectoryRequest-class.html#__init__,Method pike.smb2.QueryDirectoryResponse.__init__()=pike.smb2.QueryDirectoryResponse-class.html#__init__,Method pike.smb2.QueryInfoRequest.__init__()=pike.smb2.QueryInfoRequest-class.html#__init__,Method pike.smb2.QueryInfoResponse.__init__()=pike.smb2.QueryInfoResponse-class.html#__init__,Method pike.smb2.QueryOnDiskIDRequest.__init__()=pike.smb2.QueryOnDiskIDRequest-class.html#__init__,Method pike.smb2.QueryOnDiskIDResponse.__init__()=pike.smb2.QueryOnDiskIDResponse-class.html#__init__,Method pike.smb2.ReadRequest.__init__()=pike.smb2.ReadRequest-class.html#__init__,Method pike.smb2.ReadResponse.__init__()=pike.smb2.ReadResponse-class.html#__init__,Method pike.smb2.ReparseDataBuffer.__init__()=pike.smb2.ReparseDataBuffer-class.html#__init__,Method pike.smb2.RequestResumeKeyRequest.__init__()=pike.smb2.RequestResumeKeyRequest-class.html#__init__,Method pike.smb2.RequestResumeKeyResponse.__init__()=pike.smb2.RequestResumeKeyResponse-class.html#__init__,Method pike.smb2.SecurityDescriptorRequest.__init__()=pike.smb2.SecurityDescriptorRequest-class.html#__init__,Method pike.smb2.SessionSetupRequest.__init__()=pike.smb2.SessionSetupRequest-class.html#__init__,Method pike.smb2.SessionSetupResponse.__init__()=pike.smb2.SessionSetupResponse-class.html#__init__,Method pike.smb2.SetInfoRequest.__init__()=pike.smb2.SetInfoRequest-class.html#__init__,Method pike.smb2.SetInfoResponse.__init__()=pike.smb2.SetInfoResponse-class.html#__init__,Method pike.smb2.SetReparsePointRequest.__init__()=pike.smb2.SetReparsePointRequest-class.html#__init__,Method pike.smb2.Smb2.__init__()=pike.smb2.Smb2-class.html#__init__,Method pike.smb2.SymbolicLinkReparseBuffer.__init__()=pike.smb2.SymbolicLinkReparseBuffer-class.html#__init__,Method pike.smb2.TimewarpTokenRequest.__init__()=pike.smb2.TimewarpTokenRequest-class.html#__init__,Method pike.smb2.TreeConnectRequest.__init__()=pike.smb2.TreeConnectRequest-class.html#__init__,Method pike.smb2.TreeConnectResponse.__init__()=pike.smb2.TreeConnectResponse-class.html#__init__,Method pike.smb2.TreeDisconnectRequest.__init__()=pike.smb2.TreeDisconnectRequest-class.html#__init__,Method pike.smb2.TreeDisconnectResponse.__init__()=pike.smb2.TreeDisconnectResponse-class.html#__init__,Method pike.smb2.ValidateNegotiateInfoRequest.__init__()=pike.smb2.ValidateNegotiateInfoRequest-class.html#__init__,Method pike.smb2.ValidateNegotiateInfoResponse.__init__()=pike.smb2.ValidateNegotiateInfoResponse-class.html#__init__,Method pike.smb2.WriteRequest.__init__()=pike.smb2.WriteRequest-class.html#__init__,Method pike.smb2.WriteResponse.__init__()=pike.smb2.WriteResponse-class.html#__init__,Method pike.test.PikeTest.__init__()=pike.test.PikeTest-class.html#__init__,Method pike.test._Decorator.__init__()=pike.test._Decorator-class.html#__init__,Method pike.test._RangeDecorator.__init__()=pike.test._RangeDecorator-class.html#__init__,Method pike.test.appinstanceid.AppInstanceIdTest.__init__()=pike.test.appinstanceid.AppInstanceIdTest-class.html#__init__,Method pike.test.credit.CreditTest.__init__()=pike.test.credit.CreditTest-class.html#__init__,Method pike.test.ioctl.ValidateNegotiateInfo.__init__()=pike.test.ioctl.ValidateNegotiateInfo-class.html#__init__,Method pike.test.lease.LeaseTest.__init__()=pike.test.lease.LeaseTest-class.html#__init__,Method pike.test.query.QueryTest.__init__()=pike.test.query.QueryTest-class.html#__init__,Method pike.test.test_smb3_encryption_vector.PAIntegrity.__init__()=pike.test.test_smb3_encryption_vector.PAIntegrity-class.html#__init__,Method pike.test.test_smb3_encryption_vector.bogus_300_connection.__init__()=pike.test.test_smb3_encryption_vector.bogus_300_connection-class.html#__init__,Method pike.test.test_smb3_encryption_vector.bogus_311_connection.__init__()=pike.test.test_smb3_encryption_vector.bogus_311_connection-class.html#__init__,Method pike.transport.BasePoller.__init__()=pike.transport.BasePoller-class.html#__init__,Method pike.transport.KQueuePoller.__init__()=pike.transport.KQueuePoller-class.html#__init__,Method pike.transport.PollPoller.__init__()=pike.transport.PollPoller-class.html#__init__,Method pike.transport.Transport.__init__()=pike.transport.Transport-class.html#__init__"><a title="pike.auth.KerberosProvider.__init__
+pike.auth.NtlmProvider.__init__
+pike.core.Cursor.Bounds.__init__
+pike.core.Cursor.Hole.__init__
+pike.core.Cursor.__init__
+pike.core.Frame.__init__
+pike.core.Let.__init__
+pike.core.Register.__init__
+pike.crypto.CryptoKeys300.__init__
+pike.crypto.CryptoKeys311.__init__
+pike.crypto.EncryptionCapabilities.__init__
+pike.crypto.EncryptionCapabilitiesRequest.__init__
+pike.crypto.EncryptionCapabilitiesResponse.__init__
+pike.crypto.EncryptionContext.__init__
+pike.crypto.TransformHeader.__init__
+pike.model.Channel.__init__
+pike.model.Client.__init__
+pike.model.Connection.SessionSetupContext.__init__
+pike.model.Connection.__init__
+pike.model.Future.__init__
+pike.model.Lease.__init__
+pike.model.Open.__init__
+pike.model.ResponseError.__init__
+pike.model.Session.__init__
+pike.model.Tree.__init__
+pike.netbios.Netbios.__init__
+pike.ntlm.AvPair.__init__
+pike.ntlm.NTLMv2ClientChallenge.__init__
+pike.ntlm.NTLMv2Response.__init__
+pike.ntlm.NtLmAuthenticateMessage.__init__
+pike.ntlm.NtLmChallengeMessage.__init__
+pike.ntlm.NtLmNegotiateMessage.__init__
+pike.ntlm.Ntlm.__init__
+pike.ntlm.NtlmAuthenticator.__init__
+pike.ntlm.Version.__init__
+pike.smb2.AllocationSizeRequest.__init__
+pike.smb2.AppInstanceIdRequest.__init__
+pike.smb2.ChangeNotifyRequest.__init__
+pike.smb2.ChangeNotifyResponse.__init__
+pike.smb2.CloseRequest.__init__
+pike.smb2.CloseResponse.__init__
+pike.smb2.Command.__init__
+pike.smb2.CopyChunk.__init__
+pike.smb2.CopyChunkCopyRequest.__init__
+pike.smb2.CopyChunkCopyResponse.__init__
+pike.smb2.CreateRequest.__init__
+pike.smb2.CreateRequestContext.__init__
+pike.smb2.CreateResponse.__init__
+pike.smb2.CreateResponseContext.__init__
+pike.smb2.DurableHandleReconnectRequest.__init__
+pike.smb2.DurableHandleReconnectV2Request.__init__
+pike.smb2.DurableHandleRequest.__init__
+pike.smb2.DurableHandleResponse.__init__
+pike.smb2.DurableHandleV2Request.__init__
+pike.smb2.DurableHandleV2Response.__init__
+pike.smb2.EchoRequest.__init__
+pike.smb2.EchoResponse.__init__
+pike.smb2.EnumerateSnapshotsResponse.__init__
+pike.smb2.ErrorResponse.__init__
+pike.smb2.ErrorResponseContext.__init__
+pike.smb2.ExtendedAttributeRequest.__init__
+pike.smb2.FileAccessInformation.__init__
+pike.smb2.FileAlignmentInformation.__init__
+pike.smb2.FileAllInformation.__init__
+pike.smb2.FileAllocationInformation.__init__
+pike.smb2.FileAttributeTagInformation.__init__
+pike.smb2.FileBasicInformation.__init__
+pike.smb2.FileCompressionInformation.__init__
+pike.smb2.FileDirectoryInformation.__init__
+pike.smb2.FileDispositionInformation.__init__
+pike.smb2.FileEaInformation.__init__
+pike.smb2.FileEndOfFileInformation.__init__
+pike.smb2.FileFsAttributeInformation.__init__
+pike.smb2.FileFsControlInformation.__init__
+pike.smb2.FileFsDeviceInformation.__init__
+pike.smb2.FileFsFullSizeInformation.__init__
+pike.smb2.FileFsObjectIdInformation.__init__
+pike.smb2.FileFsSizeInformation.__init__
+pike.smb2.FileFsVolumeInformation.__init__
+pike.smb2.FileFullDirectoryInformation.__init__
+pike.smb2.FileIdBothDirectoryInformation.__init__
+pike.smb2.FileIdFullDirectoryInformation.__init__
+pike.smb2.FileInternalInformation.__init__
+pike.smb2.FileModeInformation.__init__
+pike.smb2.FileNameInformation.__init__
+pike.smb2.FileNamesInformation.__init__
+pike.smb2.FileNetworkOpenInformation.__init__
+pike.smb2.FileNotifyInformation.__init__
+pike.smb2.FilePositionInformation.__init__
+pike.smb2.FileRenameInformation.__init__
+pike.smb2.FileStandardInformation.__init__
+pike.smb2.FileStreamInformation.__init__
+pike.smb2.FileValidDataLengthInformation.__init__
+pike.smb2.FlushRequest.__init__
+pike.smb2.FlushResponse.__init__
+pike.smb2.GetReparsePointResponse.__init__
+pike.smb2.Information.__init__
+pike.smb2.IoctlInput.__init__
+pike.smb2.IoctlOutput.__init__
+pike.smb2.IoctlRequest.__init__
+pike.smb2.IoctlResponse.__init__
+pike.smb2.LeaseBreakAcknowledgement.__init__
+pike.smb2.LeaseBreakNotification.__init__
+pike.smb2.LeaseBreakResponse.__init__
+pike.smb2.LeaseRequest.__init__
+pike.smb2.LeaseResponse.__init__
+pike.smb2.LockRequest.__init__
+pike.smb2.LockResponse.__init__
+pike.smb2.LogoffRequest.__init__
+pike.smb2.LogoffResponse.__init__
+pike.smb2.MaximalAccessRequest.__init__
+pike.smb2.MaximalAccessResponse.__init__
+pike.smb2.NegotiateRequest.__init__
+pike.smb2.NegotiateRequestContext.__init__
+pike.smb2.NegotiateResponse.__init__
+pike.smb2.NegotiateResponseContext.__init__
+pike.smb2.OplockBreakAcknowledgement.__init__
+pike.smb2.OplockBreakNotification.__init__
+pike.smb2.OplockBreakResponse.__init__
+pike.smb2.PreauthIntegrityCapabilities.__init__
+pike.smb2.PreauthIntegrityCapabilitiesRequest.__init__
+pike.smb2.PreauthIntegrityCapabilitiesResponse.__init__
+pike.smb2.QueryDirectoryRequest.__init__
+pike.smb2.QueryDirectoryResponse.__init__
+pike.smb2.QueryInfoRequest.__init__
+pike.smb2.QueryInfoResponse.__init__
+pike.smb2.QueryOnDiskIDRequest.__init__
+pike.smb2.QueryOnDiskIDResponse.__init__
+pike.smb2.ReadRequest.__init__
+pike.smb2.ReadResponse.__init__
+pike.smb2.ReparseDataBuffer.__init__
+pike.smb2.RequestResumeKeyRequest.__init__
+pike.smb2.RequestResumeKeyResponse.__init__
+pike.smb2.SecurityDescriptorRequest.__init__
+pike.smb2.SessionSetupRequest.__init__
+pike.smb2.SessionSetupResponse.__init__
+pike.smb2.SetInfoRequest.__init__
+pike.smb2.SetInfoResponse.__init__
+pike.smb2.SetReparsePointRequest.__init__
+pike.smb2.Smb2.__init__
+pike.smb2.SymbolicLinkReparseBuffer.__init__
+pike.smb2.TimewarpTokenRequest.__init__
+pike.smb2.TreeConnectRequest.__init__
+pike.smb2.TreeConnectResponse.__init__
+pike.smb2.TreeDisconnectRequest.__init__
+pike.smb2.TreeDisconnectResponse.__init__
+pike.smb2.ValidateNegotiateInfoRequest.__init__
+pike.smb2.ValidateNegotiateInfoResponse.__init__
+pike.smb2.WriteRequest.__init__
+pike.smb2.WriteResponse.__init__
+pike.test.PikeTest.__init__
+pike.test._Decorator.__init__
+pike.test._RangeDecorator.__init__
+pike.test.appinstanceid.AppInstanceIdTest.__init__
+pike.test.credit.CreditTest.__init__
+pike.test.ioctl.ValidateNegotiateInfo.__init__
+pike.test.lease.LeaseTest.__init__
+pike.test.query.QueryTest.__init__
+pike.test.test_smb3_encryption_vector.PAIntegrity.__init__
+pike.test.test_smb3_encryption_vector.bogus_300_connection.__init__
+pike.test.test_smb3_encryption_vector.bogus_311_connection.__init__
+pike.transport.BasePoller.__init__
+pike.transport.KQueuePoller.__init__
+pike.transport.PollPoller.__init__
+pike.transport.Transport.__init__" class="py-name" href="#" onclick="return doclink('link-48', '__init__', 'link-48');">__init__</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L336"></a><tt class="py-lineno">336</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">kq</tt> <tt class="py-op">=</tt> <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">kqueue</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L337"></a><tt class="py-lineno">337</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">batch_size</tt> <tt class="py-op">=</tt> <tt class="py-number">10</tt> </tt>
+</div><a name="L338"></a><tt class="py-lineno">338</tt>  <tt class="py-line"> </tt>
+<a name="KQueuePoller.add_channel"></a><div id="KQueuePoller.add_channel-def"><a name="L339"></a><tt class="py-lineno">339</tt> <a class="py-toggle" href="#" id="KQueuePoller.add_channel-toggle" onclick="return toggle('KQueuePoller.add_channel');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.KQueuePoller-class.html#add_channel">add_channel</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">transport</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="KQueuePoller.add_channel-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="KQueuePoller.add_channel-expanded"><a name="L340"></a><tt class="py-lineno">340</tt>  <tt class="py-line">        <tt class="py-name">super</tt><tt class="py-op">(</tt><tt id="link-49" class="py-name"><a title="pike.transport.KQueuePoller" class="py-name" href="#" onclick="return doclink('link-49', 'KQueuePoller', 'link-47');">KQueuePoller</a></tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-50" class="py-name"><a title="pike.transport.BasePoller.add_channel
+pike.transport.KQueuePoller.add_channel
+pike.transport.PollPoller.add_channel" class="py-name" href="#" onclick="return doclink('link-50', 'add_channel', 'link-6');">add_channel</a></tt><tt class="py-op">(</tt><tt id="link-51" class="py-name"><a title="pike.transport" class="py-name" href="#" onclick="return doclink('link-51', 'transport', 'link-27');">transport</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L341"></a><tt class="py-lineno">341</tt>  <tt class="py-line">        <tt class="py-name">events</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">kevent</tt><tt class="py-op">(</tt><tt id="link-52" class="py-name"><a title="pike.transport" class="py-name" href="#" onclick="return doclink('link-52', 'transport', 'link-27');">transport</a></tt><tt class="py-op">.</tt><tt class="py-name">_fileno</tt><tt class="py-op">,</tt> </tt>
+<a name="L342"></a><tt class="py-lineno">342</tt>  <tt class="py-line">                                <tt class="py-name">filter</tt><tt class="py-op">=</tt><tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">KQ_FILTER_READ</tt><tt class="py-op">,</tt> </tt>
+<a name="L343"></a><tt class="py-lineno">343</tt>  <tt class="py-line">                                <tt class="py-name">flags</tt><tt class="py-op">=</tt><tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">KQ_EV_ADD</tt> <tt class="py-op">|</tt> <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">KQ_EV_ENABLE</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> </tt>
+<a name="L344"></a><tt class="py-lineno">344</tt>  <tt class="py-line">                  <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">kevent</tt><tt class="py-op">(</tt><tt id="link-53" class="py-name"><a title="pike.transport" class="py-name" href="#" onclick="return doclink('link-53', 'transport', 'link-27');">transport</a></tt><tt class="py-op">.</tt><tt class="py-name">_fileno</tt><tt class="py-op">,</tt> </tt>
+<a name="L345"></a><tt class="py-lineno">345</tt>  <tt class="py-line">                                <tt class="py-name">filter</tt><tt class="py-op">=</tt><tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">KQ_FILTER_WRITE</tt><tt class="py-op">,</tt> </tt>
+<a name="L346"></a><tt class="py-lineno">346</tt>  <tt class="py-line">                                <tt class="py-name">flags</tt><tt class="py-op">=</tt><tt class="py-op">(</tt><tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">KQ_EV_ADD</tt> <tt class="py-op">|</tt> </tt>
+<a name="L347"></a><tt class="py-lineno">347</tt>  <tt class="py-line">                                       <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">KQ_EV_ENABLE</tt> <tt class="py-op">|</tt> </tt>
+<a name="L348"></a><tt class="py-lineno">348</tt>  <tt class="py-line">                                       <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">KQ_EV_ONESHOT</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">]</tt> </tt>
+<a name="L349"></a><tt class="py-lineno">349</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">kq</tt><tt class="py-op">.</tt><tt class="py-name">control</tt><tt class="py-op">(</tt><tt class="py-name">events</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L350"></a><tt class="py-lineno">350</tt>  <tt class="py-line"> </tt>
+<a name="KQueuePoller.defer_write"></a><div id="KQueuePoller.defer_write-def"><a name="L351"></a><tt class="py-lineno">351</tt> <a class="py-toggle" href="#" id="KQueuePoller.defer_write-toggle" onclick="return toggle('KQueuePoller.defer_write');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.KQueuePoller-class.html#defer_write">defer_write</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">transport</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="KQueuePoller.defer_write-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="KQueuePoller.defer_write-expanded"><a name="L352"></a><tt class="py-lineno">352</tt>  <tt class="py-line">        <tt class="py-name">super</tt><tt class="py-op">(</tt><tt id="link-54" class="py-name"><a title="pike.transport.KQueuePoller" class="py-name" href="#" onclick="return doclink('link-54', 'KQueuePoller', 'link-47');">KQueuePoller</a></tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-55" class="py-name"><a title="pike.transport.BasePoller.defer_write
+pike.transport.KQueuePoller.defer_write
+pike.transport.PollPoller.defer_write" class="py-name" href="#" onclick="return doclink('link-55', 'defer_write', 'link-17');">defer_write</a></tt><tt class="py-op">(</tt><tt id="link-56" class="py-name"><a title="pike.transport" class="py-name" href="#" onclick="return doclink('link-56', 'transport', 'link-27');">transport</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L353"></a><tt class="py-lineno">353</tt>  <tt class="py-line">        <tt class="py-name">events</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">kevent</tt><tt class="py-op">(</tt><tt id="link-57" class="py-name"><a title="pike.transport" class="py-name" href="#" onclick="return doclink('link-57', 'transport', 'link-27');">transport</a></tt><tt class="py-op">.</tt><tt class="py-name">_fileno</tt><tt class="py-op">,</tt> </tt>
+<a name="L354"></a><tt class="py-lineno">354</tt>  <tt class="py-line">                                <tt class="py-name">filter</tt><tt class="py-op">=</tt><tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">KQ_FILTER_WRITE</tt><tt class="py-op">,</tt> </tt>
+<a name="L355"></a><tt class="py-lineno">355</tt>  <tt class="py-line">                                <tt class="py-name">flags</tt><tt class="py-op">=</tt><tt class="py-op">(</tt><tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">KQ_EV_ADD</tt> <tt class="py-op">|</tt> </tt>
+<a name="L356"></a><tt class="py-lineno">356</tt>  <tt class="py-line">                                       <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">KQ_EV_ENABLE</tt> <tt class="py-op">|</tt> </tt>
+<a name="L357"></a><tt class="py-lineno">357</tt>  <tt class="py-line">                                       <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">KQ_EV_ONESHOT</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">]</tt> </tt>
+<a name="L358"></a><tt class="py-lineno">358</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">kq</tt><tt class="py-op">.</tt><tt class="py-name">control</tt><tt class="py-op">(</tt><tt class="py-name">events</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L359"></a><tt class="py-lineno">359</tt>  <tt class="py-line"> </tt>
+<a name="KQueuePoller.poll"></a><div id="KQueuePoller.poll-def"><a name="L360"></a><tt class="py-lineno">360</tt> <a class="py-toggle" href="#" id="KQueuePoller.poll-toggle" onclick="return toggle('KQueuePoller.poll');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.KQueuePoller-class.html#poll">poll</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="KQueuePoller.poll-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="KQueuePoller.poll-expanded"><a name="L361"></a><tt class="py-lineno">361</tt>  <tt class="py-line">        <tt class="py-name">events</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">kq</tt><tt class="py-op">.</tt><tt class="py-name">control</tt><tt class="py-op">(</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">batch_size</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">)</tt> </tt>
+<a name="L362"></a><tt class="py-lineno">362</tt>  <tt class="py-line">        <tt class="py-name">readables</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
+<a name="L363"></a><tt class="py-lineno">363</tt>  <tt class="py-line">        <tt class="py-name">writables</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
+<a name="L364"></a><tt class="py-lineno">364</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">ev</tt> <tt class="py-keyword">in</tt> <tt class="py-name">events</tt><tt class="py-op">:</tt> </tt>
+<a name="L365"></a><tt class="py-lineno">365</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">ev</tt><tt class="py-op">.</tt><tt class="py-name">filter</tt> <tt class="py-op">==</tt> <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">KQ_FILTER_READ</tt><tt class="py-op">:</tt> </tt>
+<a name="L366"></a><tt class="py-lineno">366</tt>  <tt class="py-line">                <tt class="py-name">readables</tt><tt class="py-op">.</tt><tt id="link-58" class="py-name" targets="Method pike.crypto.TransformHeader.append()=pike.crypto.TransformHeader-class.html#append,Method pike.netbios.Netbios.append()=pike.netbios.Netbios-class.html#append,Method pike.smb2.ChangeNotifyResponse.append()=pike.smb2.ChangeNotifyResponse-class.html#append,Method pike.smb2.CopyChunkCopyRequest.append()=pike.smb2.CopyChunkCopyRequest-class.html#append,Method pike.smb2.CreateRequest.append()=pike.smb2.CreateRequest-class.html#append,Method pike.smb2.CreateResponse.append()=pike.smb2.CreateResponse-class.html#append,Method pike.smb2.ErrorResponse.append()=pike.smb2.ErrorResponse-class.html#append,Method pike.smb2.NegotiateRequest.append()=pike.smb2.NegotiateRequest-class.html#append,Method pike.smb2.NegotiateResponse.append()=pike.smb2.NegotiateResponse-class.html#append,Method pike.smb2.QueryDirectoryResponse.append()=pike.smb2.QueryDirectoryResponse-class.html#append,Method pike.smb2.QueryInfoResponse.append()=pike.smb2.QueryInfoResponse-class.html#append,Method pike.smb2.SetInfoRequest.append()=pike.smb2.SetInfoRequest-class.html#append"><a title="pike.crypto.TransformHeader.append
+pike.netbios.Netbios.append
+pike.smb2.ChangeNotifyResponse.append
+pike.smb2.CopyChunkCopyRequest.append
+pike.smb2.CreateRequest.append
+pike.smb2.CreateResponse.append
+pike.smb2.ErrorResponse.append
+pike.smb2.NegotiateRequest.append
+pike.smb2.NegotiateResponse.append
+pike.smb2.QueryDirectoryResponse.append
+pike.smb2.QueryInfoResponse.append
+pike.smb2.SetInfoRequest.append" class="py-name" href="#" onclick="return doclink('link-58', 'append', 'link-58');">append</a></tt><tt class="py-op">(</tt><tt class="py-name">ev</tt><tt class="py-op">.</tt><tt class="py-name">ident</tt><tt class="py-op">)</tt> </tt>
+<a name="L367"></a><tt class="py-lineno">367</tt>  <tt class="py-line">            <tt class="py-keyword">elif</tt> <tt class="py-name">ev</tt><tt class="py-op">.</tt><tt class="py-name">filter</tt> <tt class="py-op">==</tt> <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">KQ_FILTER_WRITE</tt><tt class="py-op">:</tt> </tt>
+<a name="L368"></a><tt class="py-lineno">368</tt>  <tt class="py-line">                <tt class="py-name">writables</tt><tt class="py-op">.</tt><tt id="link-59" class="py-name"><a title="pike.crypto.TransformHeader.append
+pike.netbios.Netbios.append
+pike.smb2.ChangeNotifyResponse.append
+pike.smb2.CopyChunkCopyRequest.append
+pike.smb2.CreateRequest.append
+pike.smb2.CreateResponse.append
+pike.smb2.ErrorResponse.append
+pike.smb2.NegotiateRequest.append
+pike.smb2.NegotiateResponse.append
+pike.smb2.QueryDirectoryResponse.append
+pike.smb2.QueryInfoResponse.append
+pike.smb2.SetInfoRequest.append" class="py-name" href="#" onclick="return doclink('link-59', 'append', 'link-58');">append</a></tt><tt class="py-op">(</tt><tt class="py-name">ev</tt><tt class="py-op">.</tt><tt class="py-name">ident</tt><tt class="py-op">)</tt> </tt>
+<a name="L369"></a><tt class="py-lineno">369</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-60" class="py-name" targets="Method pike.transport.BasePoller.process_readables()=pike.transport.BasePoller-class.html#process_readables"><a title="pike.transport.BasePoller.process_readables" class="py-name" href="#" onclick="return doclink('link-60', 'process_readables', 'link-60');">process_readables</a></tt><tt class="py-op">(</tt><tt class="py-name">readables</tt><tt class="py-op">)</tt> </tt>
+<a name="L370"></a><tt class="py-lineno">370</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-61" class="py-name" targets="Method pike.transport.BasePoller.process_writables()=pike.transport.BasePoller-class.html#process_writables"><a title="pike.transport.BasePoller.process_writables" class="py-name" href="#" onclick="return doclink('link-61', 'process_writables', 'link-61');">process_writables</a></tt><tt class="py-op">(</tt><tt class="py-name">writables</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L371"></a><tt class="py-lineno">371</tt>  <tt class="py-line"> </tt>
+<a name="L372"></a><tt class="py-lineno">372</tt>  <tt class="py-line"> </tt>
+<a name="SelectPoller"></a><div id="SelectPoller-def"><a name="L373"></a><tt class="py-lineno">373</tt> <a class="py-toggle" href="#" id="SelectPoller-toggle" onclick="return toggle('SelectPoller');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="pike.transport.SelectPoller-class.html">SelectPoller</a><tt class="py-op">(</tt><tt class="py-base-class">BasePoller</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="SelectPoller-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="SelectPoller-expanded"><a name="L374"></a><tt class="py-lineno">374</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L375"></a><tt class="py-lineno">375</tt>  <tt class="py-line"><tt class="py-docstring">    Implementation of select, available on most platforms as a fallback.</tt> </tt>
+<a name="L376"></a><tt class="py-lineno">376</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L377"></a><tt class="py-lineno">377</tt>  <tt class="py-line"><tt class="py-docstring">    Roughly equivalent performance to using asyncore</tt> </tt>
+<a name="L378"></a><tt class="py-lineno">378</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="SelectPoller.poll"></a><div id="SelectPoller.poll-def"><a name="L379"></a><tt class="py-lineno">379</tt> <a class="py-toggle" href="#" id="SelectPoller.poll-toggle" onclick="return toggle('SelectPoller.poll');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.SelectPoller-class.html#poll">poll</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="SelectPoller.poll-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="SelectPoller.poll-expanded"><a name="L380"></a><tt class="py-lineno">380</tt>  <tt class="py-line">        <tt class="py-name">non_connected</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-name">t</tt><tt class="py-op">.</tt><tt class="py-name">_fileno</tt> <tt class="py-keyword">for</tt> <tt class="py-name">t</tt> <tt class="py-keyword">in</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">connections</tt><tt class="py-op">.</tt><tt id="link-62" class="py-name" targets="Class Method pike.core.Enum.values()=pike.core.Enum-class.html#values"><a title="pike.core.Enum.values" class="py-name" href="#" onclick="return doclink('link-62', 'values', 'link-62');">values</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> <tt class="py-keyword">if</tt> <tt class="py-keyword">not</tt> <tt class="py-name">t</tt><tt class="py-op">.</tt><tt class="py-name">connected</tt><tt class="py-op">]</tt> </tt>
+<a name="L381"></a><tt class="py-lineno">381</tt>  <tt class="py-line">        <tt class="py-name">readers</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">connections</tt><tt class="py-op">.</tt><tt class="py-name">keys</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L382"></a><tt class="py-lineno">382</tt>  <tt class="py-line">        <tt class="py-name">writers</tt> <tt class="py-op">=</tt> <tt class="py-name">non_connected</tt> <tt class="py-op">+</tt> <tt class="py-name">list</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">deferred_writers</tt><tt class="py-op">)</tt> </tt>
+<a name="L383"></a><tt class="py-lineno">383</tt>  <tt class="py-line">        <tt class="py-name">readables</tt><tt class="py-op">,</tt> <tt class="py-name">writables</tt><tt class="py-op">,</tt> <tt class="py-name">_</tt> <tt class="py-op">=</tt> <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">select</tt><tt class="py-op">(</tt><tt class="py-name">readers</tt><tt class="py-op">,</tt> </tt>
+<a name="L384"></a><tt class="py-lineno">384</tt>  <tt class="py-line">                                                <tt class="py-name">writers</tt><tt class="py-op">,</tt> </tt>
+<a name="L385"></a><tt class="py-lineno">385</tt>  <tt class="py-line">                                                <tt class="py-op">[</tt><tt class="py-op">]</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">)</tt> </tt>
+<a name="L386"></a><tt class="py-lineno">386</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-63" class="py-name"><a title="pike.transport.BasePoller.process_readables" class="py-name" href="#" onclick="return doclink('link-63', 'process_readables', 'link-60');">process_readables</a></tt><tt class="py-op">(</tt><tt class="py-name">readables</tt><tt class="py-op">)</tt> </tt>
+<a name="L387"></a><tt class="py-lineno">387</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-64" class="py-name"><a title="pike.transport.BasePoller.process_writables" class="py-name" href="#" onclick="return doclink('link-64', 'process_writables', 'link-61');">process_writables</a></tt><tt class="py-op">(</tt><tt class="py-name">writables</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L388"></a><tt class="py-lineno">388</tt>  <tt class="py-line"> </tt>
+<a name="L389"></a><tt class="py-lineno">389</tt>  <tt class="py-line"> </tt>
+<a name="PollPoller"></a><div id="PollPoller-def"><a name="L390"></a><tt class="py-lineno">390</tt> <a class="py-toggle" href="#" id="PollPoller-toggle" onclick="return toggle('PollPoller');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="pike.transport.PollPoller-class.html">PollPoller</a><tt class="py-op">(</tt><tt class="py-base-class">BasePoller</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PollPoller-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="PollPoller-expanded"><a name="L391"></a><tt class="py-lineno">391</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L392"></a><tt class="py-lineno">392</tt>  <tt class="py-line"><tt class="py-docstring">    Implementation of poll, available on Linux</tt> </tt>
+<a name="L393"></a><tt class="py-lineno">393</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="PollPoller.__init__"></a><div id="PollPoller.__init__-def"><a name="L394"></a><tt class="py-lineno">394</tt> <a class="py-toggle" href="#" id="PollPoller.__init__-toggle" onclick="return toggle('PollPoller.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.PollPoller-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PollPoller.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PollPoller.__init__-expanded"><a name="L395"></a><tt class="py-lineno">395</tt>  <tt class="py-line">        <tt class="py-name">super</tt><tt class="py-op">(</tt><tt id="link-65" class="py-name" targets="Class pike.transport.PollPoller=pike.transport.PollPoller-class.html"><a title="pike.transport.PollPoller" class="py-name" href="#" onclick="return doclink('link-65', 'PollPoller', 'link-65');">PollPoller</a></tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-66" class="py-name"><a title="pike.auth.KerberosProvider.__init__
+pike.auth.NtlmProvider.__init__
+pike.core.Cursor.Bounds.__init__
+pike.core.Cursor.Hole.__init__
+pike.core.Cursor.__init__
+pike.core.Frame.__init__
+pike.core.Let.__init__
+pike.core.Register.__init__
+pike.crypto.CryptoKeys300.__init__
+pike.crypto.CryptoKeys311.__init__
+pike.crypto.EncryptionCapabilities.__init__
+pike.crypto.EncryptionCapabilitiesRequest.__init__
+pike.crypto.EncryptionCapabilitiesResponse.__init__
+pike.crypto.EncryptionContext.__init__
+pike.crypto.TransformHeader.__init__
+pike.model.Channel.__init__
+pike.model.Client.__init__
+pike.model.Connection.SessionSetupContext.__init__
+pike.model.Connection.__init__
+pike.model.Future.__init__
+pike.model.Lease.__init__
+pike.model.Open.__init__
+pike.model.ResponseError.__init__
+pike.model.Session.__init__
+pike.model.Tree.__init__
+pike.netbios.Netbios.__init__
+pike.ntlm.AvPair.__init__
+pike.ntlm.NTLMv2ClientChallenge.__init__
+pike.ntlm.NTLMv2Response.__init__
+pike.ntlm.NtLmAuthenticateMessage.__init__
+pike.ntlm.NtLmChallengeMessage.__init__
+pike.ntlm.NtLmNegotiateMessage.__init__
+pike.ntlm.Ntlm.__init__
+pike.ntlm.NtlmAuthenticator.__init__
+pike.ntlm.Version.__init__
+pike.smb2.AllocationSizeRequest.__init__
+pike.smb2.AppInstanceIdRequest.__init__
+pike.smb2.ChangeNotifyRequest.__init__
+pike.smb2.ChangeNotifyResponse.__init__
+pike.smb2.CloseRequest.__init__
+pike.smb2.CloseResponse.__init__
+pike.smb2.Command.__init__
+pike.smb2.CopyChunk.__init__
+pike.smb2.CopyChunkCopyRequest.__init__
+pike.smb2.CopyChunkCopyResponse.__init__
+pike.smb2.CreateRequest.__init__
+pike.smb2.CreateRequestContext.__init__
+pike.smb2.CreateResponse.__init__
+pike.smb2.CreateResponseContext.__init__
+pike.smb2.DurableHandleReconnectRequest.__init__
+pike.smb2.DurableHandleReconnectV2Request.__init__
+pike.smb2.DurableHandleRequest.__init__
+pike.smb2.DurableHandleResponse.__init__
+pike.smb2.DurableHandleV2Request.__init__
+pike.smb2.DurableHandleV2Response.__init__
+pike.smb2.EchoRequest.__init__
+pike.smb2.EchoResponse.__init__
+pike.smb2.EnumerateSnapshotsResponse.__init__
+pike.smb2.ErrorResponse.__init__
+pike.smb2.ErrorResponseContext.__init__
+pike.smb2.ExtendedAttributeRequest.__init__
+pike.smb2.FileAccessInformation.__init__
+pike.smb2.FileAlignmentInformation.__init__
+pike.smb2.FileAllInformation.__init__
+pike.smb2.FileAllocationInformation.__init__
+pike.smb2.FileAttributeTagInformation.__init__
+pike.smb2.FileBasicInformation.__init__
+pike.smb2.FileCompressionInformation.__init__
+pike.smb2.FileDirectoryInformation.__init__
+pike.smb2.FileDispositionInformation.__init__
+pike.smb2.FileEaInformation.__init__
+pike.smb2.FileEndOfFileInformation.__init__
+pike.smb2.FileFsAttributeInformation.__init__
+pike.smb2.FileFsControlInformation.__init__
+pike.smb2.FileFsDeviceInformation.__init__
+pike.smb2.FileFsFullSizeInformation.__init__
+pike.smb2.FileFsObjectIdInformation.__init__
+pike.smb2.FileFsSizeInformation.__init__
+pike.smb2.FileFsVolumeInformation.__init__
+pike.smb2.FileFullDirectoryInformation.__init__
+pike.smb2.FileIdBothDirectoryInformation.__init__
+pike.smb2.FileIdFullDirectoryInformation.__init__
+pike.smb2.FileInternalInformation.__init__
+pike.smb2.FileModeInformation.__init__
+pike.smb2.FileNameInformation.__init__
+pike.smb2.FileNamesInformation.__init__
+pike.smb2.FileNetworkOpenInformation.__init__
+pike.smb2.FileNotifyInformation.__init__
+pike.smb2.FilePositionInformation.__init__
+pike.smb2.FileRenameInformation.__init__
+pike.smb2.FileStandardInformation.__init__
+pike.smb2.FileStreamInformation.__init__
+pike.smb2.FileValidDataLengthInformation.__init__
+pike.smb2.FlushRequest.__init__
+pike.smb2.FlushResponse.__init__
+pike.smb2.GetReparsePointResponse.__init__
+pike.smb2.Information.__init__
+pike.smb2.IoctlInput.__init__
+pike.smb2.IoctlOutput.__init__
+pike.smb2.IoctlRequest.__init__
+pike.smb2.IoctlResponse.__init__
+pike.smb2.LeaseBreakAcknowledgement.__init__
+pike.smb2.LeaseBreakNotification.__init__
+pike.smb2.LeaseBreakResponse.__init__
+pike.smb2.LeaseRequest.__init__
+pike.smb2.LeaseResponse.__init__
+pike.smb2.LockRequest.__init__
+pike.smb2.LockResponse.__init__
+pike.smb2.LogoffRequest.__init__
+pike.smb2.LogoffResponse.__init__
+pike.smb2.MaximalAccessRequest.__init__
+pike.smb2.MaximalAccessResponse.__init__
+pike.smb2.NegotiateRequest.__init__
+pike.smb2.NegotiateRequestContext.__init__
+pike.smb2.NegotiateResponse.__init__
+pike.smb2.NegotiateResponseContext.__init__
+pike.smb2.OplockBreakAcknowledgement.__init__
+pike.smb2.OplockBreakNotification.__init__
+pike.smb2.OplockBreakResponse.__init__
+pike.smb2.PreauthIntegrityCapabilities.__init__
+pike.smb2.PreauthIntegrityCapabilitiesRequest.__init__
+pike.smb2.PreauthIntegrityCapabilitiesResponse.__init__
+pike.smb2.QueryDirectoryRequest.__init__
+pike.smb2.QueryDirectoryResponse.__init__
+pike.smb2.QueryInfoRequest.__init__
+pike.smb2.QueryInfoResponse.__init__
+pike.smb2.QueryOnDiskIDRequest.__init__
+pike.smb2.QueryOnDiskIDResponse.__init__
+pike.smb2.ReadRequest.__init__
+pike.smb2.ReadResponse.__init__
+pike.smb2.ReparseDataBuffer.__init__
+pike.smb2.RequestResumeKeyRequest.__init__
+pike.smb2.RequestResumeKeyResponse.__init__
+pike.smb2.SecurityDescriptorRequest.__init__
+pike.smb2.SessionSetupRequest.__init__
+pike.smb2.SessionSetupResponse.__init__
+pike.smb2.SetInfoRequest.__init__
+pike.smb2.SetInfoResponse.__init__
+pike.smb2.SetReparsePointRequest.__init__
+pike.smb2.Smb2.__init__
+pike.smb2.SymbolicLinkReparseBuffer.__init__
+pike.smb2.TimewarpTokenRequest.__init__
+pike.smb2.TreeConnectRequest.__init__
+pike.smb2.TreeConnectResponse.__init__
+pike.smb2.TreeDisconnectRequest.__init__
+pike.smb2.TreeDisconnectResponse.__init__
+pike.smb2.ValidateNegotiateInfoRequest.__init__
+pike.smb2.ValidateNegotiateInfoResponse.__init__
+pike.smb2.WriteRequest.__init__
+pike.smb2.WriteResponse.__init__
+pike.test.PikeTest.__init__
+pike.test._Decorator.__init__
+pike.test._RangeDecorator.__init__
+pike.test.appinstanceid.AppInstanceIdTest.__init__
+pike.test.credit.CreditTest.__init__
+pike.test.ioctl.ValidateNegotiateInfo.__init__
+pike.test.lease.LeaseTest.__init__
+pike.test.query.QueryTest.__init__
+pike.test.test_smb3_encryption_vector.PAIntegrity.__init__
+pike.test.test_smb3_encryption_vector.bogus_300_connection.__init__
+pike.test.test_smb3_encryption_vector.bogus_311_connection.__init__
+pike.transport.BasePoller.__init__
+pike.transport.KQueuePoller.__init__
+pike.transport.PollPoller.__init__
+pike.transport.Transport.__init__" class="py-name" href="#" onclick="return doclink('link-66', '__init__', 'link-48');">__init__</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L396"></a><tt class="py-lineno">396</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">p</tt> <tt class="py-op">=</tt> <tt class="py-name">select</tt><tt class="py-op">.</tt><tt id="link-67" class="py-name"><a title="pike.transport.BasePoller.poll
+pike.transport.KQueuePoller.poll
+pike.transport.PollPoller.poll
+pike.transport.SelectPoller.poll" class="py-name" href="#" onclick="return doclink('link-67', 'poll', 'link-33');">poll</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L397"></a><tt class="py-lineno">397</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">read_events</tt> <tt class="py-op">=</tt> <tt class="py-op">(</tt> </tt>
+<a name="L398"></a><tt class="py-lineno">398</tt>  <tt class="py-line">                <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">POLLIN</tt> <tt class="py-op">|</tt> </tt>
+<a name="L399"></a><tt class="py-lineno">399</tt>  <tt class="py-line">                <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">POLLERR</tt> <tt class="py-op">|</tt> </tt>
+<a name="L400"></a><tt class="py-lineno">400</tt>  <tt class="py-line">                <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">POLLHUP</tt> <tt class="py-op">|</tt> </tt>
+<a name="L401"></a><tt class="py-lineno">401</tt>  <tt class="py-line">                <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">POLLNVAL</tt> <tt class="py-op">|</tt> </tt>
+<a name="L402"></a><tt class="py-lineno">402</tt>  <tt class="py-line">                <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">POLLMSG</tt> <tt class="py-op">|</tt> </tt>
+<a name="L403"></a><tt class="py-lineno">403</tt>  <tt class="py-line">                <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">POLLPRI</tt><tt class="py-op">)</tt> </tt>
+<a name="L404"></a><tt class="py-lineno">404</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">write_events</tt> <tt class="py-op">=</tt> <tt class="py-name">select</tt><tt class="py-op">.</tt><tt class="py-name">POLLOUT</tt> </tt>
+</div><a name="L405"></a><tt class="py-lineno">405</tt>  <tt class="py-line"> </tt>
+<a name="PollPoller.add_channel"></a><div id="PollPoller.add_channel-def"><a name="L406"></a><tt class="py-lineno">406</tt> <a class="py-toggle" href="#" id="PollPoller.add_channel-toggle" onclick="return toggle('PollPoller.add_channel');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.PollPoller-class.html#add_channel">add_channel</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">transport</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PollPoller.add_channel-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PollPoller.add_channel-expanded"><a name="L407"></a><tt class="py-lineno">407</tt>  <tt class="py-line">        <tt class="py-name">super</tt><tt class="py-op">(</tt><tt id="link-68" class="py-name"><a title="pike.transport.PollPoller" class="py-name" href="#" onclick="return doclink('link-68', 'PollPoller', 'link-65');">PollPoller</a></tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-69" class="py-name"><a title="pike.transport.BasePoller.add_channel
+pike.transport.KQueuePoller.add_channel
+pike.transport.PollPoller.add_channel" class="py-name" href="#" onclick="return doclink('link-69', 'add_channel', 'link-6');">add_channel</a></tt><tt class="py-op">(</tt><tt id="link-70" class="py-name"><a title="pike.transport" class="py-name" href="#" onclick="return doclink('link-70', 'transport', 'link-27');">transport</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L408"></a><tt class="py-lineno">408</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">p</tt><tt class="py-op">.</tt><tt class="py-name">register</tt><tt class="py-op">(</tt> </tt>
+<a name="L409"></a><tt class="py-lineno">409</tt>  <tt class="py-line">                <tt id="link-71" class="py-name"><a title="pike.transport" class="py-name" href="#" onclick="return doclink('link-71', 'transport', 'link-27');">transport</a></tt><tt class="py-op">.</tt><tt class="py-name">_fileno</tt><tt class="py-op">,</tt> </tt>
+<a name="L410"></a><tt class="py-lineno">410</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">read_events</tt> <tt class="py-op">|</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">write_events</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L411"></a><tt class="py-lineno">411</tt>  <tt class="py-line"> </tt>
+<a name="PollPoller.del_channel"></a><div id="PollPoller.del_channel-def"><a name="L412"></a><tt class="py-lineno">412</tt> <a class="py-toggle" href="#" id="PollPoller.del_channel-toggle" onclick="return toggle('PollPoller.del_channel');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.PollPoller-class.html#del_channel">del_channel</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">transport</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PollPoller.del_channel-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PollPoller.del_channel-expanded"><a name="L413"></a><tt class="py-lineno">413</tt>  <tt class="py-line">        <tt class="py-name">super</tt><tt class="py-op">(</tt><tt id="link-72" class="py-name"><a title="pike.transport.PollPoller" class="py-name" href="#" onclick="return doclink('link-72', 'PollPoller', 'link-65');">PollPoller</a></tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-73" class="py-name"><a title="pike.transport.BasePoller.del_channel
+pike.transport.PollPoller.del_channel" class="py-name" href="#" onclick="return doclink('link-73', 'del_channel', 'link-11');">del_channel</a></tt><tt class="py-op">(</tt><tt id="link-74" class="py-name"><a title="pike.transport" class="py-name" href="#" onclick="return doclink('link-74', 'transport', 'link-27');">transport</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L414"></a><tt class="py-lineno">414</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">p</tt><tt class="py-op">.</tt><tt class="py-name">unregister</tt><tt class="py-op">(</tt><tt id="link-75" class="py-name"><a title="pike.transport" class="py-name" href="#" onclick="return doclink('link-75', 'transport', 'link-27');">transport</a></tt><tt class="py-op">.</tt><tt class="py-name">_fileno</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L415"></a><tt class="py-lineno">415</tt>  <tt class="py-line"> </tt>
+<a name="PollPoller.defer_write"></a><div id="PollPoller.defer_write-def"><a name="L416"></a><tt class="py-lineno">416</tt> <a class="py-toggle" href="#" id="PollPoller.defer_write-toggle" onclick="return toggle('PollPoller.defer_write');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.PollPoller-class.html#defer_write">defer_write</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">transport</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PollPoller.defer_write-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PollPoller.defer_write-expanded"><a name="L417"></a><tt class="py-lineno">417</tt>  <tt class="py-line">        <tt class="py-name">super</tt><tt class="py-op">(</tt><tt id="link-76" class="py-name"><a title="pike.transport.PollPoller" class="py-name" href="#" onclick="return doclink('link-76', 'PollPoller', 'link-65');">PollPoller</a></tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-77" class="py-name"><a title="pike.transport.BasePoller.defer_write
+pike.transport.KQueuePoller.defer_write
+pike.transport.PollPoller.defer_write" class="py-name" href="#" onclick="return doclink('link-77', 'defer_write', 'link-17');">defer_write</a></tt><tt class="py-op">(</tt><tt id="link-78" class="py-name"><a title="pike.transport" class="py-name" href="#" onclick="return doclink('link-78', 'transport', 'link-27');">transport</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L418"></a><tt class="py-lineno">418</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">p</tt><tt class="py-op">.</tt><tt class="py-name">modify</tt><tt class="py-op">(</tt> </tt>
+<a name="L419"></a><tt class="py-lineno">419</tt>  <tt class="py-line">                <tt id="link-79" class="py-name"><a title="pike.transport" class="py-name" href="#" onclick="return doclink('link-79', 'transport', 'link-27');">transport</a></tt><tt class="py-op">.</tt><tt class="py-name">_fileno</tt><tt class="py-op">,</tt> </tt>
+<a name="L420"></a><tt class="py-lineno">420</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">read_events</tt> <tt class="py-op">|</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">write_events</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L421"></a><tt class="py-lineno">421</tt>  <tt class="py-line"> </tt>
+<a name="PollPoller.poll"></a><div id="PollPoller.poll-def"><a name="L422"></a><tt class="py-lineno">422</tt> <a class="py-toggle" href="#" id="PollPoller.poll-toggle" onclick="return toggle('PollPoller.poll');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport.PollPoller-class.html#poll">poll</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="PollPoller.poll-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PollPoller.poll-expanded"><a name="L423"></a><tt class="py-lineno">423</tt>  <tt class="py-line">        <tt class="py-name">events</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">p</tt><tt class="py-op">.</tt><tt id="link-80" class="py-name"><a title="pike.transport.BasePoller.poll
+pike.transport.KQueuePoller.poll
+pike.transport.PollPoller.poll
+pike.transport.SelectPoller.poll" class="py-name" href="#" onclick="return doclink('link-80', 'poll', 'link-33');">poll</a></tt><tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">)</tt> </tt>
+<a name="L424"></a><tt class="py-lineno">424</tt>  <tt class="py-line">        <tt class="py-name">readables</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
+<a name="L425"></a><tt class="py-lineno">425</tt>  <tt class="py-line">        <tt class="py-name">writables</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
+<a name="L426"></a><tt class="py-lineno">426</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">fd</tt><tt class="py-op">,</tt> <tt class="py-name">event</tt> <tt class="py-keyword">in</tt> <tt class="py-name">events</tt><tt class="py-op">:</tt> </tt>
+<a name="L427"></a><tt class="py-lineno">427</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">event</tt> <tt class="py-op">&amp;</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">read_events</tt><tt class="py-op">:</tt> </tt>
+<a name="L428"></a><tt class="py-lineno">428</tt>  <tt class="py-line">                <tt class="py-name">readables</tt><tt class="py-op">.</tt><tt id="link-81" class="py-name"><a title="pike.crypto.TransformHeader.append
+pike.netbios.Netbios.append
+pike.smb2.ChangeNotifyResponse.append
+pike.smb2.CopyChunkCopyRequest.append
+pike.smb2.CreateRequest.append
+pike.smb2.CreateResponse.append
+pike.smb2.ErrorResponse.append
+pike.smb2.NegotiateRequest.append
+pike.smb2.NegotiateResponse.append
+pike.smb2.QueryDirectoryResponse.append
+pike.smb2.QueryInfoResponse.append
+pike.smb2.SetInfoRequest.append" class="py-name" href="#" onclick="return doclink('link-81', 'append', 'link-58');">append</a></tt><tt class="py-op">(</tt><tt class="py-name">fd</tt><tt class="py-op">)</tt> </tt>
+<a name="L429"></a><tt class="py-lineno">429</tt>  <tt class="py-line">            <tt class="py-keyword">elif</tt> <tt class="py-name">event</tt> <tt class="py-op">&amp;</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">write_events</tt><tt class="py-op">:</tt> </tt>
+<a name="L430"></a><tt class="py-lineno">430</tt>  <tt class="py-line">                <tt class="py-name">writables</tt><tt class="py-op">.</tt><tt id="link-82" class="py-name"><a title="pike.crypto.TransformHeader.append
+pike.netbios.Netbios.append
+pike.smb2.ChangeNotifyResponse.append
+pike.smb2.CopyChunkCopyRequest.append
+pike.smb2.CreateRequest.append
+pike.smb2.CreateResponse.append
+pike.smb2.ErrorResponse.append
+pike.smb2.NegotiateRequest.append
+pike.smb2.NegotiateResponse.append
+pike.smb2.QueryDirectoryResponse.append
+pike.smb2.QueryInfoResponse.append
+pike.smb2.SetInfoRequest.append" class="py-name" href="#" onclick="return doclink('link-82', 'append', 'link-58');">append</a></tt><tt class="py-op">(</tt><tt class="py-name">fd</tt><tt class="py-op">)</tt> </tt>
+<a name="L431"></a><tt class="py-lineno">431</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">p</tt><tt class="py-op">.</tt><tt class="py-name">modify</tt><tt class="py-op">(</tt><tt class="py-name">fd</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">read_events</tt><tt class="py-op">)</tt> </tt>
+<a name="L432"></a><tt class="py-lineno">432</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-83" class="py-name"><a title="pike.transport.BasePoller.process_readables" class="py-name" href="#" onclick="return doclink('link-83', 'process_readables', 'link-60');">process_readables</a></tt><tt class="py-op">(</tt><tt class="py-name">readables</tt><tt class="py-op">)</tt> </tt>
+<a name="L433"></a><tt class="py-lineno">433</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-84" class="py-name"><a title="pike.transport.BasePoller.process_writables" class="py-name" href="#" onclick="return doclink('link-84', 'process_writables', 'link-61');">process_writables</a></tt><tt class="py-op">(</tt><tt class="py-name">writables</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L434"></a><tt class="py-lineno">434</tt>  <tt class="py-line"> </tt>
+<a name="L435"></a><tt class="py-lineno">435</tt>  <tt class="py-line"> </tt>
+<a name="L436"></a><tt class="py-lineno">436</tt>  <tt class="py-line"><tt class="py-comment"># Global poller / loop function for simple use cases</tt> </tt>
+<a name="L437"></a><tt class="py-lineno">437</tt>  <tt class="py-line"><tt class="py-comment"># more advanced tests or frameworks may use a custom</tt> </tt>
+<a name="L438"></a><tt class="py-lineno">438</tt>  <tt class="py-line"><tt class="py-comment"># poller implementation by setting a poller object onto</tt> </tt>
+<a name="L439"></a><tt class="py-lineno">439</tt>  <tt class="py-line"><tt class="py-comment"># a group of transports.</tt> </tt>
+<a name="L440"></a><tt class="py-lineno">440</tt>  <tt class="py-line"><tt class="py-comment"># The global poller will use the best polling mechanism available on the system</tt> </tt>
+<a name="L441"></a><tt class="py-lineno">441</tt>  <tt class="py-line"><tt class="py-keyword">if</tt> <tt class="py-name">hasattr</tt><tt class="py-op">(</tt><tt class="py-name">select</tt><tt class="py-op">,</tt> <tt class="py-string">"kqueue"</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L442"></a><tt class="py-lineno">442</tt>  <tt class="py-line">    <tt id="link-85" class="py-name"><a title="pike.transport.poller" class="py-name" href="#" onclick="return doclink('link-85', 'poller', 'link-1');">poller</a></tt> <tt class="py-op">=</tt> <tt id="link-86" class="py-name"><a title="pike.transport.KQueuePoller" class="py-name" href="#" onclick="return doclink('link-86', 'KQueuePoller', 'link-47');">KQueuePoller</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L443"></a><tt class="py-lineno">443</tt>  <tt class="py-line"><tt class="py-keyword">elif</tt> <tt class="py-name">hasattr</tt><tt class="py-op">(</tt><tt class="py-name">select</tt><tt class="py-op">,</tt> <tt class="py-string">"poll"</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L444"></a><tt class="py-lineno">444</tt>  <tt class="py-line">    <tt id="link-87" class="py-name"><a title="pike.transport.poller" class="py-name" href="#" onclick="return doclink('link-87', 'poller', 'link-1');">poller</a></tt> <tt class="py-op">=</tt> <tt id="link-88" class="py-name"><a title="pike.transport.PollPoller" class="py-name" href="#" onclick="return doclink('link-88', 'PollPoller', 'link-65');">PollPoller</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L445"></a><tt class="py-lineno">445</tt>  <tt class="py-line"><tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L446"></a><tt class="py-lineno">446</tt>  <tt class="py-line">    <tt id="link-89" class="py-name"><a title="pike.transport.poller" class="py-name" href="#" onclick="return doclink('link-89', 'poller', 'link-1');">poller</a></tt> <tt class="py-op">=</tt> <tt id="link-90" class="py-name" targets="Class pike.transport.SelectPoller=pike.transport.SelectPoller-class.html"><a title="pike.transport.SelectPoller" class="py-name" href="#" onclick="return doclink('link-90', 'SelectPoller', 'link-90');">SelectPoller</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L447"></a><tt class="py-lineno">447</tt>  <tt class="py-line"> </tt>
+<a name="L448"></a><tt class="py-lineno">448</tt>  <tt class="py-line"> </tt>
+<a name="loop"></a><div id="loop-def"><a name="L449"></a><tt class="py-lineno">449</tt> <a class="py-toggle" href="#" id="loop-toggle" onclick="return toggle('loop');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.transport-module.html#loop">loop</a><tt class="py-op">(</tt><tt class="py-param">timeout</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-param">count</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="loop-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="loop-expanded"><a name="L450"></a><tt class="py-lineno">450</tt>  <tt class="py-line">    <tt id="link-91" class="py-name"><a title="pike.transport.poller" class="py-name" href="#" onclick="return doclink('link-91', 'poller', 'link-1');">poller</a></tt><tt class="py-op">.</tt><tt id="link-92" class="py-name" targets="Function pike.model.loop()=pike.model-module.html#loop,Method pike.transport.BasePoller.loop()=pike.transport.BasePoller-class.html#loop,Function pike.transport.loop()=pike.transport-module.html#loop"><a title="pike.model.loop
+pike.transport.BasePoller.loop
+pike.transport.loop" class="py-name" href="#" onclick="return doclink('link-92', 'loop', 'link-92');">loop</a></tt><tt class="py-op">(</tt><tt class="py-name">timeout</tt><tt class="py-op">,</tt> <tt class="py-name">count</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L451"></a><tt class="py-lineno">451</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="pike-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Thu Jun 29 08:51:27 2017
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

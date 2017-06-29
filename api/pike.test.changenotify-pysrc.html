@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>pike.test.changenotify</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="pike-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="pike-module.html">Package&nbsp;pike</a> ::
+        <a href="pike.test-module.html">Package&nbsp;test</a> ::
+        Module&nbsp;changenotify
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="pike.test.changenotify-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="pike.test.changenotify-module.html">Module pike.test.changenotify</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno"> 1</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L2"></a><tt class="py-lineno"> 2</tt>  <tt class="py-line"><tt class="py-comment"># Copyright (c) 2013, EMC Corporation</tt> </tt>
+<a name="L3"></a><tt class="py-lineno"> 3</tt>  <tt class="py-line"><tt class="py-comment"># All rights reserved.</tt> </tt>
+<a name="L4"></a><tt class="py-lineno"> 4</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L5"></a><tt class="py-lineno"> 5</tt>  <tt class="py-line"><tt class="py-comment"># Redistribution and use in source and binary forms, with or without</tt> </tt>
+<a name="L6"></a><tt class="py-lineno"> 6</tt>  <tt class="py-line"><tt class="py-comment"># modification, are permitted provided that the following conditions are met:</tt> </tt>
+<a name="L7"></a><tt class="py-lineno"> 7</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L8"></a><tt class="py-lineno"> 8</tt>  <tt class="py-line"><tt class="py-comment"># 1. Redistributions of source code must retain the above copyright notice,</tt> </tt>
+<a name="L9"></a><tt class="py-lineno"> 9</tt>  <tt class="py-line"><tt class="py-comment"># this list of conditions and the following disclaimer.</tt> </tt>
+<a name="L10"></a><tt class="py-lineno">10</tt>  <tt class="py-line"><tt class="py-comment"># 2. Redistributions in binary form must reproduce the above copyright notice,</tt> </tt>
+<a name="L11"></a><tt class="py-lineno">11</tt>  <tt class="py-line"><tt class="py-comment"># this list of conditions and the following disclaimer in the documentation</tt> </tt>
+<a name="L12"></a><tt class="py-lineno">12</tt>  <tt class="py-line"><tt class="py-comment"># and/or other materials provided with the distribution.</tt> </tt>
+<a name="L13"></a><tt class="py-lineno">13</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L14"></a><tt class="py-lineno">14</tt>  <tt class="py-line"><tt class="py-comment"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"</tt> </tt>
+<a name="L15"></a><tt class="py-lineno">15</tt>  <tt class="py-line"><tt class="py-comment"># AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</tt> </tt>
+<a name="L16"></a><tt class="py-lineno">16</tt>  <tt class="py-line"><tt class="py-comment"># IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</tt> </tt>
+<a name="L17"></a><tt class="py-lineno">17</tt>  <tt class="py-line"><tt class="py-comment"># ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE</tt> </tt>
+<a name="L18"></a><tt class="py-lineno">18</tt>  <tt class="py-line"><tt class="py-comment"># LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</tt> </tt>
+<a name="L19"></a><tt class="py-lineno">19</tt>  <tt class="py-line"><tt class="py-comment"># CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</tt> </tt>
+<a name="L20"></a><tt class="py-lineno">20</tt>  <tt class="py-line"><tt class="py-comment"># SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</tt> </tt>
+<a name="L21"></a><tt class="py-lineno">21</tt>  <tt class="py-line"><tt class="py-comment"># INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</tt> </tt>
+<a name="L22"></a><tt class="py-lineno">22</tt>  <tt class="py-line"><tt class="py-comment"># CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</tt> </tt>
+<a name="L23"></a><tt class="py-lineno">23</tt>  <tt class="py-line"><tt class="py-comment"># ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</tt> </tt>
+<a name="L24"></a><tt class="py-lineno">24</tt>  <tt class="py-line"><tt class="py-comment"># POSSIBILITY OF SUCH DAMAGE.</tt> </tt>
+<a name="L25"></a><tt class="py-lineno">25</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L26"></a><tt class="py-lineno">26</tt>  <tt class="py-line"><tt class="py-comment"># Module Name:</tt> </tt>
+<a name="L27"></a><tt class="py-lineno">27</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L28"></a><tt class="py-lineno">28</tt>  <tt class="py-line"><tt class="py-comment">#        changenotify.py</tt> </tt>
+<a name="L29"></a><tt class="py-lineno">29</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L30"></a><tt class="py-lineno">30</tt>  <tt class="py-line"><tt class="py-comment"># Abstract:</tt> </tt>
+<a name="L31"></a><tt class="py-lineno">31</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L32"></a><tt class="py-lineno">32</tt>  <tt class="py-line"><tt class="py-comment">#        Change Notify tests</tt> </tt>
+<a name="L33"></a><tt class="py-lineno">33</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L34"></a><tt class="py-lineno">34</tt>  <tt class="py-line"><tt class="py-comment"># Authors: Masen Furer &lt;masen.furer@emc.com&gt;</tt> </tt>
+<a name="L35"></a><tt class="py-lineno">35</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L36"></a><tt class="py-lineno">36</tt>  <tt class="py-line"> </tt>
+<a name="L37"></a><tt class="py-lineno">37</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-0" class="py-name" targets="Package pike=pike-module.html"><a title="pike" class="py-name" href="#" onclick="return doclink('link-0', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-1" class="py-name" targets="Module pike.model=pike.model-module.html"><a title="pike.model" class="py-name" href="#" onclick="return doclink('link-1', 'model', 'link-1');">model</a></tt> </tt>
+<a name="L38"></a><tt class="py-lineno">38</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-2" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-2', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-3" class="py-name" targets="Module pike.smb2=pike.smb2-module.html"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-3', 'smb2', 'link-3');">smb2</a></tt> </tt>
+<a name="L39"></a><tt class="py-lineno">39</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-4" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-4', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-5" class="py-name" targets="Package pike.test=pike.test-module.html"><a title="pike.test" class="py-name" href="#" onclick="return doclink('link-5', 'test', 'link-5');">test</a></tt> </tt>
+<a name="L40"></a><tt class="py-lineno">40</tt>  <tt class="py-line"> </tt>
+<a name="ChangeNotifyTest"></a><div id="ChangeNotifyTest-def"><a name="L41"></a><tt class="py-lineno">41</tt> <a class="py-toggle" href="#" id="ChangeNotifyTest-toggle" onclick="return toggle('ChangeNotifyTest');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="pike.test.changenotify.ChangeNotifyTest-class.html">ChangeNotifyTest</a><tt class="py-op">(</tt><tt class="py-base-class">pike</tt><tt class="py-op">.</tt><tt class="py-base-class">test</tt><tt class="py-op">.</tt><tt class="py-base-class">PikeTest</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ChangeNotifyTest-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="ChangeNotifyTest-expanded"><a name="ChangeNotifyTest.test_change_notify_file_name"></a><div id="ChangeNotifyTest.test_change_notify_file_name-def"><a name="L42"></a><tt class="py-lineno">42</tt> <a class="py-toggle" href="#" id="ChangeNotifyTest.test_change_notify_file_name-toggle" onclick="return toggle('ChangeNotifyTest.test_change_notify_file_name');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="pike.test.changenotify.ChangeNotifyTest-class.html#test_change_notify_file_name">test_change_notify_file_name</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ChangeNotifyTest.test_change_notify_file_name-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="ChangeNotifyTest.test_change_notify_file_name-expanded"><a name="L43"></a><tt class="py-lineno">43</tt>  <tt class="py-line">        <tt class="py-name">filename</tt> <tt class="py-op">=</tt> <tt class="py-string">"change_notify.txt"</tt> </tt>
+<a name="L44"></a><tt class="py-lineno">44</tt>  <tt class="py-line">        <tt class="py-name">chan</tt><tt class="py-op">,</tt> <tt id="link-6" class="py-name" targets="Method pike.model.Session.tree()=pike.model.Session-class.html#tree,Module pike.test.tree=pike.test.tree-module.html"><a title="pike.model.Session.tree
+pike.test.tree" class="py-name" href="#" onclick="return doclink('link-6', 'tree', 'link-6');">tree</a></tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-7" class="py-name" targets="Method pike.model.Channel.tree_connect()=pike.model.Channel-class.html#tree_connect,Method pike.test.PikeTest.tree_connect()=pike.test.PikeTest-class.html#tree_connect"><a title="pike.model.Channel.tree_connect
+pike.test.PikeTest.tree_connect" class="py-name" href="#" onclick="return doclink('link-7', 'tree_connect', 'link-7');">tree_connect</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L45"></a><tt class="py-lineno">45</tt>  <tt class="py-line"> </tt>
+<a name="L46"></a><tt class="py-lineno">46</tt>  <tt class="py-line">        <tt class="py-comment"># connect to the root of the share</tt> </tt>
+<a name="L47"></a><tt class="py-lineno">47</tt>  <tt class="py-line">        <tt class="py-name">root</tt> <tt class="py-op">=</tt> <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt id="link-8" class="py-name" targets="Method pike.model.Channel.create()=pike.model.Channel-class.html#create,Method pike.test.durable.DurableHandleTest.create()=pike.test.durable.DurableHandleTest-class.html#create"><a title="pike.model.Channel.create
+pike.test.durable.DurableHandleTest.create" class="py-name" href="#" onclick="return doclink('link-8', 'create', 'link-8');">create</a></tt><tt class="py-op">(</tt><tt id="link-9" class="py-name"><a title="pike.model.Session.tree
+pike.test.tree" class="py-name" href="#" onclick="return doclink('link-9', 'tree', 'link-6');">tree</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L48"></a><tt class="py-lineno">48</tt>  <tt class="py-line">                           <tt class="py-string">''</tt><tt class="py-op">,</tt> </tt>
+<a name="L49"></a><tt class="py-lineno">49</tt>  <tt class="py-line">                           <tt class="py-name">access</tt><tt class="py-op">=</tt><tt id="link-10" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-10', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-11" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-11', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-12" class="py-name" targets="Variable pike.smb2.Access.GENERIC_READ=pike.smb2.Access-class.html#GENERIC_READ,Variable pike.smb2.GENERIC_READ=pike.smb2-module.html#GENERIC_READ"><a title="pike.smb2.Access.GENERIC_READ
+pike.smb2.GENERIC_READ" class="py-name" href="#" onclick="return doclink('link-12', 'GENERIC_READ', 'link-12');">GENERIC_READ</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L50"></a><tt class="py-lineno">50</tt>  <tt class="py-line">                           <tt class="py-name">options</tt><tt class="py-op">=</tt><tt id="link-13" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-13', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-14" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-14', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-15" class="py-name" targets="Variable pike.smb2.CreateOptions.FILE_DIRECTORY_FILE=pike.smb2.CreateOptions-class.html#FILE_DIRECTORY_FILE,Variable pike.smb2.FILE_DIRECTORY_FILE=pike.smb2-module.html#FILE_DIRECTORY_FILE"><a title="pike.smb2.CreateOptions.FILE_DIRECTORY_FILE
+pike.smb2.FILE_DIRECTORY_FILE" class="py-name" href="#" onclick="return doclink('link-15', 'FILE_DIRECTORY_FILE', 'link-15');">FILE_DIRECTORY_FILE</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L51"></a><tt class="py-lineno">51</tt>  <tt class="py-line">                           <tt class="py-name">share</tt><tt class="py-op">=</tt><tt id="link-16" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-16', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-17" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-17', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-18" class="py-name" targets="Variable pike.smb2.FILE_SHARE_READ=pike.smb2-module.html#FILE_SHARE_READ,Variable pike.smb2.ShareAccess.FILE_SHARE_READ=pike.smb2.ShareAccess-class.html#FILE_SHARE_READ"><a title="pike.smb2.FILE_SHARE_READ
+pike.smb2.ShareAccess.FILE_SHARE_READ" class="py-name" href="#" onclick="return doclink('link-18', 'FILE_SHARE_READ', 'link-18');">FILE_SHARE_READ</a></tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-19" class="py-name" targets="Method pike.model.Future.result()=pike.model.Future-class.html#result"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-19', 'result', 'link-19');">result</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L52"></a><tt class="py-lineno">52</tt>  <tt class="py-line"> </tt>
+<a name="L53"></a><tt class="py-lineno">53</tt>  <tt class="py-line">        <tt class="py-comment"># build a change notify request</tt> </tt>
+<a name="L54"></a><tt class="py-lineno">54</tt>  <tt class="py-line">        <tt class="py-name">smb_req</tt> <tt class="py-op">=</tt> <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt id="link-20" class="py-name" targets="Method pike.model.Channel.request()=pike.model.Channel-class.html#request,Method pike.model.Connection.request()=pike.model.Connection-class.html#request,Variable pike.smb2.Smb2.request=pike.smb2.Smb2-class.html#request"><a title="pike.model.Channel.request
+pike.model.Connection.request
+pike.smb2.Smb2.request" class="py-name" href="#" onclick="return doclink('link-20', 'request', 'link-20');">request</a></tt><tt class="py-op">(</tt><tt class="py-name">obj</tt><tt class="py-op">=</tt><tt class="py-name">root</tt><tt class="py-op">)</tt> </tt>
+<a name="L55"></a><tt class="py-lineno">55</tt>  <tt class="py-line">        <tt class="py-name">notify_req</tt> <tt class="py-op">=</tt> <tt id="link-21" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-21', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-22" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-22', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-23" class="py-name" targets="Class pike.smb2.ChangeNotifyRequest=pike.smb2.ChangeNotifyRequest-class.html"><a title="pike.smb2.ChangeNotifyRequest" class="py-name" href="#" onclick="return doclink('link-23', 'ChangeNotifyRequest', 'link-23');">ChangeNotifyRequest</a></tt><tt class="py-op">(</tt><tt class="py-name">smb_req</tt><tt class="py-op">)</tt> </tt>
+<a name="L56"></a><tt class="py-lineno">56</tt>  <tt class="py-line">        <tt class="py-name">notify_req</tt><tt class="py-op">.</tt><tt class="py-name">file_id</tt> <tt class="py-op">=</tt> <tt class="py-name">root</tt><tt class="py-op">.</tt><tt class="py-name">file_id</tt> </tt>
+<a name="L57"></a><tt class="py-lineno">57</tt>  <tt class="py-line">        <tt class="py-name">notify_req</tt><tt class="py-op">.</tt><tt class="py-name">completion_filter</tt> <tt class="py-op">=</tt> <tt id="link-24" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-24', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-25" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-25', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-26" class="py-name" targets="Variable pike.smb2.CompletionFilter.SMB2_NOTIFY_CHANGE_FILE_NAME=pike.smb2.CompletionFilter-class.html#SMB2_NOTIFY_CHANGE_FILE_NAME,Variable pike.smb2.SMB2_NOTIFY_CHANGE_FILE_NAME=pike.smb2-module.html#SMB2_NOTIFY_CHANGE_FILE_NAME"><a title="pike.smb2.CompletionFilter.SMB2_NOTIFY_CHANGE_FILE_NAME
+pike.smb2.SMB2_NOTIFY_CHANGE_FILE_NAME" class="py-name" href="#" onclick="return doclink('link-26', 'SMB2_NOTIFY_CHANGE_FILE_NAME', 'link-26');">SMB2_NOTIFY_CHANGE_FILE_NAME</a></tt> </tt>
+<a name="L58"></a><tt class="py-lineno">58</tt>  <tt class="py-line">        <tt class="py-comment"># send the request async</tt> </tt>
+<a name="L59"></a><tt class="py-lineno">59</tt>  <tt class="py-line">        <tt class="py-name">futures</tt> <tt class="py-op">=</tt> <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt class="py-name">connection</tt><tt class="py-op">.</tt><tt id="link-27" class="py-name" targets="Method pike.model.Connection.SessionSetupContext.submit()=pike.model.Connection.SessionSetupContext-class.html#submit,Method pike.model.Connection.submit()=pike.model.Connection-class.html#submit"><a title="pike.model.Connection.SessionSetupContext.submit
+pike.model.Connection.submit" class="py-name" href="#" onclick="return doclink('link-27', 'submit', 'link-27');">submit</a></tt><tt class="py-op">(</tt><tt class="py-name">smb_req</tt><tt class="py-op">.</tt><tt class="py-name">parent</tt><tt class="py-op">)</tt> </tt>
+<a name="L60"></a><tt class="py-lineno">60</tt>  <tt class="py-line"> </tt>
+<a name="L61"></a><tt class="py-lineno">61</tt>  <tt class="py-line">        <tt class="py-comment"># create a file on the share to trigger the notification</tt> </tt>
+<a name="L62"></a><tt class="py-lineno">62</tt>  <tt class="py-line">        <tt class="py-name">file</tt> <tt class="py-op">=</tt> <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt id="link-28" class="py-name"><a title="pike.model.Channel.create
+pike.test.durable.DurableHandleTest.create" class="py-name" href="#" onclick="return doclink('link-28', 'create', 'link-8');">create</a></tt><tt class="py-op">(</tt><tt id="link-29" class="py-name"><a title="pike.model.Session.tree
+pike.test.tree" class="py-name" href="#" onclick="return doclink('link-29', 'tree', 'link-6');">tree</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L63"></a><tt class="py-lineno">63</tt>  <tt class="py-line">                           <tt class="py-name">filename</tt><tt class="py-op">,</tt> </tt>
+<a name="L64"></a><tt class="py-lineno">64</tt>  <tt class="py-line">                           <tt class="py-name">access</tt><tt class="py-op">=</tt><tt id="link-30" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-30', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-31" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-31', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-32" class="py-name" targets="Variable pike.smb2.Access.FILE_READ_DATA=pike.smb2.Access-class.html#FILE_READ_DATA,Variable pike.smb2.FILE_READ_DATA=pike.smb2-module.html#FILE_READ_DATA"><a title="pike.smb2.Access.FILE_READ_DATA
+pike.smb2.FILE_READ_DATA" class="py-name" href="#" onclick="return doclink('link-32', 'FILE_READ_DATA', 'link-32');">FILE_READ_DATA</a></tt> <tt class="py-op">|</tt> <tt id="link-33" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-33', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-34" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-34', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-35" class="py-name" targets="Variable pike.smb2.Access.FILE_WRITE_DATA=pike.smb2.Access-class.html#FILE_WRITE_DATA,Variable pike.smb2.FILE_WRITE_DATA=pike.smb2-module.html#FILE_WRITE_DATA"><a title="pike.smb2.Access.FILE_WRITE_DATA
+pike.smb2.FILE_WRITE_DATA" class="py-name" href="#" onclick="return doclink('link-35', 'FILE_WRITE_DATA', 'link-35');">FILE_WRITE_DATA</a></tt> <tt class="py-op">|</tt> <tt id="link-36" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-36', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-37" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-37', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-38" class="py-name" targets="Variable pike.smb2.Access.DELETE=pike.smb2.Access-class.html#DELETE,Variable pike.smb2.DELETE=pike.smb2-module.html#DELETE"><a title="pike.smb2.Access.DELETE
+pike.smb2.DELETE" class="py-name" href="#" onclick="return doclink('link-38', 'DELETE', 'link-38');">DELETE</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L65"></a><tt class="py-lineno">65</tt>  <tt class="py-line">                           <tt class="py-name">share</tt><tt class="py-op">=</tt><tt id="link-39" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-39', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-40" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-40', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-41" class="py-name"><a title="pike.smb2.FILE_SHARE_READ
+pike.smb2.ShareAccess.FILE_SHARE_READ" class="py-name" href="#" onclick="return doclink('link-41', 'FILE_SHARE_READ', 'link-18');">FILE_SHARE_READ</a></tt> <tt class="py-op">|</tt> <tt id="link-42" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-42', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-43" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-43', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-44" class="py-name" targets="Variable pike.smb2.FILE_SHARE_WRITE=pike.smb2-module.html#FILE_SHARE_WRITE,Variable pike.smb2.ShareAccess.FILE_SHARE_WRITE=pike.smb2.ShareAccess-class.html#FILE_SHARE_WRITE"><a title="pike.smb2.FILE_SHARE_WRITE
+pike.smb2.ShareAccess.FILE_SHARE_WRITE" class="py-name" href="#" onclick="return doclink('link-44', 'FILE_SHARE_WRITE', 'link-44');">FILE_SHARE_WRITE</a></tt> <tt class="py-op">|</tt> <tt id="link-45" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-45', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-46" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-46', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-47" class="py-name" targets="Variable pike.smb2.FILE_SHARE_DELETE=pike.smb2-module.html#FILE_SHARE_DELETE,Variable pike.smb2.ShareAccess.FILE_SHARE_DELETE=pike.smb2.ShareAccess-class.html#FILE_SHARE_DELETE"><a title="pike.smb2.FILE_SHARE_DELETE
+pike.smb2.ShareAccess.FILE_SHARE_DELETE" class="py-name" href="#" onclick="return doclink('link-47', 'FILE_SHARE_DELETE', 'link-47');">FILE_SHARE_DELETE</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L66"></a><tt class="py-lineno">66</tt>  <tt class="py-line">                           <tt class="py-name">options</tt><tt class="py-op">=</tt><tt id="link-48" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-48', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-49" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-49', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-50" class="py-name" targets="Variable pike.smb2.CreateOptions.FILE_DELETE_ON_CLOSE=pike.smb2.CreateOptions-class.html#FILE_DELETE_ON_CLOSE,Variable pike.smb2.FILE_DELETE_ON_CLOSE=pike.smb2-module.html#FILE_DELETE_ON_CLOSE"><a title="pike.smb2.CreateOptions.FILE_DELETE_ON_CLOSE
+pike.smb2.FILE_DELETE_ON_CLOSE" class="py-name" href="#" onclick="return doclink('link-50', 'FILE_DELETE_ON_CLOSE', 'link-50');">FILE_DELETE_ON_CLOSE</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L67"></a><tt class="py-lineno">67</tt>  <tt class="py-line">                           <tt class="py-name">disposition</tt><tt class="py-op">=</tt><tt id="link-51" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-51', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-52" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-52', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-53" class="py-name" targets="Variable pike.smb2.CreateDisposition.FILE_SUPERSEDE=pike.smb2.CreateDisposition-class.html#FILE_SUPERSEDE,Variable pike.smb2.FILE_SUPERSEDE=pike.smb2-module.html#FILE_SUPERSEDE"><a title="pike.smb2.CreateDisposition.FILE_SUPERSEDE
+pike.smb2.FILE_SUPERSEDE" class="py-name" href="#" onclick="return doclink('link-53', 'FILE_SUPERSEDE', 'link-53');">FILE_SUPERSEDE</a></tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-54" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-54', 'result', 'link-19');">result</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L68"></a><tt class="py-lineno">68</tt>  <tt class="py-line">        </tt>
+<a name="L69"></a><tt class="py-lineno">69</tt>  <tt class="py-line">        <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt id="link-55" class="py-name" targets="Method pike.model.Channel.close()=pike.model.Channel-class.html#close,Method pike.model.Connection.close()=pike.model.Connection-class.html#close,Method pike.transport.Transport.close()=pike.transport.Transport-class.html#close"><a title="pike.model.Channel.close
+pike.model.Connection.close
+pike.transport.Transport.close" class="py-name" href="#" onclick="return doclink('link-55', 'close', 'link-55');">close</a></tt><tt class="py-op">(</tt><tt class="py-name">file</tt><tt class="py-op">)</tt> </tt>
+<a name="L70"></a><tt class="py-lineno">70</tt>  <tt class="py-line">         </tt>
+<a name="L71"></a><tt class="py-lineno">71</tt>  <tt class="py-line">        <tt class="py-comment"># collect the change notify response</tt> </tt>
+<a name="L72"></a><tt class="py-lineno">72</tt>  <tt class="py-line">        <tt id="link-56" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-56', 'result', 'link-19');">result</a></tt> <tt class="py-op">=</tt> <tt class="py-name">futures</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">.</tt><tt id="link-57" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-57', 'result', 'link-19');">result</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> </tt>
+<a name="L73"></a><tt class="py-lineno">73</tt>  <tt class="py-line"> </tt>
+<a name="L74"></a><tt class="py-lineno">74</tt>  <tt class="py-line">        <tt class="py-comment"># expect one notification, for the file add</tt> </tt>
+<a name="L75"></a><tt class="py-lineno">75</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">assertEqual</tt><tt class="py-op">(</tt><tt class="py-name">len</tt><tt class="py-op">(</tt><tt id="link-58" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-58', 'result', 'link-19');">result</a></tt><tt class="py-op">.</tt><tt class="py-name">notifications</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-number">1</tt><tt class="py-op">)</tt> </tt>
+<a name="L76"></a><tt class="py-lineno">76</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">assertEqual</tt><tt class="py-op">(</tt><tt id="link-59" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-59', 'result', 'link-19');">result</a></tt><tt class="py-op">.</tt><tt class="py-name">notifications</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">.</tt><tt class="py-name">filename</tt><tt class="py-op">,</tt> <tt class="py-name">filename</tt><tt class="py-op">)</tt> </tt>
+<a name="L77"></a><tt class="py-lineno">77</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">assertEqual</tt><tt class="py-op">(</tt><tt id="link-60" class="py-name"><a title="pike.model.Future.result" class="py-name" href="#" onclick="return doclink('link-60', 'result', 'link-19');">result</a></tt><tt class="py-op">.</tt><tt class="py-name">notifications</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">.</tt><tt class="py-name">action</tt><tt class="py-op">,</tt> <tt id="link-61" class="py-name"><a title="pike" class="py-name" href="#" onclick="return doclink('link-61', 'pike', 'link-0');">pike</a></tt><tt class="py-op">.</tt><tt id="link-62" class="py-name"><a title="pike.smb2" class="py-name" href="#" onclick="return doclink('link-62', 'smb2', 'link-3');">smb2</a></tt><tt class="py-op">.</tt><tt id="link-63" class="py-name" targets="Variable pike.smb2.FileNotifyInfoAction.SMB2_ACTION_ADDED=pike.smb2.FileNotifyInfoAction-class.html#SMB2_ACTION_ADDED,Variable pike.smb2.SMB2_ACTION_ADDED=pike.smb2-module.html#SMB2_ACTION_ADDED"><a title="pike.smb2.FileNotifyInfoAction.SMB2_ACTION_ADDED
+pike.smb2.SMB2_ACTION_ADDED" class="py-name" href="#" onclick="return doclink('link-63', 'SMB2_ACTION_ADDED', 'link-63');">SMB2_ACTION_ADDED</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L78"></a><tt class="py-lineno">78</tt>  <tt class="py-line">         </tt>
+<a name="L79"></a><tt class="py-lineno">79</tt>  <tt class="py-line">        <tt class="py-name">chan</tt><tt class="py-op">.</tt><tt id="link-64" class="py-name"><a title="pike.model.Channel.close
+pike.model.Connection.close
+pike.transport.Transport.close" class="py-name" href="#" onclick="return doclink('link-64', 'close', 'link-55');">close</a></tt><tt class="py-op">(</tt><tt class="py-name">root</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L80"></a><tt class="py-lineno">80</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="pike-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Thu Jun 29 08:51:26 2017
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

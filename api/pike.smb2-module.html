@@ -44,6 +44,8 @@
     <td>
       <table cellpadding="0" cellspacing="0">
         <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
             >]&nbsp;|&nbsp;<a href="pike.smb2-module.html"
@@ -67,8 +69,17 @@
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Classes</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Classes</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Classes"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
@@ -96,6 +107,13 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a href="pike.smb2.ShareCaps-class.html" class="summary-name">ShareCaps</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.ShareFlags-class.html" class="summary-name">ShareFlags</a>
     </td>
   </tr>
 <tr>
@@ -144,6 +162,41 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a href="pike.smb2.ErrorId-class.html" class="summary-name">ErrorId</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.ErrorResponseContext-class.html" class="summary-name">ErrorResponseContext</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.ErrorResponseDefault-class.html" class="summary-name">ErrorResponseDefault</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.ErrorResponseDefaultBufferSize-class.html" class="summary-name">ErrorResponseDefaultBufferSize</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.SymbolicLinkErrorResponse-class.html" class="summary-name">SymbolicLinkErrorResponse</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a href="pike.smb2.Cancel-class.html" class="summary-name">Cancel</a>
     </td>
   </tr>
@@ -165,6 +218,20 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a href="pike.smb2.NegotiateContextType-class.html" class="summary-name">NegotiateContextType</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.HashAlgorithms-class.html" class="summary-name">HashAlgorithms</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a href="pike.smb2.NegotiateRequest-class.html" class="summary-name">NegotiateRequest</a>
     </td>
   </tr>
@@ -173,6 +240,41 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a href="pike.smb2.NegotiateResponse-class.html" class="summary-name">NegotiateResponse</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.NegotiateRequestContext-class.html" class="summary-name">NegotiateRequestContext</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.NegotiateResponseContext-class.html" class="summary-name">NegotiateResponseContext</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.PreauthIntegrityCapabilities-class.html" class="summary-name">PreauthIntegrityCapabilities</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.PreauthIntegrityCapabilitiesRequest-class.html" class="summary-name">PreauthIntegrityCapabilitiesRequest</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.PreauthIntegrityCapabilitiesResponse-class.html" class="summary-name">PreauthIntegrityCapabilitiesResponse</a>
     </td>
   </tr>
 <tr>
@@ -194,6 +296,20 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a href="pike.smb2.EchoResponse-class.html" class="summary-name">EchoResponse</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FlushRequest-class.html" class="summary-name">FlushRequest</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FlushResponse-class.html" class="summary-name">FlushResponse</a>
     </td>
   </tr>
 <tr>
@@ -340,6 +456,20 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a href="pike.smb2.AllocationSizeRequest-class.html" class="summary-name">AllocationSizeRequest</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.ExtendedAttributeRequest-class.html" class="summary-name">ExtendedAttributeRequest</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a href="pike.smb2.LeaseState-class.html" class="summary-name">LeaseState</a>
     </td>
   </tr>
@@ -348,6 +478,34 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a href="pike.smb2.LeaseFlags-class.html" class="summary-name">LeaseFlags</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.AceType-class.html" class="summary-name">AceType</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.AceFlags-class.html" class="summary-name">AceFlags</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.AclRevision-class.html" class="summary-name">AclRevision</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.SecurityDescriptorRequest-class.html" class="summary-name">SecurityDescriptorRequest</a>
     </td>
   </tr>
 <tr>
@@ -424,6 +582,27 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a href="pike.smb2.QueryOnDiskIDRequest-class.html" class="summary-name">QueryOnDiskIDRequest</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.QueryOnDiskIDResponse-class.html" class="summary-name">QueryOnDiskIDResponse</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.TimewarpTokenRequest-class.html" class="summary-name">TimewarpTokenRequest</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a href="pike.smb2.CloseRequest-class.html" class="summary-name">CloseRequest</a>
     </td>
   </tr>
@@ -446,6 +625,13 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a href="pike.smb2.FileInformationClass-class.html" class="summary-name">FileInformationClass</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileSystemInformationClass-class.html" class="summary-name">FileSystemInformationClass</a>
     </td>
   </tr>
 <tr>
@@ -515,7 +701,22 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a href="pike.smb2.Information-class.html" class="summary-name">Information</a><br />
+      Base class for all info frames.
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a href="pike.smb2.FileInformation-class.html" class="summary-name">FileInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileSystemInformation-class.html" class="summary-name">FileSystemInformation</a>
     </td>
   </tr>
 <tr>
@@ -557,7 +758,63 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a href="pike.smb2.FileFullDirectoryInformation-class.html" class="summary-name">FileFullDirectoryInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileIdFullDirectoryInformation-class.html" class="summary-name">FileIdFullDirectoryInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileIdBothDirectoryInformation-class.html" class="summary-name">FileIdBothDirectoryInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a href="pike.smb2.FileBasicInformation-class.html" class="summary-name">FileBasicInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileNetworkOpenInformation-class.html" class="summary-name">FileNetworkOpenInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileAttributeTagInformation-class.html" class="summary-name">FileAttributeTagInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileStreamInformation-class.html" class="summary-name">FileStreamInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.CompressionFormat-class.html" class="summary-name">CompressionFormat</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileCompressionInformation-class.html" class="summary-name">FileCompressionInformation</a>
     </td>
   </tr>
 <tr>
@@ -579,6 +836,41 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a href="pike.smb2.FileNameInformation-class.html" class="summary-name">FileNameInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileRenameInformation-class.html" class="summary-name">FileRenameInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileAllocationInformation-class.html" class="summary-name">FileAllocationInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileDispositionInformation-class.html" class="summary-name">FileDispositionInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileEndOfFileInformation-class.html" class="summary-name">FileEndOfFileInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileValidDataLengthInformation-class.html" class="summary-name">FileValidDataLengthInformation</a>
     </td>
   </tr>
 <tr>
@@ -607,6 +899,125 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a href="pike.smb2.FileEaInformation-class.html" class="summary-name">FileEaInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileFsSizeInformation-class.html" class="summary-name">FileFsSizeInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileFsFullSizeInformation-class.html" class="summary-name">FileFsFullSizeInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.DeviceType-class.html" class="summary-name">DeviceType</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.Characteristics-class.html" class="summary-name">Characteristics</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileFsDeviceInformation-class.html" class="summary-name">FileFsDeviceInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileSystemAtrribute-class.html" class="summary-name">FileSystemAtrribute</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileFsAttributeInformation-class.html" class="summary-name">FileFsAttributeInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileFsVolumeInformation-class.html" class="summary-name">FileFsVolumeInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileSystemControlFlags-class.html" class="summary-name">FileSystemControlFlags</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileFsControlInformation-class.html" class="summary-name">FileFsControlInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileFsObjectIdInformation-class.html" class="summary-name">FileFsObjectIdInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.CompletionFilter-class.html" class="summary-name">CompletionFilter</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.ChangeNotifyFlags-class.html" class="summary-name">ChangeNotifyFlags</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileNotifyInfoAction-class.html" class="summary-name">FileNotifyInfoAction</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.FileNotifyInformation-class.html" class="summary-name">FileNotifyInformation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.ChangeNotifyResponse-class.html" class="summary-name">ChangeNotifyResponse</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.ChangeNotifyRequest-class.html" class="summary-name">ChangeNotifyRequest</a>
     </td>
   </tr>
 <tr>
@@ -760,6 +1171,48 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a href="pike.smb2.RequestResumeKeyRequest-class.html" class="summary-name">RequestResumeKeyRequest</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.CopyChunkCopyRequest-class.html" class="summary-name">CopyChunkCopyRequest</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.CopyChunk-class.html" class="summary-name">CopyChunk</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.SetReparsePointRequest-class.html" class="summary-name">SetReparsePointRequest</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.GetReparsePointRequest-class.html" class="summary-name">GetReparsePointRequest</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.EnumerateSnapshotsRequest-class.html" class="summary-name">EnumerateSnapshotsRequest</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a href="pike.smb2.IoctlOutput-class.html" class="summary-name">IoctlOutput</a>
     </td>
   </tr>
@@ -770,14 +1223,79 @@
         <a href="pike.smb2.ValidateNegotiateInfoResponse-class.html" class="summary-name">ValidateNegotiateInfoResponse</a>
     </td>
   </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.RequestResumeKeyResponse-class.html" class="summary-name">RequestResumeKeyResponse</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.CopyChunkCopyResponse-class.html" class="summary-name">CopyChunkCopyResponse</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.SetReparsePointResponse-class.html" class="summary-name">SetReparsePointResponse</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.GetReparsePointResponse-class.html" class="summary-name">GetReparsePointResponse</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.ReparseDataBuffer-class.html" class="summary-name">ReparseDataBuffer</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.SymbolicLinkFlags-class.html" class="summary-name">SymbolicLinkFlags</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.SymbolicLinkReparseBuffer-class.html" class="summary-name">SymbolicLinkReparseBuffer</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.EnumerateSnapshotsResponse-class.html" class="summary-name">EnumerateSnapshotsResponse</a>
+    </td>
+  </tr>
 </table>
 <!-- ==================== VARIABLES ==================== -->
 <a name="section-Variables"></a>
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Variables</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Variables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
@@ -797,7 +1315,105 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="ACCESS_ALLOWED_ACE_TYPE"></a><span class="summary-name">ACCESS_ALLOWED_ACE_TYPE</span> = <code title="ACCESS_ALLOWED_ACE_TYPE">ACCESS_ALLOWED_ACE_TYPE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#ACCESS_ALLOWED_CALLBACK_ACE_TYPE" class="summary-name">ACCESS_ALLOWED_CALLBACK_ACE_TYPE</a> = <code title="ACCESS_ALLOWED_CALLBACK_ACE_TYPE">ACCESS_ALLOWED_CALLBACK_ACE<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE" class="summary-name">ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE</a> = <code title="ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE">ACCESS_ALLOWED_CALLB<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#ACCESS_ALLOWED_COMPOUND_ACE_TYPE" class="summary-name">ACCESS_ALLOWED_COMPOUND_ACE_TYPE</a> = <code title="ACCESS_ALLOWED_COMPOUND_ACE_TYPE">ACCESS_ALLOWED_COMPOUND_ACE<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ACCESS_ALLOWED_OBJECT_ACE_TYPE"></a><span class="summary-name">ACCESS_ALLOWED_OBJECT_ACE_TYPE</span> = <code title="ACCESS_ALLOWED_OBJECT_ACE_TYPE">ACCESS_ALLOWED_OBJECT_ACE_TYPE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ACCESS_DENIED_ACE_TYPE"></a><span class="summary-name">ACCESS_DENIED_ACE_TYPE</span> = <code title="ACCESS_DENIED_ACE_TYPE">ACCESS_DENIED_ACE_TYPE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ACCESS_DENIED_CALLBACK_ACE_TYPE"></a><span class="summary-name">ACCESS_DENIED_CALLBACK_ACE_TYPE</span> = <code title="ACCESS_DENIED_CALLBACK_ACE_TYPE">ACCESS_DENIED_CALLBACK_ACE_TYPE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE" class="summary-name">ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE</a> = <code title="ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE">ACCESS_DENIED_CALLBAC<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ACCESS_DENIED_OBJECT_ACE_TYPE"></a><span class="summary-name">ACCESS_DENIED_OBJECT_ACE_TYPE</span> = <code title="ACCESS_DENIED_OBJECT_ACE_TYPE">ACCESS_DENIED_OBJECT_ACE_TYPE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="ACCESS_SYSTEM_SECURITY"></a><span class="summary-name">ACCESS_SYSTEM_SECURITY</span> = <code title="ACCESS_SYSTEM_SECURITY">ACCESS_SYSTEM_SECURITY</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ACL_REVISION"></a><span class="summary-name">ACL_REVISION</span> = <code title="ACL_REVISION">ACL_REVISION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ACL_REVISION_DS"></a><span class="summary-name">ACL_REVISION_DS</span> = <code title="ACL_REVISION_DS">ACL_REVISION_DS</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="COMPRESSION_FORMAT_LZNT1"></a><span class="summary-name">COMPRESSION_FORMAT_LZNT1</span> = <code title="COMPRESSION_FORMAT_LZNT1">COMPRESSION_FORMAT_LZNT1</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="COMPRESSION_FORMAT_NONE"></a><span class="summary-name">COMPRESSION_FORMAT_NONE</span> = <code title="COMPRESSION_FORMAT_NONE">COMPRESSION_FORMAT_NONE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="CONTAINER_INHERIT_ACE"></a><span class="summary-name">CONTAINER_INHERIT_ACE</span> = <code title="CONTAINER_INHERIT_ACE">CONTAINER_INHERIT_ACE</code>
     </td>
   </tr>
 <tr>
@@ -840,6 +1456,27 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a name="DIALECT_SMB3_0"></a><span class="summary-name">DIALECT_SMB3_0</span> = <code title="DIALECT_SMB3_0">DIALECT_SMB3_0</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="DIALECT_SMB3_0_2"></a><span class="summary-name">DIALECT_SMB3_0_2</span> = <code title="DIALECT_SMB3_0_2">DIALECT_SMB3_0_2</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="DIALECT_SMB3_1_1"></a><span class="summary-name">DIALECT_SMB3_1_1</span> = <code title="DIALECT_SMB3_1_1">DIALECT_SMB3_1_1</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FAILED_ACCESS_ACE_FLAG"></a><span class="summary-name">FAILED_ACCESS_ACE_FLAG</span> = <code title="FAILED_ACCESS_ACE_FLAG">FAILED_ACCESS_ACE_FLAG</code>
     </td>
   </tr>
 <tr>
@@ -903,6 +1540,13 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a name="FILE_ALIGNMENT_INFORMATION"></a><span class="summary-name">FILE_ALIGNMENT_INFORMATION</span> = <code title="FILE_ALIGNMENT_INFORMATION">FILE_ALIGNMENT_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_ALLOCATION_INFORMATION"></a><span class="summary-name">FILE_ALLOCATION_INFORMATION</span> = <code title="FILE_ALLOCATION_INFORMATION">FILE_ALLOCATION_INFORMATION</code>
     </td>
   </tr>
 <tr>
@@ -1014,6 +1658,13 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="FILE_ATTRIBUTE_TAG_INFORMATION"></a><span class="summary-name">FILE_ATTRIBUTE_TAG_INFORMATION</span> = <code title="FILE_ATTRIBUTE_TAG_INFORMATION">FILE_ATTRIBUTE_TAG_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="FILE_ATTRIBUTE_TEMPORARY"></a><span class="summary-name">FILE_ATTRIBUTE_TEMPORARY</span> = <code title="FILE_ATTRIBUTE_TEMPORARY">FILE_ATTRIBUTE_TEMPORARY</code>
     </td>
   </tr>
@@ -1035,7 +1686,42 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="FILE_CASE_PRESERVED_NAMES"></a><span class="summary-name">FILE_CASE_PRESERVED_NAMES</span> = <code title="FILE_CASE_PRESERVED_NAMES">FILE_CASE_PRESERVED_NAMES</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_CASE_SENSITIVE_SEARCH"></a><span class="summary-name">FILE_CASE_SENSITIVE_SEARCH</span> = <code title="FILE_CASE_SENSITIVE_SEARCH">FILE_CASE_SENSITIVE_SEARCH</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_CHARACTERISTIC_TS_DEVICE"></a><span class="summary-name">FILE_CHARACTERISTIC_TS_DEVICE</span> = <code title="FILE_CHARACTERISTIC_TS_DEVICE">FILE_CHARACTERISTIC_TS_DEVICE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#FILE_CHARACTERISTIC_WEBDAV_DEVICE" class="summary-name">FILE_CHARACTERISTIC_WEBDAV_DEVICE</a> = <code title="FILE_CHARACTERISTIC_WEBDAV_DEVICE">FILE_CHARACTERISTIC_WEBDAV<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="FILE_COMPLETE_IF_OPLOCKED"></a><span class="summary-name">FILE_COMPLETE_IF_OPLOCKED</span> = <code title="FILE_COMPLETE_IF_OPLOCKED">FILE_COMPLETE_IF_OPLOCKED</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_COMPRESSION_INFORMATION"></a><span class="summary-name">FILE_COMPRESSION_INFORMATION</span> = <code title="FILE_COMPRESSION_INFORMATION">FILE_COMPRESSION_INFORMATION</code>
     </td>
   </tr>
 <tr>
@@ -1063,6 +1749,41 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a href="pike.smb2-module.html#FILE_DEVICE_ALLOW_APPCONTAINER_TRAVERSAL" class="summary-name">FILE_DEVICE_ALLOW_APPCONTAINER_TRAVERSAL</a> = <code title="FILE_DEVICE_ALLOW_APPCONTAINER_TRAVERSAL">FILE_DEVICE_ALLOW_A<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_DEVICE_CD_ROM"></a><span class="summary-name">FILE_DEVICE_CD_ROM</span> = <code title="FILE_DEVICE_CD_ROM">FILE_DEVICE_CD_ROM</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_DEVICE_DISK"></a><span class="summary-name">FILE_DEVICE_DISK</span> = <code title="FILE_DEVICE_DISK">FILE_DEVICE_DISK</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_DEVICE_IS_MOUNTED"></a><span class="summary-name">FILE_DEVICE_IS_MOUNTED</span> = <code title="FILE_DEVICE_IS_MOUNTED">FILE_DEVICE_IS_MOUNTED</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_DEVICE_SECURE_OPEN"></a><span class="summary-name">FILE_DEVICE_SECURE_OPEN</span> = <code title="FILE_DEVICE_SECURE_OPEN">FILE_DEVICE_SECURE_OPEN</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="FILE_DIRECTORY_FILE"></a><span class="summary-name">FILE_DIRECTORY_FILE</span> = <code title="FILE_DIRECTORY_FILE">FILE_DIRECTORY_FILE</code>
     </td>
   </tr>
@@ -1077,6 +1798,13 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="FILE_DISPOSITION_INFORMATION"></a><span class="summary-name">FILE_DISPOSITION_INFORMATION</span> = <code title="FILE_DISPOSITION_INFORMATION">FILE_DISPOSITION_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="FILE_EA_INFORMATION"></a><span class="summary-name">FILE_EA_INFORMATION</span> = <code title="FILE_EA_INFORMATION">FILE_EA_INFORMATION</code>
     </td>
   </tr>
@@ -1084,7 +1812,105 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="FILE_END_OF_FILE_INFORMATION"></a><span class="summary-name">FILE_END_OF_FILE_INFORMATION</span> = <code title="FILE_END_OF_FILE_INFORMATION">FILE_END_OF_FILE_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="FILE_EXECUTE"></a><span class="summary-name">FILE_EXECUTE</span> = <code title="FILE_TRAVERSE | FILE_EXECUTE">FILE_TRAVERSE | FILE_EXECUTE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_FILE_COMPRESSION"></a><span class="summary-name">FILE_FILE_COMPRESSION</span> = <code title="FILE_FILE_COMPRESSION">FILE_FILE_COMPRESSION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_FLOPPY_DISKETTE"></a><span class="summary-name">FILE_FLOPPY_DISKETTE</span> = <code title="FILE_FLOPPY_DISKETTE">FILE_FLOPPY_DISKETTE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_FS_ATTRIBUTE_INFORMATION"></a><span class="summary-name">FILE_FS_ATTRIBUTE_INFORMATION</span> = <code title="FILE_FS_ATTRIBUTE_INFORMATION">FILE_FS_ATTRIBUTE_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_FS_CONTROL_INFORMATION"></a><span class="summary-name">FILE_FS_CONTROL_INFORMATION</span> = <code title="FILE_FS_CONTROL_INFORMATION">FILE_FS_CONTROL_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_FS_DEVICE_INFORMATION"></a><span class="summary-name">FILE_FS_DEVICE_INFORMATION</span> = <code title="FILE_FS_DEVICE_INFORMATION">FILE_FS_DEVICE_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_FS_FULL_SIZE_INFORMATION"></a><span class="summary-name">FILE_FS_FULL_SIZE_INFORMATION</span> = <code title="FILE_FS_FULL_SIZE_INFORMATION">FILE_FS_FULL_SIZE_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_FS_OBJECTID_INFORMATION"></a><span class="summary-name">FILE_FS_OBJECTID_INFORMATION</span> = <code title="FILE_FS_OBJECTID_INFORMATION">FILE_FS_OBJECTID_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_FS_SECTOR_SIZE_INFORMATION"></a><span class="summary-name">FILE_FS_SECTOR_SIZE_INFORMATION</span> = <code title="FILE_FS_SECTOR_SIZE_INFORMATION">FILE_FS_SECTOR_SIZE_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_FS_SIZE_INFORMATION"></a><span class="summary-name">FILE_FS_SIZE_INFORMATION</span> = <code title="FILE_FS_SIZE_INFORMATION">FILE_FS_SIZE_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_FS_VOLUME_INFORMATION"></a><span class="summary-name">FILE_FS_VOLUME_INFORMATION</span> = <code title="FILE_FS_VOLUME_INFORMATION">FILE_FS_VOLUME_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_FULL_DIRECTORY_INFORMATION"></a><span class="summary-name">FILE_FULL_DIRECTORY_INFORMATION</span> = <code title="FILE_FULL_DIRECTORY_INFORMATION">FILE_FULL_DIRECTORY_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_ID_BOTH_DIR_INFORMATION"></a><span class="summary-name">FILE_ID_BOTH_DIR_INFORMATION</span> = <code title="FILE_ID_BOTH_DIR_INFORMATION">FILE_ID_BOTH_DIR_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_ID_FULL_DIR_INFORMATION"></a><span class="summary-name">FILE_ID_FULL_DIR_INFORMATION</span> = <code title="FILE_ID_FULL_DIR_INFORMATION">FILE_ID_FULL_DIR_INFORMATION</code>
     </td>
   </tr>
 <tr>
@@ -1119,6 +1945,13 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="FILE_NAMED_STREAMS"></a><span class="summary-name">FILE_NAMED_STREAMS</span> = <code title="FILE_NAMED_STREAMS">FILE_NAMED_STREAMS</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="FILE_NAMES_INFORMATION"></a><span class="summary-name">FILE_NAMES_INFORMATION</span> = <code title="FILE_NAMES_INFORMATION">FILE_NAMES_INFORMATION</code>
     </td>
   </tr>
@@ -1127,6 +1960,13 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a name="FILE_NAME_INFORMATION"></a><span class="summary-name">FILE_NAME_INFORMATION</span> = <code title="FILE_NAME_INFORMATION">FILE_NAME_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_NETWORK_OPEN_INFORMATION"></a><span class="summary-name">FILE_NETWORK_OPEN_INFORMATION</span> = <code title="FILE_NETWORK_OPEN_INFORMATION">FILE_NETWORK_OPEN_INFORMATION</code>
     </td>
   </tr>
 <tr>
@@ -1231,6 +2071,13 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="FILE_PERSISTENT_ACLS"></a><span class="summary-name">FILE_PERSISTENT_ACLS</span> = <code title="FILE_PERSISTENT_ACLS">FILE_PERSISTENT_ACLS</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="FILE_POSITION_INFORMATION"></a><span class="summary-name">FILE_POSITION_INFORMATION</span> = <code title="FILE_POSITION_INFORMATION">FILE_POSITION_INFORMATION</code>
     </td>
   </tr>
@@ -1273,6 +2120,41 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="FILE_READ_ONLY_DEVICE"></a><span class="summary-name">FILE_READ_ONLY_DEVICE</span> = <code title="FILE_READ_ONLY_DEVICE">FILE_READ_ONLY_DEVICE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_READ_ONLY_VOLUME"></a><span class="summary-name">FILE_READ_ONLY_VOLUME</span> = <code title="FILE_READ_ONLY_VOLUME">FILE_READ_ONLY_VOLUME</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_REMOTE_DEVICE"></a><span class="summary-name">FILE_REMOTE_DEVICE</span> = <code title="FILE_REMOTE_DEVICE">FILE_REMOTE_DEVICE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_REMOVABLE_MEDIA"></a><span class="summary-name">FILE_REMOVABLE_MEDIA</span> = <code title="FILE_REMOVABLE_MEDIA">FILE_REMOVABLE_MEDIA</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_RENAME_INFORMATION"></a><span class="summary-name">FILE_RENAME_INFORMATION</span> = <code title="FILE_RENAME_INFORMATION">FILE_RENAME_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="FILE_RESERVE_OPFILTER"></a><span class="summary-name">FILE_RESERVE_OPFILTER</span> = <code title="FILE_RESERVE_OPFILTER">FILE_RESERVE_OPFILTER</code>
     </td>
   </tr>
@@ -1281,6 +2163,13 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a name="FILE_SEQUENTIAL_ONLY"></a><span class="summary-name">FILE_SEQUENTIAL_ONLY</span> = <code title="FILE_SEQUENTIAL_ONLY">FILE_SEQUENTIAL_ONLY</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_SEQUENTIAL_WRITE_ONCE"></a><span class="summary-name">FILE_SEQUENTIAL_WRITE_ONCE</span> = <code title="FILE_SEQUENTIAL_WRITE_ONCE">FILE_SEQUENTIAL_WRITE_ONCE</code>
     </td>
   </tr>
 <tr>
@@ -1315,7 +2204,91 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="FILE_STREAM_INFORMATION"></a><span class="summary-name">FILE_STREAM_INFORMATION</span> = <code title="FILE_STREAM_INFORMATION">FILE_STREAM_INFORMATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="FILE_SUPERSEDE"></a><span class="summary-name">FILE_SUPERSEDE</span> = <code title="FILE_SUPERSEDE">FILE_SUPERSEDE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_SUPPORTS_ENCRYPTION"></a><span class="summary-name">FILE_SUPPORTS_ENCRYPTION</span> = <code title="FILE_SUPPORTS_ENCRYPTION">FILE_SUPPORTS_ENCRYPTION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#FILE_SUPPORTS_EXTENDED_ATTRIBUTES" class="summary-name">FILE_SUPPORTS_EXTENDED_ATTRIBUTES</a> = <code title="FILE_SUPPORTS_EXTENDED_ATTRIBUTES">FILE_SUPPORTS_EXTENDED_ATT<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_SUPPORTS_HARD_LINKS"></a><span class="summary-name">FILE_SUPPORTS_HARD_LINKS</span> = <code title="FILE_SUPPORTS_HARD_LINKS">FILE_SUPPORTS_HARD_LINKS</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_SUPPORTS_OBJECT_IDS"></a><span class="summary-name">FILE_SUPPORTS_OBJECT_IDS</span> = <code title="FILE_SUPPORTS_OBJECT_IDS">FILE_SUPPORTS_OBJECT_IDS</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_SUPPORTS_OPEN_BY_FILE_ID"></a><span class="summary-name">FILE_SUPPORTS_OPEN_BY_FILE_ID</span> = <code title="FILE_SUPPORTS_OPEN_BY_FILE_ID">FILE_SUPPORTS_OPEN_BY_FILE_ID</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_SUPPORTS_REMOTE_STORAGE"></a><span class="summary-name">FILE_SUPPORTS_REMOTE_STORAGE</span> = <code title="FILE_SUPPORTS_REMOTE_STORAGE">FILE_SUPPORTS_REMOTE_STORAGE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_SUPPORTS_REPARSE_POINTS"></a><span class="summary-name">FILE_SUPPORTS_REPARSE_POINTS</span> = <code title="FILE_SUPPORTS_REPARSE_POINTS">FILE_SUPPORTS_REPARSE_POINTS</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_SUPPORTS_SPARSE_FILES"></a><span class="summary-name">FILE_SUPPORTS_SPARSE_FILES</span> = <code title="FILE_SUPPORTS_SPARSE_FILES">FILE_SUPPORTS_SPARSE_FILES</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_SUPPORTS_TRANSACTIONS"></a><span class="summary-name">FILE_SUPPORTS_TRANSACTIONS</span> = <code title="FILE_SUPPORTS_TRANSACTIONS">FILE_SUPPORTS_TRANSACTIONS</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_SUPPORTS_USN_JOURNAL"></a><span class="summary-name">FILE_SUPPORTS_USN_JOURNAL</span> = <code title="FILE_SUPPORTS_USN_JOURNAL">FILE_SUPPORTS_USN_JOURNAL</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_SUPPORT_INTEGRITY_STREAMS"></a><span class="summary-name">FILE_SUPPORT_INTEGRITY_STREAMS</span> = <code title="FILE_SUPPORT_INTEGRITY_STREAMS">FILE_SUPPORT_INTEGRITY_STREAMS</code>
     </td>
   </tr>
 <tr>
@@ -1337,6 +2310,104 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a name="FILE_TRAVERSE"></a><span class="summary-name">FILE_TRAVERSE</span> = <code title="FILE_TRAVERSE | FILE_EXECUTE">FILE_TRAVERSE | FILE_EXECUTE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_UNICODE_ON_DISK"></a><span class="summary-name">FILE_UNICODE_ON_DISK</span> = <code title="FILE_UNICODE_ON_DISK">FILE_UNICODE_ON_DISK</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#FILE_VALID_DATA_LENGTH_INFORMATION" class="summary-name">FILE_VALID_DATA_LENGTH_INFORMATION</a> = <code title="FILE_VALID_DATA_LENGTH_INFORMATION">FILE_VALID_DATA_LENGTH_IN<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_VC_CONTENT_INDEX_DISABLED"></a><span class="summary-name">FILE_VC_CONTENT_INDEX_DISABLED</span> = <code title="FILE_VC_CONTENT_INDEX_DISABLED">FILE_VC_CONTENT_INDEX_DISABLED</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_VC_LOG_QUOTA_LIMIT"></a><span class="summary-name">FILE_VC_LOG_QUOTA_LIMIT</span> = <code title="FILE_VC_LOG_QUOTA_LIMIT">FILE_VC_LOG_QUOTA_LIMIT</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_VC_LOG_QUOTA_THRESHOLD"></a><span class="summary-name">FILE_VC_LOG_QUOTA_THRESHOLD</span> = <code title="FILE_VC_LOG_QUOTA_THRESHOLD">FILE_VC_LOG_QUOTA_THRESHOLD</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_VC_LOG_VOLUME_LIMIT"></a><span class="summary-name">FILE_VC_LOG_VOLUME_LIMIT</span> = <code title="FILE_VC_LOG_VOLUME_LIMIT">FILE_VC_LOG_VOLUME_LIMIT</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_VC_LOG_VOLUME_THRESHOLD"></a><span class="summary-name">FILE_VC_LOG_VOLUME_THRESHOLD</span> = <code title="FILE_VC_LOG_VOLUME_THRESHOLD">FILE_VC_LOG_VOLUME_THRESHOLD</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_VC_QUOTAS_INCOMPLETE"></a><span class="summary-name">FILE_VC_QUOTAS_INCOMPLETE</span> = <code title="FILE_VC_QUOTAS_INCOMPLETE">FILE_VC_QUOTAS_INCOMPLETE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_VC_QUOTAS_REBUILDING"></a><span class="summary-name">FILE_VC_QUOTAS_REBUILDING</span> = <code title="FILE_VC_QUOTAS_REBUILDING">FILE_VC_QUOTAS_REBUILDING</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_VC_QUOTA_ENFORCE"></a><span class="summary-name">FILE_VC_QUOTA_ENFORCE</span> = <code title="FILE_VC_QUOTA_ENFORCE">FILE_VC_QUOTA_ENFORCE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_VC_QUOTA_TRACK"></a><span class="summary-name">FILE_VC_QUOTA_TRACK</span> = <code title="FILE_VC_QUOTA_TRACK">FILE_VC_QUOTA_TRACK</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_VIRTUAL_VOLUME"></a><span class="summary-name">FILE_VIRTUAL_VOLUME</span> = <code title="FILE_VIRTUAL_VOLUME">FILE_VIRTUAL_VOLUME</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_VOLUME_IS_COMPRESSED"></a><span class="summary-name">FILE_VOLUME_IS_COMPRESSED</span> = <code title="FILE_VOLUME_IS_COMPRESSED">FILE_VOLUME_IS_COMPRESSED</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FILE_VOLUME_QUOTAS"></a><span class="summary-name">FILE_VOLUME_QUOTAS</span> = <code title="FILE_VOLUME_QUOTAS">FILE_VOLUME_QUOTAS</code>
     </td>
   </tr>
 <tr>
@@ -1371,6 +2442,13 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="FILE_WRITE_ONCE_MEDIA"></a><span class="summary-name">FILE_WRITE_ONCE_MEDIA</span> = <code title="FILE_WRITE_ONCE_MEDIA">FILE_WRITE_ONCE_MEDIA</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="FILE_WRITE_THROUGH"></a><span class="summary-name">FILE_WRITE_THROUGH</span> = <code title="FILE_WRITE_THROUGH">FILE_WRITE_THROUGH</code>
     </td>
   </tr>
@@ -1393,6 +2471,13 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a name="FSCTL_FILE_LEVEL_TRIM"></a><span class="summary-name">FSCTL_FILE_LEVEL_TRIM</span> = <code title="FSCTL_FILE_LEVEL_TRIM">FSCTL_FILE_LEVEL_TRIM</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FSCTL_GET_REPARSE_POINT"></a><span class="summary-name">FSCTL_GET_REPARSE_POINT</span> = <code title="FSCTL_GET_REPARSE_POINT">FSCTL_GET_REPARSE_POINT</code>
     </td>
   </tr>
 <tr>
@@ -1518,7 +2603,35 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="INHERITED_ACE"></a><span class="summary-name">INHERITED_ACE</span> = <code title="INHERITED_ACE">INHERITED_ACE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="INHERIT_ONLY_ACE"></a><span class="summary-name">INHERIT_ONLY_ACE</span> = <code title="INHERIT_ONLY_ACE">INHERIT_ONLY_ACE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="MAXIMUM_ALLOWED"></a><span class="summary-name">MAXIMUM_ALLOWED</span> = <code title="MAXIMUM_ALLOWED">MAXIMUM_ALLOWED</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="NO_PROPAGATE_INHERIT_ACE"></a><span class="summary-name">NO_PROPAGATE_INHERIT_ACE</span> = <code title="NO_PROPAGATE_INHERIT_ACE">NO_PROPAGATE_INHERIT_ACE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="OBJECT_INHERIT_ACE"></a><span class="summary-name">OBJECT_INHERIT_ACE</span> = <code title="OBJECT_INHERIT_ACE">OBJECT_INHERIT_ACE</code>
     </td>
   </tr>
 <tr>
@@ -1602,7 +2715,77 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="SMB2_ACTION_ADDED"></a><span class="summary-name">SMB2_ACTION_ADDED</span> = <code title="SMB2_ACTION_ADDED">SMB2_ACTION_ADDED</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_ACTION_ADDED_STREAM"></a><span class="summary-name">SMB2_ACTION_ADDED_STREAM</span> = <code title="SMB2_ACTION_ADDED_STREAM">SMB2_ACTION_ADDED_STREAM</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_ACTION_MODIFIED"></a><span class="summary-name">SMB2_ACTION_MODIFIED</span> = <code title="SMB2_ACTION_MODIFIED">SMB2_ACTION_MODIFIED</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_ACTION_MODIFIED_STREAM"></a><span class="summary-name">SMB2_ACTION_MODIFIED_STREAM</span> = <code title="SMB2_ACTION_MODIFIED_STREAM">SMB2_ACTION_MODIFIED_STREAM</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_ACTION_REMOVED"></a><span class="summary-name">SMB2_ACTION_REMOVED</span> = <code title="SMB2_ACTION_REMOVED">SMB2_ACTION_REMOVED</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_ACTION_REMOVED_BY_DELETE"></a><span class="summary-name">SMB2_ACTION_REMOVED_BY_DELETE</span> = <code title="SMB2_ACTION_REMOVED_BY_DELETE">SMB2_ACTION_REMOVED_BY_DELETE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_ACTION_REMOVED_STREAM"></a><span class="summary-name">SMB2_ACTION_REMOVED_STREAM</span> = <code title="SMB2_ACTION_REMOVED_STREAM">SMB2_ACTION_REMOVED_STREAM</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_ACTION_RENAMED_NEW_NAME"></a><span class="summary-name">SMB2_ACTION_RENAMED_NEW_NAME</span> = <code title="SMB2_ACTION_RENAMED_NEW_NAME">SMB2_ACTION_RENAMED_NEW_NAME</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_ACTION_RENAMED_OLD_NAME"></a><span class="summary-name">SMB2_ACTION_RENAMED_OLD_NAME</span> = <code title="SMB2_ACTION_RENAMED_OLD_NAME">SMB2_ACTION_RENAMED_OLD_NAME</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="SMB2_CANCEL"></a><span class="summary-name">SMB2_CANCEL</span> = <code title="SMB2_CANCEL">SMB2_CANCEL</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_CHANGE_NOTIFY"></a><span class="summary-name">SMB2_CHANGE_NOTIFY</span> = <code title="SMB2_CHANGE_NOTIFY">SMB2_CHANGE_NOTIFY</code>
     </td>
   </tr>
 <tr>
@@ -1638,6 +2821,20 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a name="SMB2_ECHO"></a><span class="summary-name">SMB2_ECHO</span> = <code title="SMB2_ECHO">SMB2_ECHO</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_ENCRYPTION_CAPABILITIES"></a><span class="summary-name">SMB2_ENCRYPTION_CAPABILITIES</span> = <code title="SMB2_ENCRYPTION_CAPABILITIES">SMB2_ENCRYPTION_CAPABILITIES</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_ERROR_ID_DEFAULT"></a><span class="summary-name">SMB2_ERROR_ID_DEFAULT</span> = <code title="SMB2_ERROR_ID_DEFAULT">SMB2_ERROR_ID_DEFAULT</code>
     </td>
   </tr>
 <tr>
@@ -1687,6 +2884,13 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a name="SMB2_FLAGS_SIGNED"></a><span class="summary-name">SMB2_FLAGS_SIGNED</span> = <code title="SMB2_FLAGS_SIGNED">SMB2_FLAGS_SIGNED</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_FLUSH"></a><span class="summary-name">SMB2_FLUSH</span> = <code title="SMB2_FLUSH">SMB2_FLUSH</code>
     </td>
   </tr>
 <tr>
@@ -1875,6 +3079,90 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="SMB2_NOTIFY_CHANGE_ATTRIBUTES"></a><span class="summary-name">SMB2_NOTIFY_CHANGE_ATTRIBUTES</span> = <code title="SMB2_NOTIFY_CHANGE_ATTRIBUTES">SMB2_NOTIFY_CHANGE_ATTRIBUTES</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_NOTIFY_CHANGE_CREATION"></a><span class="summary-name">SMB2_NOTIFY_CHANGE_CREATION</span> = <code title="SMB2_NOTIFY_CHANGE_CREATION">SMB2_NOTIFY_CHANGE_CREATION</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_NOTIFY_CHANGE_DIR_NAME"></a><span class="summary-name">SMB2_NOTIFY_CHANGE_DIR_NAME</span> = <code title="SMB2_NOTIFY_CHANGE_DIR_NAME">SMB2_NOTIFY_CHANGE_DIR_NAME</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_NOTIFY_CHANGE_EA"></a><span class="summary-name">SMB2_NOTIFY_CHANGE_EA</span> = <code title="SMB2_NOTIFY_CHANGE_EA">SMB2_NOTIFY_CHANGE_EA</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_NOTIFY_CHANGE_FILE_NAME"></a><span class="summary-name">SMB2_NOTIFY_CHANGE_FILE_NAME</span> = <code title="SMB2_NOTIFY_CHANGE_FILE_NAME">SMB2_NOTIFY_CHANGE_FILE_NAME</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_NOTIFY_CHANGE_LAST_ACCESS"></a><span class="summary-name">SMB2_NOTIFY_CHANGE_LAST_ACCESS</span> = <code title="SMB2_NOTIFY_CHANGE_LAST_ACCESS">SMB2_NOTIFY_CHANGE_LAST_ACCESS</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_NOTIFY_CHANGE_LAST_WRITE"></a><span class="summary-name">SMB2_NOTIFY_CHANGE_LAST_WRITE</span> = <code title="SMB2_NOTIFY_CHANGE_LAST_WRITE">SMB2_NOTIFY_CHANGE_LAST_WRITE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_NOTIFY_CHANGE_SECURITY"></a><span class="summary-name">SMB2_NOTIFY_CHANGE_SECURITY</span> = <code title="SMB2_NOTIFY_CHANGE_SECURITY">SMB2_NOTIFY_CHANGE_SECURITY</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_NOTIFY_CHANGE_SIZE"></a><span class="summary-name">SMB2_NOTIFY_CHANGE_SIZE</span> = <code title="SMB2_NOTIFY_CHANGE_SIZE">SMB2_NOTIFY_CHANGE_SIZE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_NOTIFY_CHANGE_STREAM_NAME"></a><span class="summary-name">SMB2_NOTIFY_CHANGE_STREAM_NAME</span> = <code title="SMB2_NOTIFY_CHANGE_STREAM_NAME">SMB2_NOTIFY_CHANGE_STREAM_NAME</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_NOTIFY_CHANGE_STREAM_SIZE"></a><span class="summary-name">SMB2_NOTIFY_CHANGE_STREAM_SIZE</span> = <code title="SMB2_NOTIFY_CHANGE_STREAM_SIZE">SMB2_NOTIFY_CHANGE_STREAM_SIZE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_NOTIFY_CHANGE_STREAM_WRITE"></a><span class="summary-name">SMB2_NOTIFY_CHANGE_STREAM_WRITE</span> = <code title="SMB2_NOTIFY_CHANGE_STREAM_WRITE">SMB2_NOTIFY_CHANGE_STREAM_WRITE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="SMB2_OPLOCK_BREAK"></a><span class="summary-name">SMB2_OPLOCK_BREAK</span> = <code title="SMB2_OPLOCK_BREAK">SMB2_OPLOCK_BREAK</code>
     </td>
   </tr>
@@ -1917,6 +3205,13 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a href="pike.smb2-module.html#SMB2_PREAUTH_INTEGRITY_CAPABILITIES" class="summary-name">SMB2_PREAUTH_INTEGRITY_CAPABILITIES</a> = <code title="SMB2_PREAUTH_INTEGRITY_CAPABILITIES">SMB2_PREAUTH_INTEGRITY_C<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="SMB2_QUERY_DIRECTORY"></a><span class="summary-name">SMB2_QUERY_DIRECTORY</span> = <code title="SMB2_QUERY_DIRECTORY">SMB2_QUERY_DIRECTORY</code>
     </td>
   </tr>
@@ -1945,6 +3240,13 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="SMB2_SESSION_FLAG_ENCRYPT_DATA"></a><span class="summary-name">SMB2_SESSION_FLAG_ENCRYPT_DATA</span> = <code title="SMB2_SESSION_FLAG_ENCRYPT_DATA">SMB2_SESSION_FLAG_ENCRYPT_DATA</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="SMB2_SESSION_FLAG_NONE"></a><span class="summary-name">SMB2_SESSION_FLAG_NONE</span> = <code title="SMB2_SESSION_FLAG_NONE">SMB2_SESSION_FLAG_NONE</code>
     </td>
   </tr>
@@ -1960,6 +3262,105 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a name="SMB2_SET_INFO"></a><span class="summary-name">SMB2_SET_INFO</span> = <code title="SMB2_SET_INFO">SMB2_SET_INFO</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#SMB2_SHAREFLAG_ACCESS_BASED_DIRECTORY_ENUM" class="summary-name">SMB2_SHAREFLAG_ACCESS_BASED_DIRECTORY_ENUM</a> = <code title="SMB2_SHAREFLAG_ACCESS_BASED_DIRECTORY_ENUM">SMB2_SHAREFLAG_AC<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#SMB2_SHAREFLAG_ALLOW_NAMESPACE_CACHING" class="summary-name">SMB2_SHAREFLAG_ALLOW_NAMESPACE_CACHING</a> = <code title="SMB2_SHAREFLAG_ALLOW_NAMESPACE_CACHING">SMB2_SHAREFLAG_ALLOW_<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_SHAREFLAG_AUTO_CACHING"></a><span class="summary-name">SMB2_SHAREFLAG_AUTO_CACHING</span> = <code title="SMB2_SHAREFLAG_AUTO_CACHING">SMB2_SHAREFLAG_AUTO_CACHING</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_SHAREFLAG_DFS"></a><span class="summary-name">SMB2_SHAREFLAG_DFS</span> = <code title="SMB2_SHAREFLAG_DFS">SMB2_SHAREFLAG_DFS</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_SHAREFLAG_DFS_ROOT"></a><span class="summary-name">SMB2_SHAREFLAG_DFS_ROOT</span> = <code title="SMB2_SHAREFLAG_DFS_ROOT">SMB2_SHAREFLAG_DFS_ROOT</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_SHAREFLAG_ENABLE_HASH_V1"></a><span class="summary-name">SMB2_SHAREFLAG_ENABLE_HASH_V1</span> = <code title="SMB2_SHAREFLAG_ENABLE_HASH_V1">SMB2_SHAREFLAG_ENABLE_HASH_V1</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_SHAREFLAG_ENABLE_HASH_V2"></a><span class="summary-name">SMB2_SHAREFLAG_ENABLE_HASH_V2</span> = <code title="SMB2_SHAREFLAG_ENABLE_HASH_V2">SMB2_SHAREFLAG_ENABLE_HASH_V2</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_SHAREFLAG_ENCRYPT_DATA"></a><span class="summary-name">SMB2_SHAREFLAG_ENCRYPT_DATA</span> = <code title="SMB2_SHAREFLAG_ENCRYPT_DATA">SMB2_SHAREFLAG_ENCRYPT_DATA</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#SMB2_SHAREFLAG_FORCE_LEVELII_OPLOCK" class="summary-name">SMB2_SHAREFLAG_FORCE_LEVELII_OPLOCK</a> = <code title="SMB2_SHAREFLAG_FORCE_LEVELII_OPLOCK">SMB2_SHAREFLAG_FORCE_LEV<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#SMB2_SHAREFLAG_FORCE_SHARED_DELETE" class="summary-name">SMB2_SHAREFLAG_FORCE_SHARED_DELETE</a> = <code title="SMB2_SHAREFLAG_FORCE_SHARED_DELETE">SMB2_SHAREFLAG_FORCE_SHAR<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_SHAREFLAG_MANUAL_CACHING"></a><span class="summary-name">SMB2_SHAREFLAG_MANUAL_CACHING</span> = <code title="SMB2_SHAREFLAG_MANUAL_CACHING">SMB2_SHAREFLAG_MANUAL_CACHING</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#SMB2_SHAREFLAG_NO_CACHING" class="summary-name">SMB2_SHAREFLAG_NO_CACHING</a> = <code title="SMB2_SHAREFLAG_AUTO_CACHING | SMB2_SHAREFLAG_NO_CACHING | SMB2_SHAREFL\
+AG_VDO_CACHING">SMB2_SHAREFLAG_AUTO_CACHING | SMB2<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#SMB2_SHAREFLAG_RESTRICT_EXCLUSIVE_OPENS" class="summary-name">SMB2_SHAREFLAG_RESTRICT_EXCLUSIVE_OPENS</a> = <code title="SMB2_SHAREFLAG_RESTRICT_EXCLUSIVE_OPENS">SMB2_SHAREFLAG_RESTR<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_SHAREFLAG_VDO_CACHING"></a><span class="summary-name">SMB2_SHAREFLAG_VDO_CACHING</span> = <code title="SMB2_SHAREFLAG_VDO_CACHING">SMB2_SHAREFLAG_VDO_CACHING</code>
     </td>
   </tr>
 <tr>
@@ -1994,6 +3395,13 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="SMB2_SHA_512"></a><span class="summary-name">SMB2_SHA_512</span> = <code title="SMB2_SHA_512">SMB2_SHA_512</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="SMB2_TREE_CONNECT"></a><span class="summary-name">SMB2_TREE_CONNECT</span> = <code title="SMB2_TREE_CONNECT">SMB2_TREE_CONNECT</code>
     </td>
   </tr>
@@ -2002,6 +3410,13 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a name="SMB2_TREE_DISCONNECT"></a><span class="summary-name">SMB2_TREE_DISCONNECT</span> = <code title="SMB2_TREE_DISCONNECT">SMB2_TREE_DISCONNECT</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SMB2_WATCH_TREE"></a><span class="summary-name">SMB2_WATCH_TREE</span> = <code title="SMB2_WATCH_TREE">SMB2_WATCH_TREE</code>
     </td>
   </tr>
 <tr>
@@ -2022,7 +3437,105 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="SUCCESSFUL_ACCESS_ACE_FLAG"></a><span class="summary-name">SUCCESSFUL_ACCESS_ACE_FLAG</span> = <code title="SUCCESSFUL_ACCESS_ACE_FLAG">SUCCESSFUL_ACCESS_ACE_FLAG</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SYMLINK_FLAG_ABSOLUTE"></a><span class="summary-name">SYMLINK_FLAG_ABSOLUTE</span> = <code title="SYMLINK_FLAG_ABSOLUTE">SYMLINK_FLAG_ABSOLUTE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SYMLINK_FLAG_RELATIVE"></a><span class="summary-name">SYMLINK_FLAG_RELATIVE</span> = <code title="SYMLINK_FLAG_RELATIVE">SYMLINK_FLAG_RELATIVE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="SYNCHRONIZE"></a><span class="summary-name">SYNCHRONIZE</span> = <code title="SYNCHRONIZE">SYNCHRONIZE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SYSTEM_ALARM_ACE_TYPE"></a><span class="summary-name">SYSTEM_ALARM_ACE_TYPE</span> = <code title="SYSTEM_ALARM_ACE_TYPE">SYSTEM_ALARM_ACE_TYPE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SYSTEM_ALARM_CALLBACK_ACE_TYPE"></a><span class="summary-name">SYSTEM_ALARM_CALLBACK_ACE_TYPE</span> = <code title="SYSTEM_ALARM_CALLBACK_ACE_TYPE">SYSTEM_ALARM_CALLBACK_ACE_TYPE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#SYSTEM_ALARM_CALLBACK_OBJECT_ACE_TYPE" class="summary-name">SYSTEM_ALARM_CALLBACK_OBJECT_ACE_TYPE</a> = <code title="SYSTEM_ALARM_CALLBACK_OBJECT_ACE_TYPE">SYSTEM_ALARM_CALLBACK_<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SYSTEM_ALARM_OBJECT_ACE_TYPE"></a><span class="summary-name">SYSTEM_ALARM_OBJECT_ACE_TYPE</span> = <code title="SYSTEM_ALARM_OBJECT_ACE_TYPE">SYSTEM_ALARM_OBJECT_ACE_TYPE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SYSTEM_AUDIT_ACE_TYPE"></a><span class="summary-name">SYSTEM_AUDIT_ACE_TYPE</span> = <code title="SYSTEM_AUDIT_ACE_TYPE">SYSTEM_AUDIT_ACE_TYPE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SYSTEM_AUDIT_CALLBACK_ACE_TYPE"></a><span class="summary-name">SYSTEM_AUDIT_CALLBACK_ACE_TYPE</span> = <code title="SYSTEM_AUDIT_CALLBACK_ACE_TYPE">SYSTEM_AUDIT_CALLBACK_ACE_TYPE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE" class="summary-name">SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE</a> = <code title="SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE">SYSTEM_AUDIT_CALLBACK_<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SYSTEM_AUDIT_OBJECT_ACE_TYPE"></a><span class="summary-name">SYSTEM_AUDIT_OBJECT_ACE_TYPE</span> = <code title="SYSTEM_AUDIT_OBJECT_ACE_TYPE">SYSTEM_AUDIT_OBJECT_ACE_TYPE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SYSTEM_MANDATORY_LABEL_ACE_TYPE"></a><span class="summary-name">SYSTEM_MANDATORY_LABEL_ACE_TYPE</span> = <code title="SYSTEM_MANDATORY_LABEL_ACE_TYPE">SYSTEM_MANDATORY_LABEL_ACE_TYPE</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE" class="summary-name">SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE</a> = <code title="SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE">SYSTEM_RESOURCE_ATTRIBUTE<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2-module.html#SYSTEM_SCOPED_POLICY_ID_ACE_TYPE" class="summary-name">SYSTEM_SCOPED_POLICY_ID_ACE_TYPE</a> = <code title="SYSTEM_SCOPED_POLICY_ID_ACE_TYPE">SYSTEM_SCOPED_POLICY_ID_ACE<code class="variable-ellipsis">...</code></code>
     </td>
   </tr>
 <tr>
@@ -2052,10 +3565,91 @@
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Variables Details</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Variables Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-VariablesDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 </table>
+<a name="ACCESS_ALLOWED_CALLBACK_ACE_TYPE"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">ACCESS_ALLOWED_CALLBACK_ACE_TYPE</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+ACCESS_ALLOWED_CALLBACK_ACE_TYPE
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="ACCESS_ALLOWED_COMPOUND_ACE_TYPE"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">ACCESS_ALLOWED_COMPOUND_ACE_TYPE</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+ACCESS_ALLOWED_COMPOUND_ACE_TYPE
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
 <a name="FILE_ATTRIBUTE_NOT_CONTENT_INDEXED"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -2069,6 +3663,78 @@
     <dt>Value:</dt>
       <dd><table><tr><td><pre class="variable">
 FILE_ATTRIBUTE_NOT_CONTENT_INDEXED
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="FILE_CHARACTERISTIC_WEBDAV_DEVICE"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">FILE_CHARACTERISTIC_WEBDAV_DEVICE</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+FILE_CHARACTERISTIC_WEBDAV_DEVICE
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="FILE_DEVICE_ALLOW_APPCONTAINER_TRAVERSAL"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">FILE_DEVICE_ALLOW_APPCONTAINER_TRAVERSAL</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+FILE_DEVICE_ALLOW_APPCONTAINER_TRAVERSAL
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="FILE_SUPPORTS_EXTENDED_ATTRIBUTES"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">FILE_SUPPORTS_EXTENDED_ATTRIBUTES</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+FILE_SUPPORTS_EXTENDED_ATTRIBUTES
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="FILE_VALID_DATA_LENGTH_INFORMATION"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">FILE_VALID_DATA_LENGTH_INFORMATION</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+FILE_VALID_DATA_LENGTH_INFORMATION
 </pre></td></tr></table>
 </dd>
   </dl>
@@ -2200,6 +3866,133 @@ SMB2_NOTIFY_BREAK_LEASE_FLAG_NONE
   </dl>
 </td></tr></table>
 </div>
+<a name="SMB2_PREAUTH_INTEGRITY_CAPABILITIES"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">SMB2_PREAUTH_INTEGRITY_CAPABILITIES</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+SMB2_PREAUTH_INTEGRITY_CAPABILITIES
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="SMB2_SHAREFLAG_ACCESS_BASED_DIRECTORY_ENUM"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">SMB2_SHAREFLAG_ACCESS_BASED_DIRECTORY_ENUM</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+SMB2_SHAREFLAG_ACCESS_BASED_DIRECTORY_ENUM
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="SMB2_SHAREFLAG_ALLOW_NAMESPACE_CACHING"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">SMB2_SHAREFLAG_ALLOW_NAMESPACE_CACHING</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+SMB2_SHAREFLAG_ALLOW_NAMESPACE_CACHING
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="SMB2_SHAREFLAG_FORCE_LEVELII_OPLOCK"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">SMB2_SHAREFLAG_FORCE_LEVELII_OPLOCK</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+SMB2_SHAREFLAG_FORCE_LEVELII_OPLOCK
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="SMB2_SHAREFLAG_FORCE_SHARED_DELETE"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">SMB2_SHAREFLAG_FORCE_SHARED_DELETE</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+SMB2_SHAREFLAG_FORCE_SHARED_DELETE
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="SMB2_SHAREFLAG_NO_CACHING"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">SMB2_SHAREFLAG_NO_CACHING</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+SMB2_SHAREFLAG_AUTO_CACHING | SMB2_SHAREFLAG_NO_CACHING | SMB2_SHAREFL<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+AG_VDO_CACHING
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="SMB2_SHAREFLAG_RESTRICT_EXCLUSIVE_OPENS"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">SMB2_SHAREFLAG_RESTRICT_EXCLUSIVE_OPENS</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+SMB2_SHAREFLAG_RESTRICT_EXCLUSIVE_OPENS
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
 <a name="SMB2_SHARE_CAP_CONTINUOUS_AVAILABILITY"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -2213,6 +4006,78 @@ SMB2_NOTIFY_BREAK_LEASE_FLAG_NONE
     <dt>Value:</dt>
       <dd><table><tr><td><pre class="variable">
 SMB2_SHARE_CAP_CONTINUOUS_AVAILABILITY
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="SYSTEM_ALARM_CALLBACK_OBJECT_ACE_TYPE"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">SYSTEM_ALARM_CALLBACK_OBJECT_ACE_TYPE</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+SYSTEM_ALARM_CALLBACK_OBJECT_ACE_TYPE
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="SYSTEM_SCOPED_POLICY_ID_ACE_TYPE"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">SYSTEM_SCOPED_POLICY_ID_ACE_TYPE</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+SYSTEM_SCOPED_POLICY_ID_ACE_TYPE
 </pre></td></tr></table>
 </dd>
   </dl>
@@ -2245,7 +4110,7 @@ SMB2_SHARE_CAP_CONTINUOUS_AVAILABILITY
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Sep 19 09:27:43 2013
+    Generated by Epydoc 3.0.1 on Thu Jun 29 08:51:16 2017
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

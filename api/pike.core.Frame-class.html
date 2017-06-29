@@ -45,6 +45,8 @@
     <td>
       <table cellpadding="0" cellspacing="0">
         <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
             >]&nbsp;|&nbsp;<a href="pike.core.Frame-class.html"
@@ -64,7 +66,7 @@ object --+
 <dl><dt>Known Subclasses:</dt>
 <dd>
       <ul class="subclass-list">
-<li><a href="pike.netbios.Netbios-class.html">netbios.Netbios</a></li><li>, <a href="pike.smb2.CreateRequestContext-class.html">smb2.CreateRequestContext</a></li><li>, <a href="pike.smb2.Command-class.html">smb2.Command</a></li><li>, <a href="pike.smb2.CreateResponseContext-class.html">smb2.CreateResponseContext</a></li><li>, <a href="pike.smb2.FileInformation-class.html">smb2.FileInformation</a></li><li>, <a href="pike.smb2.IoctlInput-class.html">smb2.IoctlInput</a></li><li>, <a href="pike.smb2.IoctlOutput-class.html">smb2.IoctlOutput</a></li><li>, <a href="pike.smb2.Smb2-class.html">smb2.Smb2</a></li>  </ul>
+<li><a href="pike.crypto.EncryptionCapabilities-class.html">crypto.EncryptionCapabilities</a></li><li>, <a href="pike.smb2.NegotiateRequestContext-class.html">smb2.NegotiateRequestContext</a></li><li>, <a href="pike.smb2.NegotiateResponseContext-class.html">smb2.NegotiateResponseContext</a></li><li>, <a href="pike.crypto.TransformHeader-class.html">crypto.TransformHeader</a></li><li>, <a href="pike.netbios.Netbios-class.html">netbios.Netbios</a></li><li>, <a href="pike.smb2.CreateRequestContext-class.html">smb2.CreateRequestContext</a></li><li>, <a href="pike.smb2.Command-class.html">smb2.Command</a></li><li>, <a href="pike.smb2.CopyChunk-class.html">smb2.CopyChunk</a></li><li>, <a href="pike.smb2.IoctlInput-class.html">smb2.IoctlInput</a></li><li>, <a href="pike.smb2.IoctlOutput-class.html">smb2.IoctlOutput</a></li><li>, <a href="pike.smb2.CreateResponseContext-class.html">smb2.CreateResponseContext</a></li><li>, <a href="pike.smb2.ErrorResponseContext-class.html">smb2.ErrorResponseContext</a></li><li>, <a href="pike.smb2.Information-class.html">smb2.Information</a></li><li>, <a href="pike.smb2.FileNotifyInformation-class.html">smb2.FileNotifyInformation</a></li><li>, <a href="pike.smb2.PreauthIntegrityCapabilities-class.html">smb2.PreauthIntegrityCapabilities</a></li><li>, <a href="pike.smb2.ReparseDataBuffer-class.html">smb2.ReparseDataBuffer</a></li><li>, <a href="pike.smb2.Smb2-class.html">smb2.Smb2</a></li><li>, <a href="pike.ntlm.AvPair-class.html">ntlm.AvPair</a></li><li>, <a href="pike.ntlm.NTLMv2ClientChallenge-class.html">ntlm.NTLMv2ClientChallenge</a></li><li>, <a href="pike.ntlm.NTLMv2Response-class.html">ntlm.NTLMv2Response</a></li><li>, <a href="pike.ntlm.NtLmAuthenticateMessage-class.html">ntlm.NtLmAuthenticateMessage</a></li><li>, <a href="pike.ntlm.NtLmChallengeMessage-class.html">ntlm.NtLmChallengeMessage</a></li><li>, <a href="pike.ntlm.NtLmNegotiateMessage-class.html">ntlm.NtLmNegotiateMessage</a></li><li>, <a href="pike.ntlm.Ntlm-class.html">ntlm.Ntlm</a></li><li>, <a href="pike.ntlm.Version-class.html">ntlm.Version</a></li>  </ul>
 </dd></dl>
 
 <hr />
@@ -73,8 +75,17 @@ object --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Nested Classes</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Nested Classes</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-NestedClasses"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
@@ -89,8 +100,17 @@ object --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Instance Methods</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
@@ -189,6 +209,108 @@ object --+
       str(x)</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.core-pysrc.html#Frame.__str__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_decode_post"></a><span class="summary-sig-name">_decode_post</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">cur</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Frame._decode_post">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_decode_pre"></a><span class="summary-sig-name">_decode_pre</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">cur</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Frame._decode_pre">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_encode_post"></a><span class="summary-sig-name">_encode_post</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">cur</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Frame._encode_post">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_encode_pre"></a><span class="summary-sig-name">_encode_pre</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">cur</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Frame._encode_pre">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_str"></a><span class="summary-sig-name">_str</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">indent</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Frame._str">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_value_str"></a><span class="summary-sig-name">_value_str</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">value</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.core-pysrc.html#Frame._value_str">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -333,9 +455,25 @@ object --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Class Variables</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="_register"></a><span class="summary-name">_register</span> = <code title="[]"><code class="variable-group">[</code><code class="variable-group">]</code></code>
+    </td>
+  </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
@@ -349,8 +487,17 @@ object --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Properties</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
@@ -379,8 +526,17 @@ object --+
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Method Details</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 </table>
 <a name="__init__"></a>
@@ -464,8 +620,17 @@ object --+
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Property Details</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Property Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-PropertyDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 </table>
 <a name="children"></a>
@@ -523,7 +688,7 @@ object --+
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Sep 19 09:27:43 2013
+    Generated by Epydoc 3.0.1 on Thu Jun 29 08:51:16 2017
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

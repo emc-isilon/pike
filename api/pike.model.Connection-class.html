@@ -45,6 +45,8 @@
     <td>
       <table cellpadding="0" cellspacing="0">
         <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
             >]&nbsp;|&nbsp;<a href="pike.model.Connection-class.html"
@@ -56,7 +58,9 @@
 <!-- ==================== CLASS DESCRIPTION ==================== -->
 <h1 class="epydoc">Class Connection</h1><p class="nomargin-top"><span class="codelink"><a href="pike.model-pysrc.html#Connection">source&nbsp;code</a></span></p>
 <pre class="base-tree">
-asyncore.dispatcher --+
+         object --+    
+                  |    
+<a href="pike.transport.Transport-class.html">transport.Transport</a> --+
                       |
                      <strong class="uidshort">Connection</strong>
 </pre>
@@ -66,13 +70,47 @@ asyncore.dispatcher --+
   <p>Represents a connection to a server and handles all socket operations 
   and request/response dispatch.</p>
 
+<!-- ==================== NESTED CLASSES ==================== -->
+<a name="section-NestedClasses"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Nested Classes</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-NestedClasses"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.model.Connection.SessionSetupContext-class.html" class="summary-name">SessionSetupContext</a>
+    </td>
+  </tr>
+</table>
 <!-- ==================== INSTANCE METHODS ==================== -->
 <a name="section-InstanceMethods"></a>
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Instance Methods</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
@@ -87,6 +125,119 @@ asyncore.dispatcher --+
       Constructor.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Connection.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#callback" class="summary-sig-name">callback</a>(<span class="summary-sig-arg">*args</span>,
+        <span class="summary-sig-arg">**kwds</span>)</span><br />
+      Register a callback function for the context block, then unregister 
+      it</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Connection.callback">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#register_callback" class="summary-sig-name">register_callback</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">event</span>,
+        <span class="summary-sig-arg">cb</span>)</span><br />
+      Registers a callback function, cb for the given event.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Connection.register_callback">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="unregister_callback"></a><span class="summary-sig-name">unregister_callback</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">event</span>,
+        <span class="summary-sig-arg">cb</span>)</span><br />
+      Unregisters a callback function, cb for the given event.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Connection.unregister_callback">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#process_callbacks" class="summary-sig-name">process_callbacks</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">event</span>,
+        <span class="summary-sig-arg">obj</span>)</span><br />
+      Fire callbacks for the given event, passing obj as the parameter</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Connection.process_callbacks">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="smb3_pa_integrity"></a><span class="summary-sig-name">smb3_pa_integrity</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">packet</span>,
+        <span class="summary-sig-arg">data</span>=<span class="summary-sig-default">None</span>)</span><br />
+      perform smb3 pre-auth integrity hash update if needed</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Connection.smb3_pa_integrity">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#next_mid_range" class="summary-sig-name">next_mid_range</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">length</span>)</span><br />
+      multicredit requests must reserve 1 message id per credit charged.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Connection.next_mid_range">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -132,39 +283,8 @@ asyncore.dispatcher --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#readable" class="summary-sig-name">readable</a>(<span class="summary-sig-arg">self</span>)</span></td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="pike.model-pysrc.html#Connection.readable">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#writable" class="summary-sig-name">writable</a>(<span class="summary-sig-arg">self</span>)</span></td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="pike.model-pysrc.html#Connection.writable">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#handle_connect" class="summary-sig-name">handle_connect</a>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#handle_connect" class="summary-sig-name">handle_connect</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      callback fired when connection is established</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Connection.handle_connect">source&nbsp;code</a></span>
             
@@ -180,7 +300,8 @@ asyncore.dispatcher --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#handle_read" class="summary-sig-name">handle_read</a>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#handle_read" class="summary-sig-name">handle_read</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      callback fired when the socket has data available</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Connection.handle_read">source&nbsp;code</a></span>
             
@@ -196,7 +317,8 @@ asyncore.dispatcher --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#handle_write" class="summary-sig-name">handle_write</a>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#handle_write" class="summary-sig-name">handle_write</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      callback fired when the socket is available for writing</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Connection.handle_write">source&nbsp;code</a></span>
             
@@ -212,7 +334,8 @@ asyncore.dispatcher --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#handle_close" class="summary-sig-name">handle_close</a>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#handle_close" class="summary-sig-name">handle_close</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      callback fired when the socket is closed</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Connection.handle_close">source&nbsp;code</a></span>
             
@@ -228,7 +351,8 @@ asyncore.dispatcher --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#handle_error" class="summary-sig-name">handle_error</a>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#handle_error" class="summary-sig-name">handle_error</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      callback fired if a non-recoverable exception is raised</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Connection.handle_error">source&nbsp;code</a></span>
             
@@ -248,6 +372,73 @@ asyncore.dispatcher --+
       Close connection.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Connection.close">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_prepare_outgoing"></a><span class="summary-sig-name">_prepare_outgoing</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Connection._prepare_outgoing">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_find_oplock_future"></a><span class="summary-sig-name">_find_oplock_future</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">file_id</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Connection._find_oplock_future">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_find_lease_future"></a><span class="summary-sig-name">_find_lease_future</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">lease_key</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Connection._find_lease_future">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_dispatch_incoming"></a><span class="summary-sig-name">_dispatch_incoming</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">res</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Connection._dispatch_incoming">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -297,7 +488,46 @@ asyncore.dispatcher --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#negotiate" class="summary-sig-name">negotiate</a>(<span class="summary-sig-arg">self</span>)</span><br />
+          <td><span class="summary-sig"><a name="negotiate_request"></a><span class="summary-sig-name">negotiate_request</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">hash_algorithms</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">salt</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">ciphers</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Connection.negotiate_request">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="negotiate_submit"></a><span class="summary-sig-name">negotiate_submit</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">negotiate_request</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Connection.negotiate_submit">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="pike.model.Connection-class.html#negotiate" class="summary-sig-name">negotiate</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">hash_algorithms</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">salt</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">ciphers</span>=<span class="summary-sig-default">None</span>)</span><br />
       Perform dialect negotiation.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Connection.negotiate">source&nbsp;code</a></span>
@@ -316,7 +546,8 @@ asyncore.dispatcher --+
         <tr>
           <td><span class="summary-sig"><a href="pike.model.Connection-class.html#session_setup" class="summary-sig-name">session_setup</a>(<span class="summary-sig-arg">self</span>,
         <span class="summary-sig-arg">creds</span>=<span class="summary-sig-default">None</span>,
-        <span class="summary-sig-arg">bind</span>=<span class="summary-sig-default">None</span>)</span><br />
+        <span class="summary-sig-arg">bind</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">resume</span>=<span class="summary-sig-default">None</span>)</span><br />
       Establish a session.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Connection.session_setup">source&nbsp;code</a></span>
@@ -383,10 +614,44 @@ asyncore.dispatcher --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
+          <td><span class="summary-sig"><a name="session"></a><span class="summary-sig-name">session</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">session_id</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Connection.session">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
           <td><span class="summary-sig"><a name="signing_key"></a><span class="summary-sig-name">signing_key</span>(<span class="summary-sig-arg">self</span>,
         <span class="summary-sig-arg">session_id</span>)</span></td>
           <td align="right" valign="top">
             <span class="codelink"><a href="pike.model-pysrc.html#Connection.signing_key">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="encryption_context"></a><span class="summary-sig-name">encryption_context</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">session_id</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="pike.model-pysrc.html#Connection.encryption_context">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -429,51 +694,27 @@ asyncore.dispatcher --+
   </tr>
   <tr>
     <td colspan="2" class="summary">
-    <p class="indent-wrapped-lines"><b>Inherited from <code>asyncore.dispatcher</code></b>:
-      <code>__getattr__</code>,
-      <code>__repr__</code>,
-      <code>__str__</code>,
-      <code>accept</code>,
-      <code>add_channel</code>,
-      <code>bind</code>,
-      <code>connect</code>,
-      <code>create_socket</code>,
-      <code>del_channel</code>,
-      <code>handle_accept</code>,
-      <code>handle_connect_event</code>,
-      <code>handle_expt</code>,
-      <code>handle_expt_event</code>,
-      <code>handle_read_event</code>,
-      <code>handle_write_event</code>,
-      <code>listen</code>,
-      <code>log</code>,
-      <code>log_info</code>,
-      <code>recv</code>,
-      <code>send</code>,
-      <code>set_reuse_addr</code>,
-      <code>set_socket</code>
+    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="pike.transport.Transport-class.html">transport.Transport</a></code></b>:
+      <code><a href="pike.transport.Transport-class.html#connect">connect</a></code>,
+      <code><a href="pike.transport.Transport-class.html#create_socket">create_socket</a></code>,
+      <code><a href="pike.transport.Transport-class.html#handle_connect_event">handle_connect_event</a></code>,
+      <code><a href="pike.transport.Transport-class.html#recv">recv</a></code>,
+      <code><a href="pike.transport.Transport-class.html#send">send</a></code>,
+      <code><a href="pike.transport.Transport-class.html#set_socket">set_socket</a></code>
       </p>
-    </td>
-  </tr>
-</table>
-<!-- ==================== CLASS VARIABLES ==================== -->
-<a name="section-ClassVariables"></a>
-<table class="summary" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Class Variables</span></td>
-</tr>
-  <tr>
-    <td colspan="2" class="summary">
-    <p class="indent-wrapped-lines"><b>Inherited from <code>asyncore.dispatcher</code></b>:
-      <code>accepting</code>,
-      <code>addr</code>,
-      <code>closing</code>,
-      <code>connected</code>,
-      <code>connecting</code>,
-      <code>debug</code>,
-      <code>ignore_log_types</code>
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__format__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__sizeof__</code>,
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
       </p>
     </td>
   </tr>
@@ -483,8 +724,17 @@ asyncore.dispatcher --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Instance Variables</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
@@ -511,13 +761,47 @@ asyncore.dispatcher --+
     </td>
   </tr>
 </table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
 <!-- ==================== METHOD DETAILS ==================== -->
 <a name="section-MethodDetails"></a>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Method Details</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 </table>
 <a name="__init__"></a>
@@ -544,52 +828,100 @@ asyncore.dispatcher --+
   class="link">Client.connect</a>().</p>
   <dl class="fields">
     <dt>Overrides:
-        asyncore.dispatcher.__init__
+        object.__init__
     </dt>
   </dl>
 </td></tr></table>
 </div>
-<a name="readable"></a>
+<a name="callback"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">readable</span>(<span class="sig-arg">self</span>)</span>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">callback</span>(<span class="sig-arg">*args</span>,
+        <span class="sig-arg">**kwds</span>)</span>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="pike.model-pysrc.html#Connection.readable">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="pike.model-pysrc.html#Connection.callback">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
-  
+  <p>Register a callback function for the context block, then unregister 
+  it</p>
   <dl class="fields">
-    <dt>Overrides:
-        asyncore.dispatcher.readable
-    </dt>
+    <dt>Decorators:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code>@contextlib.contextmanager</code></li>
+    </ul></dd>
   </dl>
 </td></tr></table>
 </div>
-<a name="writable"></a>
+<a name="register_callback"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">writable</span>(<span class="sig-arg">self</span>)</span>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">register_callback</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">event</span>,
+        <span class="sig-arg">cb</span>)</span>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="pike.model-pysrc.html#Connection.writable">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="pike.model-pysrc.html#Connection.register_callback">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
-  
+  <p>Registers a callback function, cb for the given event. When the event 
+  fires, cb will be called with the relevant top-level Netbios frame as the
+  single paramter.</p>
   <dl class="fields">
-    <dt>Overrides:
-        asyncore.dispatcher.writable
-    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="process_callbacks"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">process_callbacks</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">event</span>,
+        <span class="sig-arg">obj</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pike.model-pysrc.html#Connection.process_callbacks">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Fire callbacks for the given event, passing obj as the parameter</p>
+  <p>Connection-specific callbacks will be fired first, followed by client 
+  callbacks</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="next_mid_range"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">next_mid_range</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">length</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pike.model-pysrc.html#Connection.next_mid_range">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>multicredit requests must reserve 1 message id per credit charged. the
+  message id of the request should be the first id of the range.</p>
+  <dl class="fields">
   </dl>
 </td></tr></table>
 </div>
@@ -607,10 +939,11 @@ asyncore.dispatcher --+
     </td>
   </tr></table>
   
-  
+  <p>callback fired when connection is established</p>
   <dl class="fields">
     <dt>Overrides:
-        asyncore.dispatcher.handle_connect
+        <a href="pike.transport.Transport-class.html#handle_connect">transport.Transport.handle_connect</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
     </dt>
   </dl>
 </td></tr></table>
@@ -629,10 +962,11 @@ asyncore.dispatcher --+
     </td>
   </tr></table>
   
-  
+  <p>callback fired when the socket has data available</p>
   <dl class="fields">
     <dt>Overrides:
-        asyncore.dispatcher.handle_read
+        <a href="pike.transport.Transport-class.html#handle_read">transport.Transport.handle_read</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
     </dt>
   </dl>
 </td></tr></table>
@@ -651,10 +985,25 @@ asyncore.dispatcher --+
     </td>
   </tr></table>
   
-  
+  <p>callback fired when the socket is available for writing</p>
+  <p>note: unlike asyncore, write notifications are not provided by 
+  default. this is a performance optimization because the socket is usually
+  available for writing, and the application usually knows when it wants to
+  write. There is no point in filling the event queues with write ready 
+  messages that will be ignored if the client has no data to send.</p>
+  <p>Instead, applications are expected to implement handle_write, but to 
+  call it directly when data is to be sent. IF the socket would block, 
+  EALREADY will be handled by the Transport. The Transport requests a 
+  single write notification from the pollwer; when received, handle_write 
+  will be called once signalling that the socket may now be ready to 
+  retry</p>
+  <p>If the application would prefer to be notified when the socket is 
+  ready to write, transport.poller.defer_write(transport) may be called to 
+  schedule a single handle_write callback.</p>
   <dl class="fields">
     <dt>Overrides:
-        asyncore.dispatcher.handle_write
+        <a href="pike.transport.Transport-class.html#handle_write">transport.Transport.handle_write</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
     </dt>
   </dl>
 </td></tr></table>
@@ -673,10 +1022,11 @@ asyncore.dispatcher --+
     </td>
   </tr></table>
   
-  
+  <p>callback fired when the socket is closed</p>
   <dl class="fields">
     <dt>Overrides:
-        asyncore.dispatcher.handle_close
+        <a href="pike.transport.Transport-class.html#handle_close">transport.Transport.handle_close</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
     </dt>
   </dl>
 </td></tr></table>
@@ -695,10 +1045,11 @@ asyncore.dispatcher --+
     </td>
   </tr></table>
   
-  
+  <p>callback fired if a non-recoverable exception is raised</p>
   <dl class="fields">
     <dt>Overrides:
-        asyncore.dispatcher.handle_error
+        <a href="pike.transport.Transport-class.html#handle_error">transport.Transport.handle_error</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
     </dt>
   </dl>
 </td></tr></table>
@@ -722,7 +1073,7 @@ asyncore.dispatcher --+
   outstanding requests with EOFError.</p>
   <dl class="fields">
     <dt>Overrides:
-        asyncore.dispatcher.close
+        <a href="pike.transport.Transport-class.html#close">transport.Transport.close</a>
     </dt>
   </dl>
 </td></tr></table>
@@ -785,7 +1136,10 @@ asyncore.dispatcher --+
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">negotiate</span>(<span class="sig-arg">self</span>)</span>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">negotiate</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">hash_algorithms</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">salt</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">ciphers</span>=<span class="sig-default">None</span>)</span>
   </h3>
   </td><td align="right" valign="top"
     ><span class="codelink"><a href="pike.model-pysrc.html#Connection.negotiate">source&nbsp;code</a></span>&nbsp;
@@ -809,7 +1163,8 @@ asyncore.dispatcher --+
   <tr valign="top"><td>
   <h3 class="epydoc"><span class="sig"><span class="sig-name">session_setup</span>(<span class="sig-arg">self</span>,
         <span class="sig-arg">creds</span>=<span class="sig-default">None</span>,
-        <span class="sig-arg">bind</span>=<span class="sig-default">None</span>)</span>
+        <span class="sig-arg">bind</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">resume</span>=<span class="sig-default">None</span>)</span>
   </h3>
   </td><td align="right" valign="top"
     ><span class="codelink"><a href="pike.model-pysrc.html#Connection.session_setup">source&nbsp;code</a></span>&nbsp;
@@ -829,6 +1184,7 @@ asyncore.dispatcher --+
           NTLM authentication will be used.  If None, Kerberos 
           authentication will be attempted.</li>
         <li><strong class="pname"><code>bind</code></strong> (<a href="pike.model.Session-class.html" class="link">Session</a>) - An existing session to bind.</li>
+        <li><strong class="pname"><code>resume</code></strong> (<a href="pike.model.Session-class.html" class="link">Session</a>) - An previous session to resume.</li>
     </ul></dd>
   </dl>
 </td></tr></table>
@@ -860,7 +1216,7 @@ asyncore.dispatcher --+
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Sep 19 09:27:43 2013
+    Generated by Epydoc 3.0.1 on Thu Jun 29 08:51:17 2017
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

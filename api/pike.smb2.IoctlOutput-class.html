@@ -45,6 +45,8 @@
     <td>
       <table cellpadding="0" cellspacing="0">
         <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
             >]&nbsp;|&nbsp;<a href="pike.smb2.IoctlOutput-class.html"
@@ -66,7 +68,7 @@ object --+
 <dl><dt>Known Subclasses:</dt>
 <dd>
       <ul class="subclass-list">
-<li><a href="pike.smb2.ValidateNegotiateInfoResponse-class.html">ValidateNegotiateInfoResponse</a></li>  </ul>
+<li><a href="pike.smb2.CopyChunkCopyResponse-class.html">CopyChunkCopyResponse</a></li><li>, <a href="pike.smb2.EnumerateSnapshotsResponse-class.html">EnumerateSnapshotsResponse</a></li><li>, <a href="pike.smb2.GetReparsePointResponse-class.html">GetReparsePointResponse</a></li><li>, <a href="pike.smb2.RequestResumeKeyResponse-class.html">RequestResumeKeyResponse</a></li><li>, <a href="pike.smb2.SetReparsePointResponse-class.html">SetReparsePointResponse</a></li><li>, <a href="pike.smb2.ValidateNegotiateInfoResponse-class.html">ValidateNegotiateInfoResponse</a></li>  </ul>
 </dd></dl>
 
 <hr />
@@ -75,8 +77,17 @@ object --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Nested Classes</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Nested Classes</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-NestedClasses"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
   <tr>
     <td colspan="2" class="summary">
@@ -91,8 +102,17 @@ object --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Instance Methods</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
@@ -128,6 +148,14 @@ object --+
       <code><a href="pike.core.Frame-class.html#prev_sibling">prev_sibling</a></code>,
       <code><a href="pike.core.Frame-class.html#serialize">serialize</a></code>
       </p>
+    <div class="private">    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="pike.core.Frame-class.html">core.Frame</a></code></b> (private):
+      <code><a href="pike.core.Frame-class.html#_decode_post" onclick="show_private();">_decode_post</a></code>,
+      <code><a href="pike.core.Frame-class.html#_decode_pre" onclick="show_private();">_decode_pre</a></code>,
+      <code><a href="pike.core.Frame-class.html#_encode_post" onclick="show_private();">_encode_post</a></code>,
+      <code><a href="pike.core.Frame-class.html#_encode_pre" onclick="show_private();">_encode_pre</a></code>,
+      <code><a href="pike.core.Frame-class.html#_str" onclick="show_private();">_str</a></code>,
+      <code><a href="pike.core.Frame-class.html#_value_str" onclick="show_private();">_value_str</a></code>
+      </p></div>
     <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
       <code>__delattr__</code>,
       <code>__format__</code>,
@@ -148,9 +176,33 @@ object --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Class Variables</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="pike.smb2.IoctlOutput-class.html#_register" class="summary-name" onclick="show_private();">_register</a> = <code title="[({FSCTL_SET_REPARSE_POINT: &lt;class 'pike.smb2.SetReparsePointResponse'\
+&gt;,
+   FSCTL_GET_REPARSE_POINT: &lt;class 'pike.smb2.GetReparsePointResponse'\
+&gt;,
+   FSCTL_SRV_REQUEST_RESUME_KEY: &lt;class 'pike.smb2.RequestResumeKeyRes\
+ponse'&gt;,
+   FSCTL_VALIDATE_NEGOTIATE_INFO: &lt;class 'pike.smb2.ValidateNegotiateI\
+nfoResponse'&gt;,
+..."><code class="variable-group">[</code><code class="variable-group">(</code><code class="variable-group">{</code>FSCTL_SET_REPARSE_POINT<code class="variable-op">: </code>&lt;class 'pike.smb2.SetR<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
   <tr>
     <td colspan="2" class="summary">
     <p class="indent-wrapped-lines"><b>Inherited from <code><a href="pike.core.Frame-class.html">core.Frame</a></code></b>:
@@ -164,8 +216,17 @@ object --+
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Properties</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
   <tr>
     <td colspan="2" class="summary">
@@ -184,8 +245,17 @@ object --+
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
-  <td align="left" colspan="2" class="table-header">
-    <span class="table-header">Method Details</span></td>
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
 </tr>
 </table>
 <a name="__init__"></a>
@@ -210,6 +280,51 @@ object --+
         object.__init__
         <dd><em class="note">(inherited documentation)</em></dd>
     </dt>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== CLASS VARIABLE DETAILS ==================== -->
+<a name="section-ClassVariableDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variable Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariableDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="_register"></a>
+<div class="private">
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">_register</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<code class="variable-group">[</code><code class="variable-group">(</code><code class="variable-group">{</code>FSCTL_SET_REPARSE_POINT<code class="variable-op">: </code>&lt;class 'pike.smb2.SetReparsePointResponse'<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+&gt;<code class="variable-op">,</code>
+   FSCTL_GET_REPARSE_POINT<code class="variable-op">: </code>&lt;class 'pike.smb2.GetReparsePointResponse'<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+&gt;<code class="variable-op">,</code>
+   FSCTL_SRV_REQUEST_RESUME_KEY<code class="variable-op">: </code>&lt;class 'pike.smb2.RequestResumeKeyRes<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+ponse'&gt;<code class="variable-op">,</code>
+   FSCTL_VALIDATE_NEGOTIATE_INFO<code class="variable-op">: </code>&lt;class 'pike.smb2.ValidateNegotiateI<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+nfoResponse'&gt;<code class="variable-op">,</code>
+<code class="variable-ellipsis">...</code>
+</pre></td></tr></table>
+</dd>
   </dl>
 </td></tr></table>
 </div>
@@ -240,7 +355,7 @@ object --+
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Sep 19 09:27:44 2013
+    Generated by Epydoc 3.0.1 on Thu Jun 29 08:51:21 2017
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"
