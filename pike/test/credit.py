@@ -86,6 +86,7 @@ def post_serialize_credit_assert(exp_credit_charge, future):
             future.complete(True)
     return cb
 
+@pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
 class CreditTest(pike.test.PikeTest):
     def __init__(self, *args, **kwargs):
         super(CreditTest, self).__init__(*args, **kwargs)
@@ -119,6 +120,7 @@ class CreditTest(pike.test.PikeTest):
         write_buf = buf * (file_chunks / write_chunks)
         write_credits_per_op = write_size / size_64k
         chan, tree = self.tree_connect()
+        starting_credits = chan.connection.negotiate_response.parent.credit_response
         self.info("creating {0} ({1} bytes)".format(fname, file_size))
 
         # get enough initial credits
@@ -143,7 +145,7 @@ class CreditTest(pike.test.PikeTest):
 
         # calculate a reasonable expected number of credits
         # from negotiate, session_setup (x2), tree_connect, create (+16), close
-        exp_credits = 1 + ((pike.model.default_credit_request - 1) * 4) + 15
+        exp_credits = starting_credits + ((pike.model.default_credit_request - 1) * 4) + 15
         credit_request_per_op = pike.model.default_credit_request
         # from the series of write requests
         if write_credits_per_op > credit_request_per_op:
@@ -212,6 +214,7 @@ class CreditTest(pike.test.PikeTest):
             extra_write = (write_remainder, c)
 
         chan, tree = self.tree_connect()
+        starting_credits = chan.connection.negotiate_response.parent.credit_response
         self.info("creating {0} ({1} bytes)".format(fname, file_size))
 
         # get enough initial credits
@@ -265,7 +268,7 @@ class CreditTest(pike.test.PikeTest):
 
         # calculate a reasonable expected number of credits
         # from negotiate, session_setup (x2), tree_connect, create (+16), close
-        exp_credits = 1 + ((pike.model.default_credit_request - 1) * 4) + 15
+        exp_credits = starting_credits + ((pike.model.default_credit_request - 1) * 4) + 15
         credit_request_per_op = pike.model.default_credit_request
         # from the series of write requests
         if write_credits_per_op > credit_request_per_op:
@@ -382,24 +385,26 @@ class EdgeCreditTest(CreditTest):
         sequence_number_target = 2080
 
         chan1, tree1 = self.tree_connect()
-        self.assertEqual(chan1.connection.credits, 1)
+        starting_credits = chan1.connection.negotiate_response.parent.credit_response
+        self.assertEqual(chan1.connection.credits, starting_credits)
 
         with chan1.let(credit_request=credits_per_req):
             fh1 = chan1.create(
                     tree1,
                     fname).result()
-        self.assertEqual(chan1.connection.credits, credits_per_req)
+        exp_credits = starting_credits + credits_per_req - 1
+        self.assertEqual(chan1.connection.credits, exp_credits)
 
-        # build up the sequence number to greater than 2048
+        # build up the sequence number to the target
         while chan1.connection._next_mid < sequence_number_target:
             smb_req = chan1.write_request(fh1, 0, buf*credits_per_req).parent
             smb_resp = chan1.connection.submit(smb_req.parent)[0].result()
             # if the server is granting our request,
             self.assertEqual(smb_resp.credit_response, credits_per_req)
             # then total number of credits should stay the same
-            self.assertEqual(chan1.connection.credits, credits_per_req)
+            self.assertEqual(chan1.connection.credits, exp_credits)
 
-        # at the end, next mid should be > 2048
+        # at the end, next mid should be > target
         self.assertGreater(chan1.connection._next_mid, sequence_number_target)
 
 class AsyncCreditTest(CreditTest):
@@ -415,6 +420,7 @@ class AsyncCreditTest(CreditTest):
         """
         chan1, tree1 = self.tree_connect()
         chan2, tree2 = self.tree_connect()
+        chan2_starting_credits = chan2.connection.negotiate_response.parent.credit_response
         fname = "test_async_lock"
         buf = "\0\1\2\3\4\5\6\7"
         lock1 = (0, 8, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK)
@@ -432,8 +438,7 @@ class AsyncCreditTest(CreditTest):
                 tree2,
                 fname,
                 share=share_all).result()
-        # onefs counts this as 4, because onefs starts at 4 instead of 1
-        self.assertEqual(chan2.connection.credits, 1)
+        self.assertEqual(chan2.connection.credits, chan2_starting_credits)
         chan1.lock(fh1, [lock1]).result()
 
         # send 3 locks, 1 credit charge, 3 credit request
@@ -449,9 +454,8 @@ class AsyncCreditTest(CreditTest):
                 self.assertEqual(f.interim_response.credit_response, credit_req)
 
         # at this point, we should have sent 3x 1charge, 3request lock commands
-        # so if the server granted our request should have 1 + 3 * (3 - 1)
-        # onefs counts this as 10, because onefs starts at 4 instead of 1
-        self.assertEqual(chan2.connection.credits, 7)
+        exp_credits = chan2_starting_credits + len(contend_locks) * (credit_req - 1)
+        self.assertEqual(chan2.connection.credits, exp_credits)
 
         # unlock fh1 locks
         lock1_un = tuple(list(lock1[:2]) + [pike.smb2.SMB2_LOCKFLAG_UN_LOCK])
@@ -460,16 +464,18 @@ class AsyncCreditTest(CreditTest):
         # these completion responses shouldn't have a carry a 1 credit charge + 0 grant
         for f in lock_futures:
             self.assertEqual(f.result().credit_response, 0)
-        # onefs counts this as 10, because onefs starts at 4 instead of 1
-        self.assertEqual(chan2.connection.credits, 7)
+        self.assertEqual(chan2.connection.credits, exp_credits)
         buf = "\0\1\2\3\4\5\6\7"*8192
-        # now write a 7 credit request to ensure we do have 7 credits
-        chan2.write(fh2, 0, buf*7)
-        self.assertEqual(chan2.connection.credits, 7)
-        # now write an 8 credit request to ensure we do have 7 credits (this should fail)
+
+        # send a request for all of our credits
+        chan2.write(fh2, 0, buf*exp_credits)
+        self.assertEqual(chan2.connection.credits, exp_credits)
+
+        # send a request for all of our credits + 1 (this should disconnect the client)
         with self.assertRaises(EOFError):
-            chan2.write(fh2, 0, buf*8)
-            self.fail("We should have less than 8 credits, but an 8 credit request succeeds")
+            chan2.write(fh2, 0, buf*(exp_credits + 1))
+            self.fail("We should have {0} credits, but an {1} credit request succeeds".format(
+                    exp_credits, exp_credits + 1))
 
     def test_async_write(self):
         """
@@ -482,6 +488,7 @@ class AsyncCreditTest(CreditTest):
         """
         chan1, tree1 = self.tree_connect()
         chan2, tree2 = self.tree_connect()
+        chan2_starting_credits = chan2.connection.negotiate_response.parent.credit_response
         fname = "test_async_write"
         lkey = array.array('B',map(random.randint, [0]*16, [255]*16))
         # buf is 64k
@@ -500,7 +507,7 @@ class AsyncCreditTest(CreditTest):
                 tree2,
                 fname,
                 share=share_all).result()
-        self.assertEqual(chan2.connection.credits, 1)
+        self.assertEqual(chan2.connection.credits, chan2_starting_credits)
         write_futures = []
         for n_credits in write_request_multiples:
             with chan2.let(credit_request=credit_req):
