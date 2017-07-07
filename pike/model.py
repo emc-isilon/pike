@@ -133,7 +133,7 @@ class Future(object):
         self.request = request
         self.interim_response = None
         self.response = None
-        self.notify = None
+        self.notify = []
         self.traceback = None
 
     def complete(self, response, traceback=None):
@@ -147,8 +147,8 @@ class Future(object):
         """
         self.response = response
         self.traceback = traceback
-        if self.notify is not None:
-            self.notify(self)
+        for notify in self.notify:
+            notify(self)
 
     def interim(self, response):
         """
@@ -158,6 +158,12 @@ class Future(object):
         """
         self.interim_response = response
 
+    def has_response(self):
+        return self.response is not None
+
+    def has_interim_response(self):
+        return self.response is not None or self.interim_response is not None
+
     def wait(self, timeout=default_timeout):
         """
         Wait for future result to become available.
@@ -165,7 +171,7 @@ class Future(object):
         @param timeout: The time in seconds before giving up and raising TimeoutError
         """
         deadline = time.time() + timeout
-        while self.response is None:
+        while not self.has_response():
             now = time.time()
             if now > deadline:
                 raise TimeoutError('Timed out after %s seconds' % timeout)
@@ -180,7 +186,7 @@ class Future(object):
         @param timeout: The time in seconds before giving up and raising TimeoutError
         """
         deadline = time.time() + timeout
-        while self.response is None and self.interim_response is None:
+        while not self.has_interim_response():
             now = time.time()
             if now > deadline:
                 raise TimeoutError('Timed out after %s seconds' % timeout)
@@ -218,7 +224,7 @@ class Future(object):
         if self.response is not None:
             notify(self)
         else:
-            self.notify = notify
+            self.notify.append(notify)
 
     def __enter__(self):
         pass
@@ -336,7 +342,7 @@ class Client(object):
         @param server: The server to connect to.
         @param port: The port to connect to.
         """
-        return Connection(self, server, port).connection_future
+        return Connection(self, server, port).establish().connection_future
 
     # Do not use, may be removed.  Use oplock_break_future.
     def next_oplock_break(self):
@@ -492,7 +498,8 @@ class Connection(transport.Transport):
         self.error = None
         self.traceback = None
 
-        for result in socket.getaddrinfo(server, port,
+    def establish(self):
+        for result in socket.getaddrinfo(self.server, self.port,
                                          0,
                                          socket.SOCK_STREAM,
                                          socket.IPPROTO_TCP):
@@ -500,6 +507,7 @@ class Connection(transport.Transport):
             break
         self.create_socket(family, socktype)
         self.connect(sockaddr)
+        return self
 
     @contextlib.contextmanager
     def callback(self, event, cb):
