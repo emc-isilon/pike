@@ -178,18 +178,35 @@ class ThreadedClient(model.Client):
             self.work_pool.abort()
     
     def connect_submit(self, server, port=445):
-        """
-        Create a threaded connection.
-
-        Returns a new L{Future} object for the L{ThreadedConnection} being established
-        asynchronously to the given server and port.
-
-        @param server: The server to connect to.
-        @param port: The port to connect to.
-        """
         return ThreadedConnection(self, server, port).establish().connection_future
 
-    ## TODO: oplock/lease break futures
+    def oplock_break_future(self, file_id):
+        future = ThreadedFuture(None)
+
+        for smb_res in self._oplock_break_queue[:]:
+            if smb_res[0].file_id == file_id:
+                future.complete(smb_res)
+                self._oplock_break_queue.remove(smb_res)
+                break
+
+        if future.response is None:
+            self._oplock_break_map[file_id] = future
+
+        return future
+
+    def lease_break_future(self, lease_key):
+        future = ThreadedFuture(None)
+
+        for smb_res in self._lease_break_queue[:]:
+            if smb_res[0].lease_key == lease_key:
+                future.complete(smb_res)
+                self._lease_break_queue.remove(smb_res)
+                break
+
+        if future.response is None:
+            self._lease_break_map[lease_key.tostring()] = future
+
+        return future
 
 class ThreadedConnection(model.Connection):
 
