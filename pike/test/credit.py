@@ -398,9 +398,18 @@ class EdgeCreditTest(CreditTest):
         # build up the sequence number to the target
         while chan1.connection._next_mid < sequence_number_target:
             smb_req = chan1.write_request(fh1, 0, buf*credits_per_req).parent
-            smb_resp = chan1.connection.submit(smb_req.parent)[0].result()
+            smb_future = chan1.connection.submit(smb_req.parent)[0]
+            smb_resp = smb_future.result()
+            if smb_future.interim_response:
+                # if server granted credits on interim
+                self.assertEqual(smb_future.interim_response.credit_response,
+                                 credits_per_req)
+                # then server should grant 0 credits on final resp
+                self.assertEqual(smb_resp.credit_response, 0)
+            else:
+                # otherwise, all credits should be granted in final response
+                self.assertEqual(smb_resp.credit_response, credits_per_req)
             # if the server is granting our request,
-            self.assertEqual(smb_resp.credit_response, credits_per_req)
             # then total number of credits should stay the same
             self.assertEqual(chan1.connection.credits, exp_credits)
 
