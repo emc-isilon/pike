@@ -3106,6 +3106,8 @@ class IoctlCode(core.ValueEnum):
     FSCTL_DFS_GET_REFERRALS_EX         = 0x000601B0
     FSCTL_FILE_LEVEL_TRIM              = 0x00098208
     FSCTL_VALIDATE_NEGOTIATE_INFO      = 0x00140204
+    FSCTL_SET_ZERO_DATA                = 0x000980C8
+    FSCTL_SET_SPARSE                   = 0x000900C4
 
 IoctlCode.import_items(globals())
 
