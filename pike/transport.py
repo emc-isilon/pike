@@ -38,6 +38,7 @@ from errno import errorcode, EBADF, ECONNRESET, ENOTCONN, ESHUTDOWN, \
                   EAGAIN
 import select
 import socket
+import threading
 import time
 
 _reraised_exceptions = (KeyboardInterrupt, SystemExit)
@@ -226,6 +227,7 @@ class BasePoller(object):
         """
         self.connections = {}
         self.deferred_writers = set()
+        self.poll_lock = threading.Lock()
 
     def add_channel(self, transport):
         """
@@ -261,7 +263,8 @@ class BasePoller(object):
         while True:
             if count is not None and complete_iterations >= count:
                 break
-            self.poll()
+            with self.poll_lock:
+                self.poll()
             if timeout is not None and time.time() > start + timeout:
                 break
             complete_iterations += 1
