@@ -353,39 +353,45 @@ class ErrorResponse(Command):
         self._error_contexts.append(e)
 
     def _decode(self, cur):
+        dialect = self.parent.parent.conn.dialect_revision
         self.error_context_count = cur.decode_uint8le()
         # Ignore Reserved
         cur.decode_uint8le()
         self.byte_count = cur.decode_uint32le()
         end = cur + self.byte_count
 
-        # SMB 3.1.1+ Error context handling
-        if self.error_context_count > 0:
-            for ix in xrange(self.error_context_count):
-                cur.align(self.parent.start, 8)
-                data_length = cur.decode_uint32le()
-                error_id = cur.decode_uint32le()
+        if dialect >= DIALECT_SMB3_1_1:
+            # SMB 3.1.1+ Error context handling
+            if self.error_context_count > 0:
+                for ix in xrange(self.error_context_count):
+                    cur.align(self.parent.start, 8)
+                    data_length = cur.decode_uint32le()
+                    error_id = cur.decode_uint32le()
+                    parent_status = self.parent.status
+                    if parent_status not in self.special_statuses:
+                        parent_status = None
+                    key = (error_id, parent_status)
+                    ctx = self._context_table[key]
+                    with cur.bounded(cur, end):
+                        ctx(self, data_length).decode(cur)
+        else:
+            # compatability shim for older dialects
+            if self.byte_count > 0:
+                error_id = 0
                 parent_status = self.parent.status
                 if parent_status not in self.special_statuses:
                     parent_status = None
                 key = (error_id, parent_status)
                 ctx = self._context_table[key]
                 with cur.bounded(cur, end):
-                    ctx(self, data_length).decode(cur)
-        elif self.byte_count > 0:
-            # compatability shim for older dialects
-            error_id = 0
-            parent_status = self.parent.status
-            if parent_status not in self.special_statuses:
-                parent_status = None
-            key = (error_id, parent_status)
-            ctx = self._context_table[key]
-            with cur.bounded(cur, end):
-                self.error_data = ctx(self, self.byte_count)
-                self.error_data.decode(cur)
-        else:
-           # Ignore ErrorData
-           cur += self.byte_count if self.byte_count else 1
+                    self.error_data = ctx(self, self.byte_count)
+                    self.error_data.decode(cur)
+            else:
+                # MS-SMB2 2.2.2: If the ByteCount field is zero then the server
+                # MUST supply an ErrorData field that is one byte in length, and
+                # SHOULD set that byte to zero; the client MUST ignore it on
+                # receipt.
+                cur.decode_bytes(1)
 
 class ErrorId(core.ValueEnum):
     SMB2_ERROR_ID_DEFAULT = 0x0
