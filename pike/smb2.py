@@ -383,9 +383,6 @@ class ErrorResponse(Command):
             with cur.bounded(cur, end):
                 self.error_data = ctx(self, self.byte_count)
                 self.error_data.decode(cur)
-        else:
-           # Ignore ErrorData
-           cur += self.byte_count if self.byte_count else 1
 
 class ErrorId(core.ValueEnum):
     SMB2_ERROR_ID_DEFAULT = 0x0

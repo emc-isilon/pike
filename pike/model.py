@@ -570,6 +570,12 @@ class Connection(transport.Transport):
                 self._pre_auth_integrity_hash +
                 value.parent.parent.buf[4:])
 
+    @property
+    def dialect_revision(self):
+        return (self.negotiate_response.dialect_revision
+                if self.negotiate_response is not None
+                else 0x0)
+
     def next_mid_range(self, length):
         """
         multicredit requests must reserve 1 message id per credit charged.
