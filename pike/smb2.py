@@ -643,6 +643,7 @@ class PreauthIntegrityCapabilitiesResponse(NegotiateResponseContext,
 class SessionFlags(core.FlagEnum):
     SMB2_SESSION_FLAG_NONE    = 0x00
     SMB2_SESSION_FLAG_BINDING = 0x01
+    SMB2_SESSION_FLAG_IS_NULL = 0x02
     SMB2_SESSION_FLAG_ENCRYPT_DATA = 0x04
 
 SessionFlags.import_items(globals())
