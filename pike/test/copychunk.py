@@ -45,6 +45,8 @@ share_all = pike.smb2.FILE_SHARE_READ | \
 access_rwd = pike.smb2.FILE_READ_DATA | \
              pike.smb2.FILE_WRITE_DATA | \
              pike.smb2.DELETE
+access_wd =  pike.smb2.FILE_WRITE_DATA | \
+             pike.smb2.DELETE
 
 # Max values
 
@@ -116,6 +118,40 @@ class TestServerSideCopy(pike.test.PikeTest):
                                   disposition=dst_disp,
                                   options=dst_options).result()
         return (fh_src, fh_dst)
+
+    def _chunkcopy_with_resume_key(self, chan, chunks, dst_file, resume_key):
+        smb_req = chan.request(obj=dst_file.tree)
+        ioctl_req = pike.smb2.IoctlRequest(smb_req)
+        copychunk_req = pike.smb2.CopyChunkCopyRequest(ioctl_req)
+
+        ioctl_req.max_output_response = 16384
+        ioctl_req.file_id = dst_file.file_id
+        ioctl_req.flags |= pike.smb2.IoctlFlags.SMB2_0_IOCTL_IS_FSCTL
+        copychunk_req.source_key = resume_key
+        copychunk_req.chunk_count = len(chunks)
+
+        for source_offset, target_offset, length in chunks:
+            chunk = pike.smb2.CopyChunk(copychunk_req)
+            chunk.source_offset = source_offset
+            chunk.target_offset = target_offset
+            chunk.length = length
+        result = chan.connection.transceive(ioctl_req.parent.parent)[0]
+        return result     
+
+    def _convert_fileid_to_resume_key(self, file_handle):
+        import struct
+        import array
+        manual_key = array.array('B')
+        file_id = file_handle.file_id
+        tmp_first_pack = struct.pack('<Q',file_id[0])
+        tmp_second_pack = struct.pack('<Q',file_id[1])
+        tmp_first_list = list(struct.unpack('BBBBBBBB', tmp_first_pack))
+        tmp_second_list = list(struct.unpack('BBBBBBBB', tmp_second_pack))
+        padding = [0, 0, 0, 0, 0, 0, 0, 0]
+        manual_key.fromlist(tmp_first_list)
+        manual_key.fromlist(tmp_second_list)
+        manual_key.fromlist(padding)
+        return manual_key
 
     def generic_ssc_test_case(self, block, number_of_chunks, total_offset=0):
         """
@@ -428,3 +464,188 @@ class TestServerSideCopy(pike.test.PikeTest):
                                                         pike.smb2.FILE_DELETE_ON_CLOSE,
                                             dst_disp=pike.smb2.FILE_OPEN_IF,
                                             exp_error=pike.ntstatus.STATUS_INVALID_DEVICE_REQUEST)
+
+    def generic_resume_key_test_case(self, req_num = 1, neg = False,\
+                                     neg_type = None, exp_error=None,
+                                     same_sess=False):
+        """
+        Resume key specific test including basic, multiple reqeusts, negative test
+        """
+        src_filename = "src_copy_chunk_rk.txt"
+        dst_filename = "dst_copy_chunk_rk.txt"
+        block = _gen_test_buffer(20000)
+        self._create_and_write(src_filename, block)
+
+
+        chunks = [(0, 0, 4000), (4000, 4000, 4000),\
+          (8000, 8000, 4000), (12000, 12000, 4000), \
+          (16000, 16000, 4000)]
+
+        if neg_type == "src_no_read":
+            src_access = access_wd
+        else:
+            src_access = None
+
+        fh_src, fh_dst = self._open_src_dst(src_filename, dst_filename,\
+                                            src_access = src_access)
+        close_handles = []
+        resume_key_list = []
+
+        # multiple resume_key requests cases
+        if req_num > 1:
+            # same session to issue multiple resume_key requets
+            if same_sess == False:
+                for i in range(2, (req_num+1)):
+                    chan2, tree2 = self.tree_connect()
+                    fh_src_2 = chan2.create(tree2,
+                                    src_filename,
+                                    access=access_rwd,
+                                    share=share_all).result()
+                    fh_dst_2 = chan2.create(tree2,
+                                    dst_filename,
+                                    access=access_rwd,
+                                    share=share_all).result()
+                    resume_key_other = chan2.resume_key(fh_src_2)[0][0].resume_key
+                    close_handles.append((chan2, tree2, fh_src_2, fh_dst_2))
+                    result = self._chunkcopy_with_resume_key(chan2, chunks,\
+                                                             fh_dst_2, resume_key_other)
+                    self.assertEqual(result[0][0].chunks_written, 5)
+                    self.assertEqual(result[0][0].total_bytes_written, 20000)
+            # multiple sessions to issue multiple resume_key requests
+            else:
+                for i in range(2, (req_num+1)):
+                    fh_src_2, fh_dst_2 = self._open_src_dst(src_filename,\
+                                                            dst_filename,\
+                                                            src_options = 0,\
+                                                            dst_options = 0)
+                    resume_key_other = self.chan.resume_key(fh_src_2)[0][0].resume_key
+                    resume_key_list.append(resume_key_other)
+                    result = self._chunkcopy_with_resume_key(self.chan, chunks,\
+                                                             fh_dst_2, resume_key_other)
+                    self.assertEqual(result[0][0].chunks_written, 5)
+                    self.assertEqual(result[0][0].total_bytes_written, 20000)
+                    self.chan.close(fh_src_2)
+                    self.chan.close(fh_dst_2)
+         
+
+
+        if neg == False:
+            resume_key = self.chan.resume_key(fh_src)[0][0].resume_key
+            result = self._chunkcopy_with_resume_key(self.chan, chunks,\
+                                                     fh_dst, resume_key)
+            self.assertEqual(result[0][0].chunks_written, 5)
+            self.assertEqual(result[0][0].total_bytes_written, 20000)
+
+            # read each file and verify the result
+            src_buf = self.chan.read(fh_src, 20000, 0).tostring()
+            self.assertBufferEqual(src_buf, block)
+            dst_buf = self.chan.read(fh_dst, 20000, 0).tostring()
+            self.assertBufferEqual(dst_buf, block)
+        else:
+            try:
+                with self.assert_error(exp_error):
+                    if neg_type == "other_key":
+                        try:
+                            assert req_num > 1
+                        except AssertionError:
+                            raise Exception("in case of test_other_resume_key "
+                                           "we need req_num at least two")
+
+                        result = self._chunkcopy_with_resume_key(self.chan, chunks,\
+                                                                 fh_dst, resume_key_other)
+                    if neg_type == "manual_key":
+                        manual_key = self._convert_fileid_to_resume_key(fh_src)
+                        result = self._chunkcopy_with_resume_key(self.chan, chunks,\
+                                                                 fh_dst, manual_key)
+                    if neg_type == "bogus_key":
+                        import array
+                        bogus_key = array.array('B', [255]*24)
+                        result = self._chunkcopy_with_resume_key(self.chan, chunks,\
+                                                                 fh_dst, bogus_key)
+                    if neg_type == "src_no_read":
+                        resume_key = self.chan.resume_key(fh_src)[0][0].resume_key
+                        result = self._chunkcopy_with_resume_key(self.chan, chunks,\
+                                                                 fh_dst, resume_key)
+                    if neg_type == "ssc_disable":
+                        resume_key = self.chan.resume_key(fh_src)[0][0].resume_key
+            finally:
+                pass
+
+        for chan_other, tree, fh_src_2, fh_dst_2 in close_handles:
+            chan_other.close(fh_src_2)
+            chan_other.close(fh_dst_2)
+            chan_other.tree_disconnect(tree)
+            chan_other.logoff()
+
+        self.chan.close(fh_src)
+        self.chan.close(fh_dst)
+
+
+
+    def test_resume_key_by_copychunk(self):
+        """
+        a typical ssc test first request for a resume key
+        then use the resume key for chunk copy
+        """
+        self.generic_resume_key_test_case()
+
+    def test_multiple_resume_key_diff_sessions(self):
+        """
+        test multple sessions each acquiring a resume_key
+        of same file to perform the server side copy
+        """
+        self.generic_resume_key_test_case(req_num=2)
+
+    def test_multiple_resume_key_same_sessions(self):
+        """
+        test in same session, for multiple opens of same file 
+        each acquiring a resume_key to perform the server side copy
+        """
+        self.generic_resume_key_test_case(req_num=5, same_sess=True)
+
+    def test_other_resume_key(self):
+        """
+        negative test for multiple sessions acquiring resume key
+        for same file one session uses other session's resume key
+        to perform the server side copy
+        """
+        self.generic_resume_key_test_case(req_num=2, neg=True,\
+                                          neg_type="other_key",\
+                                          exp_error=pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND)
+
+    def test_manual_resume_key(self):
+        """
+        negative test for single session does not acquire resume_key
+        but self-generate one resume_key by file_id to perform the 
+        server side copy
+        """
+        self.generic_resume_key_test_case(req_num=1, neg=True,\
+                                          neg_type="manual_key",\
+                                          exp_error=pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND)
+
+    def test_bogus_resume_key(self):
+        """
+        negative test for single session does not acquire resume_key
+        but generate one bogus resume_key to perform the server side copy
+        """
+        self.generic_resume_key_test_case(req_num=1, neg=True,\
+                                          neg_type="bogus_key",\
+                                          exp_error=pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND)
+
+    def test_src_no_read_resume_key(self):
+        """
+        negative test for single session the source file handle does not
+        apply for read permission then send the resume_key request for it
+        """
+        self.generic_resume_key_test_case(req_num=1, neg=True,\
+                                          neg_type="src_no_read",\
+                                          exp_error=pike.ntstatus.STATUS_ACCESS_DENIED)
+
+    def test_ssc_disable_resume_key(self):
+        """
+        negative test for globally disabled ssc then
+        perform the resume key  ioctl reqeust
+        """
+        self.generic_resume_key_test_case(req_num=1, neg=True,\
+                                          neg_type="ssc_disable",\
+                                          exp_error=pike.ntstatus.STATUS_INVALID_DEVICE_REQUEST)
