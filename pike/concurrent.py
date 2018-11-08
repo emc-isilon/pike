@@ -63,7 +63,7 @@ class WorkThread(threading.Thread):
     def __init__(self, work_queue, killswitch, work_timeout, *args, **kwds):
         """
         constructor, remaining arguments are passed to threading.Thread
-        
+
         @type work_queue: L{Queue.Queue}
         @param work_queue: shared queue from the L{ThreadPool}
         @type killswitch: L{threading.Event}
@@ -133,7 +133,7 @@ class ThreadedFuture(model.Future):
         """
         super(ThreadedFuture, self).__init__(request)
         self.response_lock = threading.Lock()
-    
+
     def complete(self, response, traceback=None):
         with self.response_lock:
             self.response = response
@@ -176,7 +176,7 @@ class ThreadedClient(model.Client):
     def __del__(self):
         if self.cleanup_work_pool:
             self.work_pool.abort()
-    
+
     def connect_submit(self, server, port=445):
         return ThreadedConnection(self, server, port).establish().connection_future
 
