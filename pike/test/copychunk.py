@@ -45,6 +45,10 @@ share_all = pike.smb2.FILE_SHARE_READ | \
 access_rwd = pike.smb2.FILE_READ_DATA | \
              pike.smb2.FILE_WRITE_DATA | \
              pike.smb2.DELETE
+access_wd =  pike.smb2.FILE_WRITE_DATA | \
+             pike.smb2.DELETE
+
+SIMPLE_CONTENT = "Hello"
 
 # Max values
 
@@ -64,8 +68,10 @@ class TestServerSideCopy(pike.test.PikeTest):
 
     def setUp(self):
         self.chan, self.tree = self.tree_connect()
+        self.other_chan_list = []
 
     def tearDown(self):
+        self._clean_up_other_channels()
         self.chan.tree_disconnect(self.tree)
         self.chan.logoff()
 
@@ -116,6 +122,25 @@ class TestServerSideCopy(pike.test.PikeTest):
                                   disposition=dst_disp,
                                   options=dst_options).result()
         return (fh_src, fh_dst)
+
+    def _clean_up_other_channels(self):
+        """
+        clean up chan tree filehandles during failure
+        """
+        if self.other_chan_list:
+            for mydict in self.other_chan_list:
+                for fh in mydict["filehandles"]:
+                    mydict["channel"].close(fh)
+                mydict["channel"].tree_disconnect(mydict["tree"])
+                mydict["channel"].logoff()
+            self.other_chan_list = []
+
+    def _prepare_source_file(self):
+        """
+        generate a five chunks file as source file for resume_key request
+        """
+        src_filename = "src_copy_chunk_rk.txt"
+        self._create_and_write(src_filename, SIMPLE_CONTENT)
 
     def generic_ssc_test_case(self, block, number_of_chunks, total_offset=0):
         """
@@ -428,3 +453,165 @@ class TestServerSideCopy(pike.test.PikeTest):
                                                         pike.smb2.FILE_DELETE_ON_CLOSE,
                                             dst_disp=pike.smb2.FILE_OPEN_IF,
                                             exp_error=pike.ntstatus.STATUS_INVALID_DEVICE_REQUEST)
+
+    def generic_multiple_resume_key_test_case(self, sess_num):
+        """
+        multiple session resume key test
+        """
+        src_filename = "src_copy_chunk_rk.txt"
+        content = "resume key test"
+        rk_list = []
+
+        for i in range(sess_num):
+            chan, tree = self.tree_connect()
+            fh_1 = chan.create(tree,
+                               src_filename,
+                               access=access_rwd,
+                               share=share_all).result()
+            chan.write(fh_1, 0, content)
+            resume_key_1_1 = chan.resume_key(fh_1)[0][0].resume_key
+            resume_key_1_2 = chan.resume_key(fh_1)[0][0].resume_key
+            fh_2 = chan.create(tree,
+                               src_filename,
+                               access=access_rwd,
+                               share=share_all).result()
+            resume_key_2_1 = chan.resume_key(fh_2)[0][0].resume_key
+            resume_key_2_2 = chan.resume_key(fh_2)[0][0].resume_key
+            self.other_chan_list.append(
+                {"channel": chan, "tree": tree, "filehandles": [fh_1, fh_2]})
+            try:
+                # for same file handler, resume_key should be same
+                self.assertEqual(resume_key_1_1, resume_key_1_2)
+                self.assertEqual(resume_key_2_1, resume_key_2_2)
+                # for different file handler in same session
+                self.assertNotEqual(resume_key_1_1, resume_key_2_1)
+                # for different file hander and different session
+                self.assertNotIn(resume_key_1_1, rk_list)
+                self.assertNotIn(resume_key_2_1, rk_list)
+            except Exception as e:
+                raise AssertionError("resume key check fail", e)
+            else:
+                rk_list += [resume_key_1_1, resume_key_2_1]
+
+    def test_multiple_resume_key(self):
+        """
+        test multiple sessions requesting resume_key for same
+        file, also test within one session, multiple requests
+        for same file
+        """
+        self.generic_multiple_resume_key_test_case(sess_num=3)
+
+    def generic_negative_resume_key_test_case(self, resume_key, exp_error=None):
+        """
+        negative test for invalid resume key handling case
+        """
+        src_filename = "src_copy_chunk_rk.txt"
+        dst_filename = "dst_copy_chunk_rk.txt"
+
+        chunks = [(0, 0, len(SIMPLE_CONTENT))]
+        fh_src, fh_dst = self._open_src_dst(
+            src_filename, dst_filename)
+
+        if exp_error is None:
+            exp_error = pike.ntstatus.STATUS_SUCCESS
+        try:
+            with self.assert_error(exp_error):
+                result = self.chan.copychunk(
+                    fh_src, fh_dst, chunks, resume_key)
+        finally:
+            self.chan.close(fh_src)
+            self.chan.close(fh_dst)
+
+    def test_other_resume_key(self):
+        """
+        negative test for multiple sessions acquiring resume key
+        for same file one session uses other session's resume key
+        to perform the server side copy
+        """
+        self._prepare_source_file()
+        chan_2, tree_2 = self.tree_connect()
+        src_filename = "src_copy_chunk_rk.txt"
+        fh_src_2 = chan_2.create(tree_2,
+                                 src_filename,
+                                 access=access_rwd,
+                                 share=share_all).result()
+        self.other_chan_list.append(
+            {"channel": chan_2, "tree": tree_2, "filehandles": [fh_src_2]})
+        other_key = chan_2.resume_key(fh_src_2)[0][0].resume_key
+
+        self.generic_negative_resume_key_test_case(
+            other_key, exp_error=pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND)
+
+    def test_bogus_resume_key(self):
+        """
+        negative test for single session does not acquire resume_key
+        but generate one bogus resume_key to perform the server side copy
+        """
+        self._prepare_source_file()
+        import array
+        bogus_key = array.array('B', [255] * 24)
+        self.generic_negative_resume_key_test_case(
+            bogus_key, exp_error=pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND)
+
+    def generic_ssc_write_test_case(self, block, number_of_chunks, total_offset=0):
+        """
+        copy block in number_of_chunks, offset the destination copy by total_offset
+        by ioctl FSCTL_SRV_COPYCHUNK_WRITE function 
+        """
+
+        src_filename = "src_copy_chunk_write.txt"
+        dst_filename = "dst_copy_chunk_write.txt"
+        self._create_and_write(src_filename, block)
+        total_len = len(block)
+        chunk_sz = (total_len / number_of_chunks) + 1
+        this_offset = 0
+
+        chunks = []
+        while this_offset < total_len:
+            offset = this_offset
+            if this_offset + chunk_sz < total_len:
+                length = chunk_sz
+            else:
+                length = total_len - this_offset
+            chunks.append((offset, offset + total_offset, length))
+            this_offset += chunk_sz
+
+        fh_src, fh_dst = self._open_src_dst(src_filename, dst_filename,
+                                            dst_access=access_wd)
+
+        result = self.chan.copychunk(fh_src, fh_dst, chunks, write_flag=True)
+        self.assertEqual(result[0][0].chunks_written, number_of_chunks)
+        self.assertEqual(result[0][0].total_bytes_written, total_len)
+        self.assertEqual(result[0][0].chunk_bytes_written, 0)
+
+        # read source file and verify the result
+        src_buf = self.chan.read(fh_src, total_len, 0).tostring()
+        self.assertBufferEqual(src_buf, block)
+        # another handle to read the destination file
+        fh_dst_2 = self.chan.create(self.tree,
+                                    dst_filename,
+                                    access=access_rwd,
+                                    share=share_all,
+                                    disposition=pike.smb2.FILE_OPEN,
+                                    options=0).result()
+        dst_buf = self.chan.read(fh_dst_2, total_len, 0).tostring()
+        self.assertBufferEqual(dst_buf, block)
+
+        self.chan.close(fh_dst_2)
+        self.chan.close(fh_src)
+        self.chan.close(fh_dst)
+
+    def test_copy_write_small_file(self):
+        block = "Hello"
+        num_of_chunks = 1
+        self.generic_ssc_write_test_case(block, num_of_chunks)
+
+    def test_copy_write_multiple_chunks(self):
+        block = _gen_test_buffer(65535)
+        num_of_chunks = 10
+        self.generic_ssc_write_test_case(block, num_of_chunks)
+
+    def test_copy_write_max_chunks(self):
+        block = _gen_test_buffer(65535)
+        num_of_chunks = 16
+        self.generic_ssc_write_test_case(block, num_of_chunks)

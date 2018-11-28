@@ -1733,17 +1733,21 @@ class Channel(object):
 
         return self.connection.transceive(smb_req.parent)[0]
 
-    def copychunk_request(self, source_file, target_file, chunks):
+    def copychunk_request(self, source_file, target_file, chunks, resume_key=None, write_flag=False):
         """
         @param source_file: L{Open}
         @param target_file: L{Open}
         @param chunks: sequence of tuples (source_offset, target_offset, length)
         """
-        resume_key = self.resume_key(source_file)[0][0].resume_key
+        if not resume_key:
+            resume_key = self.resume_key(source_file)[0][0].resume_key
 
         smb_req = self.request(obj=target_file.tree)
         ioctl_req = smb2.IoctlRequest(smb_req)
-        copychunk_req = smb2.CopyChunkCopyRequest(ioctl_req)
+        if write_flag:
+            copychunk_req = smb2.CopyChunkCopyWriteRequest(ioctl_req)
+        else:
+            copychunk_req = smb2.CopyChunkCopyRequest(ioctl_req)
 
         ioctl_req.max_output_response = 16384
         ioctl_req.file_id = target_file.file_id
@@ -1758,7 +1762,7 @@ class Channel(object):
             chunk.length = length
         return ioctl_req
 
-    def copychunk(self, source_file, target_file, chunks):
+    def copychunk(self, source_file, target_file, chunks, resume_key=None, write_flag=False):
         """
         @param source_file: L{Open}
         @param target_file: L{Open}
@@ -1768,7 +1772,9 @@ class Channel(object):
                 self.copychunk_request(
                     source_file,
                     target_file,
-                    chunks).parent.parent)[0]
+                    chunks,
+                    resume_key,
+                    write_flag).parent.parent)[0]
 
     def set_symlink_request(self, file, target_name, flags):
         smb_req = self.request(obj=file.tree)
