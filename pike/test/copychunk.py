@@ -68,8 +68,10 @@ class TestServerSideCopy(pike.test.PikeTest):
 
     def setUp(self):
         self.chan, self.tree = self.tree_connect()
+        self.other_chan_list = []
 
     def tearDown(self):
+        self._clean_up_other_channels()
         self.chan.tree_disconnect(self.tree)
         self.chan.logoff()
 
@@ -121,17 +123,18 @@ class TestServerSideCopy(pike.test.PikeTest):
                                   options=dst_options).result()
         return (fh_src, fh_dst)
 
-    def _clean_up_opens(self, clean_list):
+    def _clean_up_other_channels(self):
         """
         clean up chan tree filehandles during failure
         """
-        if clean_list:
-            if len(clean_list[0]) == 3:
-                        for chan, tree, fh_1, fh_2 in clean_list:
-                            chan.close(fh_1)
-                            chan.close(fh_2)
-                            chan.tree_disconnect(tree)
-                            chan.logoff()
+        if self.other_chan_list:
+            for mydict in self.other_chan_list:
+                print("clean +1")
+                for fh in mydict["filehandles"]:
+                    mydict["channel"].close(fh)
+                mydict["channel"].tree_disconnect(mydict["tree"])
+                mydict["channel"].logoff()
+            self.other_chan_list = []
 
     def _prepare_source_file(self):
         """
@@ -458,7 +461,6 @@ class TestServerSideCopy(pike.test.PikeTest):
         """
         src_filename = "src_copy_chunk_rk.txt"
         content = "resume key test"
-        close_hdls = []
         rk_list = []
 
         for i in range(sess_num):
@@ -476,7 +478,7 @@ class TestServerSideCopy(pike.test.PikeTest):
                                share=share_all).result()
             resume_key_2_1 = chan.resume_key(fh_2)[0][0].resume_key
             resume_key_2_2 = chan.resume_key(fh_2)[0][0].resume_key
-            close_hdls.append((chan, tree, fh_1, fh_2))
+            self.other_chan_list.append({"channel":chan, "tree":tree, "filehandles": [fh_1, fh_2]})
             try:
                 # for same file handler, resume_key should be same
                 self.assertEqual(resume_key_1_1, resume_key_1_2)
@@ -487,12 +489,9 @@ class TestServerSideCopy(pike.test.PikeTest):
                 self.assertNotIn(resume_key_1_1, rk_list)
                 self.assertNotIn(resume_key_2_1, rk_list)
             except Exception as e:
-                self._clean_up_opens(close_hdls)
                 raise AssertionError("resume key check fail", e)
             else:
                 rk_list += [resume_key_1_1, resume_key_2_1]
-
-        self._clean_up_opens(close_hdls)
 
 
     def test_multiple_resume_key(self):
@@ -537,14 +536,12 @@ class TestServerSideCopy(pike.test.PikeTest):
                                 src_filename,
                                 access=access_rwd,
                                 share=share_all).result()
+        self.other_chan_list.append({"channel":chan_2, "tree":tree_2, "filehandles": [fh_src_2]})
         other_key = chan_2.resume_key(fh_src_2)[0][0].resume_key
 
         self.generic_negative_resume_key_test_case(
             other_key, exp_error=pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND)
 
-        chan_2.close(fh_src_2)
-        chan_2.tree_disconnect(tree_2)
-        chan_2.logoff()
 
     def test_bogus_resume_key(self):
         """
