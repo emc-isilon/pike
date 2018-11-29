@@ -123,16 +123,24 @@ class TestServerSideCopy(pike.test.PikeTest):
                                   options=dst_options).result()
         return (fh_src, fh_dst)
 
+    def _get_readable_handler(self, filename):
+        fh_read = self.chan.create(self.tree,
+                                   filename,
+                                   access=pike.smb2.FILE_READ_DATA,
+                                   share=share_all,
+                                   options=0).result()
+        return fh_read
+
     def _clean_up_other_channels(self):
         """
         clean up chan tree filehandles during failure
         """
         if self.other_chan_list:
-            for mydict in self.other_chan_list:
-                for fh in mydict["filehandles"]:
-                    mydict["channel"].close(fh)
-                mydict["channel"].tree_disconnect(mydict["tree"])
-                mydict["channel"].logoff()
+            for info in self.other_chan_list:
+                for fh in info["filehandles"]:
+                    info["channel"].close(fh)
+                info["channel"].tree_disconnect(info["tree"])
+                info["channel"].logoff()
             self.other_chan_list = []
 
     def _prepare_source_file(self):
@@ -142,7 +150,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         src_filename = "src_copy_chunk_rk.txt"
         self._create_and_write(src_filename, SIMPLE_CONTENT)
 
-    def generic_ssc_test_case(self, block, number_of_chunks, total_offset=0):
+    def generic_ssc_test_case(self, block, number_of_chunks, total_offset=0, write_flag=False):
         """
         copy block in number_of_chunks, offset the destination copy by total_offset
         """
@@ -161,21 +169,31 @@ class TestServerSideCopy(pike.test.PikeTest):
                 length = chunk_sz
             else:
                 length = total_len - this_offset
-            chunks.append((offset, offset+total_offset, length))
+            chunks.append((offset, offset + total_offset, length))
             this_offset += chunk_sz
 
-        fh_src, fh_dst = self._open_src_dst(src_filename, dst_filename)
+        if write_flag:
+            dst_access = access_wd
+        else:
+            dst_access = access_rwd
 
-        result = self.chan.copychunk(fh_src, fh_dst, chunks)
+        fh_src, fh_dst = self._open_src_dst(src_filename, dst_filename,
+                                            dst_access=dst_access)
+
+        result = self.chan.copychunk(fh_src, fh_dst, chunks, write_flag)
+
         self.assertEqual(result[0][0].chunks_written, number_of_chunks)
         self.assertEqual(result[0][0].total_bytes_written, total_len)
 
         # read each file and verify the result
         src_buf = self.chan.read(fh_src, total_len, 0).tostring()
         self.assertBufferEqual(src_buf, block)
-        dst_buf = self.chan.read(fh_dst, total_len, total_offset).tostring()
+        fh_dst_read = self._get_readable_handler(dst_filename)
+        dst_buf = self.chan.read(
+            fh_dst_read, total_len, total_offset).tostring()
         self.assertBufferEqual(dst_buf, block)
 
+        self.chan.close(fh_dst_read)
         self.chan.close(fh_src)
         self.chan.close(fh_dst)
 
@@ -216,6 +234,21 @@ class TestServerSideCopy(pike.test.PikeTest):
         num_of_chunks = 10
         offset = 64
         self.generic_ssc_test_case(block, num_of_chunks, offset)
+
+    def test_copy_write_small_file(self):
+        block = "Hello"
+        num_of_chunks = 1
+        self.generic_ssc_test_case(block, num_of_chunks, write_flag=True)
+
+    def test_copy_write_multiple_chunks(self):
+        block = _gen_test_buffer(65535)
+        num_of_chunks = 10
+        self.generic_ssc_test_case(block, num_of_chunks, write_flag=True)
+
+    def test_copy_write_max_chunks(self):
+        block = _gen_test_buffer(65535)
+        num_of_chunks = 16
+        self.generic_ssc_test_case(block, num_of_chunks, write_flag=True)
 
     def generic_ssc_same_file_test_case(self, block, number_of_chunks, total_offset=0):
         """
@@ -488,8 +521,10 @@ class TestServerSideCopy(pike.test.PikeTest):
                 # for different file hander and different session
                 self.assertNotIn(resume_key_1_1, rk_list)
                 self.assertNotIn(resume_key_2_1, rk_list)
-            except Exception as e:
-                raise AssertionError("resume key check fail", e)
+            except AssertionError:
+                self.error("resume key check failed on session index {0}".format(
+                    i), exc_info=True)
+                raise
             else:
                 rk_list += [resume_key_1_1, resume_key_2_1]
 
@@ -553,65 +588,3 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.generic_negative_resume_key_test_case(
             bogus_key, exp_error=pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND)
 
-    def generic_ssc_write_test_case(self, block, number_of_chunks, total_offset=0):
-        """
-        copy block in number_of_chunks, offset the destination copy by total_offset
-        by ioctl FSCTL_SRV_COPYCHUNK_WRITE function 
-        """
-
-        src_filename = "src_copy_chunk_write.txt"
-        dst_filename = "dst_copy_chunk_write.txt"
-        self._create_and_write(src_filename, block)
-        total_len = len(block)
-        chunk_sz = (total_len / number_of_chunks) + 1
-        this_offset = 0
-
-        chunks = []
-        while this_offset < total_len:
-            offset = this_offset
-            if this_offset + chunk_sz < total_len:
-                length = chunk_sz
-            else:
-                length = total_len - this_offset
-            chunks.append((offset, offset + total_offset, length))
-            this_offset += chunk_sz
-
-        fh_src, fh_dst = self._open_src_dst(src_filename, dst_filename,
-                                            dst_access=access_wd)
-
-        result = self.chan.copychunk(fh_src, fh_dst, chunks, write_flag=True)
-        self.assertEqual(result[0][0].chunks_written, number_of_chunks)
-        self.assertEqual(result[0][0].total_bytes_written, total_len)
-        self.assertEqual(result[0][0].chunk_bytes_written, 0)
-
-        # read source file and verify the result
-        src_buf = self.chan.read(fh_src, total_len, 0).tostring()
-        self.assertBufferEqual(src_buf, block)
-        # another handle to read the destination file
-        fh_dst_2 = self.chan.create(self.tree,
-                                    dst_filename,
-                                    access=access_rwd,
-                                    share=share_all,
-                                    disposition=pike.smb2.FILE_OPEN,
-                                    options=0).result()
-        dst_buf = self.chan.read(fh_dst_2, total_len, 0).tostring()
-        self.assertBufferEqual(dst_buf, block)
-
-        self.chan.close(fh_dst_2)
-        self.chan.close(fh_src)
-        self.chan.close(fh_dst)
-
-    def test_copy_write_small_file(self):
-        block = "Hello"
-        num_of_chunks = 1
-        self.generic_ssc_write_test_case(block, num_of_chunks)
-
-    def test_copy_write_multiple_chunks(self):
-        block = _gen_test_buffer(65535)
-        num_of_chunks = 10
-        self.generic_ssc_write_test_case(block, num_of_chunks)
-
-    def test_copy_write_max_chunks(self):
-        block = _gen_test_buffer(65535)
-        num_of_chunks = 16
-        self.generic_ssc_write_test_case(block, num_of_chunks)
