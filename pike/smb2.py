@@ -3264,6 +3264,9 @@ class CopyChunkCopyRequest(IoctlInput):
         for chunk in self._children:
             chunk.encode(cur)
 
+class CopyChunkCopyWriteRequest(CopyChunkCopyRequest):
+    ioctl_ctl_code = FSCTL_SRV_COPYCHUNK_WRITE
+
 class CopyChunk(core.Frame):
     def __init__(self, parent):
         core.Frame.__init__(self, parent)
@@ -3349,6 +3352,9 @@ class CopyChunkCopyResponse(IoctlOutput):
         self.chunks_written = cur.decode_uint32le()
         self.chunk_bytes_written = cur.decode_uint32le()
         self.total_bytes_written = cur.decode_uint32le()
+
+class CopyChunkCopyWriteResponse(CopyChunkCopyResponse):
+    ioctl_ctl_code = FSCTL_SRV_COPYCHUNK_WRITE
 
 class SetReparsePointResponse(IoctlOutput):
     ioctl_ctl_code = FSCTL_SET_REPARSE_POINT
