@@ -180,7 +180,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         fh_src, fh_dst = self._open_src_dst(src_filename, dst_filename,
                                             dst_access=dst_access)
 
-        result = self.chan.copychunk(fh_src, fh_dst, chunks, write_flag)
+        result = self.chan.copychunk(fh_src, fh_dst, chunks, write_flag=write_flag)
 
         self.assertEqual(result[0][0].chunks_written, number_of_chunks)
         self.assertEqual(result[0][0].total_bytes_written, total_len)
