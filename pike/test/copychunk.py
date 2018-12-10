@@ -253,6 +253,8 @@ class TestServerSideCopy(pike.test.PikeTest):
                 length = total_len - this_offset
             chunks.append((offset, offset + dst_offset, length))
             this_offset += chunk_sz
+        self.logger.info("chunks generated, total_length is %d, chunk_size is %d, dst_offset is %lu" % (
+            total_len, chunk_sz, dst_offset))
         return chunks
 
     def generic_ssc_test_case(self, block, number_of_chunks, total_offset=0, write_flag=False):
@@ -728,9 +730,9 @@ class TestServerSideCopy(pike.test.PikeTest):
         self._gen_16mega_file(src_filename)
         iter_num = 3
         for i in range(iter_num):
-            chunks = self._gen_random_chunks_on_para(**kwargs)
             self.logger.info(
-                "iter %d, parameter is %s" % (i, kwargs))
+                "iter %d, parameters flags are %s" % (i, kwargs))
+            chunks = self._gen_random_chunks_on_para(**kwargs)
             if i == (iter_num - 1):
                 src_options = pike.smb2.FILE_DELETE_ON_CLOSE
             else:
