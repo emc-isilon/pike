@@ -38,6 +38,8 @@
 import pike.ntstatus
 import pike.smb2
 import pike.test
+import random
+import pike.test.compound as compound
 
 share_all = pike.smb2.FILE_SHARE_READ | \
             pike.smb2.FILE_SHARE_WRITE | \
@@ -49,6 +51,9 @@ access_wd =  pike.smb2.FILE_WRITE_DATA | \
              pike.smb2.DELETE
 
 SIMPLE_CONTENT = "Hello"
+SIMPLE_5_CHUNKS = [(0, 0, 4000), (4000, 4000, 4000), (8000, 8000, 4000),
+                   (12000, 12000, 4000), (16000, 16000, 4000)]
+SIMPLE_5_CHUNKS_LEN = 20000
 
 # Max values
 
@@ -82,8 +87,24 @@ class TestServerSideCopy(pike.test.PikeTest):
                                access=access_rwd,
                                share=share_all,
                                disposition=pike.smb2.FILE_SUPERSEDE).result()
-
-        bytes_written = self.chan.write(fh1, 0, content)
+        # get the max size of write per request
+        max_write_size = self.chan.connection.negotiate_response.max_write_size
+        total_len = len(content)
+        this_offset = 0
+        writes = []
+        while this_offset < total_len:
+            offset = this_offset
+            if this_offset + max_write_size < total_len:
+                length = max_write_size
+            else:
+                length = total_len - this_offset
+            writes.append((offset, length))
+            this_offset += max_write_size
+        num_of_writes = len(writes)
+        bytes_written = 0
+        for the_offset, the_length in writes:
+            bytes_written += self.chan.write(fh1, the_offset,
+                                             content[the_offset:(the_offset + the_length)])
         self.chan.close(fh1)
 
     def _open_src_dst(self, src_filename, dst_filename,
@@ -149,6 +170,92 @@ class TestServerSideCopy(pike.test.PikeTest):
         """
         src_filename = "src_copy_chunk_rk.txt"
         self._create_and_write(src_filename, SIMPLE_CONTENT)
+
+    def _read_big_file(self, file_handle, total_len, add_offset=0):
+        """ read large file and return in string """
+        max_read_size = self.chan.connection.negotiate_response.max_read_size
+        reads = []
+        this_offset = 0
+        while this_offset < total_len:
+            offset = this_offset
+            if this_offset + max_read_size < total_len:
+                length = max_read_size
+            else:
+                length = total_len - this_offset
+            reads.append((offset, length))
+            this_offset += max_read_size
+        num_of_reads = len(reads)
+        read_list = []
+        for the_offset, the_length in reads:
+            read_list.append(self.chan.read(
+                file_handle, the_length, the_offset + add_offset).tostring())
+        return "".join(read_list)
+
+    def _gen_16mega_file(self, filename):
+        """
+        use multiple server side copy to generate a 16M sourcefile
+        """
+        file_64k = "temp_src_file_64k.txt"
+        file_1m = "temp_src_file_1m.txt"
+        block_64k = _gen_test_buffer(65536)
+        self._create_and_write(file_64k, block_64k)
+        list_offset_64k = [i * 65536 for i in range(16)]
+        chunks_64k_1m = zip([0] * 16, list_offset_64k, [65536] * 16)
+        list_offset_1m = [i * 1048576 for i in range(16)]
+        chunks_1m_16m = zip([0] * 16, list_offset_1m, [1048576] * 16)
+        fh_64k = self.chan.create(self.tree,
+                                  file_64k,
+                                  access=access_rwd,
+                                  share=share_all,
+                                  disposition=pike.smb2.FILE_OPEN,
+                                  options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
+        fh_1m = self.chan.create(self.tree,
+                                 file_1m,
+                                 access=access_rwd,
+                                 share=share_all,
+                                 disposition=pike.smb2.FILE_SUPERSEDE,
+                                 options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
+        fh_16m = self.chan.create(self.tree,
+                                  filename,
+                                  access=access_rwd,
+                                  share=share_all,
+                                  disposition=pike.smb2.FILE_SUPERSEDE,
+                                  options=0).result()
+        self.chan.copychunk(fh_64k, fh_1m, chunks_64k_1m)
+        self.chan.copychunk(fh_1m, fh_16m, chunks_1m_16m)
+        self.chan.close(fh_64k)
+        self.chan.close(fh_1m)
+        self.chan.close(fh_16m)
+
+    def _gen_random_chunks_on_para(self, random_chunk_size=False, random_offset=False):
+        """
+        generate random chunks for chunkcopy operation
+        copy length is always randomized, chunk_size and offset can be fixed by flags
+        """
+
+        if random_chunk_size:
+            chunk_sz = random.randrange(1, SERVER_SIDE_COPY_MAX_CHUNK_SIZE + 1)
+        else:
+            chunk_sz = SERVER_SIDE_COPY_MAX_CHUNK_SIZE
+        total_len = random.randrange(1, 16 * chunk_sz)
+        if random_offset:
+            dst_offset = random.randrange(1, 4294967295 - total_len)
+        else:
+            dst_offset = 0
+        num_of_chunks = total_len / chunk_sz + (total_len % chunk_sz > 0)
+        this_offset = 0
+        chunks = []
+        while this_offset < total_len:
+            offset = this_offset
+            if this_offset + chunk_sz < total_len:
+                length = chunk_sz
+            else:
+                length = total_len - this_offset
+            chunks.append((offset, offset + dst_offset, length))
+            this_offset += chunk_sz
+        self.logger.info("chunks generated, total_length is %d, chunk_size is %d, dst_offset is %lu" % (
+            total_len, chunk_sz, dst_offset))
+        return chunks
 
     def generic_ssc_test_case(self, block, number_of_chunks, total_offset=0, write_flag=False):
         """
@@ -588,3 +695,134 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.generic_negative_resume_key_test_case(
             bogus_key, exp_error=pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND)
 
+    def basic_ssc_random_test_case(self,
+                                   chunks,
+                                   src_options=0):
+        """
+        given chunks, perform server side copy accordingly
+        """
+        src_filename = "src_copy_chunk_random.txt"
+        dst_filename = "dst_copy_chunk_random.txt"
+
+        fh_src, fh_dst = self._open_src_dst(
+            src_filename, dst_filename, src_options=src_options)
+
+        result = self.chan.copychunk(fh_src, fh_dst, chunks)
+        copy_len = chunks[-1][0] + chunks[-1][2]
+        dst_offset = chunks[0][1]
+        self.assertEqual(result[0][0].chunks_written, len(chunks))
+        self.assertEqual(result[0][0].total_bytes_written, copy_len)
+
+        # read each file and verify the result
+        src_buf = self._read_big_file(fh_src, copy_len)
+        dst_buf = self._read_big_file(
+            fh_dst, copy_len, add_offset=dst_offset)
+        self.assertBufferEqual(dst_buf, src_buf)
+
+        self.chan.close(fh_src)
+        self.chan.close(fh_dst)
+
+    def generic_ssc_random_test_case_loop(self, **kwargs):
+        """
+        test loop for certain random parameters
+        """
+        src_filename = "src_copy_chunk_random.txt"
+        self._gen_16mega_file(src_filename)
+        iter_num = 3
+        for i in range(iter_num):
+            self.logger.info(
+                "iter %d, parameters flags are %s" % (i, kwargs))
+            chunks = self._gen_random_chunks_on_para(**kwargs)
+            if i == (iter_num - 1):
+                src_options = pike.smb2.FILE_DELETE_ON_CLOSE
+            else:
+                src_options = 0
+            self.basic_ssc_random_test_case(chunks, src_options=src_options)
+
+    def test_random_copy_length(self):
+        self.generic_ssc_random_test_case_loop(random_chunk_size=False)
+
+    def test_random_chunk_size(self):
+        self.generic_ssc_random_test_case_loop(random_chunk_size=True)
+
+    def test_random_file_offset(self):
+        self.generic_ssc_random_test_case_loop(
+            random_chunk_size=False, random_offset=True)
+
+    def test_random_all(self):
+        self.generic_ssc_random_test_case_loop(
+            random_chunk_size=True, random_offset=True)
+
+    def generic_ssc_compound_test_case(self):
+        """
+        test copychunk request inside one compound smb message
+        1st chunkcopy from src to dst file
+        2nd read half of the dst file
+        3rd read the other half of the dst file
+        4st close the open
+        """
+        src_filename = "src_ssc_chunk_cp.txt"
+        dst_filename = "dst_ssc_chunk_cp.txt"
+        block = _gen_test_buffer(SIMPLE_5_CHUNKS_LEN)
+        self._create_and_write(src_filename, block)
+        fh_src, fh_dst = self._open_src_dst(src_filename, dst_filename)
+        ioctl_req = self.chan.copychunk_request(
+            fh_src, fh_dst, SIMPLE_5_CHUNKS)
+        nb_req = ioctl_req.parent.parent
+        read_req1 = self.chan.read_request(
+            compound.RelatedOpen(self.tree), SIMPLE_5_CHUNKS_LEN / 2, 0)
+        compound.adopt(nb_req, read_req1.parent)
+        read_req2 = self.chan.read_request(compound.RelatedOpen(
+            self.tree), SIMPLE_5_CHUNKS_LEN / 2, SIMPLE_5_CHUNKS_LEN / 2)
+        compound.adopt(nb_req, read_req2.parent)
+        close_req = self.chan.close_request(compound.RelatedOpen(self.tree))
+        compound.adopt(nb_req, close_req.parent)
+
+        (ssc_res,
+         read1_res,
+         read2_res,
+         close_res) = self.chan.connection.transceive(nb_req)
+
+        self.assertEqual(ssc_res[0][0].chunks_written, len(SIMPLE_5_CHUNKS))
+        self.assertEqual(
+            ssc_res[0][0].total_bytes_written, SIMPLE_5_CHUNKS_LEN)
+        dst_buf = read1_res[0].data.tostring() + read2_res[0].data.tostring()
+        self.assertBufferEqual(dst_buf, block)
+        self.chan.close(fh_src)
+
+    def test_ssc_in_compound_req(self):
+        self.generic_ssc_compound_test_case()
+
+    def generic_mchan_ssc_test_case(self):
+        """
+        Interaction with multiple channel feature:
+        reqeust resume key in one channel
+        copy chunk in another channel with the resume key
+        """
+        src_filename = "src_copy_chunk_mc.txt"
+        dst_filename = "dst_copy_chunk_mc.txt"
+        block = _gen_test_buffer(SIMPLE_5_CHUNKS_LEN)
+        self._create_and_write(src_filename, block)
+        chan2 = self.chan.connection.client.connect(self.server).\
+            negotiate().session_setup(self.creds, bind=self.chan.session)
+
+        fh_src, fh_dst = self._open_src_dst(src_filename, dst_filename)
+        resume_key = self.chan.resume_key(fh_src)[0][0].resume_key
+        result = chan2.copychunk(fh_src, fh_dst, SIMPLE_5_CHUNKS, resume_key)
+
+        self.assertEqual(result[0][0].chunks_written, len(SIMPLE_5_CHUNKS))
+        self.assertEqual(result[0][0].total_bytes_written, SIMPLE_5_CHUNKS_LEN)
+
+        # read each file and verify the result
+        src_buf = self.chan.read(fh_src, SIMPLE_5_CHUNKS_LEN, 0).tostring()
+        self.assertBufferEqual(src_buf, block)
+        dst_buf = chan2.read(fh_dst, SIMPLE_5_CHUNKS_LEN, 0).tostring()
+        self.assertBufferEqual(dst_buf, block)
+        self.chan.close(fh_src)
+        self.chan.close(fh_dst)
+        chan2.connection.close()
+
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
+    @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL)
+    def test_ssc_in_multchannel(self):
+        self.generic_mchan_ssc_test_case()
