@@ -66,6 +66,16 @@ def _gen_test_buffer(length):
     buf = (pattern * (length / (len(pattern)) + 1))[:length]
     return buf
 
+def _gen_random_test_buffer(length):
+    buf = ''
+    random_str_seq = "0123456789" + \
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    for i in range(0, length):
+        if i % length == 0 and i != 0:
+            buf += '-'
+        buf += str(random_str_seq[random.randint(0, len(random_str_seq) - 1)])
+    return buf 
+
 ###
 # Main test
 ###
@@ -256,6 +266,59 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.logger.info("chunks generated, total_length is %d, chunk_size is %d, dst_offset is %lu" % (
             total_len, chunk_sz, dst_offset))
         return chunks
+
+    def _prepare_before_ssc_copy(self, filepair, write_throu=False):
+        if write_throu:
+            my_options = pike.smb2.FILE_WRITE_THROUGH
+        else:
+            my_options = 0
+        num_sess = len(filepair)
+        for i in range(0, num_sess):
+            chan, tree = self.tree_connect()
+            fh_src = chan.create(tree,
+                                 filepair[i][0],
+                                 access=access_rwd,
+                                 share=share_all).result()
+
+            fh_dst = chan.create(tree,
+                                 filepair[i][1],
+                                 access=access_rwd,
+                                 share=share_all,
+                                 options=my_options).result()
+            resume_key = chan.resume_key(fh_src)[0][0].resume_key
+            self.other_chan_list.append(
+                {"channel": chan, "tree": tree, "filehandles": [fh_src, fh_dst], "resume_key": resume_key})
+
+    def _submit_ssc_async_request(self, chan, file_handle, resume_key, chunks):
+        """
+        submit ssc request with resume_key as input parameter
+        return the future object for later check
+        """
+        smb_req = chan.request(obj=file_handle.tree)
+        ioctl_req = pike.smb2.IoctlRequest(smb_req)
+        copychunk_req = pike.smb2.CopyChunkCopyRequest(ioctl_req)
+
+        ioctl_req.max_output_response = 16384
+        ioctl_req.file_id = file_handle.file_id
+        ioctl_req.flags |= pike.smb2.SMB2_0_IOCTL_IS_FSCTL
+        copychunk_req.source_key = resume_key
+        copychunk_req.chunk_count = len(chunks)
+
+        for source_offset, target_offset, length in chunks:
+            chunk = pike.smb2.CopyChunk(copychunk_req)
+            chunk.source_offset = source_offset
+            chunk.target_offset = target_offset
+            chunk.length = length
+
+        future = chan.connection.submit(ioctl_req.parent.parent)
+        return future
+
+    def _submit_ssc_async_request_in_other_channels(self, index, chunks):
+        chan = self.other_chan_list[index]["channel"]
+        fh_dst = self.other_chan_list[index]["filehandles"][1]
+        resume_key = self.other_chan_list[index]["resume_key"]
+
+        return self._submit_ssc_async_request(chan, fh_dst, resume_key, chunks)
 
     def generic_ssc_test_case(self, block, number_of_chunks, total_offset=0, write_flag=False):
         """
@@ -826,3 +889,228 @@ class TestServerSideCopy(pike.test.PikeTest):
     @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL)
     def test_ssc_in_multchannel(self):
         self.generic_mchan_ssc_test_case()
+
+    def generic_multiple_ssc_test_case(self, filepair, chunks, blocks,
+                                       write_throu=False, num_iter=1):
+        """
+        server side copy in multiple sessions, multiple iterations
+        with filepair, chunks, blocks, write_through flag as input 
+        parameters
+        """
+        num_sess = len(filepair)
+        results = [None] * num_sess * num_iter
+        ssc_futures = [None] * num_sess * num_iter
+
+        self._prepare_before_ssc_copy(filepair, write_throu=write_throu)
+
+        # for loop to submit requests in short time
+        for it in range(num_iter):
+            for i in range(num_sess):
+                chunk_break = zip(*chunks)
+                dst_list = [x + filepair[i][2] for x in chunk_break[1]]
+                newchunks = zip(chunk_break[0], dst_list, chunk_break[2])
+                ssc_futures[it * num_sess +
+                            i] = self._submit_ssc_async_request_in_other_channels(i, newchunks)
+
+        # collect asychronized results
+        for i in range(num_sess * num_iter):
+            results[i] = ssc_futures[i][0].result()
+            copy_len = chunks[-1][0] + chunks[-1][2]
+            self.assertEqual(results[i][0][0].chunks_written, len(chunks))
+            self.assertEqual(results[i][0][0].total_bytes_written, copy_len)
+            if i < num_sess:
+                dst_buf = self.other_chan_list[i]["channel"].read(
+                    self.other_chan_list[i]["filehandles"][1], copy_len, filepair[i][2]).tostring()
+                self.assertBufferEqual(dst_buf, blocks[i])
+
+    def test_multiple_ssc_file(self):
+        """
+        server side copy with certain iterations in certain number
+        of sessions
+        """
+        num_sess = 5
+        num_iter = 3
+        # file pair element {src_filename, dst_filename, dst_offset}
+        filepair = []
+        blocks = []
+        for i in range(0, num_sess):
+            src_filename = "src_multiple_session" + str(i) + ".txt"
+            dst_filename = "dst_multiple_session" + str(i) + ".txt"
+            filepair.append((src_filename, dst_filename, 0))
+            block = _gen_random_test_buffer(SIMPLE_5_CHUNKS_LEN)
+            self._create_and_write(src_filename, block)
+            blocks.append(block)
+        self.logger.info("start multiple session test, session number is %d iteration number is %d" % (
+            num_sess, num_iter))
+        self.generic_multiple_ssc_test_case(
+            filepair, SIMPLE_5_CHUNKS, blocks, num_iter=num_iter)
+
+    def test_multiple_ssc_same_source_file(self):
+        """
+        multiple server side copy operation which shares the same 
+        source file
+        """
+        num_sess = 5
+        num_iter = 3
+        # file pair element {src_filename, dst_filename, dst_offset}
+        filepair = []
+        blocks = []
+        for i in range(0, num_sess):
+            src_filename = "src_multiple_session_same_source.txt"
+            dst_filename = "dst_multiple_session" + str(i) + ".txt"
+            filepair.append((src_filename, dst_filename, 0))
+            if i == 0:
+                block = _gen_random_test_buffer(SIMPLE_5_CHUNKS_LEN)
+                self._create_and_write(src_filename, block)
+        blocks = [block] * num_sess
+        self.logger.info("ssc same source multiple session test, session number is %d iteration number is %d" % (
+            num_sess, num_iter))
+        self.generic_multiple_ssc_test_case(
+            filepair, SIMPLE_5_CHUNKS, blocks, num_iter=num_iter)
+
+    def test_multiple_ssc_same_dest_file(self):
+        """
+        multiple server side copy operation which shares the same 
+        destination file but with different destination offset
+        """
+        num_sess = 5
+        num_iter = 3
+        # file pair element {src_filename, dst_filename, dst_offset}
+        filepair = []
+        blocks = []
+        for i in range(0, num_sess):
+            src_filename = "src_multiple_session" + str(i) + ".txt"
+            dst_filename = "dst_multiple_session_same_dest.txt"
+            filepair.append((src_filename, dst_filename,
+                             0 + i * SIMPLE_5_CHUNKS_LEN))
+            block = _gen_random_test_buffer(SIMPLE_5_CHUNKS_LEN)
+            self._create_and_write(src_filename, block)
+            blocks.append(block)
+        self.logger.info("ssc same dest multiple session test, session number is %d iteration number is %d" % (
+            num_sess, num_iter))
+        self.generic_multiple_ssc_test_case(
+            filepair, SIMPLE_5_CHUNKS, blocks, num_iter=num_iter)
+
+    def test_multiple_ssc_file_with_writethrough_flag(self):
+        """
+        multiple server side copy operation which write_through
+        flag set when creating the destination file handle
+        """
+        num_sess = 3
+        num_iter = 1
+        # file pair element {src_filename, dst_filename, dst_offset}
+        filepair = []
+        blocks = []
+        for i in range(0, num_sess):
+            src_filename = "src_multiple_session" + str(i) + ".txt"
+            dst_filename = "dst_multiple_session" + str(i) + ".txt"
+            filepair.append((src_filename, dst_filename, 0))
+            block = _gen_random_test_buffer(SIMPLE_5_CHUNKS_LEN)
+            self._create_and_write(src_filename, block)
+            blocks.append(block)
+        self.logger.info("ssc test with write_through set, session number is %d iteration number is %d" % (
+            num_sess, num_iter))
+        self.generic_multiple_ssc_test_case(
+            filepair, SIMPLE_5_CHUNKS, blocks, write_throu=True, num_iter=num_iter)
+
+    def generic_ssc_boundary_test_case(self, block, chunks,
+                                       exp_error=None, ssc_res=[0, 0, 0]):
+        """
+        check situation that one of the chunks which contain numbers cross the value
+        of end of file or maximum values system can support
+        """
+        src_filename = "src_copy_chunk_cross_offset.txt"
+        dst_filename = "dst_copy_chunk_cross_offset.txt"
+        self._create_and_write(src_filename, block)
+
+        fh_src, fh_dst = self._open_src_dst(src_filename, dst_filename)
+        resume_key = self.chan.resume_key(fh_src)[0][0].resume_key
+        future = self._submit_ssc_async_request(
+            self.chan, fh_dst, resume_key, chunks)
+
+        if exp_error is None:
+            exp_error = pike.ntstatus.STATUS_SUCCESS
+        try:
+            with self.assert_error(exp_error):
+                result = future[0].result()
+        finally:
+            self.chan.close(fh_src)
+            self.chan.close(fh_dst)
+
+        self.assertIsInstance(
+            future[0].response.response.children[0].ioctl_output, pike.smb2.CopyChunkCopyResponse)
+        chunks_written = future[0].response.response.children[0].children[0].chunks_written
+        chunk_bytes_written = future[0].response.response.children[0].children[0].chunk_bytes_written
+        total_bytes_written = future[0].response.response.children[0].children[0].total_bytes_written
+        self.assertEqual(chunks_written, ssc_res[0])
+        self.assertEqual(chunk_bytes_written, ssc_res[1])
+        self.assertEqual(total_bytes_written, ssc_res[2])
+
+    def test_neg_cross_offset_basic(self):
+        block = _gen_test_buffer(4096)
+        chunks = [(10, 0, 4096)]
+        self.generic_ssc_boundary_test_case(block, chunks,
+                                            exp_error=pike.ntstatus.STATUS_INVALID_VIEW_SIZE)
+
+    def test_neg_cross_offset_second_chunk(self):
+        block = _gen_test_buffer(8192)
+        chunks = [(0, 0, 4096), (4097, 4096, 4096)]
+        exp_res = [1, 0, 4096]
+        self.generic_ssc_boundary_test_case(block, chunks,
+                                            exp_error=pike.ntstatus.STATUS_INVALID_VIEW_SIZE,
+                                            ssc_res=exp_res)
+
+    def test_neg_cross_offset_fifth_chunk(self):
+        block = _gen_test_buffer(20480)
+        chunks = [(0, 0, 4096), (4096, 4096, 4096), (8192, 8192, 4096),
+                  (12288, 12288, 4096), (16386, 16384, 4096)]
+        exp_res = [4, 0, 16384]
+        self.generic_ssc_boundary_test_case(block, chunks,
+                                            exp_error=pike.ntstatus.STATUS_INVALID_VIEW_SIZE,
+                                            ssc_res=exp_res)
+
+    def test_neg_cross_max_chunks(self):
+        """
+        request contains 300 chunks 
+        """
+        block = _gen_test_buffer(30000)
+        chunks = [(0, 0, 100)] * 300
+        exp_res = [256, 1048576, 16777216]
+        self.generic_ssc_boundary_test_case(block, chunks,
+                                            exp_error=pike.ntstatus.STATUS_INVALID_PARAMETER,
+                                            ssc_res=exp_res)
+
+    def test_neg_cross_chunk_size(self):
+        """
+        request with chunk size in first chunk larger
+        than the maximum chunk size
+        """
+        block = _gen_test_buffer(1048577)
+        chunks = [(0, 0, 1048577)]
+        exp_res = [256, 1048576, 16777216]
+        self.generic_ssc_boundary_test_case(block, chunks,
+                                            exp_error=pike.ntstatus.STATUS_INVALID_PARAMETER,
+                                            ssc_res=exp_res)
+
+    def test_neg_cross_second_chunk_size(self):
+        """
+        request with second chunk chunk size larger
+        than the maximum chunk size
+        """
+        block = _gen_test_buffer(2097153)
+        chunks = [(0, 0, 1048576), (1048576, 1048576, 1048577)]
+        exp_res = [256, 1048576, 16777216]
+        self.generic_ssc_boundary_test_case(block, chunks,
+                                            exp_error=pike.ntstatus.STATUS_INVALID_PARAMETER,
+                                            ssc_res=exp_res)
+
+    def test_neg_cross_chunk_size_allf(self):
+        """
+        request with chunk size in one chunk all f
+        """
+        block = _gen_test_buffer(1048577)
+        chunks = [(0, 0, 4294967295)]
+        exp_res = [256, 1048576, 16777216]
+        self.generic_ssc_boundary_test_case(block, chunks,
+                                            exp_error=pike.ntstatus.STATUS_INVALID_PARAMETER,
+                                            ssc_res=exp_res)
