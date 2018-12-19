@@ -98,7 +98,8 @@ class TestServerSideCopy(pike.test.PikeTest):
                                share=share_all,
                                disposition=pike.smb2.FILE_SUPERSEDE).result()
         # get the max size of write per request
-        max_write_size = self.chan.connection.negotiate_response.max_write_size
+        max_write_size = min(self.chan.connection.negotiate_response.max_write_size,
+                             SERVER_SIDE_COPY_MAX_CHUNK_SIZE)
         total_len = len(content)
         this_offset = 0
         writes = []
@@ -267,8 +268,8 @@ class TestServerSideCopy(pike.test.PikeTest):
             total_len, chunk_sz, dst_offset))
         return chunks
 
-    def _prepare_before_ssc_copy(self, filepair, write_throu=False):
-        if write_throu:
+    def _prepare_before_ssc_copy(self, filepair, write_thru=False):
+        if write_thru:
             my_options = pike.smb2.FILE_WRITE_THROUGH
         else:
             my_options = 0
@@ -891,7 +892,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.generic_mchan_ssc_test_case()
 
     def generic_multiple_ssc_test_case(self, filepair, chunks, blocks,
-                                       write_throu=False, num_iter=1):
+                                       write_thru=False, num_iter=1):
         """
         server side copy in multiple sessions, multiple iterations
         with filepair, chunks, blocks, write_through flag as input 
@@ -901,7 +902,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         results = [None] * num_sess * num_iter
         ssc_futures = [None] * num_sess * num_iter
 
-        self._prepare_before_ssc_copy(filepair, write_throu=write_throu)
+        self._prepare_before_ssc_copy(filepair, write_thru=write_thru)
 
         # for loop to submit requests in short time
         for it in range(num_iter):
@@ -1011,7 +1012,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.logger.info("ssc test with write_through set, session number is %d iteration number is %d" % (
             num_sess, num_iter))
         self.generic_multiple_ssc_test_case(
-            filepair, SIMPLE_5_CHUNKS, blocks, write_throu=True, num_iter=num_iter)
+            filepair, SIMPLE_5_CHUNKS, blocks, write_thru=True, num_iter=num_iter)
 
     def generic_ssc_boundary_test_case(self, block, chunks,
                                        exp_error=None, ssc_res=[0, 0, 0]):
@@ -1037,11 +1038,12 @@ class TestServerSideCopy(pike.test.PikeTest):
             self.chan.close(fh_src)
             self.chan.close(fh_dst)
 
+        ioctl_resp = future[0].response.response.children[0]
         self.assertIsInstance(
-            future[0].response.response.children[0].ioctl_output, pike.smb2.CopyChunkCopyResponse)
-        chunks_written = future[0].response.response.children[0].children[0].chunks_written
-        chunk_bytes_written = future[0].response.response.children[0].children[0].chunk_bytes_written
-        total_bytes_written = future[0].response.response.children[0].children[0].total_bytes_written
+            ioctl_resp.ioctl_output, pike.smb2.CopyChunkCopyResponse)
+        chunks_written = ioctl_resp.children[0].chunks_written
+        chunk_bytes_written = ioctl_resp.children[0].chunk_bytes_written
+        total_bytes_written = ioctl_resp.children[0].total_bytes_written
         self.assertEqual(chunks_written, ssc_res[0])
         self.assertEqual(chunk_bytes_written, ssc_res[1])
         self.assertEqual(total_bytes_written, ssc_res[2])
