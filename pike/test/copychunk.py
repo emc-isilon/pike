@@ -55,12 +55,6 @@ SIMPLE_5_CHUNKS = [(0, 0, 4000), (4000, 4000, 4000), (8000, 8000, 4000),
                    (12000, 12000, 4000), (16000, 16000, 4000)]
 SIMPLE_5_CHUNKS_LEN = 20000
 
-# Max values
-
-SERVER_SIDE_COPY_MAX_NUMBER_OF_CHUNKS = 16
-SERVER_SIDE_COPY_MAX_CHUNK_SIZE = 1048576
-SERVER_SIDE_COPY_MAX_DATA_SIZE = 16777216
-
 def _gen_test_buffer(length):
     pattern = "".join([ chr(x) for x in xrange(ord(' '), ord('~'))])
     buf = (pattern * (length / (len(pattern)) + 1))[:length]
@@ -80,6 +74,11 @@ def _gen_random_test_buffer(length):
 # Main test
 ###
 class TestServerSideCopy(pike.test.PikeTest):
+    # these values are valid for Windows -- other servers may need to adjust
+    bad_resume_key_error = pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND
+    max_number_of_chunks = 256
+    max_chunk_size = 1048576
+    max_data_size = 16777216
 
     def setUp(self):
         self.chan, self.tree = self.tree_connect()
@@ -99,7 +98,7 @@ class TestServerSideCopy(pike.test.PikeTest):
                                disposition=pike.smb2.FILE_SUPERSEDE).result()
         # get the max size of write per request
         max_write_size = min(self.chan.connection.negotiate_response.max_write_size,
-                             SERVER_SIDE_COPY_MAX_CHUNK_SIZE)
+                             self.max_chunk_size)
         total_len = len(content)
         this_offset = 0
         writes = []
@@ -245,9 +244,9 @@ class TestServerSideCopy(pike.test.PikeTest):
         """
 
         if random_chunk_size:
-            chunk_sz = random.randrange(1, SERVER_SIDE_COPY_MAX_CHUNK_SIZE + 1)
+            chunk_sz = random.randrange(1, self.max_chunk_size + 1)
         else:
-            chunk_sz = SERVER_SIDE_COPY_MAX_CHUNK_SIZE
+            chunk_sz = self.max_chunk_size
         total_len = random.randrange(1, 16 * chunk_sz)
         if random_offset:
             dst_offset = random.randrange(1, 4294967295 - total_len)
@@ -746,7 +745,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         other_key = chan_2.resume_key(fh_src_2)[0][0].resume_key
 
         self.generic_negative_resume_key_test_case(
-            other_key, exp_error=pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND)
+            other_key, exp_error=self.bad_resume_key_error)
 
     def test_bogus_resume_key(self):
         """
@@ -757,7 +756,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         import array
         bogus_key = array.array('B', [255] * 24)
         self.generic_negative_resume_key_test_case(
-            bogus_key, exp_error=pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND)
+            bogus_key, exp_error=self.bad_resume_key_error)
 
     def basic_ssc_random_test_case(self,
                                    chunks,
@@ -1077,7 +1076,9 @@ class TestServerSideCopy(pike.test.PikeTest):
         """
         block = _gen_test_buffer(30000)
         chunks = [(0, 0, 100)] * 300
-        exp_res = [256, 1048576, 16777216]
+        exp_res = [self.max_number_of_chunks,
+                   self.max_chunk_size,
+                   self.max_data_size]
         self.generic_ssc_boundary_test_case(block, chunks,
                                             exp_error=pike.ntstatus.STATUS_INVALID_PARAMETER,
                                             ssc_res=exp_res)
@@ -1089,7 +1090,9 @@ class TestServerSideCopy(pike.test.PikeTest):
         """
         block = _gen_test_buffer(1048577)
         chunks = [(0, 0, 1048577)]
-        exp_res = [256, 1048576, 16777216]
+        exp_res = [self.max_number_of_chunks,
+                   self.max_chunk_size,
+                   self.max_data_size]
         self.generic_ssc_boundary_test_case(block, chunks,
                                             exp_error=pike.ntstatus.STATUS_INVALID_PARAMETER,
                                             ssc_res=exp_res)
@@ -1101,7 +1104,9 @@ class TestServerSideCopy(pike.test.PikeTest):
         """
         block = _gen_test_buffer(2097153)
         chunks = [(0, 0, 1048576), (1048576, 1048576, 1048577)]
-        exp_res = [256, 1048576, 16777216]
+        exp_res = [self.max_number_of_chunks,
+                   self.max_chunk_size,
+                   self.max_data_size]
         self.generic_ssc_boundary_test_case(block, chunks,
                                             exp_error=pike.ntstatus.STATUS_INVALID_PARAMETER,
                                             ssc_res=exp_res)
@@ -1112,7 +1117,9 @@ class TestServerSideCopy(pike.test.PikeTest):
         """
         block = _gen_test_buffer(1048577)
         chunks = [(0, 0, 4294967295)]
-        exp_res = [256, 1048576, 16777216]
+        exp_res = [self.max_number_of_chunks,
+                   self.max_chunk_size,
+                   self.max_data_size]
         self.generic_ssc_boundary_test_case(block, chunks,
                                             exp_error=pike.ntstatus.STATUS_INVALID_PARAMETER,
                                             ssc_res=exp_res)
