@@ -38,7 +38,7 @@ import array
 import random
 import struct
 from socket import gethostname
-import Cryptodome.Cipher.DES as DES
+import Cryptodome.Cipher.DES
 import Cryptodome.Cipher.ARC4 as RC4
 import Cryptodome.Hash.HMAC as HMAC
 import Cryptodome.Hash.MD4 as MD4
@@ -60,7 +60,8 @@ def des_key_64(K):
     return "".join(out_key)
 
 def DES(K, D):
-    d1 = DES.new(des_key_64(K))
+    d1 = Cryptodome.Cipher.DES.new(des_key_64(K),
+                                   Cryptodome.Cipher.DES.MODE_ECB)
     return d1.encrypt(D)
 
 def DESL(K, D):
