@@ -68,7 +68,7 @@ def _gen_random_test_buffer(length):
         if i % length == 0 and i != 0:
             buf += '-'
         buf += str(random_str_seq[random.randint(0, len(random_str_seq) - 1)])
-    return buf 
+    return buf
 
 ###
 # Main test
@@ -631,7 +631,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.generic_ssc_negative_test_case(src_access=pike.smb2.FILE_WRITE_DATA | \
                                                        pike.smb2.DELETE,
                                             exp_error=pike.ntstatus.STATUS_ACCESS_DENIED)
-        
+
     def test_neg_dst_no_read(self):
         """
         Try to copychunk with no read access on the destination file
@@ -894,7 +894,7 @@ class TestServerSideCopy(pike.test.PikeTest):
                                        write_thru=False, num_iter=1):
         """
         server side copy in multiple sessions, multiple iterations
-        with filepair, chunks, blocks, write_through flag as input 
+        with filepair, chunks, blocks, write_through flag as input
         parameters
         """
         num_sess = len(filepair)
@@ -947,7 +947,7 @@ class TestServerSideCopy(pike.test.PikeTest):
 
     def test_multiple_ssc_same_source_file(self):
         """
-        multiple server side copy operation which shares the same 
+        multiple server side copy operation which shares the same
         source file
         """
         num_sess = 5
@@ -970,7 +970,7 @@ class TestServerSideCopy(pike.test.PikeTest):
 
     def test_multiple_ssc_same_dest_file(self):
         """
-        multiple server side copy operation which shares the same 
+        multiple server side copy operation which shares the same
         destination file but with different destination offset
         """
         num_sess = 5
@@ -1072,7 +1072,7 @@ class TestServerSideCopy(pike.test.PikeTest):
 
     def test_neg_cross_max_chunks(self):
         """
-        request contains 300 chunks 
+        request contains 300 chunks
         """
         block = _gen_test_buffer(30000)
         chunks = [(0, 0, 100)] * 300
