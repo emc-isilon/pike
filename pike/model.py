@@ -1749,7 +1749,7 @@ class Channel(object):
         else:
             copychunk_req = smb2.CopyChunkCopyRequest(ioctl_req)
 
-        ioctl_req.max_output_response = 16384
+        ioctl_req.max_output_response = 12
         ioctl_req.file_id = target_file.file_id
         ioctl_req.flags |= smb2.SMB2_0_IOCTL_IS_FSCTL
         copychunk_req.source_key = resume_key
