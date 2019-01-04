@@ -180,3 +180,28 @@ class CompoundTest(pike.test.PikeTest):
             (create_res1,
              write_res,
              close_res) = chan.connection.transceive(nb_req)
+    
+    def test_create_faied_and_query(self):
+        chan, tree = self.tree_connect()
+        name = "create_query_failed"
+        test_dir = chan.create(tree,
+                            name,
+                            access=pike.smb2.GENERIC_READ,
+                            options=pike.smb2.FILE_DIRECTORY_FILE).result()
+
+        create_req = chan.create_request(
+                tree,
+                name,
+                access=pike.smb2.GENERIC_READ,
+                disposition=pike.smb2.FILE_CREATE,
+                options=pike.smb2.FILE_DIRECTORY_FILE)
+        nb_req = create_req.parent.parent
+        
+        query_req = chan.query_directory_request(RelatedOpen(tree))
+        adopt(nb_req, query_req.parent)
+        
+
+        with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_COLLISION):
+            (create_res1, query_res) = chan.connection.transceive(nb_req)
+
+        chan.close(test_dir)

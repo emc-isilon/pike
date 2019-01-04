@@ -78,3 +78,31 @@ class QueryDirectoryTest(pike.test.PikeTest):
 
         chan.close(hello)
         chan.close(root)
+    
+    def test_file_id_both_directory_information(self):
+
+        chan, tree = self.tree_connect()
+        root = chan.create(tree, '', access=pike.smb2.GENERIC_READ, options=pike.smb2.FILE_DIRECTORY_FILE, share=pike.smb2.FILE_SHARE_READ).result()
+
+        result = chan.query_directory(root,file_information_class=pike.smb2.FILE_ID_BOTH_DIR_INFORMATION)
+        names = map(lambda info: info.file_name, result)
+
+        self.assertIn('.', names)
+        self.assertIn('..', names)
+
+        chan.close(root)
+        
+    def test_restart_scan(self):
+
+        chan, tree = self.tree_connect()
+        root = chan.create(tree, '', access=pike.smb2.GENERIC_READ, options=pike.smb2.FILE_DIRECTORY_FILE, share=pike.smb2.FILE_SHARE_READ).result()
+
+        result = chan.query_directory(root)
+        names = map(lambda info: info.file_name, result)
+        self.assertIn('.', names)
+        
+        result = chan.query_directory(root,flags=pike.smb2.SL_RESTART_SCAN,file_name='README*',)
+        names = map(lambda info: info.file_name, result)
+        self.assertIn('.', names)
+        
+        chan.close(root)
