@@ -86,9 +86,11 @@ class QueryDirectoryTest(pike.test.PikeTest):
 
         result = chan.query_directory(root,file_information_class=pike.smb2.FILE_ID_BOTH_DIR_INFORMATION)
         names = map(lambda info: info.file_name, result)
-
         self.assertIn('.', names)
         self.assertIn('..', names)
+
+        file_ids = map(lambda info: info.file_id, result)
+        self.assertNotIn( 0, file_ids )
 
         chan.close(root)
         

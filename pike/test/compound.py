@@ -199,9 +199,12 @@ class CompoundTest(pike.test.PikeTest):
         
         query_req = chan.query_directory_request(RelatedOpen(tree))
         adopt(nb_req, query_req.parent)
-        
 
+        (create_future, query_future) = chan.connection.submit(nb_req)
         with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_COLLISION):
-            (create_res1, query_res) = chan.connection.transceive(nb_req)
+            create_future.result()
+        
+        with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_COLLISION):
+            query_future.result()
 
         chan.close(test_dir)
