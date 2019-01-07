@@ -1733,6 +1733,24 @@ class Channel(object):
 
         return self.connection.transceive(smb_req.parent)[0]
 
+    def network_resiliency_request_request(self, file, timeout):
+        smb_req = self.request(obj=file.tree)
+        ioctl_req = smb2.IoctlRequest(smb_req)
+
+        vni_req = smb2.NetworkResiliencyRequestRequest(ioctl_req)
+        ioctl_req.file_id = file.file_id
+        ioctl_req.max_output_response = 4096
+        ioctl_req.flags = smb2.SMB2_0_IOCTL_IS_FSCTL
+        vni_req.timeout = timeout
+        vni_req.Reserved = 1
+        return ioctl_req
+
+    def network_resiliency_request(self, file, timeout):
+        return self.connection.transceive(
+
+            self.network_resiliency_request_request(file, timeout).parent.parent
+        )[0]
+
     def copychunk_request(self, source_file, target_file, chunks, resume_key=None, write_flag=False):
         """
         @param source_file: L{Open}

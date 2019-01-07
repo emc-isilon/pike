@@ -40,6 +40,8 @@ import pike.test as test
 import pike.ntstatus as ntstatus
 import random
 import array
+import time
+import pike.model
 
 # Constants
 LEASE_R   = smb2.SMB2_LEASE_READ_CACHING
@@ -48,10 +50,17 @@ LEASE_RH  = LEASE_R | smb2.SMB2_LEASE_HANDLE_CACHING
 LEASE_RWH = LEASE_RW | LEASE_RH
 SHARE_ALL = smb2.FILE_SHARE_READ | smb2.FILE_SHARE_WRITE | smb2.FILE_SHARE_DELETE
 
+class _testNetworkResiliencyRequestRequest(pike.smb2.NetworkResiliencyRequestRequest):
+    def  _encode(self, cur):
+        cur.encode_uint32le(self.timeout)
+        cur.encode_uint16le(self.reserved)
+
 @test.RequireDialect(smb2.DIALECT_SMB3_0)
 @test.RequireCapabilities(smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES)
 @test.RequireShareCapabilities(smb2.SMB2_SHARE_CAP_CONTINUOUS_AVAILABILITY)
 class Persistent(test.PikeTest):
+    buf_too_small_error = pike.ntstatus.STATUS_INVALID_PARAMETER
+
     def setup(self):
         self.lease_key = array.array('B',map(random.randint, [0]*16, [255]*16))
         self.channel, self.tree = self.tree_connect()
@@ -117,3 +126,94 @@ class Persistent(test.PikeTest):
         self.channel, self.tree = self.tree_connect()
         handle2 = self.create_persistent(prev_handle = handle1)
         self.channel.close(handle2)
+
+    def test_resiliency_interact_persistent(self):
+        chan, tree = self.tree_connect()
+        handle1 = self.create_persistent()
+        print handle1
+        timeout = 100
+        # a = chan.network_resiliency_request(handle1, timeout=timeout)
+        print handle1.durable_flags
+        self.channel.connection.close()
+
+        time.sleep((timeout - 10) / 1000)
+
+        chan2, tree2 = self.tree_connect(client=pike.model.Client())
+        # Invalidate handle from separate client
+        with self.assert_error(ntstatus.STATUS_FILE_NOT_AVAILABLE):
+            handle2 = self.create(chan2,
+                                  tree2,
+                                  access=smb2.FILE_READ_DATA,
+                                  share=SHARE_ALL,
+                                  disposition=pike.smb2.FILE_OPEN)
+        chan2.connection.close()
+
+        chan3, tree3 = self.tree_connect()
+        handle3 = self.create_persistent(chan3,tree3,prev_handle = handle1)
+        print handle3.durable_flags
+        self.assertEqual(handle2.lease.lease_state, LEASE_RWH)
+        chan3.connection.close()
+
+    def test_resiliency_timeout_interact_durable(self):
+        chan, tree = self.tree_connect()
+        handle1 = self.create(chan, tree)
+        timeout = 100
+        a = chan.network_resiliency_request(handle1, timeout=timeout)
+        self.assertEqual(handle1.lease.lease_state, self.rw)
+
+        # Close the connection
+        chan.connection.close()
+        time.sleep(timeout / 1000 + 5)  # timeout
+
+        chan2, tree2 = self.tree_connect(client=pike.model.Client())
+        # Invalidate handle from separate client
+        handle2 = self.create(chan2,
+                              tree2,
+                              access=smb2.FILE_READ_DATA,
+                              share=SHARE_ALL,
+                              disposition=pike.smb2.FILE_OPEN)
+
+        self.assertEqual(handle2.lease.lease_state, self.rw)
+        chan2.close(handle2)
+        chan2.connection.close()
+        chan3, tree3 = self.tree_connect()
+
+        # Reconnect should fail(resiliency timeout)
+        with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND):
+            handle3 = self.create(chan3, tree3, durable=handle1)
+
+    def test_buffer_too_small(self):
+        chan, tree = self.tree_connect()
+        handle1 = self.create(chan,
+                              tree)
+
+        timeout = 5
+        # with self.assert_error(pike.ntstatus.STATUS_BUFFER_TOO_SMALL):  just for onefs
+        with self.assert_error(self.buf_too_small_error):  # for windows plat
+            smb_req = chan.request(obj=handle1.tree)
+            ioctl_req = pike.smb2.IoctlRequest(smb_req)
+            vni_req = _testNetworkResiliencyRequestRequest(ioctl_req)
+            ioctl_req.file_id = handle1.file_id
+            ioctl_req.flags = pike.smb2.SMB2_0_IOCTL_IS_FSCTL
+            vni_req.Timeout = timeout
+            vni_req.Reserved = 0
+            a = chan.connection.transceive(smb_req.parent)[0]
+
+        self.assertEqual(handle1.lease.lease_state, self.rw)
+        chan.connection.close()
+
+        chan2, tree2 = self.tree_connect(client=pike.model.Client())
+        handle2 = self.create(chan2,
+                              tree2,
+                              access=smb2.FILE_READ_DATA,
+                              share=SHARE_ALL,
+                              disposition=pike.smb2.FILE_OPEN)
+
+        self.assertEqual(handle2.lease.lease_state, self.rw)
+        chan2.close(handle2)
+        chan2.connection.close()
+
+        chan3, tree3 = self.tree_connect()
+        # buffer too small
+        with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND):
+            handle3 = self.create(chan3, tree3, durable=handle1)

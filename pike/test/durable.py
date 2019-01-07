@@ -40,6 +40,14 @@ import pike.test
 import pike.ntstatus
 import random
 import array
+import time
+
+# for buffer too small
+class _testNetworkResiliencyRequestRequest(pike.smb2.NetworkResiliencyRequestRequest):
+    def  _encode(self, cur):
+        cur.encode_uint32le(self.timeout)
+        cur.encode_uint16le(self.reserved)
+
 
 @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_LEASING)
 class DurableHandleTest(pike.test.PikeTest):
@@ -50,6 +58,8 @@ class DurableHandleTest(pike.test.PikeTest):
     rw = r | pike.smb2.SMB2_LEASE_WRITE_CACHING
     rh = r | pike.smb2.SMB2_LEASE_HANDLE_CACHING
     rwh = rw | rh
+    buffer_too_small_error = pike.ntstatus.STATUS_INVALID_PARAMETER
+
                     
     def create(self, chan, tree, durable, lease=rwh, lease_key=lease1, disposition=pike.smb2.FILE_SUPERSEDE):
         return chan.create(tree,
@@ -142,6 +152,106 @@ class DurableHandleTest(pike.test.PikeTest):
         with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND):
             handle3 = self.create(chan3, tree3, durable=handle1)
 
+    def resiliency_interact_durable_test(self, durable):
+        chan, tree = self.tree_connect()
+        handle1 = self.create(chan, tree, durable=durable, lease=self.rw)
+        timeout = 100
+        a = chan.network_resiliency_request(handle1, timeout=timeout)
+        self.assertEqual(handle1.lease.lease_state, self.rw)
+
+        # Close the connection
+        chan.connection.close()
+        time.sleep((timeout - 10) / 1000)
+
+        chan2, tree2 = self.tree_connect(client=pike.model.Client())
+        # Invalidate handle from separate client
+        handle2 = self.create(chan2,
+                              tree2,
+                              durable=durable,
+                              lease=self.rw,
+                              lease_key=self.lease2,
+                              disposition=pike.smb2.FILE_OPEN)
+        # resiliency interact handle2's lease_status(before rw, now r)
+        self.assertEqual(handle2.lease.lease_state, self.r)
+        chan2.close(handle2)
+        chan2.connection.close()
+        chan3, tree3 = self.tree_connect()
+        handle3 = self.create(chan3, tree3, durable=handle1)
+
+        # Reconnect should now pass(resiliency valided, but only read)
+        self.assertEqual(handle3.lease.lease_state, self.r)
+        self.assertEqual(handle1.file_id, handle3.file_id)
+
+    def resiliency_timeout_interact_durable_test(self, durable):
+        chan, tree = self.tree_connect()
+        handle1 = self.create(chan, tree, durable=durable, lease=self.rw)
+        timeout = 100
+        a = chan.network_resiliency_request(handle1, timeout=timeout)
+        self.assertEqual(handle1.lease.lease_state, self.rw)
+
+        # Close the connection
+        chan.connection.close()
+        time.sleep(timeout / 1000 + 5)  # timeout
+
+        chan2, tree2 = self.tree_connect(client=pike.model.Client())
+        # Invalidate handle from separate client
+        handle2 = self.create(chan2,
+                              tree2,
+                              durable=durable,
+                              lease=self.rw,
+                              lease_key=self.lease2,
+                              disposition=pike.smb2.FILE_OPEN)
+
+        self.assertEqual(handle2.lease.lease_state, self.rw)
+        chan2.close(handle2)
+        chan2.connection.close()
+        chan3, tree3 = self.tree_connect()
+
+        # Reconnect should fail(resiliency timeout)
+        with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND):
+            handle3 = self.create(chan3, tree3, durable=handle1)
+
+        # test longth too small  windows:AssertionError: "STATUS_INVALID_PARAMETER"
+
+    def buffer_too_small(self, durable=True):
+        chan, tree = self.tree_connect()
+        handle1 = self.create(chan,
+                              tree,
+                              durable=durable,
+                              lease=self.rw)
+
+        timeout = 5
+        # with self.assert_error(pike.ntstatus.STATUS_BUFFER_TOO_SMALL):  just for onefs
+        with self.assert_error(self.buffer_too_small_error):  # for windows plat
+            smb_req = chan.request(obj=handle1.tree)
+            ioctl_req = pike.smb2.IoctlRequest(smb_req)
+            vni_req = _testNetworkResiliencyRequestRequest(ioctl_req)
+            ioctl_req.file_id = handle1.file_id
+            ioctl_req.flags = pike.smb2.SMB2_0_IOCTL_IS_FSCTL
+            vni_req.Timeout = timeout
+            vni_req.Reserved = 0
+            a = chan.connection.transceive(smb_req.parent)[0]
+
+        self.assertEqual(handle1.lease.lease_state, self.rw)
+        chan.connection.close()
+
+        chan2, tree2 = self.tree_connect(client=pike.model.Client())
+        handle2 = self.create(chan2,
+                              tree2,
+                              durable=durable,
+                              lease=self.rw,
+                              lease_key=self.lease2,
+                              disposition=pike.smb2.FILE_OPEN)
+
+        self.assertEqual(handle2.lease.lease_state, self.rw)
+        chan2.close(handle2)
+        chan2.connection.close()
+
+        chan3, tree3 = self.tree_connect()
+        # buffer too small
+        with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND):
+            handle3 = self.create(chan3, tree3, durable=handle1)
+
     # Request a durable handle
     @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
     def test_durable(self):
@@ -189,3 +299,18 @@ class DurableHandleTest(pike.test.PikeTest):
     @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
     def test_durable_v2_invalidate(self):
         self.durable_invalidate_test(0)
+
+    # add resiliency function
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
+    def test_resiliency_interact_durable(self):
+        self.resiliency_interact_durable_test(True)
+
+    # resiliency timeout
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
+    def test_resiliency_timeout_interact_durable(self):
+        self.resiliency_timeout_interact_durable_test(True)
+
+    # resiliency's buffer too small
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
+    def test_buffer_too_small(self):
+        self.buffer_too_small(True)
