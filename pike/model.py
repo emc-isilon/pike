@@ -1742,7 +1742,7 @@ class Channel(object):
         ioctl_req.max_output_response = 4096
         ioctl_req.flags = smb2.SMB2_0_IOCTL_IS_FSCTL
         vni_req.timeout = timeout
-        vni_req.Reserved = 1
+        vni_req.reserved = 0
         return ioctl_req
 
     def network_resiliency_request(self, file, timeout):
@@ -1925,9 +1925,18 @@ class Open(object):
         self.file_id = self.create_response.file_id
         self.oplock_level = self.create_response.oplock_level
         self.lease = None
+        self.is_durable = False
+        self.is_persistent = False
         self.durable_timeout = None
         self.durable_flags = None
         self.create_guid = create_guid
+
+        durable_res = filter(
+            lambda c: isinstance(c, smb2.DurableHandleResponse),
+            self.create_response)
+
+        if durable_res != []:
+            self.is_durable = True
 
         if prev is not None:
             self.durable_timeout = prev.durable_timeout
@@ -1948,6 +1957,12 @@ class Open(object):
         if durable_v2_res != []:
             self.durable_timeout = durable_v2_res[0].timeout
             self.durable_flags = durable_v2_res[0].flags
+
+        if self.durable_flags is not None:
+            self.is_durable = True
+            if self.durable_flags & smb2.SMB2_DHANDLE_FLAG_PERSISTENT != 0:
+                self.is_persistent = True
+
 
     def arm_oplock_future(self):
         """
