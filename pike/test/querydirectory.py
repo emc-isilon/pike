@@ -39,13 +39,19 @@ import pike.smb2
 import pike.test
 import pike.ntstatus
 
+
 class QueryDirectoryTest(pike.test.PikeTest):
     # Enumerate directory at FILE_DIRECTORY_INFORMATION level.
     # Test for presence of . and .. entries
     def test_file_directory_info(self):
+
         chan, tree = self.tree_connect()
-        
-        root = chan.create(tree, '', access=pike.smb2.GENERIC_READ, options=pike.smb2.FILE_DIRECTORY_FILE, share=pike.smb2.FILE_SHARE_READ).result()
+        root = chan.create(tree,
+                           '',
+                           access=pike.smb2.GENERIC_READ,
+                           options=pike.smb2.FILE_DIRECTORY_FILE,
+                           share=pike.smb2.FILE_SHARE_READ).result()
+
         names = map(lambda info: info.file_name, chan.enum_directory(root))
 
         self.assertIn('.', names)
@@ -58,7 +64,7 @@ class QueryDirectoryTest(pike.test.PikeTest):
     def test_specific_name(self):
         chan, tree = self.tree_connect()
         name = 'hello.txt'
-        
+
         hello = chan.create(tree,
                             name,
                             access=pike.smb2.GENERIC_WRITE | pike.smb2.GENERIC_READ | pike.smb2.DELETE,
@@ -77,4 +83,44 @@ class QueryDirectoryTest(pike.test.PikeTest):
             chan.query_directory(root, file_name=name)
 
         chan.close(hello)
+        chan.close(root)
+
+    def test_file_id_both_directory_information(self):
+
+        chan, tree = self.tree_connect()
+        root = chan.create(tree,
+                           '',
+                           access=pike.smb2.GENERIC_READ,
+                           options=pike.smb2.FILE_DIRECTORY_FILE,
+                           share=pike.smb2.FILE_SHARE_READ).result()
+
+        result = chan.query_directory(root, file_information_class=pike.smb2.FILE_ID_BOTH_DIR_INFORMATION)
+        names = map(lambda info: info.file_name, result)
+        self.assertIn('.', names)
+        self.assertIn('..', names)
+
+        valid_file_ids = map(lambda info: info.file_id >= 0, result)
+        self.assertNotIn(False, valid_file_ids)
+
+        chan.close(root)
+
+    def test_restart_scan(self):
+
+        chan, tree = self.tree_connect()
+        root = chan.create(tree,
+                           '',
+                           access=pike.smb2.GENERIC_READ,
+                           options=pike.smb2.FILE_DIRECTORY_FILE,
+                           share=pike.smb2.FILE_SHARE_READ).result()
+
+        result = chan.query_directory(root)
+        names = map(lambda info: info.file_name, result)
+        self.assertIn('.', names)
+
+        result = chan.query_directory(root,
+                                      flags=pike.smb2.SL_RESTART_SCAN,
+                                      file_name='*')
+        names = map(lambda info: info.file_name, result)
+        self.assertIn('.', names)
+
         chan.close(root)
