@@ -184,7 +184,7 @@ class CompoundTest(pike.test.PikeTest):
              write_res,
              close_res) = chan.connection.transceive(nb_req)
 
-    def test_create_faied_and_query(self):
+    def test_create_failed_and_query(self):
         chan, tree = self.tree_connect()
         name = "create_query_failed"
         test_dir = chan.create(tree,
