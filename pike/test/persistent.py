@@ -80,7 +80,7 @@ class Persistent(test.PikeTest):
             persistent = True
             ).result()
         self.assertEqual(handle.durable_flags, smb2.SMB2_DHANDLE_FLAG_PERSISTENT)
-        
+
         return handle
 
     # Opening a persistent handle grants persistent flag
@@ -94,18 +94,14 @@ class Persistent(test.PikeTest):
         handle1 = self.create_persistent()
         self.channel.connection.close()
         self.channel, self.tree = self.tree_connect()
-        print handle1.is_persistent
-        print handle1.durable_flags
 
         handle2 = self.create_persistent(prev_handle = handle1)
-        print vars(handle2)
 
         # Was the original lease state granted in the response?
         self.assertEqual(handle2.lease.lease_state, LEASE_RWH)
-        print handle2.is_persistent
 
         self.channel.close(handle2)
-        
+
     # Opening a file with a disconnected persistent handle fails with
     # STATUS_FILE_NOT_AVAILABLE
     def test_open_while_disconnected(self):
@@ -127,15 +123,15 @@ class Persistent(test.PikeTest):
         self.channel.connection.close()
         self.channel, self.tree = self.tree_connect()
         handle2 = self.create_persistent(prev_handle = handle1)
-        self.assertTrue(handle1)
-        self.assertTrue(handle2)
         self.assertEqual(handle1.file_id, handle2.file_id)
         self.channel.close(handle2)
 
     def test_resiliency_same_timeout_reconnect_before_timeout(self):
         handle1 = self.create_persistent()
+        self.assertTrue(handle1.is_persistent)
         timeout = handle1.durable_timeout
         a = self.channel.network_resiliency_request(handle1, timeout=timeout)
+        self.assertTrue(handle1.is_resilient)
         self.channel.connection.close()
 
         #  sleeping time = resiliemcy < ca's default 120s
@@ -159,18 +155,22 @@ class Persistent(test.PikeTest):
         # it seams that resilience has not impacted the result of reconnect
         self.assertTrue(handle1.is_persistent)
         self.assertTrue(handle3.is_persistent)
+        self.assertTrue(handle3.is_resilient)
         self.assertEqual(handle1.file_id, handle3.file_id)
         self.channel.close(handle3)
 
     def test_resiliency_reconnect_before_timeout(self):
         handle1 = self.create_persistent()
-        timeout =5000
+        self.assertTrue(handle1.is_persistent)
+        timeout = 4000
+        wait_time = timeout / 1000.0 * 0.5
         a = self.channel.network_resiliency_request(handle1, timeout=timeout)
+        self.assertTrue(handle1.is_resilient)
 
         self.channel.connection.close()
 
         #  sleeping time < resiliemcy < ca's default 120s
-        time.sleep(timeout/1000.0-4.0)  # timeout
+        time.sleep(wait_time)
 
         self.channel, self.tree = self.tree_connect(client=pike.model.Client())
         with self.assert_error(ntstatus.STATUS_FILE_NOT_AVAILABLE):
@@ -187,17 +187,24 @@ class Persistent(test.PikeTest):
 
         self.assertTrue(handle1.is_persistent)
         self.assertTrue(handle3.is_persistent)
+        self.assertTrue(handle3.is_resilient)
         self.assertEqual(handle1.file_id, handle3.file_id)
         self.channel.close(handle3)
 
     def test_resiliency_reconnect_after_timeout(self):
         handle1 = self.create_persistent()
-        timeout = 1000
+        self.assertTrue(handle1.is_persistent)
+        timeout = 2000
+        wait_time = timeout / 1000.0 * 1.1
+        # ensure that the wait_time is _less_ than the granted timeout
+        # to confirm that the resiliency request updates the timeout
+        self.assertLess(wait_time, handle1.durable_timeout)
         a = self.channel.network_resiliency_request(handle1, timeout=timeout)
+        self.assertTrue(handle1.is_resilient)
         self.channel.connection.close()
 
         # resiliemcy < sleeping time < ca's default 120s
-        time.sleep(timeout/1000.0 + 1.0)  # timeout
+        time.sleep(wait_time)
 
         self.channel, self.tree = self.tree_connect(client=pike.model.Client())
 
@@ -215,13 +222,14 @@ class Persistent(test.PikeTest):
             handle3 = self.create_persistent(prev_handle=handle1)
 
 
-
     def test_resiliency_same_timeout_reconnect_after_timeout(self):
         handle1 = self.create_persistent()
+        self.assertTrue(handle1.is_persistent)
 
         # set ca's timeout equals resiliency's timeout
         timeout = handle1.durable_timeout
         a = self.channel.network_resiliency_request(handle1, timeout=timeout)
+        self.assertTrue(handle1.is_resilient)
         self.channel.connection.close()
 
         # resilience's timeout = ca's defaut 120s < sleeping time
@@ -234,6 +242,7 @@ class Persistent(test.PikeTest):
 
     def test_buffer_too_small(self):
         handle1 = self.create_persistent()
+        self.assertTrue(handle1.is_persistent)
 
         timeout = 5
         with self.assert_error(pike.ntstatus.STATUS_BUFFER_TOO_SMALL):  # just for onefs
@@ -264,5 +273,6 @@ class Persistent(test.PikeTest):
         handle3 = self.create_persistent(prev_handle=handle1)
         self.assertTrue(handle1.is_persistent)
         self.assertTrue(handle3.is_persistent)
+        self.assertFalse(handle3.is_resilient)
         self.assertEqual(handle1.file_id, handle3.file_id)
         self.channel.close(handle3)
