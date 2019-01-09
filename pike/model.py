@@ -1737,19 +1737,25 @@ class Channel(object):
         smb_req = self.request(obj=file.tree)
         ioctl_req = smb2.IoctlRequest(smb_req)
 
-        vni_req = smb2.NetworkResiliencyRequestRequest(ioctl_req)
+        nrr_req = smb2.NetworkResiliencyRequestRequest(ioctl_req)
         ioctl_req.file_id = file.file_id
         ioctl_req.max_output_response = 4096
         ioctl_req.flags = smb2.SMB2_0_IOCTL_IS_FSCTL
-        vni_req.timeout = timeout
-        vni_req.reserved = 0
+        nrr_req.timeout = timeout
+        nrr_req.reserved = 0
         return ioctl_req
 
     def network_resiliency_request(self, file, timeout):
-        return self.connection.transceive(
-
+        def update_handle(resp_future):
+            if resp_future.response.status == ntstatus.STATUS_SUCCESS:
+                # 3.3.5.15.9 Handling a Resiliency Request
+                file.is_durable = False
+                file.is_resilient = True
+        nrr_future = self.connection.submit(
             self.network_resiliency_request_request(file, timeout).parent.parent
         )[0]
+        nrr_future.then(update_handle)
+        return nrr_future.result()
 
     def copychunk_request(self, source_file, target_file, chunks, resume_key=None, write_flag=False):
         """
@@ -1926,25 +1932,17 @@ class Open(object):
         self.oplock_level = self.create_response.oplock_level
         self.lease = None
         self.is_durable = False
+        self.is_resilient = False
         self.is_persistent = False
         self.durable_timeout = None
         self.durable_flags = None
         self.create_guid = create_guid
 
-        durable_res = filter(
-            lambda c: isinstance(c, smb2.DurableHandleResponse),
-            self.create_response)
-
-        if durable_res != []:
-            self.is_durable = True
-
-
         if prev is not None:
-            self.is_durable = True
+            self.is_durable = prev.is_durable
+            self.is_resilient = prev.is_resilient
             self.durable_timeout = prev.durable_timeout
             self.durable_flags = prev.durable_flags
-
-
 
         if self.oplock_level != smb2.SMB2_OPLOCK_LEVEL_NONE:
             if self.oplock_level == smb2.SMB2_OPLOCK_LEVEL_LEASE:
@@ -1954,6 +1952,13 @@ class Open(object):
                 self.lease = tree.session.client.lease(tree, lease_res)
             else:
                 self.arm_oplock_future()
+
+        durable_res = filter(
+            lambda c: isinstance(c, smb2.DurableHandleResponse),
+            self.create_response)
+
+        if durable_res != []:
+            self.is_durable = True
 
         durable_v2_res = filter(
                 lambda c: isinstance(c, smb2.DurableHandleV2Response),
