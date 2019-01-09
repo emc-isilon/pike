@@ -86,6 +86,13 @@ class StateError(Exception):
 class CreditError(Exception):
     pass
 
+class RequestError(Exception):
+    def __init__(self, request, message=None):
+        if message is None:
+            message = "Could not send {0}".format(repr(request))
+        Exception.__init__(self, message)
+        self.request = request
+
 class ResponseError(Exception):
     def __init__(self, response):
         Exception.__init__(self, response.command, response.status)
@@ -821,6 +828,10 @@ class Connection(transport.Transport):
         a list of L{Future} objects, one for each corresponding
         L{smb2.Smb2} frame in the request.
         """
+        if not isinstance(req, netbios.Netbios):
+            raise RequestError(
+                    req,
+                    "{0} is not a netbios.Netbios frame".format(repr(req)))
         if self.error is not None:
             raise self.error, None, self.traceback
         futures = []
