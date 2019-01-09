@@ -50,7 +50,7 @@ LEASE_RH  = LEASE_R | smb2.SMB2_LEASE_HANDLE_CACHING
 LEASE_RWH = LEASE_RW | LEASE_RH
 SHARE_ALL = smb2.FILE_SHARE_READ | smb2.FILE_SHARE_WRITE | smb2.FILE_SHARE_DELETE
 
-class _testNetworkResiliencyRequestRequest(pike.smb2.NetworkResiliencyRequestRequest):
+class InvalidNetworkResiliencyRequestRequest(pike.smb2.NetworkResiliencyRequestRequest):
     def  _encode(self, cur):
         cur.encode_uint32le(self.timeout)
         cur.encode_uint16le(self.reserved)
@@ -94,11 +94,15 @@ class Persistent(test.PikeTest):
         handle1 = self.create_persistent()
         self.channel.connection.close()
         self.channel, self.tree = self.tree_connect()
+        print handle1.is_persistent
+        print handle1.durable_flags
 
         handle2 = self.create_persistent(prev_handle = handle1)
+        print vars(handle2)
 
         # Was the original lease state granted in the response?
         self.assertEqual(handle2.lease.lease_state, LEASE_RWH)
+        print handle2.is_persistent
 
         self.channel.close(handle2)
         
@@ -128,24 +132,23 @@ class Persistent(test.PikeTest):
         self.assertEqual(handle1.file_id, handle2.file_id)
         self.channel.close(handle2)
 
-    def test_resiliency_interact_persistent(self):
+    def test_resiliency_same_timeout_reconnect_before_timeout(self):
         handle1 = self.create_persistent()
         timeout = handle1.durable_timeout
         a = self.channel.network_resiliency_request(handle1, timeout=timeout)
         self.channel.connection.close()
-        print handle1.is_persistent
-        print handle1.is_durable
 
-        #  sleeping time < resiliemcy < ca's default 120s
-        time.sleep(15)
+        #  sleeping time = resiliemcy < ca's default 120s
+        time.sleep(min(handle1.durable_timeout/1000.0,1))
         self.channel, self.tree = self.tree_connect(client=pike.model.Client())
 
         # Invalidate handle from separate client
-        handle2 = self.channel.create(self.tree,
-                                      "persistent.txt",
-                                      access=smb2.FILE_READ_DATA,
-                                      share=SHARE_ALL,
-                                      disposition=pike.smb2.FILE_OPEN)
+        with self.assert_error(ntstatus.STATUS_FILE_NOT_AVAILABLE):
+            handle2 = self.channel.create(self.tree,
+                                          "persistent.txt",
+                                          access=smb2.FILE_READ_DATA,
+                                          share=SHARE_ALL,
+                                          disposition=pike.smb2.FILE_OPEN).result()
 
         self.channel.connection.close()
 
@@ -159,43 +162,61 @@ class Persistent(test.PikeTest):
         self.assertEqual(handle1.file_id, handle3.file_id)
         self.channel.close(handle3)
 
-    def test_resiliency_timein_interact_durable(self):
+    def test_resiliency_reconnect_before_timeout(self):
         handle1 = self.create_persistent()
-        timeout = 10000
+        timeout =5000
         a = self.channel.network_resiliency_request(handle1, timeout=timeout)
 
         self.channel.connection.close()
 
         #  sleeping time < resiliemcy < ca's default 120s
-        time.sleep(timeout / 1000.0 - 4.0)  # timeout
-        self.channel, self.tree = self.tree_connect()
-        handle3 = self.create_persistent(prev_handle=handle1)
+        time.sleep(timeout/1000.0-4.0)  # timeout
 
-        self.assertTrue(handle1.is_persistent)
-        self.assertTrue(handle3.is_persistent)
-        self.assertEqual(handle1.file_id, handle3.file_id)
-        self.channel.close(handle3)
-
-    def test_timeout_resiliency_interact_durable(self):
-        handle1 = self.create_persistent()
-        timeout = 10000
-        # a = self.channel.network_resiliency_request(handle1, timeout=timeout)
-        # self.assertEqual(handle1.lease.lease_state, self.rw)
+        self.channel, self.tree = self.tree_connect(client=pike.model.Client())
+        with self.assert_error(ntstatus.STATUS_FILE_NOT_AVAILABLE):
+            handle2 = self.channel.create(self.tree,
+                                          "persistent.txt",
+                                          access=smb2.FILE_READ_DATA,
+                                          share=SHARE_ALL,
+                                          disposition=pike.smb2.FILE_OPEN).result()
 
         self.channel.connection.close()
 
-        # resiliemcy < sleeping time < ca's default 120s
-        time.sleep(timeout / 1000.0 + 5.0)  # timeout
         self.channel, self.tree = self.tree_connect()
         handle3 = self.create_persistent(prev_handle=handle1)
 
-        # It seams that resilience timeout has not impacted the result
         self.assertTrue(handle1.is_persistent)
         self.assertTrue(handle3.is_persistent)
         self.assertEqual(handle1.file_id, handle3.file_id)
         self.channel.close(handle3)
 
-    def test_timeout_ca_resiliency_interact_persistent(self):
+    def test_resiliency_reconnect_after_timeout(self):
+        handle1 = self.create_persistent()
+        timeout = 1000
+        a = self.channel.network_resiliency_request(handle1, timeout=timeout)
+        self.channel.connection.close()
+
+        # resiliemcy < sleeping time < ca's default 120s
+        time.sleep(timeout/1000.0 + 1.0)  # timeout
+
+        self.channel, self.tree = self.tree_connect(client=pike.model.Client())
+
+        # Because resiliency timeout, so another opener:handle2 break the persistent
+        handle2 = self.channel.create(self.tree,
+                                      'persistent.txt',
+                                      access=smb2.FILE_READ_DATA,
+                                      share=SHARE_ALL,
+                                      disposition=pike.smb2.FILE_OPEN)
+        self.channel.connection.close()
+
+        self.channel, self.tree = self.tree_connect()
+        # Because resiliency timeout, other opener has broken the persistent, so reconnect would fail
+        with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND):
+            handle3 = self.create_persistent(prev_handle=handle1)
+
+
+
+    def test_resiliency_same_timeout_reconnect_after_timeout(self):
         handle1 = self.create_persistent()
 
         # set ca's timeout equals resiliency's timeout
@@ -204,33 +225,12 @@ class Persistent(test.PikeTest):
         self.channel.connection.close()
 
         # resilience's timeout = ca's defaut 120s < sleeping time
-        time.sleep(121)
+        time.sleep(handle1.durable_timeout/1000.0+1)
 
         # timeout, can't get object name
         self.channel, self.tree = self.tree_connect()
         with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND):
             handle3 = self.create_persistent(prev_handle=handle1)
-
-    def test_timeout_cav2_interact_persistent(self):
-        handle1 = self.create_persistent()
-
-        # set ca's timeout equals resiliency's timeout
-        timeout = handle1.durable_timeout + 5000
-        a = self.channel.network_resiliency_request(handle1, timeout=timeout)
-        self.channel.connection.close()
-
-        # ca's defaut 120s < sleeping time < resilience's timeout
-        time.sleep(121)
-
-        self.channel, self.tree = self.tree_connect()
-
-        handle3 = self.create_persistent(prev_handle=handle1)
-
-        # sleeping time longer than ca's default, couldn't get object name, but shoter than resilience' time,so the result is true.
-        self.assertTrue(handle1.is_persistent)
-        self.assertTrue(handle3.is_persistent)
-        self.assertEqual(handle1.file_id, handle3.file_id)
-        self.channel.close(handle3)
 
     def test_buffer_too_small(self):
         handle1 = self.create_persistent()
@@ -239,21 +239,22 @@ class Persistent(test.PikeTest):
         with self.assert_error(pike.ntstatus.STATUS_BUFFER_TOO_SMALL):  # just for onefs
             smb_req = self.channel.request(obj=handle1.tree)
             ioctl_req = pike.smb2.IoctlRequest(smb_req)
-            vni_req = _testNetworkResiliencyRequestRequest(ioctl_req)
+            vni_req = InvalidNetworkResiliencyRequestRequest(ioctl_req)
             ioctl_req.file_id = handle1.file_id
             ioctl_req.flags = pike.smb2.SMB2_0_IOCTL_IS_FSCTL
             vni_req.Timeout = timeout
             vni_req.Reserved = 0
-            a = self.channel.connection.transceive(smb_req.parent)[0]
+            a = self.channel.connection.transceive(ioctl_req.parent.parent)[0]
 
-        # self.channel.connection.close()
+        self.channel.connection.close()
 
         self.channel, self.tree = self.tree_connect(client=pike.model.Client())
-        handle2 = self.channel.create(self.tree,
-                                      "persistent.txt",
-                                      access=smb2.FILE_READ_DATA,
-                                      share=SHARE_ALL,
-                                      disposition=pike.smb2.FILE_OPEN)
+        with self.assert_error(ntstatus.STATUS_FILE_NOT_AVAILABLE):
+            handle2 = self.channel.create(self.tree,
+                                          "persistent.txt",
+                                          access=smb2.FILE_READ_DATA,
+                                          share=SHARE_ALL,
+                                          disposition=pike.smb2.FILE_OPEN).result()
 
         self.channel.connection.close()
 

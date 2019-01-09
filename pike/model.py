@@ -1938,9 +1938,13 @@ class Open(object):
         if durable_res != []:
             self.is_durable = True
 
+
         if prev is not None:
+            self.is_durable = True
             self.durable_timeout = prev.durable_timeout
             self.durable_flags = prev.durable_flags
+
+
 
         if self.oplock_level != smb2.SMB2_OPLOCK_LEVEL_NONE:
             if self.oplock_level == smb2.SMB2_OPLOCK_LEVEL_LEASE:

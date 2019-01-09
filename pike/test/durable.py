@@ -43,7 +43,7 @@ import array
 import time
 
 # for buffer too small
-class _testNetworkResiliencyRequestRequest(pike.smb2.NetworkResiliencyRequestRequest):
+class InvalidNetworkResiliencyRequestRequest(pike.smb2.NetworkResiliencyRequestRequest):
     def  _encode(self, cur):
         cur.encode_uint32le(self.timeout)
         cur.encode_uint16le(self.reserved)
@@ -78,6 +78,7 @@ class DurableHandleTest(pike.test.PikeTest):
         handle1 = self.create(chan, tree, durable=durable)
 
         self.assertEqual(handle1.lease.lease_state, self.rwh)
+        self.assertTrue(handle1.is_durable)
 
         chan.close(handle1)
 
@@ -87,6 +88,7 @@ class DurableHandleTest(pike.test.PikeTest):
         handle1 = self.create(chan, tree, durable=durable)
 
         self.assertEqual(handle1.lease.lease_state, self.rwh)
+        self.assertTrue(handle1.is_durable)
 
         # Close the connection
         chan.connection.close()
@@ -95,15 +97,15 @@ class DurableHandleTest(pike.test.PikeTest):
 
         # Request reconnect
         handle2 = self.create(chan2, tree2, durable=handle1)
-    
         self.assertEqual(handle2.lease.lease_state, self.rwh)
-
+        self.assertTrue(handle2.is_durable)
         chan2.close(handle2)
 
     def durable_reconnect_fails_client_guid_test(self, durable):
         chan, tree = self.tree_connect()
 
         handle1 = self.create(chan, tree, durable=durable)
+        self.assertTrue(handle1.is_durable)
 
         self.assertEqual(handle1.lease.lease_state, self.rwh)
 
@@ -120,14 +122,16 @@ class DurableHandleTest(pike.test.PikeTest):
         chan3, tree3 = self.tree_connect()
 
         handle3 = self.create(chan3, tree3, durable=handle1)
+        self.assertTrue(handle3.is_durable)
 
         chan3.close(handle3)
 
     def durable_invalidate_test(self, durable):
         chan, tree = self.tree_connect()
 
-        handle1 = self.create(chan, tree, durable=durable, lease=self.rw)
-        self.assertEqual(handle1.lease.lease_state, self.rw)
+        handle1 = self.create(chan, tree, durable=durable)
+        self.assertEqual(handle1.lease.lease_state, self.rwh)
+        self.assertTrue(handle1.is_durable)
 
         # Close the connection
         chan.connection.close()
@@ -153,13 +157,14 @@ class DurableHandleTest(pike.test.PikeTest):
             handle3 = self.create(chan3, tree3, durable=handle1)
 
     @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
-    def test_resiliency_interact_durable(self, durable=True):
+    def test_resiliency_reconnect_before_timeout(self, durable=True):
         chan, tree = self.tree_connect()
-        handle1 = self.create(chan, tree, durable=durable, lease=self.rw)
+        handle1 = self.create(chan, tree, durable=durable)
+        self.assertTrue(handle1.is_durable)
         timeout = 100
 
         a = chan.network_resiliency_request(handle1, timeout=timeout)
-        self.assertEqual(handle1.lease.lease_state, self.rw)
+        self.assertEqual(handle1.lease.lease_state, self.rwh)
 
         # Close the connection
         chan.connection.close()
@@ -179,17 +184,19 @@ class DurableHandleTest(pike.test.PikeTest):
         chan2.connection.close()
         chan3, tree3 = self.tree_connect()
         handle3 = self.create(chan3, tree3, durable=handle1)
+        self.assertTrue(handle3.is_durable)
 
         # cause of the resiliency, handle1.fileid would be equals to handle3's.
         self.assertEqual(handle1.file_id, handle3.file_id)
 
     @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
-    def test_resiliency_timeout_interact_durable(self,durable=True):
+    def test_resiliency_reconnect_after_timeout(self,durable=True):
         chan, tree = self.tree_connect()
-        handle1 = self.create(chan, tree, durable=durable, lease=self.rw)
+        handle1 = self.create(chan, tree, durable=durable, lease=self.rwh)
+        self.assertTrue(handle1.is_durable)
         timeout = 100
         a = chan.network_resiliency_request(handle1, timeout=timeout)
-        self.assertEqual(handle1.lease.lease_state, self.rw)
+        self.assertEqual(handle1.lease.lease_state, self.rwh)
 
         # Close the connection
         chan.connection.close()
@@ -216,26 +223,27 @@ class DurableHandleTest(pike.test.PikeTest):
 
     # test longth too small  windows:AssertionError: "STATUS_INVALID_PARAMETER"
     @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
-    def test_buffer_too_small(self,durable=True):
+    def test_resiliency_buffer_too_small(self,durable=True):
         chan, tree = self.tree_connect()
         handle1 = self.create(chan,
                           tree,
-                          durable=durable,
-                          lease=self.rw)
+                          durable=durable)
+        self.assertTrue(handle1.is_durable)
 
         timeout = 5
         # with self.assert_error(pike.ntstatus.STATUS_BUFFER_TOO_SMALL):  just for onefs
         with self.assert_error(self.buffer_too_small_error): # for windows plat
             smb_req = chan.request(obj=handle1.tree)
             ioctl_req = pike.smb2.IoctlRequest(smb_req)
-            vni_req = _testNetworkResiliencyRequestRequest(ioctl_req)
+            # replace with invalid request that has short input buffer
+            invalid_nrr_req = InvalidNetworkResiliencyRequestRequest(ioctl_req)
             ioctl_req.file_id = handle1.file_id
             ioctl_req.flags = pike.smb2.SMB2_0_IOCTL_IS_FSCTL
-            vni_req.timeout = timeout
-            vni_req.reserved = 0
-            a = chan.connection.transceive(smb_req.parent)[0]
+            invalid_nrr_req.timeout = timeout
+            invalid_nrr_req.reserved = 0
+            a = chan.connection.transceive(ioctl_req.parent.parent)[0]
 
-        self.assertEqual(handle1.lease.lease_state, self.rw)
+        self.assertEqual(handle1.lease.lease_state, self.rwh)
         chan.connection.close()
 
         chan2, tree2 = self.tree_connect(client=pike.model.Client())
@@ -246,7 +254,7 @@ class DurableHandleTest(pike.test.PikeTest):
                           lease_key=self.lease2,
                           disposition=pike.smb2.FILE_OPEN)
 
-        self.assertEqual(handle2.lease.lease_state, self.rw)
+        self.assertEqual(handle2.lease.lease_state, self.rwh)
         chan2.close(handle2)
         chan2.connection.close()
 
