@@ -60,7 +60,7 @@ class DurableHandleTest(pike.test.PikeTest):
     rwh = rw | rh
     buffer_too_small_error = pike.ntstatus.STATUS_INVALID_PARAMETER
 
-                    
+
     def create(self, chan, tree, durable, lease=rwh, lease_key=lease1, disposition=pike.smb2.FILE_SUPERSEDE):
         return chan.create(tree,
                            'durable.txt',
@@ -160,11 +160,12 @@ class DurableHandleTest(pike.test.PikeTest):
     def test_resiliency_reconnect_before_timeout(self, durable=True):
         chan, tree = self.tree_connect()
         handle1 = self.create(chan, tree, durable=durable)
-        self.assertTrue(handle1.is_durable)
+        self.assertEqual(handle1.lease.lease_state, self.rwh)
+        self.assertEqual(handle1.is_durable, durable)
         timeout = 100
 
         a = chan.network_resiliency_request(handle1, timeout=timeout)
-        self.assertEqual(handle1.lease.lease_state, self.rwh)
+        self.assertTrue(handle1.is_resilient)
 
         # Close the connection
         chan.connection.close()
@@ -184,19 +185,21 @@ class DurableHandleTest(pike.test.PikeTest):
         chan2.connection.close()
         chan3, tree3 = self.tree_connect()
         handle3 = self.create(chan3, tree3, durable=handle1)
-        self.assertTrue(handle3.is_durable)
+        self.assertTrue(handle3.is_resilient)
 
         # cause of the resiliency, handle1.fileid would be equals to handle3's.
         self.assertEqual(handle1.file_id, handle3.file_id)
+        chan3.close(handle3)
 
     @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
-    def test_resiliency_reconnect_after_timeout(self,durable=True):
+    def test_resiliency_reconnect_after_timeout(self, durable=True):
         chan, tree = self.tree_connect()
         handle1 = self.create(chan, tree, durable=durable, lease=self.rwh)
-        self.assertTrue(handle1.is_durable)
+        self.assertEqual(handle1.lease.lease_state, self.rwh)
+        self.assertEqual(handle1.is_durable, durable)
         timeout = 100
         a = chan.network_resiliency_request(handle1, timeout=timeout)
-        self.assertEqual(handle1.lease.lease_state, self.rwh)
+        self.assertTrue(handle1.is_resilient)
 
         # Close the connection
         chan.connection.close()
@@ -221,18 +224,16 @@ class DurableHandleTest(pike.test.PikeTest):
         with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND):
             handle3 = self.create(chan3, tree3, durable=handle1)
 
-    # test longth too small  windows:AssertionError: "STATUS_INVALID_PARAMETER"
     @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
-    def test_resiliency_buffer_too_small(self,durable=True):
+    def test_resiliency_buffer_too_small(self, durable=True):
         chan, tree = self.tree_connect()
         handle1 = self.create(chan,
                           tree,
                           durable=durable)
-        self.assertTrue(handle1.is_durable)
+        self.assertEqual(handle1.is_durable, durable)
 
         timeout = 5
-        # with self.assert_error(pike.ntstatus.STATUS_BUFFER_TOO_SMALL):  just for onefs
-        with self.assert_error(self.buffer_too_small_error): # for windows plat
+        with self.assert_error(self.buffer_too_small_error):
             smb_req = chan.request(obj=handle1.tree)
             ioctl_req = pike.smb2.IoctlRequest(smb_req)
             # replace with invalid request that has short input buffer
@@ -254,7 +255,7 @@ class DurableHandleTest(pike.test.PikeTest):
                           lease_key=self.lease2,
                           disposition=pike.smb2.FILE_OPEN)
 
-        self.assertEqual(handle2.lease.lease_state, self.rwh)
+        self.assertEqual(handle2.lease.lease_state, self.rw)
         chan2.close(handle2)
         chan2.connection.close()
 
@@ -263,6 +264,19 @@ class DurableHandleTest(pike.test.PikeTest):
         with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND):
             handle3 = self.create(chan3, tree3, durable=handle1)
 
+    # the resiliency_upgrade tests start with a non-durable handle
+    # and upgrade to resilient handle by use of ioctl
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
+    def test_resiliency_upgrade_reconnect_before_timeout(self):
+        self.test_resiliency_reconnect_before_timeout(durable=False)
+
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
+    def test_resiliency_upgrade_reconnect_after_timeout(self):
+        self.test_resiliency_reconnect_after_timeout(durable=False)
+
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
+    def test_resiliency_upgrade_buffer_too_small(self):
+        self.test_resiliency_buffer_too_small(durable=False)
 
     # Request a durable handle
     @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
@@ -311,5 +325,3 @@ class DurableHandleTest(pike.test.PikeTest):
     @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
     def test_durable_v2_invalidate(self):
         self.durable_invalidate_test(0)
-
-
