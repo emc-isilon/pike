@@ -1758,7 +1758,7 @@ class Channel(object):
 
     def network_resiliency_request(self, file, timeout):
         def update_handle(resp_future):
-            if resp_future.response.status == ntstatus.STATUS_SUCCESS:
+            if resp_future.result().status == ntstatus.STATUS_SUCCESS:
                 # 3.3.5.15.9 Handling a Resiliency Request
                 file.is_durable = False
                 file.is_resilient = True
