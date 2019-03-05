@@ -33,11 +33,13 @@
 #
 # Authors: Ki Anderson (kimberley.anderson@emc.com)
 #          Paul Martin (paul.o.martin@emc.com)
+#          Steve Leef (steven.leef@dell.com)
 #
 
 import pike.model as model
 import pike.smb2 as smb2
 import pike.test as test
+import pike.ntstatus
 
 class ValidateNegotiateInfo(test.PikeTest):
     def __init__(self, *args, **kwds):
@@ -51,3 +53,19 @@ class ValidateNegotiateInfo(test.PikeTest):
     def test_validate_negotiate_smb3(self):
         chan, tree = self.tree_connect()
         chan.validate_negotiate_info(tree)
+
+
+class QueryNetworkInterfaceInfo(test.PikeTest):
+    def __init__(self, *args, **kwds):
+        super(QueryNetworkInterfaceInfo, self).__init__(*args, **kwds)
+        self.default_client.dialects = [
+                smb2.DIALECT_SMB3_0,
+                smb2.DIALECT_SMB3_0_2]
+
+    @test.RequireDialect(smb2.DIALECT_SMB3_0, smb2.DIALECT_SMB3_0_2)
+    def test_query_interface_info_smb3(self):
+        chan, tree = self.tree_connect()
+        try:
+            chan.query_network_interface_info(tree)
+        except model.ResponseError as err:
+            self.assertEqual(err.response.status, pike.ntstatus.STATUS_SUCCESS)

@@ -3234,6 +3234,15 @@ class ValidateNegotiateInfoRequest(IoctlInput):
         for dialect in self.dialects:
             cur.encode_uint16le(dialect)
 
+class QueryNetworkInterfaceInfoRequest(IoctlInput):
+    ioctl_ctl_code = FSCTL_QUERY_NETWORK_INTERFACE_INFO
+
+    def __init__(self, parent):
+        IoctlInput.__init__(self, parent)
+
+    def  _encode(self, cur):
+        pass
+
 class RequestResumeKeyRequest(IoctlInput):
     ioctl_ctl_code = FSCTL_SRV_REQUEST_RESUME_KEY
 
@@ -3323,6 +3332,7 @@ class IoctlOutput(core.Frame):
         if parent is not None:
             parent.ioctl_output = self
 
+
 class ValidateNegotiateInfoResponse(IoctlOutput):
     ioctl_ctl_code = FSCTL_VALIDATE_NEGOTIATE_INFO
 
@@ -3338,6 +3348,15 @@ class ValidateNegotiateInfoResponse(IoctlOutput):
         self.client_guid = cur.decode_bytes(16)
         self.security_mode = SecurityMode(cur.decode_uint16le())
         self.dialect = Dialect(cur.decode_uint16le())
+
+class QueryNetworkInterfaceInfoResponse(IoctlOutput):
+    ioctl_ctl_code = FSCTL_QUERY_NETWORK_INTERFACE_INFO
+
+    def __init__(self, parent):
+        IoctlOutput.__init__(self, parent)
+
+    def _decode(self, cur):
+        pass
 
 class RequestResumeKeyResponse(IoctlOutput):
    ioctl_ctl_code = FSCTL_SRV_REQUEST_RESUME_KEY
