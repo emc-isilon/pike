@@ -1734,7 +1734,7 @@ class Channel(object):
 
         return res
 
-    def query_network_interface_info(self, tree):
+    def query_network_interface_info_request(self, tree):
         smb_req = self.request(obj=tree)
         ioctl_req = smb2.IoctlRequest(smb_req)
         qni_req = smb2.QueryNetworkInterfaceInfoRequest(ioctl_req)
@@ -1744,9 +1744,12 @@ class Channel(object):
         ioctl_req.max_output_response = 65536
         ioctl_req.flags = smb2.SMB2_0_IOCTL_IS_FSCTL
 
-        res = self.connection.transceive(smb_req.parent)[0]
+        return ioctl_req
 
-        return res
+    def query_network_interface_info(self, tree):
+        return self.connection.transceive(
+            self.query_network_interface_info_request(
+                tree).parent.parent)[0]
 
     def resume_key(self, file):
         smb_req = self.request(obj=file.tree)
