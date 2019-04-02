@@ -57,7 +57,11 @@ Alternatively, to build and run all tests
 
 To run an individual test file:
 
-    $ python -m unittest discover -s pike/test -p echo.py EchoTest.test_echo
+    $ python -m unittest discover -s pike/test -p echo.py
+
+To run an individual test case
+
+    $ python -m unittest pike.test.echo.EchoTest.test_echo
 
 Kerberos Hints
 ==============
