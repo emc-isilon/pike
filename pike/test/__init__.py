@@ -161,7 +161,7 @@ class PikeTest(unittest.TestCase):
         pass
 
     @contextlib.contextmanager
-    def assert_error(self, status):
+    def assert_error(self, *status):
         e = None
         o = PikeTest._AssertErrorContext()
 
@@ -172,7 +172,7 @@ class PikeTest(unittest.TestCase):
 
         if e is None:
             raise self.failureException('No error raised when "%s" expected' % status)
-        elif e.response.status != status:
+        elif e.response.status not in status:
             raise self.failureException('"%s" raised when "%s" expected' % (e.response.status, status))
 
         o.response = e.response
@@ -243,19 +243,19 @@ class TreeConnectWithDialect(object):
     """
     @contextlib.contextmanager
     def tree_connect_with_dialect_and_caps(self, dialect=None, caps=0):
-        self.client = model.Client(capabilities=caps)
+        client = model.Client(capabilities=caps)
         if dialect is not None:
-            self.client.dialects = [dialect]
-        self.conn = self.client.connect(self.server, self.port)
-        self.conn.negotiate()
-        chan = self.conn.session_setup(self.creds)
-        tree = chan.tree_connect(self.share)
+            client.dialects = [dialect, smb2.DIALECT_SMB2_002]
+        chan, tree = self.tree_connect(client)
         try:
             yield chan, tree
         finally:
             if chan.connection.connected:
-                chan.logoff()
-                chan.connection.close()
+                try:
+                    chan.logoff()
+                    chan.connection.close()
+                except EOFError:
+                    pass
 
 
 class _Decorator(object):
