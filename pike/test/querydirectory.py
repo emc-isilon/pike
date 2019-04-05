@@ -127,25 +127,8 @@ class QueryDirectoryTest(pike.test.PikeTest):
         chan.close(root)
 
 
-class TreeConnectWithDialect(object):
-    @contextmanager
-    def tree_connect_with_dialect_and_caps(self, dialect=None, caps=0):
-        self.client = pike.model.Client(capabilities=caps)
-        if dialect is not None:
-            self.client.dialects = [dialect]
-        self.conn = self.client.connect(self.server, self.port)
-        self.conn.negotiate()
-        chan = self.conn.session_setup(self.creds)
-        tree = chan.tree_connect(self.share)
-        try:
-            yield chan, tree
-        finally:
-            if chan.connection.connected:
-                chan.logoff()
-                chan.connection.close()
-
-
-class QueryDirectoryTestMaxMtu(pike.test.PikeTest, TreeConnectWithDialect):
+class QueryDirectoryTestMaxMtu(pike.test.PikeTest,
+                               pike.test.TreeConnectWithDialect):
     root_dir_name = "mtu_transport_query_dir"
     filename_prefix = "A" * 200
     filename_pattern = "{0}.test.{{0:05}}".format(filename_prefix)
@@ -158,8 +141,9 @@ class QueryDirectoryTestMaxMtu(pike.test.PikeTest, TreeConnectWithDialect):
         if QueryDirectoryTestMaxMtu.dataset_created:
             return
         # 66 bytes is the struct size of FILE_DIRECTORY_INFORMATION
-        self.n_entries = (self.payload_size /
+        n_entries = (self.payload_size /
                      ((len(self.filename_pattern) - 1) * 2 + 66)) + 1
+        QueryDirectoryTestMaxMtu.n_entries = n_entries
         self.info("Creating {0} files to fill {1} bytes".format(
                         self.n_entries,
                         self.payload_size))
@@ -232,170 +216,18 @@ class QueryDirectoryTestMaxMtu(pike.test.PikeTest, TreeConnectWithDialect):
                 self.assertLessEqual(transaction_size,
                                      max_trans_size)
 
-    def test_file_directory_info_max_mtu(self):
+    def test_file_directory_info(self):
         self.gen_file_directory_info_max_mtu()
 
-    def test_file_directory_info_max_mtu_2_002(self):
+    def test_file_directory_info_2_002(self):
         self.gen_file_directory_info_max_mtu(dialect=pike.smb2.DIALECT_SMB2_002)
 
-    def test_file_directory_info_max_mtu_large_mtu(self):
+    def test_file_directory_info_2_1(self):
+        self.gen_file_directory_info_max_mtu(dialect=pike.smb2.DIALECT_SMB2_1)
+
+    def test_file_directory_info_3_0(self):
+        self.gen_file_directory_info_max_mtu(dialect=pike.smb2.DIALECT_SMB3_0)
+
+    def test_file_directory_info_large_mtu(self):
         self.gen_file_directory_info_max_mtu(caps=pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
 
-class WriteReadMaxMtu(pike.test.PikeTest, TreeConnectWithDialect):
-    invalid_write_status = pike.ntstatus.STATUS_INVALID_PARAMETER
-    invalid_read_status = pike.ntstatus.STATUS_INVALID_PARAMETER
-    invalid_read_status = pike.ntstatus.STATUS_INVALID_NETWORK_RESPONSE     # onefs only
-
-    write_buf = None
-
-    def setUp(self):
-        if WriteReadMaxMtu.write_buf is None:
-            with self.tree_connect_with_dialect_and_caps() as (chan, tree):
-                max_sz = max(chan.connection.negotiate_response.max_read_size,
-                             chan.connection.negotiate_response.max_write_size)
-                WriteReadMaxMtu.write_buf = "%" * max_sz
-
-    def pump_credits(self, chan, fh, size):
-        """
-        do small write operations on the file, but request enough credits to
-        satisfy a write of `size`
-        """
-        n_credits = size / 65536 + (1 if size % 65536 > 0 else 0)
-        if chan.connection.credits >= n_credits:
-            return
-
-        self.info("pumping credits from {0} to {1}".format(
-                        chan.connection.credits,
-                        n_credits))
-        while chan.connection.credits < n_credits:
-            with chan.let(credit_request=n_credits):
-                chan.write(fh, 0, "A")
-
-    def gen_writeread_max_mtu(self, dialect=None, caps=0):
-        """
-        Send the largest write and read the server will accept
-        """
-
-        filename = "gen_writeread_max_mtu"
-
-        with self.tree_connect_with_dialect_and_caps(dialect, caps) as (chan, tree):
-            max_read_size = chan.connection.negotiate_response.max_read_size
-            max_write_size = chan.connection.negotiate_response.max_write_size
-            self.info("Write {0} / Read {1}".format(
-                            max_write_size,
-                            max_read_size))
-            fh = chan.create(
-                        tree,
-                        filename,
-                        access=pike.smb2.GENERIC_ALL | pike.smb2.DELETE,
-                        options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
-            self.pump_credits(chan, fh, max_write_size)
-            write_resp = chan.write(fh, 0, self.write_buf[:max_write_size])
-            self.pump_credits(chan, fh, max_read_size)
-            read_resp = chan.read(fh, max_read_size, 0)
-            self.assertBufferEqual(read_resp.tostring(), self.write_buf[:max_read_size])
-
-    def gen_writeread_over(self, writeover=0, readover=0, dialect=None, caps=0):
-        """
-        Send more than the largest write and read the server will accept
-        """
-
-        filename = "gen_writeread_over"
-
-        with self.tree_connect_with_dialect_and_caps(dialect, caps) as (chan, tree):
-            fh = chan.create(
-                        tree,
-                        filename,
-                        access=pike.smb2.GENERIC_ALL | pike.smb2.DELETE,
-                        options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
-            if writeover:
-                max_write_size = chan.connection.negotiate_response.max_write_size
-                write_size = max_write_size + writeover
-                over_buf = "%" * writeover
-                self.info("Write {0} (over {1})".format(write_size, writeover))
-                self.pump_credits(chan, fh, write_size)
-                write_resp = chan.write(fh, 0, self.write_buf + over_buf)
-            if readover:
-                max_read_size = chan.connection.negotiate_response.max_read_size
-                read_size = max_read_size + readover
-                self.info("Read {0} (over {1})".format(read_size, readover))
-                self.pump_credits(chan, fh, read_size)
-                read_resp = chan.read(fh, read_size, 0)
-
-    def test_wr_2_002(self):
-        self.gen_writeread_max_mtu(dialect=pike.smb2.DIALECT_SMB2_002)
-
-    def test_wr_2_002_writeover1(self):
-        with self.assert_error(self.invalid_write_status):
-            self.gen_writeread_over(writeover=1,
-                                    dialect=pike.smb2.DIALECT_SMB2_002)
-
-    def test_wr_2_002_readover1(self):
-        with self.assert_error(self.invalid_read_status):
-            self.gen_writeread_over(readover=1,
-                                    dialect=pike.smb2.DIALECT_SMB2_002)
-
-    def test_wr_2_1(self):
-        self.gen_writeread_max_mtu(dialect=pike.smb2.DIALECT_SMB2_1)
-
-    def test_wr_2_1_writeover1(self):
-        with self.assert_error(self.invalid_write_status):
-            self.gen_writeread_over(writeover=1,
-                                    dialect=pike.smb2.DIALECT_SMB2_1)
-
-    def test_wr_2_1_readover1(self):
-        with self.assert_error(self.invalid_read_status):
-            self.gen_writeread_over(readover=1,
-                                    dialect=pike.smb2.DIALECT_SMB2_1)
-
-    def test_wr_3_0(self):
-        self.gen_writeread_max_mtu(dialect=pike.smb2.DIALECT_SMB3_0)
-
-    def test_wr_3_0_writeover1(self):
-        with self.assert_error(self.invalid_write_status):
-            self.gen_writeread_over(writeover=1,
-                                    dialect=pike.smb2.DIALECT_SMB3_0)
-
-    def test_wr_3_0_readover1(self):
-        with self.assert_error(self.invalid_read_status):
-            self.gen_writeread_over(readover=1,
-                                    dialect=pike.smb2.DIALECT_SMB3_0)
-
-    def test_wr_3_0_2(self):
-        self.gen_writeread_max_mtu(dialect=pike.smb2.DIALECT_SMB3_0_2)
-
-    def test_wr_3_0_2_writeover1(self):
-        with self.assert_error(self.invalid_write_status):
-            self.gen_writeread_over(writeover=1,
-                                    dialect=pike.smb2.DIALECT_SMB3_0_2)
-
-    def test_wr_3_0_2_readover1(self):
-        with self.assert_error(self.invalid_read_status):
-            self.gen_writeread_over(readover=1,
-                                    dialect=pike.smb2.DIALECT_SMB3_0_2)
-
-    def test_wr_3_1_1(self):
-        self.gen_writeread_max_mtu(dialect=pike.smb2.DIALECT_SMB3_1_1)
-
-    def test_wr_3_1_1_writeover1(self):
-        with self.assert_error(self.invalid_write_status):
-            self.gen_writeread_over(writeover=1,
-                                    dialect=pike.smb2.DIALECT_SMB3_1_1)
-
-    def test_wr_3_1_1_readover1(self):
-        with self.assert_error(self.invalid_read_status):
-            self.gen_writeread_over(readover=1,
-                                    dialect=pike.smb2.DIALECT_SMB3_1_1)
-
-    def test_wr_large_mtu(self):
-        self.gen_writeread_max_mtu(caps=pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
-
-    def test_wr_large_mtu_writeover1(self):
-        with self.assert_error(self.invalid_write_status):
-            self.gen_writeread_over(writeover=1,
-                                    caps=pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
-
-    def test_wr_large_mtu_readover1(self):
-        with self.assert_error(self.invalid_read_status):
-            self.gen_writeread_over(readover=1,
-                                    caps=pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)

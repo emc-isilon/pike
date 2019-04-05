@@ -56,12 +56,12 @@ class ReadWriteTest(pike.test.PikeTest):
                            disposition=pike.smb2.FILE_SUPERSEDE,
                            options=pike.smb2.FILE_DELETE_ON_CLOSE,
                            oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_EXCLUSIVE).result()
-       
+
         bytes_written = chan.write(file,
                                    0,
                                    buffer)
         self.assertEqual(bytes_written, len(buffer))
-        
+
         chan.close(file)
 
     # Test that a 0-byte write succeeds
@@ -78,12 +78,12 @@ class ReadWriteTest(pike.test.PikeTest):
                            disposition=pike.smb2.FILE_SUPERSEDE,
                            options=pike.smb2.FILE_DELETE_ON_CLOSE,
                            oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_EXCLUSIVE).result()
-       
+
         bytes_written = chan.write(file,
                                    0,
                                    buffer)
         self.assertEqual(bytes_written, 0)
-        
+
         chan.close(file)
 
     # Test that a 0-byte write succeeds
@@ -100,12 +100,12 @@ class ReadWriteTest(pike.test.PikeTest):
                            disposition=pike.smb2.FILE_SUPERSEDE,
                            options=pike.smb2.FILE_DELETE_ON_CLOSE,
                            oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_EXCLUSIVE).result()
-       
+
         bytes_written = chan.write(file,
                                    0,
                                    buffer)
         self.assertEqual(bytes_written, 0)
-        
+
         chan.close(file)
 
     # Test that a 0-byte write triggers access checks
@@ -121,10 +121,10 @@ class ReadWriteTest(pike.test.PikeTest):
                            share=share_all,
                            disposition=pike.smb2.FILE_SUPERSEDE,
                            oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_EXCLUSIVE).result()
-       
+
         with self.assert_error(pike.ntstatus.STATUS_ACCESS_DENIED):
             chan.write(file, 0, None)
-        
+
         chan.close(file)
 
     # Test that 0-byte write does not cause an oplock break
@@ -196,3 +196,164 @@ class ReadWriteTest(pike.test.PikeTest):
 
         chan.close(file)
         chan.close(file2)
+
+
+class WriteReadMaxMtu(pike.test.PikeTest,
+                      pike.test.TreeConnectWithDialect):
+    invalid_write_status = pike.ntstatus.STATUS_INVALID_PARAMETER
+    invalid_read_status = pike.ntstatus.STATUS_INVALID_PARAMETER
+    invalid_read_status = pike.ntstatus.STATUS_INVALID_NETWORK_RESPONSE     # onefs only
+
+    write_buf = None
+
+    def setUp(self):
+        if WriteReadMaxMtu.write_buf is None:
+            with self.tree_connect_with_dialect_and_caps() as (chan, tree):
+                max_sz = max(chan.connection.negotiate_response.max_read_size,
+                             chan.connection.negotiate_response.max_write_size)
+                WriteReadMaxMtu.write_buf = "%" * max_sz
+
+    def pump_credits(self, chan, fh, size):
+        """
+        do small write operations on the file, but request enough credits to
+        satisfy a write of `size`
+        """
+        n_credits = size / 65536 + (1 if size % 65536 > 0 else 0)
+        if chan.connection.credits >= n_credits:
+            return
+
+        self.info("pumping credits from {0} to {1}".format(
+                        chan.connection.credits,
+                        n_credits))
+        while chan.connection.credits < n_credits:
+            with chan.let(credit_request=n_credits):
+                chan.write(fh, 0, "A")
+
+    def gen_writeread_max_mtu(self, dialect=None, caps=0):
+        """
+        Send the largest write and read the server will accept
+        """
+
+        filename = "gen_writeread_max_mtu"
+
+        with self.tree_connect_with_dialect_and_caps(dialect, caps) as (chan, tree):
+            max_read_size = chan.connection.negotiate_response.max_read_size
+            max_write_size = chan.connection.negotiate_response.max_write_size
+            self.info("Write {0} / Read {1}".format(
+                            max_write_size,
+                            max_read_size))
+            fh = chan.create(
+                        tree,
+                        filename,
+                        access=pike.smb2.GENERIC_ALL | pike.smb2.DELETE,
+                        options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
+            self.pump_credits(chan, fh, max_write_size)
+            write_resp = chan.write(fh, 0, self.write_buf[:max_write_size])
+            self.pump_credits(chan, fh, max_read_size)
+            read_resp = chan.read(fh, max_read_size, 0)
+            self.assertBufferEqual(read_resp.tostring(), self.write_buf[:max_read_size])
+
+    def gen_writeread_over(self, writeover=0, readover=0, dialect=None, caps=0):
+        """
+        Send more than the largest write and read the server will accept
+        """
+
+        filename = "gen_writeread_over"
+
+        with self.tree_connect_with_dialect_and_caps(dialect, caps) as (chan, tree):
+            fh = chan.create(
+                        tree,
+                        filename,
+                        access=pike.smb2.GENERIC_ALL | pike.smb2.DELETE,
+                        options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
+            if writeover:
+                max_write_size = chan.connection.negotiate_response.max_write_size
+                write_size = max_write_size + writeover
+                over_buf = "%" * writeover
+                self.info("Write {0} (over {1})".format(write_size, writeover))
+                self.pump_credits(chan, fh, write_size)
+                write_resp = chan.write(fh, 0, self.write_buf + over_buf)
+            if readover:
+                max_read_size = chan.connection.negotiate_response.max_read_size
+                read_size = max_read_size + readover
+                self.info("Read {0} (over {1})".format(read_size, readover))
+                self.pump_credits(chan, fh, read_size)
+                read_resp = chan.read(fh, read_size, 0)
+
+    def test_wr_2_002(self):
+        self.gen_writeread_max_mtu(dialect=pike.smb2.DIALECT_SMB2_002)
+
+    def test_wr_2_002_writeover1(self):
+        with self.assert_error(self.invalid_write_status):
+            self.gen_writeread_over(writeover=1,
+                                    dialect=pike.smb2.DIALECT_SMB2_002)
+
+    def test_wr_2_002_readover1(self):
+        with self.assert_error(self.invalid_read_status):
+            self.gen_writeread_over(readover=1,
+                                    dialect=pike.smb2.DIALECT_SMB2_002)
+
+    def test_wr_2_1(self):
+        self.gen_writeread_max_mtu(dialect=pike.smb2.DIALECT_SMB2_1)
+
+    def test_wr_2_1_writeover1(self):
+        with self.assert_error(self.invalid_write_status):
+            self.gen_writeread_over(writeover=1,
+                                    dialect=pike.smb2.DIALECT_SMB2_1)
+
+    def test_wr_2_1_readover1(self):
+        with self.assert_error(self.invalid_read_status):
+            self.gen_writeread_over(readover=1,
+                                    dialect=pike.smb2.DIALECT_SMB2_1)
+
+    def test_wr_3_0(self):
+        self.gen_writeread_max_mtu(dialect=pike.smb2.DIALECT_SMB3_0)
+
+    def test_wr_3_0_writeover1(self):
+        with self.assert_error(self.invalid_write_status):
+            self.gen_writeread_over(writeover=1,
+                                    dialect=pike.smb2.DIALECT_SMB3_0)
+
+    def test_wr_3_0_readover1(self):
+        with self.assert_error(self.invalid_read_status):
+            self.gen_writeread_over(readover=1,
+                                    dialect=pike.smb2.DIALECT_SMB3_0)
+
+    def test_wr_3_0_2(self):
+        self.gen_writeread_max_mtu(dialect=pike.smb2.DIALECT_SMB3_0_2)
+
+    def test_wr_3_0_2_writeover1(self):
+        with self.assert_error(self.invalid_write_status):
+            self.gen_writeread_over(writeover=1,
+                                    dialect=pike.smb2.DIALECT_SMB3_0_2)
+
+    def test_wr_3_0_2_readover1(self):
+        with self.assert_error(self.invalid_read_status):
+            self.gen_writeread_over(readover=1,
+                                    dialect=pike.smb2.DIALECT_SMB3_0_2)
+
+    def test_wr_3_1_1(self):
+        self.gen_writeread_max_mtu(dialect=pike.smb2.DIALECT_SMB3_1_1)
+
+    def test_wr_3_1_1_writeover1(self):
+        with self.assert_error(self.invalid_write_status):
+            self.gen_writeread_over(writeover=1,
+                                    dialect=pike.smb2.DIALECT_SMB3_1_1)
+
+    def test_wr_3_1_1_readover1(self):
+        with self.assert_error(self.invalid_read_status):
+            self.gen_writeread_over(readover=1,
+                                    dialect=pike.smb2.DIALECT_SMB3_1_1)
+
+    def test_wr_large_mtu(self):
+        self.gen_writeread_max_mtu(caps=pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
+
+    def test_wr_large_mtu_writeover1(self):
+        with self.assert_error(self.invalid_write_status):
+            self.gen_writeread_over(writeover=1,
+                                    caps=pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
+
+    def test_wr_large_mtu_readover1(self):
+        with self.assert_error(self.invalid_read_status):
+            self.gen_writeread_over(readover=1,
+                                    caps=pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)

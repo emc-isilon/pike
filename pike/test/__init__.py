@@ -236,6 +236,28 @@ class PikeTest(unittest.TestCase):
             raise AssertionError("Block mismatch at byte {0}: "
                                  "{1} != {2}".format(low, buf1[low], buf2[low]))
 
+
+class TreeConnectWithDialect(object):
+    """
+    Mixin class provides `tree_connect_with_dialect_and_caps` contextmanager
+    """
+    @contextlib.contextmanager
+    def tree_connect_with_dialect_and_caps(self, dialect=None, caps=0):
+        self.client = model.Client(capabilities=caps)
+        if dialect is not None:
+            self.client.dialects = [dialect]
+        self.conn = self.client.connect(self.server, self.port)
+        self.conn.negotiate()
+        chan = self.conn.session_setup(self.creds)
+        tree = chan.tree_connect(self.share)
+        try:
+            yield chan, tree
+        finally:
+            if chan.connection.connected:
+                chan.logoff()
+                chan.connection.close()
+
+
 class _Decorator(object):
     def __init__(self, value):
         self.value = value
