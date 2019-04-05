@@ -39,7 +39,10 @@ import pike.smb2
 import pike.test
 import pike.ntstatus
 import array
+import errno
 import random
+import socket
+
 
 class ReadWriteTest(pike.test.PikeTest):
     # Test that we can write to a file
@@ -61,28 +64,6 @@ class ReadWriteTest(pike.test.PikeTest):
                                    0,
                                    buffer)
         self.assertEqual(bytes_written, len(buffer))
-
-        chan.close(file)
-
-    # Test that a 0-byte write succeeds
-    def test_write_none(self):
-        chan, tree = self.tree_connect()
-        buffer = None
-
-        share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
-
-        file = chan.create(tree,
-                           'write.txt',
-                           access=pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE,
-                           share=share_all,
-                           disposition=pike.smb2.FILE_SUPERSEDE,
-                           options=pike.smb2.FILE_DELETE_ON_CLOSE,
-                           oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_EXCLUSIVE).result()
-
-        bytes_written = chan.write(file,
-                                   0,
-                                   buffer)
-        self.assertEqual(bytes_written, 0)
 
         chan.close(file)
 
@@ -200,9 +181,13 @@ class ReadWriteTest(pike.test.PikeTest):
 
 class WriteReadMaxMtu(pike.test.PikeTest,
                       pike.test.TreeConnectWithDialect):
-    invalid_write_status = pike.ntstatus.STATUS_INVALID_PARAMETER
-    invalid_read_status = pike.ntstatus.STATUS_INVALID_PARAMETER
-    invalid_read_status = pike.ntstatus.STATUS_INVALID_NETWORK_RESPONSE     # onefs only
+    invalid_write_status = [
+            pike.ntstatus.STATUS_INVALID_PARAMETER,     # windows 2012+
+            pike.ntstatus.STATUS_BUFFER_OVERFLOW]       # windows 2008r2 / 7
+    invalid_read_status = [
+            pike.ntstatus.STATUS_INVALID_PARAMETER,     # windows 2012+
+            pike.ntstatus.STATUS_BUFFER_OVERFLOW,       # windows 2008r2 / 7
+            pike.ntstatus.STATUS_INVALID_NETWORK_RESPONSE]      # onefs
 
     write_buf = None
 
@@ -235,8 +220,10 @@ class WriteReadMaxMtu(pike.test.PikeTest,
         """
 
         filename = "gen_writeread_max_mtu"
+        write_resp = read_resp = None
 
-        with self.tree_connect_with_dialect_and_caps(dialect, caps) as (chan, tree):
+        with self.tree_connect_with_dialect_and_caps(dialect, caps) as (chan,
+                                                                        tree):
             max_read_size = chan.connection.negotiate_response.max_read_size
             max_write_size = chan.connection.negotiate_response.max_write_size
             self.info("Write {0} / Read {1}".format(
@@ -251,7 +238,9 @@ class WriteReadMaxMtu(pike.test.PikeTest,
             write_resp = chan.write(fh, 0, self.write_buf[:max_write_size])
             self.pump_credits(chan, fh, max_read_size)
             read_resp = chan.read(fh, max_read_size, 0)
-            self.assertBufferEqual(read_resp.tostring(), self.write_buf[:max_read_size])
+            self.assertBufferEqual(read_resp.tostring(),
+                                   self.write_buf[:max_read_size])
+        return write_resp, read_resp
 
     def gen_writeread_over(self, writeover=0, readover=0, dialect=None, caps=0):
         """
@@ -259,6 +248,7 @@ class WriteReadMaxMtu(pike.test.PikeTest,
         """
 
         filename = "gen_writeread_over"
+        write_resp = read_resp = None
 
         with self.tree_connect_with_dialect_and_caps(dialect, caps) as (chan, tree):
             fh = chan.create(
@@ -279,81 +269,109 @@ class WriteReadMaxMtu(pike.test.PikeTest,
                 self.info("Read {0} (over {1})".format(read_size, readover))
                 self.pump_credits(chan, fh, read_size)
                 read_resp = chan.read(fh, read_size, 0)
+        return write_resp, read_resp
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_002)
     def test_wr_2_002(self):
         self.gen_writeread_max_mtu(dialect=pike.smb2.DIALECT_SMB2_002)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_002)
     def test_wr_2_002_writeover1(self):
-        with self.assert_error(self.invalid_write_status):
+        try:
             self.gen_writeread_over(writeover=1,
                                     dialect=pike.smb2.DIALECT_SMB2_002)
+            self.fail("Writing more than max_write_size didn't raise error")
+        # special handling is needed here since windows resets the connection
+        # instead of checking the size and returning an error
+        except pike.model.ResponseError as err:
+            if err.response.status not in self.invalid_write_status:
+                raise
+        except socket.error as err:
+            if err.errno != errno.ECONNRESET:
+                raise
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_002)
     def test_wr_2_002_readover1(self):
-        with self.assert_error(self.invalid_read_status):
+        with self.assert_error(*self.invalid_read_status):
             self.gen_writeread_over(readover=1,
                                     dialect=pike.smb2.DIALECT_SMB2_002)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
     def test_wr_2_1(self):
         self.gen_writeread_max_mtu(dialect=pike.smb2.DIALECT_SMB2_1)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
     def test_wr_2_1_writeover1(self):
-        with self.assert_error(self.invalid_write_status):
+        with self.assert_error(*self.invalid_write_status):
             self.gen_writeread_over(writeover=1,
                                     dialect=pike.smb2.DIALECT_SMB2_1)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
     def test_wr_2_1_readover1(self):
-        with self.assert_error(self.invalid_read_status):
+        with self.assert_error(*self.invalid_read_status):
             self.gen_writeread_over(readover=1,
                                     dialect=pike.smb2.DIALECT_SMB2_1)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
     def test_wr_3_0(self):
         self.gen_writeread_max_mtu(dialect=pike.smb2.DIALECT_SMB3_0)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
     def test_wr_3_0_writeover1(self):
-        with self.assert_error(self.invalid_write_status):
+        with self.assert_error(*self.invalid_write_status):
             self.gen_writeread_over(writeover=1,
                                     dialect=pike.smb2.DIALECT_SMB3_0)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
     def test_wr_3_0_readover1(self):
-        with self.assert_error(self.invalid_read_status):
+        with self.assert_error(*self.invalid_read_status):
             self.gen_writeread_over(readover=1,
                                     dialect=pike.smb2.DIALECT_SMB3_0)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0_2)
     def test_wr_3_0_2(self):
         self.gen_writeread_max_mtu(dialect=pike.smb2.DIALECT_SMB3_0_2)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0_2)
     def test_wr_3_0_2_writeover1(self):
-        with self.assert_error(self.invalid_write_status):
+        with self.assert_error(*self.invalid_write_status):
             self.gen_writeread_over(writeover=1,
                                     dialect=pike.smb2.DIALECT_SMB3_0_2)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0_2)
     def test_wr_3_0_2_readover1(self):
-        with self.assert_error(self.invalid_read_status):
+        with self.assert_error(*self.invalid_read_status):
             self.gen_writeread_over(readover=1,
                                     dialect=pike.smb2.DIALECT_SMB3_0_2)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0_2)
     def test_wr_3_1_1(self):
         self.gen_writeread_max_mtu(dialect=pike.smb2.DIALECT_SMB3_1_1)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0_2)
     def test_wr_3_1_1_writeover1(self):
-        with self.assert_error(self.invalid_write_status):
+        with self.assert_error(*self.invalid_write_status):
             self.gen_writeread_over(writeover=1,
                                     dialect=pike.smb2.DIALECT_SMB3_1_1)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0_2)
     def test_wr_3_1_1_readover1(self):
-        with self.assert_error(self.invalid_read_status):
+        with self.assert_error(*self.invalid_read_status):
             self.gen_writeread_over(readover=1,
                                     dialect=pike.smb2.DIALECT_SMB3_1_1)
 
+    @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
     def test_wr_large_mtu(self):
         self.gen_writeread_max_mtu(caps=pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
 
+    @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
     def test_wr_large_mtu_writeover1(self):
-        with self.assert_error(self.invalid_write_status):
+        with self.assert_error(*self.invalid_write_status):
             self.gen_writeread_over(writeover=1,
                                     caps=pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
 
+    @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
     def test_wr_large_mtu_readover1(self):
-        with self.assert_error(self.invalid_read_status):
+        with self.assert_error(*self.invalid_read_status):
             self.gen_writeread_over(readover=1,
                                     caps=pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
