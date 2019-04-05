@@ -41,6 +41,7 @@ import pike.ntstatus
 
 from contextlib import contextmanager
 
+
 class QueryDirectoryTest(pike.test.PikeTest):
     # Enumerate directory at FILE_DIRECTORY_INFORMATION level.
     # Test for presence of . and .. entries
@@ -68,7 +69,9 @@ class QueryDirectoryTest(pike.test.PikeTest):
 
         hello = chan.create(tree,
                             name,
-                            access=pike.smb2.GENERIC_WRITE | pike.smb2.GENERIC_READ | pike.smb2.DELETE,
+                            access=(pike.smb2.GENERIC_WRITE |
+                                    pike.smb2.GENERIC_READ |
+                                    pike.smb2.DELETE),
                             disposition=pike.smb2.FILE_SUPERSEDE,
                             options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
 
@@ -149,7 +152,7 @@ class QueryDirectoryTestMaxMtu(pike.test.PikeTest,
                         self.payload_size))
 
         chan, tree = self.tree_connect()
-        with self.get_test_root(chan, tree) as root_handle:
+        with self.get_test_root(chan, tree) as _:
             pass            # ensure the test root dir is created
         # Creates files within the root directory.
         remaining_files = self.n_entries
@@ -180,25 +183,28 @@ class QueryDirectoryTestMaxMtu(pike.test.PikeTest,
             self.root_dir_name,
             access=pike.smb2.GENERIC_READ,
             options=pike.smb2.FILE_DIRECTORY_FILE,
-            share=pike.smb2.FILE_SHARE_READ |\
-                  pike.smb2.FILE_SHARE_WRITE |\
-                  pike.smb2.FILE_SHARE_DELETE).result()
+            share=(pike.smb2.FILE_SHARE_READ |
+                   pike.smb2.FILE_SHARE_WRITE |
+                   pike.smb2.FILE_SHARE_DELETE)).result()
         try:
             yield root_handle
         finally:
             chan.close(root_handle)
 
-    # Enumerate directory at FILE_DIRECTORY_INFORMATION level using the maximum transfer size.
     def gen_file_directory_info_max_mtu(self, dialect=None, caps=0):
         """
-        Enumerate directory at FILE_DIRECTORY_INFORMATION level using the maximum transfer size.
+        Enumerate directory at FILE_DIRECTORY_INFORMATION level using the
+        maximum transfer size.
         """
 
-        with self.tree_connect_with_dialect_and_caps(dialect, caps) as (chan, tree):
-            # Retrieves the maximum transaction size to determine how big the command's payload can be (MTU).
+        with self.tree_connect_with_dialect_and_caps(dialect, caps) as (chan,
+                                                                        tree):
+            # Retrieves the maximum transaction size to determine how big the
+            # command's payload can be (MTU).
             max_trans_size = chan.connection.negotiate_response.max_transact_size
 
-            # Enumerates the root directory and validates that the expected files are present in it.
+            # Enumerates the root directory and validates that the expected
+            # files are present in it.
             with self.get_test_root(chan, tree) as root_handle:
                 dir_query = chan.query_directory(
                     root_handle,
@@ -219,15 +225,18 @@ class QueryDirectoryTestMaxMtu(pike.test.PikeTest,
     def test_file_directory_info(self):
         self.gen_file_directory_info_max_mtu()
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_002)
     def test_file_directory_info_2_002(self):
         self.gen_file_directory_info_max_mtu(dialect=pike.smb2.DIALECT_SMB2_002)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
     def test_file_directory_info_2_1(self):
         self.gen_file_directory_info_max_mtu(dialect=pike.smb2.DIALECT_SMB2_1)
 
+    @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
     def test_file_directory_info_3_0(self):
         self.gen_file_directory_info_max_mtu(dialect=pike.smb2.DIALECT_SMB3_0)
 
+    @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
     def test_file_directory_info_large_mtu(self):
         self.gen_file_directory_info_max_mtu(caps=pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
-
