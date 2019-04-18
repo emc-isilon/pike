@@ -133,7 +133,7 @@ class QueryDirectoryTest(pike.test.PikeTest):
 class QueryDirectoryTestMaxMtu(pike.test.PikeTest,
                                pike.test.TreeConnectWithDialect):
     root_dir_name = "mtu_transport_query_dir"
-    filename_prefix = "A" * 200
+    filename_prefix = "A" * 211
     filename_pattern = "{0}.test.{{0:05}}".format(filename_prefix)
     payload_size = 65536
     n_entries = 0
@@ -206,21 +206,33 @@ class QueryDirectoryTestMaxMtu(pike.test.PikeTest,
             # Enumerates the root directory and validates that the expected
             # files are present in it.
             with self.get_test_root(chan, tree) as root_handle:
-                dir_query = chan.query_directory(
+                dir_query1 = chan.query_directory(
                     root_handle,
                     file_information_class=pike.smb2.FILE_DIRECTORY_INFORMATION,
                     flags=0,
                     file_index=0,
                     file_name='{0}*'.format(self.filename_prefix),
                     output_buffer_length=self.payload_size)
+                dir_query2 = chan.query_directory(
+                    root_handle,
+                    file_information_class=pike.smb2.FILE_DIRECTORY_INFORMATION,
+                    flags=0,
+                    file_name='{0}*'.format(self.filename_prefix),
+                    output_buffer_length=self.payload_size)
 
-                transaction_size = dir_query[-1].end - dir_query[0].start
+                transaction_size1 = dir_query1[-1].end - dir_query1[0].start
                 self.info("Transaction size for query: {0}/{1}".format(
-                                transaction_size, max_trans_size))
+                                transaction_size1, max_trans_size))
+                transaction_size2 = dir_query2[-1].end - dir_query2[0].start
+                self.info("Transaction size for query: {0}/{1}".format(
+                                transaction_size2, max_trans_size))
                 self.info("Dir entries returned: {0}/{1}".format(
-                                len(dir_query), self.n_entries))
-                self.assertLessEqual(transaction_size,
+                                len(dir_query1) + len(dir_query2),
+                                self.n_entries))
+                self.assertLessEqual(transaction_size1,
                                      max_trans_size)
+                self.assertGreaterEqual(transaction_size1 + transaction_size2,
+                                        self.payload_size)
 
     def test_file_directory_info(self):
         self.gen_file_directory_info_max_mtu()

@@ -229,6 +229,7 @@ class WriteReadMaxMtu(pike.test.PikeTest,
             self.info("Write {0} / Read {1}".format(
                             max_write_size,
                             max_read_size))
+            self.assertGreaterEqual(len(self.write_buf), max_write_size)
             fh = chan.create(
                         tree,
                         filename,
@@ -236,6 +237,7 @@ class WriteReadMaxMtu(pike.test.PikeTest,
                         options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
             self.pump_credits(chan, fh, max_write_size)
             write_resp = chan.write(fh, 0, self.write_buf[:max_write_size])
+            self.assertEqual(write_resp, max_write_size)
             self.pump_credits(chan, fh, max_read_size)
             read_resp = chan.read(fh, max_read_size, 0)
             self.assertBufferEqual(read_resp.tostring(),
@@ -258,6 +260,7 @@ class WriteReadMaxMtu(pike.test.PikeTest,
                         options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
             if writeover:
                 max_write_size = chan.connection.negotiate_response.max_write_size
+                self.assertGreaterEqual(len(self.write_buf), max_write_size)
                 write_size = max_write_size + writeover
                 over_buf = "%" * writeover
                 self.info("Write {0} (over {1})".format(write_size, writeover))
