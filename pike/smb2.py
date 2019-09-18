@@ -128,6 +128,8 @@ class ShareFlags(core.FlagEnum):
 ShareFlags.import_items(globals())
 
 # Misc
+RELATED_SID = (2**64-1)
+RELATED_TID = (2**32-1)
 RELATED_FID = (2**64-1,2**64-1)
 UNSOLICITED_MESSAGE_ID = (2**64-1)
 
