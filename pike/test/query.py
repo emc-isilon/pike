@@ -41,34 +41,64 @@ import pike.ntstatus
 
 from pike.test import unittest
 
+
 class QueryTest(pike.test.PikeTest):
+
     def __init__(self, *args, **kwargs):
         super(QueryTest, self).__init__(*args, **kwargs)
         self.chan = None
         self.tree = None
-        
+
     def open_file(self):
         """Helper to open basic file"""
         self.chan, self.tree = self.tree_connect()
         return self.chan.create(self.tree, "test.txt", disposition=pike.smb2.FILE_SUPERSEDE).result()
 
-    def basic_test(self, level):
+    def basic_test(self, level, info_type=pike.smb2.SMB2_0_INFO_FILE, additional_information=None):
         """Helper to perform a basic query test"""
         handle = self.open_file()
-        info = self.chan.query_file_info(handle, level)
+        info = self.chan.query_file_info(
+            handle, level, info_type=info_type, additional_information=additional_information)
         self.chan.close(handle)
 
     def mismatch_test(self, level, size):
         """Helper to perform a test size mismatch"""
         handle = self.open_file()
-        
+
         with self.assert_error(pike.ntstatus.STATUS_INFO_LENGTH_MISMATCH):
-            self.chan.query_file_info(handle, level, output_buffer_length = size)
+            self.chan.query_file_info(handle, level, output_buffer_length=size)
         self.chan.close(handle)
 
     # The following tests simply try each info level
     def test_query_file_basic_info(self):
         self.basic_test(pike.smb2.FILE_BASIC_INFORMATION)
+
+    def test_query_file_sec_info_owner(self):
+        sec_info = pike.smb2.OWNER_SECURITY_INFORMATION
+        self.basic_test(pike.smb2.FILE_SECURITY_INFORMATION,
+                        info_type=pike.smb2.SMB2_0_INFO_SECURITY,
+                        additional_information=sec_info)
+
+    def test_query_file_sec_info_group(self):
+        sec_info = pike.smb2.GROUP_SECURITY_INFORMATION
+        self.basic_test(pike.smb2.FILE_SECURITY_INFORMATION,
+                        info_type=pike.smb2.SMB2_0_INFO_SECURITY,
+                        additional_information=sec_info)
+
+    def test_query_file_sec_info_dacl(self):
+        sec_info = pike.smb2.DACL_SECURITY_INFORMATION
+        self.basic_test(pike.smb2.FILE_SECURITY_INFORMATION,
+                        info_type=pike.smb2.SMB2_0_INFO_SECURITY,
+                        additional_information=sec_info)
+
+    def test_query_file_sec_info_all(self):
+        sec_info = (pike.smb2.OWNER_SECURITY_INFORMATION +
+                    pike.smb2.GROUP_SECURITY_INFORMATION +
+                    pike.smb2.DACL_SECURITY_INFORMATION)
+
+        self.basic_test(pike.smb2.FILE_SECURITY_INFORMATION,
+                        info_type=pike.smb2.SMB2_0_INFO_SECURITY,
+                        additional_information=sec_info)
 
     def test_query_file_standard_info(self):
         self.basic_test(pike.smb2.FILE_STANDARD_INFORMATION)
@@ -90,7 +120,6 @@ class QueryTest(pike.test.PikeTest):
 
     def test_query_file_all_info(self):
         self.basic_test(pike.smb2.FILE_ALL_INFORMATION)
-
 
     def test_mismatch_0_file_basic_info(self):
         self.mismatch_test(pike.smb2.FILE_BASIC_INFORMATION, 0)

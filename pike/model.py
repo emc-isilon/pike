@@ -1571,7 +1571,7 @@ class Channel(object):
         return set_req
 
     @contextlib.contextmanager
-    def set_file_info(self, handle, cls):
+    def set_file_info(self, handle, cls, additional_information=None):
         info_type = file_information_class = None
         if hasattr(cls, "info_type"):
             info_type = cls.info_type
@@ -1580,7 +1580,8 @@ class Channel(object):
         set_req = self.set_file_info_request(
                 handle,
                 file_information_class,
-                info_type)
+                info_type,
+                additional_information=additional_information)
         yield cls(set_req)
         self.connection.transceive(set_req.parent.parent)[0]
 
