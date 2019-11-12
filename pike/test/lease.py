@@ -54,7 +54,7 @@ class LeaseTest(pike.test.PikeTest):
     # Upgrade lease from RW to RWH, then break it to R
     def test_lease_upgrade_break(self):
         chan, tree = self.tree_connect()
-        
+
         # Request rw lease
         handle1 = chan.create(tree,
                               'lease.txt',
@@ -62,9 +62,9 @@ class LeaseTest(pike.test.PikeTest):
                               oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
                               lease_key = self.lease1,
                               lease_state = self.rw).result()
-    
+
         self.assertEqual(handle1.lease.lease_state, self.rw)
-        
+
         handle2 = chan.create(tree,
                               'lease.txt',
                               share=self.share_all,
@@ -77,7 +77,7 @@ class LeaseTest(pike.test.PikeTest):
 
         # On break, voluntarily give up handle caching
         handle2.lease.on_break(lambda state: state & ~pike.smb2.SMB2_LEASE_HANDLE_CACHING)
-   
+
         # Break our lease
         handle3 = chan.create(tree,
                               'lease.txt',
@@ -105,7 +105,7 @@ class LeaseTest(pike.test.PikeTest):
                               oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
                               lease_key = self.lease1,
                               lease_state = self.rw).result()
-        
+
         # Upgrade to rwh
         handle2 = chan.create(tree,
                               'lease.txt',
@@ -113,7 +113,7 @@ class LeaseTest(pike.test.PikeTest):
                               oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
                               lease_key = self.lease1,
                               lease_state = self.rwh).result()
-        
+
         # Break our lease
         handle3_future = chan.create(tree,
                                      'lease.txt',
@@ -121,19 +121,19 @@ class LeaseTest(pike.test.PikeTest):
                                      oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
                                      lease_key = self.lease2,
                                      lease_state = self.rwh)
-        
+
         # Wait for break
         handle1.lease.future.wait()
-        
+
         # Close second handle
         chan.close(handle2)
-        
+
         # Now ack break
         handle1.lease.on_break(lambda state: state)
-        
+
         # Wait for handle3
         handle3 = handle3_future.result()
-        
+
         chan.close(handle1)
         chan.close(handle3)
 
