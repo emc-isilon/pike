@@ -1782,6 +1782,38 @@ class Channel(object):
         yield cls(set_req)
         self.connection.transceive(set_req.parent.parent)[0]
 
+    def query_quota_info_request(
+            self,
+            handle,
+            return_single=False,
+            restart_scan=False,
+            output_buffer_length=4096):
+        smb_req = self.request(obj=handle)
+        query_req = smb2.QueryInfoRequest(smb_req)
+        quota_query_info = smb2.QueryQuotaInfo(query_req)
+
+        query_req.info_type = smb2.SMB2_0_INFO_QUOTA
+        query_req.file_information_class = 0
+        query_req.file_id = handle.file_id
+        query_req.output_buffer_length = output_buffer_length
+        quota_query_info.return_single = return_single
+        quota_query_info.restart_scan = restart_scan
+        return query_req
+
+    def query_quota_info(
+            self,
+            handle,
+            return_single=False,
+            restart_scan=False,
+            output_buffer_length=4096):
+        return self.connection.transceive(
+                self.query_quota_info_request(
+                    handle,
+                    return_single=return_single,
+                    restart_scan=restart_scan,
+                    output_buffer_length=output_buffer_length
+                ).parent.parent)[0][0]
+
     def change_notify_request(
         self,
         handle,
