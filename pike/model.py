@@ -1997,8 +1997,6 @@ class Tree(object):
 
 class Open(object):
     def __init__(self, tree, smb_res, create_guid=None, prev=None):
-        object.__init__(self)
-
         self.create_response = smb_res[0]
 
         self.tree = tree
@@ -2113,6 +2111,16 @@ class Open(object):
             # If the underlying connection for the channel is closed explicitly
             # open will not able to find an appropriate channel, to send close.
             pass
+
+
+class RelatedOpen(object):
+    """
+    Use in place of a real `Open` object in compound requests to use a handle
+    from previous Create in the chain
+    """
+    def __init__(self, tree=None):
+        self.tree_id = tree.tree_id
+        self.file_id = smb2.RELATED_FID
 
 
 class Lease(object):
