@@ -38,28 +38,9 @@ import pike.model
 import pike.ntstatus
 import pike.smb2
 import pike.test
-import random
-import array
 
 
-def adopt(new_parent, obj):
-    """
-    obj is adopted by new_parent
-    """
-    new_parent.append(obj)
-    obj.parent = new_parent
-    if isinstance(obj, pike.smb2.Smb2):
-        obj.flags |= pike.smb2.SMB2_FLAGS_RELATED_OPERATIONS
-
-
-class RelatedOpen(pike.model.Tree):
-    """
-    Shim to insert the RELATED_FID into the request
-    """
-    def __init__(self, tree=None):
-        self.tree_id = tree.tree_id
-        self.file_id = pike.smb2.RELATED_FID
-        self.encrypt_data = tree.encrypt_data if tree is not None else False
+RelatedOpen = pike.model.RelatedOpen
 
 
 class CompoundTest(pike.test.PikeTest):
@@ -100,10 +81,10 @@ class CompoundTest(pike.test.PikeTest):
                 options=pike.smb2.FILE_DELETE_ON_CLOSE)
         nb_req = create_req.parent.parent
         query_req = chan.query_file_info_request(RelatedOpen(tree))
-        adopt(nb_req, query_req.parent)
+        nb_req.adopt(query_req.parent)
 
         close_req = chan.close_request(RelatedOpen(tree))
-        adopt(nb_req, close_req.parent)
+        nb_req.adopt(close_req.parent)
 
         (create_res,
          query_res,
@@ -132,10 +113,10 @@ class CompoundTest(pike.test.PikeTest):
                 access=pike.smb2.GENERIC_WRITE)
         nb_req = create_req1.parent.parent
         write_req = chan.write_request(RelatedOpen(tree), 0, buf)
-        adopt(nb_req, write_req.parent)
+        nb_req.adopt(write_req.parent)
 
         close_req = chan.close_request(RelatedOpen(tree))
-        adopt(nb_req, close_req.parent)
+        nb_req.adopt(close_req.parent)
 
         (create_res1,
          write_res,
@@ -149,10 +130,10 @@ class CompoundTest(pike.test.PikeTest):
                 options=pike.smb2.FILE_DELETE_ON_CLOSE)
         nb_req = create_req2.parent.parent
         read_req = chan.read_request(RelatedOpen(tree), 1024, 0)
-        adopt(nb_req, read_req.parent)
+        nb_req.adopt(read_req.parent)
 
         close_req = chan.close_request(RelatedOpen(tree))
-        adopt(nb_req, close_req.parent)
+        nb_req.adopt(close_req.parent)
 
         (create_res2,
          read_res,
@@ -174,10 +155,10 @@ class CompoundTest(pike.test.PikeTest):
                 options=pike.smb2.FILE_DELETE_ON_CLOSE)
         nb_req = create_req1.parent.parent
         write_req = chan.write_request(RelatedOpen(tree), 0, "Expect fail")
-        adopt(nb_req, write_req.parent)
+        nb_req.adopt(write_req.parent)
 
         close_req = chan.close_request(RelatedOpen(tree))
-        adopt(nb_req, close_req.parent)
+        nb_req.adopt(close_req.parent)
 
         with self.assert_error(pike.ntstatus.STATUS_ACCESS_DENIED):
             (create_res1,
@@ -201,7 +182,7 @@ class CompoundTest(pike.test.PikeTest):
         nb_req = create_req.parent.parent
 
         query_req = chan.query_directory_request(RelatedOpen(tree))
-        adopt(nb_req, query_req.parent)
+        nb_req.adopt(query_req.parent)
 
         (create_future, query_future) = chan.connection.submit(nb_req)
         with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_COLLISION):
