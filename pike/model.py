@@ -93,6 +93,11 @@ class RequestError(Exception):
         Exception.__init__(self, message)
         self.request = request
 
+class CallbackError(Exception):
+    """
+    the callback was not suitable
+    """
+
 class ResponseError(Exception):
     def __init__(self, response):
         Exception.__init__(self, response.command, response.status)
@@ -222,6 +227,8 @@ class Future(object):
                        when its result becomes available.  If it is already available,
                        it will be called immediately.
         """
+        if not callable(notify):
+            raise CallbackError("{0} is not a callable object".format(notify))
         if self.response is not None:
             notify(self)
         else:
@@ -1462,7 +1469,7 @@ class Channel(object):
 
     def close_submit(self, close_req):
         resp_future = self.connection.submit(close_req.parent.parent)[0]
-        resp_future.then(close_req.handle.dispose())
+        resp_future.then(lambda f: close_req.handle.dispose())
         return resp_future
 
     def close(self, handle):
@@ -1596,6 +1603,7 @@ class Channel(object):
         cnotify_req.file_id = handle.file_id
         cnotify_req.buffer_length = buffer_length
         cnotify_req.flags = flags
+        cnotify_req.completion_filter = completion_filter
         return cnotify_req
 
     def change_notify(
@@ -1609,7 +1617,7 @@ class Channel(object):
                     handle,
                     completion_filter,
                     flags,
-                    buffer_length=4096).parent.parent)[0][0]
+                    buffer_length=4096).parent.parent)[0]
 
     # Send an echo request and get a response
     def echo(self):
