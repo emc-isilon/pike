@@ -131,7 +131,10 @@ ShareFlags.import_items(globals())
 RELATED_FID = (2**64-1,2**64-1)
 UNSOLICITED_MESSAGE_ID = (2**64-1)
 
+
 class Smb2(core.Frame):
+    LOG_CHILDREN_COUNT = False
+    LOG_CHILDREN_EXPAND = True
     _request_table = {}
     _response_table = {}
     _notification_table = {}
@@ -157,6 +160,16 @@ class Smb2(core.Frame):
         self._command = None
         if parent is not None:
             parent.append(self)
+
+    def _log_str(self):
+        components = []
+        if not self.children:
+            components.append(type(self).__name__)
+        else:
+            components.extend(self._log_str_children())
+        if self.status:
+            components.insert(1, str(self.status))
+        return " ".join(components)
 
     def _children(self):
         return [self._command] if self._command is not None else []
@@ -345,6 +358,13 @@ class ErrorResponse(Command):
         self.error_context_count = 0
         self.error_data = None
         self._error_contexts = []
+
+    def _log_str(self):
+        components = [type(self).__name__]
+        if self.parent:
+            if self.parent.command:
+                components.append(str(self.parent.command))
+        return " ".join(components)
 
     def _children(self):
         return self._error_contexts
@@ -549,6 +569,15 @@ class NegotiateResponse(Response):
         self.negotiate_contexts_count = None
         self.negotiate_contexts_offset = None
         self.negotiate_contexts = []
+
+    def _log_str(self):
+        components = [
+            super(NegotiateResponse, self)._log_str(),
+            str(self.dialect_revision),
+            ]
+        if self.capabilities:
+            components.append("({})".format(self.capabilities))
+        return " ".join(components)
 
     def _children(self):
         return self.negotiate_contexts
@@ -764,6 +793,15 @@ class TreeConnectRequest(Request):
         self.path_length = None
         self.path = None
 
+    def _log_str(self):
+        components = [
+            super(TreeConnectRequest, self)._log_str(),
+            str(self.path),
+            ]
+        if self.flags:
+            components.append("({})".format(self.flags))
+        return " ".join(components)
+
     def _encode(self, cur):
         # Reserved/Flags (SMB 3.1.1)
         cur.encode_uint16le(self.flags)
@@ -795,6 +833,16 @@ class TreeConnectResponse(Response):
         self.share_flags = 0
         self.capabilities = 0
         self.maximal_access = 0
+
+    def _log_str(self):
+        components = [
+            super(TreeConnectResponse, self)._log_str(),
+            ]
+        if self.share_flags:
+            components.append(str(self.share_flags))
+        if self.capabilities:
+            components.append(str(self.capabilities))
+        return " ".join(components)
 
     def _decode(self, cur):
         self.share_type = cur.decode_uint8le()
@@ -971,6 +1019,12 @@ class CreateRequest(Request):
         self.create_contexts_length = 0
         self._create_contexts = []
 
+    def _log_str(self):
+        return " ".join([
+                super(CreateRequest, self)._log_str(),
+                self.name,
+                ])
+
     def _children(self):
         return self._create_contexts
 
@@ -1085,6 +1139,12 @@ class CreateResponse(Response):
         self.create_contexts_offset = 0
         self.create_contexts_length = 0
         self._create_contexts = []
+
+    def _log_str(self):
+        return " ".join([
+                super(CreateResponse, self)._log_str(),
+                "(0x{:x}, 0x{:x})".format(*self.file_id),
+                ])
 
     def _children(self):
         return self._create_contexts
@@ -1835,6 +1895,15 @@ class CloseRequest(Request):
         self.flags = 0
         self.file_id = None
 
+    def _log_str(self):
+        components = [
+                super(CloseRequest, self)._log_str(),
+                "(0x{:x}, 0x{:x})".format(*self.file_id),
+                ]
+        if self.flags:
+            components.append("({})".format(self.flags))
+        return " ".join(components)
+
     def _encode(self, cur):
         cur.encode_uint16le(self.flags)
         # Reserved
@@ -1929,6 +1998,16 @@ class QueryDirectoryRequest(Request):
         self.file_name = None
         self.output_buffer_length = 0
 
+    def _log_str(self):
+        components = [
+            super(QueryDirectoryRequest, self)._log_str(),
+            ]
+        if self.file_information_class:
+            components.append(str(self.file_information_class))
+        if self.flags:
+            components.append("({})".format(self.flags))
+        return " ".join(components)
+
     def _encode(self, cur):
         cur.encode_uint8le(self.file_information_class)
         cur.encode_uint8le(self.flags)
@@ -1968,6 +2047,14 @@ class QueryDirectoryResponse(Response):
             self._file_information_class = request[0].file_information_class
 
         self._entries = []
+
+    def _log_str(self):
+        components = [
+            super(QueryDirectoryResponse, self)._log_str(),
+            ]
+        if self._file_information_class:
+            components.append(str(self._file_information_class))
+        return " ".join(components)
 
     def _children(self):
         return self._entries
@@ -2029,6 +2116,19 @@ class QueryInfoRequest(Request):
         self.file_id = None
         self.output_buffer_length = 4096
 
+    def _log_str(self):
+        components = [
+            super(QueryInfoRequest, self)._log_str(),
+            ]
+        if self.info_type == SMB2_0_INFO_FILE:
+            if self.file_information_class:
+                components.append(str(self.file_information_class))
+        else:
+            components.append(str(self.info_type))
+        if self.flags:
+            components.append("({})".format(self.flags))
+        return " ".join(components)
+
     def _encode(self, cur):
         cur.encode_uint8le(self.info_type)
         cur.encode_uint8le(self.file_information_class)
@@ -2051,6 +2151,8 @@ class QueryInfoResponse(Response):
     command_id = SMB2_QUERY_INFO
     structure_size = 9
     allowed_status = [ntstatus.STATUS_SUCCESS, ntstatus.STATUS_BUFFER_OVERFLOW]
+    LOG_CHILDREN_COUNT = False
+    LOG_CHILDREN_EXPAND = True
 
     _info_map = {}
     information = core.Register(_info_map, "info_type", "file_information_class")
@@ -2098,6 +2200,8 @@ class QueryInfoResponse(Response):
 class SetInfoRequest(Request):
     command_id = SMB2_SET_INFO
     structure_size = 33
+    LOG_CHILDREN_COUNT = False
+    LOG_CHILDREN_EXPAND = True
 
     def __init__(self, parent):
         Request.__init__(self, parent)
@@ -3071,6 +3175,7 @@ class FileNotifyInformation(core.Frame):
         self.filename = cur.decode_utf16le(filenamelength)
         cur.offset = startoffset + neo
         return neo
+
     def __repr__(self):
         return "<{0} {1} '{2}'>".format(self.__class__.__name__,
                                         self.action,
@@ -3083,6 +3188,9 @@ class ChangeNotifyResponse(Response):
     def __init__(self, parent):
         Response.__init__(self, parent)
         self.notifications = []
+
+    def children(self):
+        return self.notifications
 
     def append(self, child):
         self.notifications.append(child)
@@ -3247,6 +3355,12 @@ class ReadRequest(Request):
         self.read_channel_info_length = None
         self.buffer = 0
 
+    def _log_str(self):
+        return " ".join([
+                super(ReadRequest, self)._log_str(),
+                "({}@{})".format(self.length, self.offset),
+                ])
+
     def _encode(self, cur):
         # Padding
         cur.encode_uint8le(self.padding)
@@ -3289,6 +3403,12 @@ class ReadResponse(Response):
         self.data_remaining = 0
         self.reserved2 = 0
 
+    def _log_str(self):
+        return " ".join([
+                super(ReadResponse, self)._log_str(),
+                "({})".format(self.length),
+                ])
+
     def _decode(self, cur):
         self.offset = cur.decode_uint8le()
         self.reserved = cur.decode_uint8le()
@@ -3323,6 +3443,14 @@ class WriteRequest(Request):
         self.channel = 0
         self.write_channel_info_offset = 0
         self.write_channel_info_length = 0
+
+    def _log_str(self):
+        components = [super(WriteRequest, self)._log_str()]
+        if self.flags:
+            components.append("({})".format(self.flags))
+        if self.buffer:
+            components.append("({}@{})".format(len(self.buffer), self.offset))
+        return " ".join(components)
 
     def _encode(self, cur):
         # Encode 0 for buffer offset for now
@@ -3366,6 +3494,15 @@ class WriteResponse(Response):
         self.remaining = 0
         self.write_channel_info_offset = 0
         self.write_channel_info_length = 0
+
+    def _log_str(self):
+        components = [
+                super(WriteResponse, self)._log_str(),
+                "({})".format(self.count),
+                ]
+        if self.remaining:
+            components.append("(remaining {})".format(self.remaining))
+        return " ".join(components)
 
     def _decode(self, cur):
         self.reserved = cur.decode_uint16le()
@@ -3454,6 +3591,8 @@ IoctlFlags.import_items(globals())
 class IoctlRequest(Request):
     command_id = SMB2_IOCTL
     structure_size = 57
+    LOG_CHILDREN_COUNT = False
+    LOG_CHILDREN_EXPAND = True
 
     field_blacklist = ['ioctl_input']
 
@@ -3508,6 +3647,8 @@ class IoctlRequest(Request):
 class IoctlResponse(Response):
     command_id = SMB2_IOCTL
     structure_size = 49
+    LOG_CHILDREN_COUNT = False
+    LOG_CHILDREN_EXPAND = True
 
     field_blacklist = ['ioctl_output']
 
@@ -3668,7 +3809,6 @@ class IoctlOutput(core.Frame):
         super(IoctlOutput, self).__init__(parent)
         if parent is not None:
             parent.ioctl_output = self
-
 
 class ValidateNegotiateInfoResponse(IoctlOutput):
     ioctl_ctl_code = FSCTL_VALIDATE_NEGOTIATE_INFO
