@@ -1870,21 +1870,25 @@ class Channel(object):
         return self.connection.transceive(
                 self.get_symlink_request(file).parent.parent)[0]
 
-    def enumerate_snapshots_request(self, fh, max_output_response=16384):
+    def enumerate_snapshots_request(self, fh,
+                                    snap_request=smb2.EnumerateSnapshotsRequest,
+                                    max_output_response=16384):
         smb_req = self.request(obj=fh.tree)
         ioctl_req = smb2.IoctlRequest(smb_req)
         ioctl_req.max_output_response = max_output_response
         ioctl_req.file_id = fh.file_id
         ioctl_req.flags |= smb2.SMB2_0_IOCTL_IS_FSCTL
-        enum_req = smb2.EnumerateSnapshotsRequest(ioctl_req)
+        enum_req = snap_request(ioctl_req)
         return enum_req
 
-    def enumerate_snapshots(self, fh):
+    def enumerate_snapshots(self, fh, snap_request=smb2.EnumerateSnapshotsRequest):
         return self.connection.transceive(
-                self.enumerate_snapshots_request(fh).parent.parent.parent)[0]
+                self.enumerate_snapshots_request(fh,
+                    snap_request).parent.parent.parent)[0]
 
-    def enumerate_snapshots_list(self, fh):
-        return self.enumerate_snapshots(fh)[0][0].snapshots
+    def enumerate_snapshots_list(self, fh,
+                                 snap_request=smb2.EnumerateSnapshotsRequest):
+        return self.enumerate_snapshots(fh, snap_request)[0][0].snapshots
 
     def lease_break_acknowledgement(self, tree, notify):
         """

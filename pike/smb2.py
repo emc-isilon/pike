@@ -3843,3 +3843,48 @@ class EnumerateSnapshotsResponse(IoctlOutput):
         # TODO: handle the case where the buffer is too small
         self.snapshots = snapshot_buffer.strip("\0").split("\0")
 
+class SetZeroDataRequest(IoctlInput):
+    ioctl_ctl_code = IoctlCode.FSCTL_SET_ZERO_DATA
+
+    def __init__(self, parent):
+        IoctlInput.__init__(self, parent)
+        self.FileOffset = 0
+        self.BeyondFinalZero = 0
+        parent.ioctl_input = self
+
+    def _encode(self, cur):
+        cur.encode_uint64le(self.FileOffset)            # FileOffset
+        cur.encode_uint64le(self.BeyondFinalZero)       # BeyondFinalZero
+
+
+class SetZeroDataResponse(IoctlOutput):
+    ioctl_ctl_code = IoctlCode.FSCTL_SET_ZERO_DATA
+
+    def __init__(self, parent):
+        IoctlOutput.__init__(self, parent)
+        parent.ioctl_output = self
+
+    def _decode(self, cur):
+        pass
+
+
+class SetSparseRequest(IoctlInput):
+    ioctl_ctl_code = IoctlCode.FSCTL_SET_SPARSE
+
+    def __init__(self, parent):
+        IoctlInput.__init__(self, parent)
+        parent.ioctl_input = self
+
+    def _encode(self, cur):
+        pass
+
+
+class SetSparseResponse(IoctlOutput):
+    ioctl_ctl_code = IoctlCode.FSCTL_SET_SPARSE
+
+    def __init__(self, parent):
+        IoctlOutput.__init__(self, parent)
+        parent.ioctl_output = self
+
+    def _decode(self, cur):
+        pass
