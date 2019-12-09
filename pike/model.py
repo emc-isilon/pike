@@ -1870,15 +1870,20 @@ class Channel(object):
         return self.connection.transceive(
                 self.get_symlink_request(file).parent.parent)[0]
 
+    def create_fsctl_req(self, smb_req, fh, buflen=16384):
+        ioctl_req = smb2.IoctlRequest(smb_req)
+        ioctl_req.max_output_response = buflen
+        ioctl_req.flags = smb2.SMB2_0_IOCTL_IS_FSCTL
+        ioctl_req.file_id = fh.file_id
+        return ioctl_req
+
     def enumerate_snapshots_request(self, fh,
                                     snap_request=smb2.EnumerateSnapshotsRequest,
                                     max_output_response=16384):
         smb_req = self.request(obj=fh.tree)
-        ioctl_req = smb2.IoctlRequest(smb_req)
-        ioctl_req.max_output_response = max_output_response
-        ioctl_req.file_id = fh.file_id
-        ioctl_req.flags |= smb2.SMB2_0_IOCTL_IS_FSCTL
-        enum_req = snap_request(ioctl_req)
+        fsctl_req = self.create_fsctl_req(smb_req, fh,
+                                          buflen=max_output_response)
+        enum_req = snap_request(fsctl_req)
         return enum_req
 
     def enumerate_snapshots(self, fh, snap_request=smb2.EnumerateSnapshotsRequest):
@@ -1889,6 +1894,34 @@ class Channel(object):
     def enumerate_snapshots_list(self, fh,
                                  snap_request=smb2.EnumerateSnapshotsRequest):
         return self.enumerate_snapshots(fh, snap_request)[0][0].snapshots
+
+    def zero_data(self, chan, tree, src_offsets, dst_offsets, src_filename):
+        """ Send a FSCTL_SET_ZERO_DATA ioctl request """
+        fh_src = chan.create(tree, src_filename,
+                             access=smb2.FILE_READ_DATA | smb2.FILE_WRITE_DATA,
+                             share=(smb2.FILE_SHARE_READ |
+                                    smb2.FILE_SHARE_WRITE |
+                                    smb2.FILE_SHARE_DELETE),
+                             disposition=smb2.FILE_OPEN_IF).result()
+        smb_req = self.request(obj=tree)
+        fsctl_req = self.create_fsctl_req(smb_req, fh_src)
+        smb2.SetSparseRequest(fsctl_req)
+        try:
+            results = chan.connection.transceive(smb_req.parent)
+        except Exception:
+            chan.close(fh_src)
+            raise
+
+        smb_req = self.request(obj=tree)
+        fsctl_req = self.create_fsctl_req(smb_req, fh_src)
+        zerodata_req = smb2.SetZeroDataRequest(fsctl_req)
+        zerodata_req.file_offset = src_offsets
+        zerodata_req.beyond_final_zero = dst_offsets
+        try:
+            results = chan.connection.transceive(smb_req.parent)
+            return results
+        finally:
+            chan.close(fh_src)
 
     def lease_break_acknowledgement(self, tree, notify):
         """
@@ -2068,6 +2101,14 @@ class Open(object):
         if self.lease is not None:
             self.lease.dispose()
             self.lease = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        chan = self.tree.session.first_channel()
+        chan.close(self)
+
 
 class Lease(object):
     def __init__(self, tree):

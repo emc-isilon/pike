@@ -3848,13 +3848,13 @@ class SetZeroDataRequest(IoctlInput):
 
     def __init__(self, parent):
         IoctlInput.__init__(self, parent)
-        self.FileOffset = 0
-        self.BeyondFinalZero = 0
+        self.file_offset = 0
+        self.beyond_final_zero = 0
         parent.ioctl_input = self
 
     def _encode(self, cur):
-        cur.encode_uint64le(self.FileOffset)            # FileOffset
-        cur.encode_uint64le(self.BeyondFinalZero)       # BeyondFinalZero
+        cur.encode_uint64le(self.file_offset)
+        cur.encode_uint64le(self.beyond_final_zero)
 
 
 class SetZeroDataResponse(IoctlOutput):
@@ -3866,7 +3866,6 @@ class SetZeroDataResponse(IoctlOutput):
 
     def _decode(self, cur):
         pass
-
 
 class SetSparseRequest(IoctlInput):
     ioctl_ctl_code = IoctlCode.FSCTL_SET_SPARSE
