@@ -1895,9 +1895,9 @@ class Channel(object):
                                  snap_request=smb2.EnumerateSnapshotsRequest):
         return self.enumerate_snapshots(fh, snap_request)[0][0].snapshots
 
-    def zero_data(self, chan, tree, src_offsets, dst_offsets, src_filename):
+    def zero_data(self, tree, src_offsets, dst_offsets, src_filename):
         """ Send a FSCTL_SET_ZERO_DATA ioctl request """
-        fh_src = chan.create(tree, src_filename,
+        fh_src = self.create(tree, src_filename,
                              access=smb2.FILE_READ_DATA | smb2.FILE_WRITE_DATA,
                              share=(smb2.FILE_SHARE_READ |
                                     smb2.FILE_SHARE_WRITE |
@@ -1907,9 +1907,9 @@ class Channel(object):
         fsctl_req = self.create_fsctl_req(smb_req, fh_src)
         smb2.SetSparseRequest(fsctl_req)
         try:
-            results = chan.connection.transceive(smb_req.parent)
+            results = self.connection.transceive(smb_req.parent)
         except Exception:
-            chan.close(fh_src)
+            self.close(fh_src)
             raise
 
         smb_req = self.request(obj=tree)
@@ -1918,10 +1918,10 @@ class Channel(object):
         zerodata_req.file_offset = src_offsets
         zerodata_req.beyond_final_zero = dst_offsets
         try:
-            results = chan.connection.transceive(smb_req.parent)
+            results = self.connection.transceive(smb_req.parent)
             return results
         finally:
-            chan.close(fh_src)
+            self.close(fh_src)
 
     def lease_break_acknowledgement(self, tree, notify):
         """
