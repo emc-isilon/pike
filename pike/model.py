@@ -2106,8 +2106,13 @@ class Open(object):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        chan = self.tree.session.first_channel()
-        chan.close(self)
+        try:
+            chan = self.tree.session.first_channel()
+            chan.close(self)
+        except StopIteration:
+            # If the underlying connection for the channel is closed explicitly
+            # open will not able to find an appropriate channel, to send close.
+            pass
 
 
 class Lease(object):
