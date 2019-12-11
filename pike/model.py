@@ -1870,7 +1870,7 @@ class Channel(object):
         return self.connection.transceive(
                 self.get_symlink_request(file).parent.parent)[0]
 
-    def create_fsctl_req(self, smb_req, fh, buflen=16384):
+    def fsctl_request(self, smb_req, fh, buflen=16384):
         ioctl_req = smb2.IoctlRequest(smb_req)
         ioctl_req.max_output_response = buflen
         ioctl_req.flags = smb2.SMB2_0_IOCTL_IS_FSCTL
@@ -1881,7 +1881,7 @@ class Channel(object):
                                     snap_request=smb2.EnumerateSnapshotsRequest,
                                     max_output_response=16384):
         smb_req = self.request(obj=fh.tree)
-        fsctl_req = self.create_fsctl_req(smb_req, fh,
+        fsctl_req = self.fsctl_request(smb_req, fh,
                                           buflen=max_output_response)
         enum_req = snap_request(fsctl_req)
         return enum_req
@@ -1904,7 +1904,7 @@ class Channel(object):
                                     smb2.FILE_SHARE_DELETE),
                              disposition=smb2.FILE_OPEN_IF).result()
         smb_req = self.request(obj=tree)
-        fsctl_req = self.create_fsctl_req(smb_req, fh_src)
+        fsctl_req = self.fsctl_request(smb_req, fh_src)
         smb2.SetSparseRequest(fsctl_req)
         try:
             results = self.connection.transceive(smb_req.parent)
@@ -1913,7 +1913,7 @@ class Channel(object):
             raise
 
         smb_req = self.request(obj=tree)
-        fsctl_req = self.create_fsctl_req(smb_req, fh_src)
+        fsctl_req = self.fsctl_request(smb_req, fh_src)
         zerodata_req = smb2.SetZeroDataRequest(fsctl_req)
         zerodata_req.file_offset = src_offsets
         zerodata_req.beyond_final_zero = dst_offsets
