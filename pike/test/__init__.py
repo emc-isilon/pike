@@ -287,13 +287,72 @@ class PikeTestSuite(unittest.TestSuite):
         super(PikeTestSuite, self).addTest(test)
 
 
-def suite():
+class SambaPikeTestSuite(PikeTestSuite):
+    skip_tests_reasons = {
+        # ERROR
+        "test_resiliency_reconnect_after_timeout": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_resiliency_reconnect_before_timeout": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_resiliency_upgrade_reconnect_after_timeout": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_resiliency_upgrade_reconnect_before_timeout": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_bogus_resume_key": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_bogus_resume_key": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_other_resume_key": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_other_resume_key": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_ssc_in_compound_req": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_ssc_in_compound_req": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_set_sec_dacl": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_set_sec_dacl_append_ace": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_set_sec_dacl_new": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_set_sec_dacl_partial_copy": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_set_sec_group": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_set_sec_owner": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_set_sec_same": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_downlevel": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_downlevel": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_downlevel": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_treeconnect": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_write_none": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_write_none_lease": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_write_none_oplock": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_allow_zero_byte_write": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_set_get_reparse_point": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_symbolic_link_error_response": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_smb_3_0_encryption": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_smb_3_0_2_encryption": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_smb_3_1_1_compound": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_smb_3_1_1_encryption_ccm": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_smb_3_1_1_encryption_gcm": "returns error against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        # FAIL
+        "test_resiliency_buffer_too_small": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_resiliency_upgrade_buffer_too_small": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_neg_dst_exc_brl": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_neg_dst_is_a_dir": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_neg_src_exc_brl": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_smb3": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_smb3_many_capabilities": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_encryption_capabilities_both_prefer_gcm": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_write_none_access": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_query_interface_info_smb3": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_create_failed_and_query": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_deny_write": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_async_lock": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_async_write": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+        "test_sequence_number_wrap": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
+    }
+
+
+def suite(clz=PikeTestSuite):
     test_loader = unittest.TestLoader()
-    test_loader.suiteClass = PikeTestSuite
+    test_loader.suiteClass = clz
     test_suite = test_loader.discover(
             os.path.abspath(os.path.dirname(__file__)),
             "*.py")
     return test_suite
+
+
+def samba_suite():
+    return suite(SambaPikeTestSuite)
+
 
 if __name__ == '__main__':
     test_runner = unittest.TextTestRunner()
