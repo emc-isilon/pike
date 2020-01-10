@@ -1,0 +1,38 @@
+name: Run tests against samba
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+      matrix:
+        python-version: [2.7]
+
+    services:
+      samba:
+        image: dperson/samba:latest
+        env:
+          USER: pike;GiThubCI123
+          SHARE: pike;/share;;no;no;;pike;;
+        ports:
+        # will assign a random free host port
+        - 445/tcp
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Pike
+      run: python setup.py install
+    - name: Run Pike
+      run: python -m unittest -v pike.test.samba_suite
+      env:
+        PIKE_SERVER: localhost
+        PIKE_PORT: ${{ job.services.samba.ports[445] }}
+        PIKE_SHARE: pike
+        PIKE_CREDS: pike%GiThubCI123
