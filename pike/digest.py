@@ -20,16 +20,28 @@ from builtins import range
 
 import array
 
-import Cryptodome.Hash.HMAC as HMAC
-import Cryptodome.Hash.SHA256 as SHA256
-import Cryptodome.Hash.SHA512 as SHA512
-import Cryptodome.Cipher.AES as AES
+try
+    import Crypto.Hash.HMAC as HMAC
+    import Crypto.Hash.SHA256 as SHA256
+    import Crypto.Hash.SHA512 as SHA512
+    import Crypto.Cipher.AES as AES
+except ImportError:
+    import Cryptodome.Hash.HMAC as HMAC
+    import Cryptodome.Hash.SHA256 as SHA256
+    import Cryptodome.Hash.SHA512 as SHA512
+    import Cryptodome.Cipher.AES as AES
 
 from . import core
 
 
-def sha256_hmac(key, message):
-    return array.array("B", HMAC.new(key.tobytes(), message.tobytes(), SHA256).digest())
+def sha256_hmac(key,message):
+    return array.array('B',
+        HMAC.new(
+            key.tobytes(),
+            message.tobytes(),
+            SHA256,
+        ).digest(),
+    )
 
 
 def aes128_cmac(key, message):
