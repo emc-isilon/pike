@@ -47,6 +47,8 @@ maintaining a clear visual distinction between values and types.
 """
 from __future__ import absolute_import
 
+from builtins import str
+from builtins import range
 import array
 from . import core
 from . import nttime
@@ -362,7 +364,7 @@ class ErrorResponse(Command):
 
         # SMB 3.1.1+ Error context handling
         if self.error_context_count > 0:
-            for ix in xrange(self.error_context_count):
+            for ix in range(self.error_context_count):
                 cur.align(self.parent.start, 8)
                 data_length = cur.decode_uint32le()
                 error_id = cur.decode_uint32le()
@@ -576,7 +578,7 @@ class NegotiateResponse(Response):
         self.security_buffer = cur.decode_bytes(length)
         if self.negotiate_contexts_count > 0:
             cur.seekto(self.parent.start + self.negotiate_contexts_offset)
-            for ix in xrange(self.negotiate_contexts_count):
+            for ix in range(self.negotiate_contexts_count):
                 cur.align(self.parent.start, 8)
                 context_type = cur.decode_uint16le()
                 data_length = cur.decode_uint16le()
@@ -621,7 +623,7 @@ class PreauthIntegrityCapabilities(core.Frame):
     def _decode(self, cur):
         self.hash_algorithm_count = cur.decode_uint16le()
         self.salt_length = cur.decode_uint16le()
-        for ix in xrange(self.hash_algorithm_count):
+        for ix in range(self.hash_algorithm_count):
             self.hash_algorithms.append(HashAlgorithms(cur.decode_uint16le()))
         self.salt = cur.decode_bytes(self.salt_length)
 
@@ -3017,9 +3019,9 @@ class FileFsObjectIdInformation(FileSystemInformation):
         self.extended_info = ""
 
     def _decode(self, cur):
-        for count in xrange(2):
+        for count in range(2):
             self.objectid += str(cur.decode_uint64le())
-        for count in xrange(6):
+        for count in range(6):
             self.extended_info += str(cur.decode_uint64le())
 
 class CompletionFilter(core.FlagEnum):

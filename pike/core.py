@@ -38,6 +38,9 @@
 Core Pike infrastructure
 """
 
+from builtins import hex
+from builtins import str
+from builtins import object
 import array
 import struct
 import inspect
@@ -239,7 +242,7 @@ class Cursor(object):
         self.encode_struct('<q', val)
 
     def encode_utf16le(self, val):
-        self.encode_bytes(unicode(val).encode('utf-16le'))
+        self.encode_bytes(str(val).encode('utf-16le'))
 
     def trunc(self):
         self._expand_to(self.offset)
@@ -413,7 +416,7 @@ class Frame(object):
 
     def _value_str(self, value):
         if isinstance(value, array.array) and value.typecode == 'B':
-            return '0x' + ''.join(map(lambda b:'%.2x'%b,value))
+            return '0x' + ''.join(['%.2x'%b for b in value])
         else:
             return str(value)
 
@@ -547,21 +550,21 @@ class Enum(long):
         """
         Returns a list of (name,value) pairs for allowed enumeration values.
         """
-        return cls._nametoval.iteritems()
+        return iter(cls._nametoval.items())
 
     @classmethod
     def names(cls):
         """
         Returns a list of names of allowed enumeration values.
         """
-        return [name for (name,value) in cls.items()]
+        return [name for (name,value) in list(cls.items())]
 
     @classmethod
     def values(cls):
         """
         Returns a list of allowed enumeration values.
         """
-        return [value for (name,value) in cls.items()]
+        return [value for (name,value) in list(cls.items())]
 
     @classmethod
     def import_items(cls, dictionary):
@@ -574,7 +577,7 @@ class Enum(long):
 
             SomeEnumClass.import_items(globals())
         """
-        dictionary.update((name,cls(value)) for (name,value) in cls.items())
+        dictionary.update((name,cls(value)) for (name,value) in list(cls.items()))
 
     @classmethod
     def validate(cls, value):
@@ -608,7 +611,7 @@ class Enum(long):
             valtoname = {}
             misc = {}
 
-            for (name,val) in idict.iteritems():
+            for (name,val) in idict.items():
                 if name[0].isupper():
                     nametoval[name] = val
                     valtoname[val] = name
@@ -678,7 +681,7 @@ class FlagEnum(Enum):
     @classmethod
     def validate(cls, value):
         remaining = value
-        for flag in cls.values():
+        for flag in list(cls.values()):
             if flag & remaining == flag:
                 remaining &= ~flag
 
@@ -686,7 +689,7 @@ class FlagEnum(Enum):
             raise ValueError("Invalid %s: 0x%x (remainder 0x%x)" % (cls.__name__, value, remaining))
 
     def __str__(self):
-        names = [name for (name,flag) in self.items()
+        names = [name for (name,flag) in list(self.items())
                  if (flag != 0 and flag & self == flag) or
                     (self == 0 and flag == 0)]
 

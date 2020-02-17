@@ -42,6 +42,7 @@ This module contains wrappers around external authentication mechanisms and APIs
 from __future__ import absolute_import
 
 
+from builtins import object
 import array
 try:
     import kerberos

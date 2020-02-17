@@ -35,6 +35,9 @@ from __future__ import absolute_import
 # Authors: Masen Furer (masen.furer@emc.com)
 #
 
+from builtins import chr
+from builtins import range
+from builtins import object
 import array
 import random
 import struct
@@ -56,7 +59,7 @@ def des_key_64(K):
     """
     in_key = K + "\0"
     out_key = [K[0]]
-    for ix in xrange(1,len(in_key)):
+    for ix in range(1,len(in_key)):
         out_key.append(chr( ((ord(in_key[ix-1]) << (8-ix)) & 0xFF) | (ord(in_key[ix]) >> ix)) )
     return "".join(out_key)
 
@@ -69,7 +72,7 @@ def DESL(K, D):
     return DES(K[:7], D) + DES(K[7:14], D) + DES(K[14:16] + "\0"*5, D)
 
 def nonce(length):
-    return array.array("B", [random.getrandbits(8) for x in xrange(length) ])
+    return array.array("B", [random.getrandbits(8) for x in range(length) ])
 
 def encode_frame(frame):
     buffer = array.array('B')

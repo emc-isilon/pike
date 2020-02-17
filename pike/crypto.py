@@ -34,6 +34,9 @@ from __future__ import absolute_import
 #
 # Authors: Masen Furer (masen.furer@dell.com)
 #
+from builtins import map
+from builtins import range
+from builtins import object
 from . import core
 from . import digest
 from . import smb2
@@ -85,7 +88,7 @@ class EncryptionCapabilities(core.Frame):
 
     def _decode(self, cur):
         self.ciphers_count = cur.decode_uint16le()
-        for ix in xrange(self.ciphers_count):
+        for ix in range(self.ciphers_count):
             self.ciphers.append(Ciphers(cur.decode_uint16le()))
 
 
@@ -121,7 +124,7 @@ class TransformHeader(core.Frame):
         self.signature = None
         # the value of nonce is always used in the encryption routine
         self.nonce = array.array('B',
-                                 map(random.randint, [0]*16, [255]*16))
+                                 list(map(random.randint, [0]*16, [255]*16)))
         # if wire_nonce is set, it will be sent on the wire instead of nonce
         self.wire_nonce = None
         self.original_message_size = None
