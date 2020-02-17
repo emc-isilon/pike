@@ -498,7 +498,7 @@ class Connection(transport.Transport):
         self._binding = None
         self._binding_key = None
         self._settings = {}
-        self._pre_auth_integrity_hash = array.array('B', "\0"*64)
+        self._pre_auth_integrity_hash = array.array('B', b"\0"*64)
         self._negotiate_request = None
         self._negotiate_response = None
         self.callbacks = {}

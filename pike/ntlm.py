@@ -533,8 +533,8 @@ class NTLMv2ClientChallenge(core.Frame):
         core.Frame.__init__(self, parent)
         if parent is not None:
             parent.challenge = self
-        self.time_stamp = array.array("B", "\0"*8)
-        self.challenge_from_client = array.array("B", "\0"*8)
+        self.time_stamp = array.array("B", b"\0"*8)
+        self.challenge_from_client = array.array("B", b"\0"*8)
         self.av_pairs = []
     def _encode(self, cur):
         cur.encode_uint8le(1)       # RespType

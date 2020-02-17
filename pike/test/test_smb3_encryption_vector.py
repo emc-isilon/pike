@@ -44,7 +44,7 @@ class bogus_311_connection(bogus_connection):
 
 class PAIntegrity(object):
     def __init__(self):
-        self.hash = array.array('B', "\0"*64)
+        self.hash = array.array('B', b"\0"*64)
     def update(self, data):
         self.hash = digest.smb3_sha512(
             self.hash +

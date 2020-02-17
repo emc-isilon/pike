@@ -47,7 +47,7 @@ import random
 from Cryptodome.Cipher import AES
 
 
-def pad_right(value, length, byte='\0'):
+def pad_right(value, length, byte=b'\0'):
     if len(value) > length:
         value = value[:length]
     elif len(value) < 16:
@@ -120,7 +120,7 @@ class TransformHeader(core.Frame):
     """
     def __init__(self, parent):
         core.Frame.__init__(self, parent)
-        self.protocol_id = array.array('B', "\xfdSMB")
+        self.protocol_id = array.array('B', b"\xfdSMB")
         self.signature = None
         # the value of nonce is always used in the encryption routine
         self.nonce = array.array('B',
