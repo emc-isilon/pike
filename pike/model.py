@@ -59,6 +59,8 @@ import time
 import operator
 import contextlib
 
+from future.utils import raise_
+
 from . import auth
 from . import core
 from . import crypto
@@ -221,7 +223,7 @@ class Future(object):
         if isinstance(self.response, BaseException):
             traceback = self.traceback
             self.traceback = None
-            raise self.response, None, traceback
+            raise_(self.response, None, traceback)
         else:
             return self.response
 
@@ -846,7 +848,7 @@ class Connection(transport.Transport):
                     req,
                     "{0} is not a netbios.Netbios frame".format(repr(req)))
         if self.error is not None:
-            raise self.error, None, self.traceback
+            raise_(self.error, None, self.traceback)
         futures = []
         for smb_req in req:
             if isinstance(smb_req[0], smb2.Cancel):
