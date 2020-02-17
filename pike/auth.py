@@ -55,6 +55,10 @@ except ImportError:
 
 
 def split_credentials(creds):
+    if isinstance(creds, bytes):
+        warnings.warn("Pass creds as unicode string, got {!r}".format(creds),
+                      UnicodeWarning)
+        creds = creds.decode("utf-8")
     user, password = creds.split('%')
     if '\\' in user:
         domain, user = user.split('\\')
@@ -71,9 +75,9 @@ class KerberosProvider(object):
              self.context) = kerberos.authGSSClientInit(
                 "cifs/" + conn.server,
                 gssmech=2,
-                user=user,
-                password=password,
-                domain=domain)
+                user=user.encode("utf-8"),
+                password=password.encode("utf-8"),
+                domain=domain.encode("utf-8"))
         else:
             (self.result,
              self.context) = kerberos.authGSSClientInit("cifs/" + conn.server,

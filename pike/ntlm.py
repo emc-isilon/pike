@@ -441,14 +441,14 @@ class NtLmAuthenticateMessage(core.Frame):
             if is_unicode:
                 cur.encode_utf16le(self.domain_name)
             else:
-                cur.encode_bytes(self.domain_name)
+                cur.encode_bytes(self.domain_name.encode("ascii"))
 
         user_name_offset_hole(cur - message_start)
         if user_name_len > 0:
             if is_unicode:
                 cur.encode_utf16le(self.user_name)
             else:
-                cur.encode_bytes(self.user_name)
+                cur.encode_bytes(self.user_name.encode("ascii"))
 
         workstation_name_offset_hole(cur - message_start)
         if workstation_name_len > 0:
@@ -635,7 +635,7 @@ class NtlmAuthenticator(object):
         self.authenticate_buffer = None
 
     def ntlmv1(self):
-        self.lm_hash = LMOWFv1(self.password)
+        self.lm_hash = LMOWFv1(self.password.encode("ascii"))
         self.nt_hash = NTOWFv1(self.password)
         (self.nt_challenge_response,
          self.lm_challenge_response,
