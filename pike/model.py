@@ -49,6 +49,7 @@ from builtins import next
 from builtins import map
 from builtins import range
 from builtins import object
+from builtins import str
 import sys
 import socket
 import array
@@ -58,6 +59,7 @@ import logging
 import time
 import operator
 import contextlib
+import warnings
 
 from future.utils import raise_
 
@@ -1685,6 +1687,10 @@ class Channel(object):
             buffer=None,
             remaining_bytes=0,
             flags=0):
+        if not isinstance(buffer, bytes):
+            warnings.warn("buffer must be bytes, got {!r}, casting as str and encoding "
+                          "with 'ascii'".format(buffer), UnicodeWarning)
+            buffer = str(buffer).encode("ascii")
         smb_req = self.request(obj=file)
         write_req = smb2.WriteRequest(smb_req)
 
