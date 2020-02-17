@@ -389,7 +389,36 @@ class Cursor(object):
 class BadPacket(Exception):
     pass
 
-class Frame(object):
+
+class FrameMeta(type):
+    def __new__(mcs, name, bases, dict):
+        # Inherit _register from bases
+        dict['_register'] = []
+        for base in bases:
+            if hasattr(base, '_register'):
+                dict['_register'] += base._register
+
+        # Inherit field_blacklist from bases
+        if 'field_blacklist' in dict:
+            for base in bases:
+                if hasattr(base,'field_blacklist'):
+                    dict['field_blacklist'] += base.field_blacklist
+
+        result = type.__new__(mcs, name, bases, dict)
+
+        # Register class in appropriate tables
+        for (table,keyattrs) in result._register:
+            if all(hasattr(result, a) for a in keyattrs):
+                key = [getattr(result, a) for a in keyattrs]
+                if len(key) == 1:
+                    key = key[0]
+                else:
+                    key = tuple(key)
+                table[key] = result
+
+        return result
+
+class Frame(with_metaclass(FrameMeta)):
     field_blacklist = ['fields','parent','start','end']
 
     def __init__(self, parent, context=None):
@@ -496,34 +525,6 @@ class Frame(object):
     def is_last_child(self):
         children = self.parent.children
         return children.index(self) == len(children) - 1
-
-    class __metaclass__(type):
-        def __new__(mcs, name, bases, dict):
-            # Inherit _register from bases
-            dict['_register'] = []
-            for base in bases:
-                if hasattr(base, '_register'):
-                    dict['_register'] += base._register
-
-            # Inherit field_blacklist from bases
-            if 'field_blacklist' in dict:
-                for base in bases:
-                    if hasattr(base,'field_blacklist'):
-                        dict['field_blacklist'] += base.field_blacklist
-
-            result = type.__new__(mcs, name, bases, dict)
-
-            # Register class in appropriate tables
-            for (table,keyattrs) in result._register:
-                if all(hasattr(result, a) for a in keyattrs):
-                    key = [getattr(result, a) for a in keyattrs]
-                    if len(key) == 1:
-                        key = key[0]
-                    else:
-                        key = tuple(key)
-                    table[key] = result
-
-            return result
 
 class Register(object):
     def __init__(self, table, *keyattrs):
