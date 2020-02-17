@@ -356,7 +356,7 @@ class Cursor(object):
         def __getattr__(self, attr):
             if hasattr(self.cur.__class__, attr):
                 f = getattr(self.cur.__class__, attr)
-                if inspect.ismethod(f):
+                if callable(f):
                     copy = self.cur.copy()
                     def f2(*args, **kwargs):
                         offset = copy.offset
