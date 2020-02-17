@@ -44,6 +44,7 @@ from __future__ import absolute_import
 
 from builtins import object
 import array
+import warnings
 try:
     import kerberos
 except ImportError:
