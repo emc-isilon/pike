@@ -166,7 +166,7 @@ class TransformHeader(core.Frame):
         # the crypto header will be written in _encode_smb2
         self.crypto_header_offset = cur.offset
         # save a space for the wire nonce
-        self.wire_nonce_hole = cur.hole.encode_bytes('\0'*16)
+        self.wire_nonce_hole = cur.hole.encode_bytes(b'\0'*16)
         cur.advanceto(cur + 16)
 
         # the following fields are part of AdditionalAuthenticatedData and are

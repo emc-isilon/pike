@@ -80,7 +80,7 @@ def encode_frame(frame):
     return buffer
 
 
-NTLM_SIGNATURE = "NTLMSSP\x00"
+NTLM_SIGNATURE = b"NTLMSSP\x00"
 
 class MessageType(core.ValueEnum):
     NtLmNegotiate = 0x1

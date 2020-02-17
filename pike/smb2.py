@@ -165,7 +165,7 @@ class Smb2(core.Frame):
         return [self._command] if self._command is not None else []
 
     def _encode(self, cur):
-        cur.encode_bytes('\xfeSMB')
+        cur.encode_bytes(b'\xfeSMB')
         cur.encode_uint16le(64)
         cur.encode_uint16le(self.credit_charge)
         if self.flags & SMB2_FLAGS_SERVER_TO_REDIR:
@@ -223,7 +223,7 @@ class Smb2(core.Frame):
         signature_hole(self.signature)
 
     def _decode(self, cur):
-        if (cur.decode_bytes(4).tostring() != '\xfeSMB'):
+        if (cur.decode_bytes(4).tostring() != b'\xfeSMB'):
             raise core.BadPacket()
         if (cur.decode_uint16le() != 64):
             raise core.BadPacket()
@@ -608,7 +608,7 @@ class PreauthIntegrityCapabilities(core.Frame):
     def __init__(self):
         self.hash_algorithms = []
         self.hash_algorithms_count = None
-        self.salt = ""
+        self.salt = b""
         self.salt_length = None
     def _encode(self, cur):
         if self.hash_algorithms_count is None:
@@ -1154,7 +1154,7 @@ class CreateResponseContext(core.Frame):
             parent.append(self)
 
 class MaximalAccessRequest(CreateRequestContext):
-    name = 'MxAc'
+    name = b'MxAc'
 
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
@@ -1165,7 +1165,7 @@ class MaximalAccessRequest(CreateRequestContext):
             cur.encode_uint64le(self.timestamp)
 
 class MaximalAccessResponse(CreateResponseContext):
-    name = 'MxAc'
+    name = b'MxAc'
 
     def __init__(self, parent):
         CreateResponseContext.__init__(self, parent)
@@ -1177,7 +1177,7 @@ class MaximalAccessResponse(CreateResponseContext):
         self.maximal_access = Access(cur.decode_uint32le())
 
 class AllocationSizeRequest(CreateRequestContext):
-    name = 'AlSi'
+    name = b'AlSi'
 
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
@@ -1188,7 +1188,7 @@ class AllocationSizeRequest(CreateRequestContext):
 
 
 class ExtendedAttributeRequest(CreateRequestContext):
-    name = 'ExtA'
+    name = b'ExtA'
 
     def __init__(self,parent):
         CreateRequestContext.__init__(self,parent)
@@ -1285,7 +1285,7 @@ class AclRevision(core.ValueEnum):
 AclRevision.import_items(globals())
 
 class SecurityDescriptorRequest(CreateRequestContext):
-    name = 'SecD'
+    name = b'SecD'
 
     def __init__(self,parent):
         CreateRequestContext.__init__(self,parent)
@@ -1639,7 +1639,7 @@ class NT_SID(core.Frame):
         subauth_count_hole(self.sub_authority_count)
 
 class LeaseRequest(CreateRequestContext):
-    name = 'RqLs'
+    name = b'RqLs'
     # This class handles V2 requests as well.  Set
     # the lease_flags field to a non-None value
     # to enable the extended fields
@@ -1672,7 +1672,7 @@ class LeaseRequest(CreateRequestContext):
             cur.encode_uint64le(0)
 
 class LeaseResponse(CreateResponseContext):
-    name = 'RqLs'
+    name = b'RqLs'
     v1_size = 32
     v2_size = 52
     # This class handles V2 responses as well.
@@ -1712,7 +1712,7 @@ class DurableFlags(core.FlagEnum):
 DurableFlags.import_items(globals())
 
 class DurableHandleRequest(CreateRequestContext):
-    name = 'DHnQ'
+    name = b'DHnQ'
 
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
@@ -1723,7 +1723,7 @@ class DurableHandleRequest(CreateRequestContext):
         cur.encode_uint64le(0)
 
 class DurableHandleResponse(CreateResponseContext):
-    name = 'DHnQ'
+    name = b'DHnQ'
 
     def __init__(self, parent):
         CreateResponseContext.__init__(self, parent)
@@ -1733,7 +1733,7 @@ class DurableHandleResponse(CreateResponseContext):
         cur.decode_uint64le()
 
 class DurableHandleReconnectRequest(CreateRequestContext):
-    name = 'DHnC'
+    name = b'DHnC'
 
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
@@ -1744,7 +1744,7 @@ class DurableHandleReconnectRequest(CreateRequestContext):
         cur.encode_uint64le(self.file_id[1])
 
 class DurableHandleV2Request(CreateRequestContext):
-    name = 'DH2Q'
+    name = b'DH2Q'
 
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
@@ -1760,7 +1760,7 @@ class DurableHandleV2Request(CreateRequestContext):
         cur.encode_bytes(self.create_guid)
 
 class DurableHandleV2Response(CreateResponseContext):
-    name = 'DH2Q'
+    name = b'DH2Q'
 
     def __init__(self, parent):
         CreateResponseContext.__init__(self, parent)
@@ -1772,7 +1772,7 @@ class DurableHandleV2Response(CreateResponseContext):
         self.flags = DurableFlags(cur.decode_uint32le())
 
 class DurableHandleReconnectV2Request(CreateRequestContext):
-    name = 'DH2C'
+    name = b'DH2C'
 
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
@@ -1787,7 +1787,7 @@ class DurableHandleReconnectV2Request(CreateRequestContext):
         cur.encode_uint32le(self.flags)
 
 class AppInstanceIdRequest(CreateRequestContext):
-    name = '\x45\xBC\xA6\x6A\xEF\xA7\xF7\x4A\x90\x08\xFA\x46\x2E\x14\x4D\x74'
+    name = b'\x45\xBC\xA6\x6A\xEF\xA7\xF7\x4A\x90\x08\xFA\x46\x2E\x14\x4D\x74'
 
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
@@ -1801,7 +1801,7 @@ class AppInstanceIdRequest(CreateRequestContext):
         cur.encode_bytes(self.app_instance_id)
 
 class QueryOnDiskIDRequest(CreateRequestContext):
-    name = 'QFid'
+    name = b'QFid'
 
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
@@ -1810,7 +1810,7 @@ class QueryOnDiskIDRequest(CreateRequestContext):
         pass           # client sends no data to server
 
 class QueryOnDiskIDResponse(CreateResponseContext):
-    name = 'QFid'
+    name = b'QFid'
 
     def __init__(self, parent):
         CreateResponseContext.__init__(self, parent)
@@ -1820,7 +1820,7 @@ class QueryOnDiskIDResponse(CreateResponseContext):
         self.file_id = cur.decode_bytes(32)
 
 class TimewarpTokenRequest(CreateRequestContext):
-    name = 'TWrp'
+    name = b'TWrp'
 
     def __init__(self, parent):
         super(TimewarpTokenRequest, self).__init__(parent)
