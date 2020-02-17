@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 #
 # Copyright (c) 2013, EMC Corporation
 # All rights reserved.
@@ -34,9 +35,9 @@
 # Authors: Brian Koropoff (brian.koropoff@emc.com)
 #
 
-import core
-import crypto
-import smb2
+from . import core
+from . import crypto
+from . import smb2
 
 class Netbios(core.Frame):
     def __init__(self, context=None):

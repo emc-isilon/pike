@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 #
 # Copyright (c) 2013, EMC Corporation
 # All rights reserved.
@@ -43,9 +44,9 @@ import Cryptodome.Cipher.ARC4 as RC4
 import Cryptodome.Hash.HMAC as HMAC
 import Cryptodome.Hash.MD4 as MD4
 import Cryptodome.Hash.MD5 as MD5
-import core
-import model
-import nttime
+from . import core
+from . import model
+from . import nttime
 
 def des_key_64(K):
     """

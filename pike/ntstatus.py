@@ -1,4 +1,5 @@
-import core
+from __future__ import absolute_import
+from . import core
 
 class Status(core.ValueEnum):
     STATUS_SUCCESS = 0x00000000

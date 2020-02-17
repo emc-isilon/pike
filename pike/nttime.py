@@ -39,9 +39,9 @@ from datetime import datetime, timedelta
 import math
 import time
 
-_unix_time_offset = 11644473600L
+_unix_time_offset = 11644473600
 _unix_epoch = datetime.fromtimestamp(0) + timedelta(hours=time.localtime().tm_isdst)
-_intervals_per_second = 10000000L
+_intervals_per_second = 10000000
 
 def _unix_time_to_nt_time(t):
     return (t + _unix_time_offset) * _intervals_per_second

@@ -289,7 +289,7 @@ class BasePoller(object):
             t = self.connections[fileno]
             try:
                 t.handle_read()
-            except socket.error, e:
+            except socket.error as e:
                 if e.args[0] not in (EBADF, ECONNRESET, ENOTCONN, ESHUTDOWN, ECONNABORTED):
                     t.handle_error()
                 else:
@@ -316,7 +316,7 @@ class BasePoller(object):
                     if fileno in self.deferred_writers:
                         self.deferred_writers.remove(fileno)
                     t.handle_write()
-            except socket.error, e:
+            except socket.error as e:
                 if e.args[0] not in (EBADF, ECONNRESET, ENOTCONN, ESHUTDOWN, ECONNABORTED):
                     t.handle_error()
                 else:

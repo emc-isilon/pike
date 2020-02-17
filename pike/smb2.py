@@ -45,12 +45,13 @@ making it PEP-8 compliant. For example, FooBarBaz becomes foo_bar_baz.
 This makes it simple to correlate the code with the spec while
 maintaining a clear visual distinction between values and types.
 """
+from __future__ import absolute_import
 
 import array
-import core
-import nttime
+from . import core
+from . import nttime
 import re
-import ntstatus
+from . import ntstatus
 
 # Dialects constants
 class Dialect(core.ValueEnum):

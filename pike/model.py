@@ -43,6 +43,7 @@ to be established and tracked.  It provides convenience functions
 for exercising common elements of the protocol without manually
 constructing packets.
 """
+from __future__ import absolute_import
 
 import sys
 import socket
@@ -54,15 +55,16 @@ import time
 import operator
 import contextlib
 
-import auth
-import core
-import crypto
-import netbios
-import nttime
-import smb2
-import transport
-import ntstatus
-import digest
+from . import auth
+from . import core
+from . import crypto
+from . import netbios
+from . import nttime
+from . import smb2
+from . import transport
+from . import ntstatus
+from . import digest
+from functools import reduce
 
 default_credit_request = 10
 default_timeout = 30
@@ -1074,7 +1076,7 @@ class Connection(transport.Transport):
             Returns a L{Future} object, for the L{Channel} object
             """
             try:
-                res = self.next()
+                res = next(self)
                 res.then(self.submit)
             except StopIteration:
                 pass
@@ -1223,7 +1225,7 @@ class Session(object):
         del self._channels[id(conn)]
 
     def first_channel(self):
-        return self._channels.itervalues().next()
+        return next(self._channels.itervalues())
 
     def tree(self, tree_id):
         return self._trees.get(tree_id, None)

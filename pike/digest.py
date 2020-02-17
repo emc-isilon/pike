@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 #
 # Copyright (c) 2013, EMC Corporation
 # All rights reserved.
@@ -39,7 +40,7 @@ import Cryptodome.Hash.SHA256 as SHA256
 import Cryptodome.Hash.SHA512 as SHA512
 import Cryptodome.Cipher.AES as AES
 import array
-import core
+from . import core
 
 def sha256_hmac(key,message):
     return array.array('B',

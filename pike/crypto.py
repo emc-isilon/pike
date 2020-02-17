@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 #
 # Copyright (c) 2016, EMC Corporation
 # All rights reserved.
@@ -33,9 +34,9 @@
 #
 # Authors: Masen Furer (masen.furer@dell.com)
 #
-import core
-import digest
-import smb2
+from . import core
+from . import digest
+from . import smb2
 
 import array
 import random
