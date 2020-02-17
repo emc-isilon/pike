@@ -1,3 +1,4 @@
+from __future__ import division
 #
 # Copyright (c) 2015, EMC Corporation
 # All rights reserved.
@@ -35,6 +36,11 @@
 #          Masen Furer (masen.furer@emc.com)
 #
 
+from builtins import chr
+from builtins import str
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 import pike.ntstatus
 import pike.smb2
 import pike.test
@@ -55,8 +61,8 @@ SIMPLE_5_CHUNKS = [(0, 0, 4000), (4000, 4000, 4000), (8000, 8000, 4000),
 SIMPLE_5_CHUNKS_LEN = 20000
 
 def _gen_test_buffer(length):
-    pattern = "".join([ chr(x) for x in xrange(ord(' '), ord('~'))])
-    buf = (pattern * (length / (len(pattern)) + 1))[:length]
+    pattern = "".join([ chr(x) for x in range(ord(' '), ord('~'))])
+    buf = (pattern * (old_div(length, (len(pattern))) + 1))[:length]
     return buf
 
 def _gen_random_test_buffer(length):
@@ -209,9 +215,9 @@ class TestServerSideCopy(pike.test.PikeTest):
         block_64k = _gen_test_buffer(65536)
         self._create_and_write(file_64k, block_64k)
         list_offset_64k = [i * 65536 for i in range(16)]
-        chunks_64k_1m = zip([0] * 16, list_offset_64k, [65536] * 16)
+        chunks_64k_1m = list(zip([0] * 16, list_offset_64k, [65536] * 16))
         list_offset_1m = [i * 1048576 for i in range(16)]
-        chunks_1m_16m = zip([0] * 16, list_offset_1m, [1048576] * 16)
+        chunks_1m_16m = list(zip([0] * 16, list_offset_1m, [1048576] * 16))
         fh_64k = self.chan.create(self.tree,
                                   file_64k,
                                   access=access_rwd,
@@ -251,7 +257,7 @@ class TestServerSideCopy(pike.test.PikeTest):
             dst_offset = random.randrange(1, 4294967295 - total_len)
         else:
             dst_offset = 0
-        num_of_chunks = total_len / chunk_sz + (total_len % chunk_sz > 0)
+        num_of_chunks = old_div(total_len, chunk_sz) + (total_len % chunk_sz > 0)
         this_offset = 0
         chunks = []
         while this_offset < total_len:
@@ -328,7 +334,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self._create_and_write(src_filename, block)
 
         total_len = len(block)
-        chunk_sz = (total_len / number_of_chunks) + 1
+        chunk_sz = (old_div(total_len, number_of_chunks)) + 1
         this_offset = 0
 
         chunks = []
@@ -428,7 +434,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self._create_and_write(filename, block)
 
         total_len = len(block)
-        chunk_sz = (total_len / number_of_chunks) + 1
+        chunk_sz = (old_div(total_len, number_of_chunks)) + 1
         this_offset = 0
 
         chunks = []
@@ -503,7 +509,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self._create_and_write(src_filename, block)
 
         total_len = len(block)
-        chunk_sz = (total_len / number_of_chunks) + 1
+        chunk_sz = (old_div(total_len, number_of_chunks)) + 1
         this_offset = 0
 
         chunks = []
@@ -832,10 +838,10 @@ class TestServerSideCopy(pike.test.PikeTest):
             fh_src, fh_dst, SIMPLE_5_CHUNKS)
         nb_req = ioctl_req.parent.parent
         read_req1 = self.chan.read_request(
-            pike.model.RelatedOpen(self.tree), SIMPLE_5_CHUNKS_LEN / 2, 0)
+            pike.model.RelatedOpen(self.tree), old_div(SIMPLE_5_CHUNKS_LEN, 2), 0)
         nb_req.adopt(read_req1.parent)
         read_req2 = self.chan.read_request(pike.model.RelatedOpen(
-            self.tree), SIMPLE_5_CHUNKS_LEN / 2, SIMPLE_5_CHUNKS_LEN / 2)
+            self.tree), old_div(SIMPLE_5_CHUNKS_LEN, 2), old_div(SIMPLE_5_CHUNKS_LEN, 2))
         nb_req.adopt(read_req2.parent)
         close_req = self.chan.close_request(pike.model.RelatedOpen(self.tree))
         nb_req.adopt(close_req.parent)
@@ -905,9 +911,9 @@ class TestServerSideCopy(pike.test.PikeTest):
         # for loop to submit requests in short time
         for it in range(num_iter):
             for i in range(num_sess):
-                chunk_break = zip(*chunks)
+                chunk_break = list(zip(*chunks))
                 dst_list = [x + filepair[i][2] for x in chunk_break[1]]
-                newchunks = zip(chunk_break[0], dst_list, chunk_break[2])
+                newchunks = list(zip(chunk_break[0], dst_list, chunk_break[2]))
                 ssc_futures[it * num_sess +
                             i] = self._submit_ssc_async_request_in_other_channels(i, newchunks)
 

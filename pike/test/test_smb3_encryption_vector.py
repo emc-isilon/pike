@@ -2,6 +2,7 @@
 # SMB 3.0 Encryption: https://blogs.msdn.microsoft.com/openspecification/2012/10/05/encryption-in-smb-3-0-a-protocol-perspective/
 # SMB 3.1.1 Encryption: https://blogs.msdn.microsoft.com/openspecification/2015/09/09/smb-3-1-1-encryption-in-windows-10/
 # SMB 3.1.1 Pre-auth integrity: https://blogs.msdn.microsoft.com/openspecification/2015/08/11/smb-3-1-1-pre-authentication-integrity-in-windows-10/
+from builtins import object
 import array
 import unittest as unt
 import pike.crypto as crypto

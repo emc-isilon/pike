@@ -1,4 +1,5 @@
 from __future__ import print_function
+from __future__ import division
 #
 # Copyright (c) 2013, EMC Corporation
 # All rights reserved.
@@ -35,6 +36,9 @@ from __future__ import print_function
 # Authors: Brian Koropoff (brian.koropoff@emc.com)
 #
 
+from builtins import str
+from past.utils import old_div
+from builtins import object
 import os
 import gc
 import logging
@@ -97,13 +101,9 @@ class PikeTest(unittest.TestCase):
         self._connections = []
         self.default_client = model.Client()
         if self.min_dialect is not None:
-            self.default_client.dialects = filter(
-                    lambda d: d >= self.min_dialect,
-                    self.default_client.dialects)
+            self.default_client.dialects = [d for d in self.default_client.dialects if d >= self.min_dialect]
         if self.max_dialect is not None:
-            self.default_client.dialects = filter(
-                    lambda d: d <= self.max_dialect,
-                    self.default_client.dialects)
+            self.default_client.dialects = [d for d in self.default_client.dialects if d <= self.max_dialect]
         if self.signing:
             self.default_client.security_mode = (smb2.SMB2_NEGOTIATE_SIGNING_ENABLED |
                                                  smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED)
@@ -220,8 +220,8 @@ class PikeTest(unittest.TestCase):
         low = 0
         high = len(buf1)
         while high - low > 1:
-            chunk_1 = (low, low+(high-low)/2)
-            chunk_2 = (low+(high-low)/2, high)
+            chunk_1 = (low, low+old_div((high-low),2))
+            chunk_2 = (low+old_div((high-low),2), high)
             if buf1[chunk_1[0]:chunk_1[1]] != buf2[chunk_1[0]:chunk_1[1]]:
                 low, high = chunk_1
             elif buf1[chunk_2[0]:chunk_2[1]] != buf2[chunk_2[0]:chunk_2[1]]:

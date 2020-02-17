@@ -34,6 +34,7 @@
 # Authors: Paul Martin (paul.o.martin@emc.com)
 #
 
+from builtins import map
 import pike.model as model
 import pike.smb2 as smb2
 import pike.test as test
@@ -61,7 +62,7 @@ class InvalidNetworkResiliencyRequestRequest(pike.smb2.NetworkResiliencyRequestR
 class Persistent(test.PikeTest):
 
     def setup(self):
-        self.lease_key = array.array('B',map(random.randint, [0]*16, [255]*16))
+        self.lease_key = array.array('B',list(map(random.randint, [0]*16, [255]*16)))
         self.channel, self.tree = self.tree_connect()
 
     def create_persistent(self, prev_handle = 0):
