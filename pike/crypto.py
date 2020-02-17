@@ -258,18 +258,18 @@ class CryptoKeys300(object):
     """ Key generation for SMB 0x300 and 0x302 """
     def __init__(self, session_key, *args, **kwds):
         self.encryption = digest.derive_key(
-            session_key, "SMB2AESCCM", "ServerIn \0")[:16].tostring()
+            session_key, b"SMB2AESCCM", b"ServerIn \0")[:16].tostring()
         self.decryption = digest.derive_key(
-            session_key, "SMB2AESCCM", "ServerOut\0")[:16].tostring()
+            session_key, b"SMB2AESCCM", b"ServerOut\0")[:16].tostring()
 
 
 class CryptoKeys311(object):
     """ Key generation for SMB 0x311 + """
     def __init__(self, session_key, pre_auth_integrity_hash, *args, **kwds):
         self.encryption = digest.derive_key(
-            session_key, "SMBC2SCipherKey", pre_auth_integrity_hash)[:16].tostring()
+            session_key, b"SMBC2SCipherKey", pre_auth_integrity_hash)[:16].tostring()
         self.decryption = digest.derive_key(
-            session_key, "SMBS2CCipherKey", pre_auth_integrity_hash)[:16].tostring()
+            session_key, b"SMBS2CCipherKey", pre_auth_integrity_hash)[:16].tostring()
 
 
 class EncryptionContext(object):
