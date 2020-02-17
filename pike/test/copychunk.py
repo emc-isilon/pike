@@ -63,7 +63,7 @@ SIMPLE_5_CHUNKS_LEN = 20000
 def _gen_test_buffer(length):
     pattern = "".join([ chr(x) for x in range(ord(' '), ord('~'))])
     buf = (pattern * (old_div(length, (len(pattern))) + 1))[:length]
-    return buf
+    return buf.encode("ascii")
 
 def _gen_random_test_buffer(length):
     buf = ''
@@ -72,8 +72,9 @@ def _gen_random_test_buffer(length):
     for i in range(0, length):
         if i % length == 0 and i != 0:
             buf += '-'
+        # XXX: accidentally quadratic str concat
         buf += str(random_str_seq[random.randint(0, len(random_str_seq) - 1)])
-    return buf
+    return buf.encode("ascii")
 
 ###
 # Main test
@@ -373,7 +374,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.chan.close(fh_dst)
 
     def test_copy_small_file(self):
-        block = "Hello"
+        block = b"Hello"
         num_of_chunks = 1
         self.generic_ssc_test_case(block, num_of_chunks)
 
@@ -393,7 +394,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.generic_ssc_test_case(block, num_of_chunks)
 
     def test_offset_copy_small_file(self):
-        block = "Hello"
+        block = b"Hello"
         num_of_chunks = 1
         offset = 64
         self.generic_ssc_test_case(block, num_of_chunks, offset)
@@ -411,7 +412,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.generic_ssc_test_case(block, num_of_chunks, offset)
 
     def test_copy_write_small_file(self):
-        block = "Hello"
+        block = b"Hello"
         num_of_chunks = 1
         self.generic_ssc_test_case(block, num_of_chunks, write_flag=True)
 

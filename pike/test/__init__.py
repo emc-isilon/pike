@@ -163,8 +163,8 @@ class PikeTest(unittest.TestCase):
 
         try:
             yield o
-        except model.ResponseError as e:
-            pass
+        except model.ResponseError as err:
+            e = err
 
         if e is None:
             raise self.failureException('No error raised when "%s" expected' % status)

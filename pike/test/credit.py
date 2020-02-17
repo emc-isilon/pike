@@ -119,7 +119,7 @@ class CreditTest(pike.test.PikeTest):
         then perform one large read operation and subsequently close the file
         """
         fname = self.id().rpartition(".")[-1]
-        buf = "\0\1\2\3\4\5\6\7"*8192
+        buf = b"\0\1\2\3\4\5\6\7"*8192
         buflen = len(buf)
         file_chunks = old_div(file_size, buflen)
         write_chunks = old_div(file_size, write_size)
@@ -201,7 +201,7 @@ class CreditTest(pike.test.PikeTest):
         this version of the function works with arbitrary sizes
         """
         fname = self.id().rpartition(".")[-1]
-        buf = "\0\1\2\3\4\5\6\7"*8192
+        buf = b"\0\1\2\3\4\5\6\7"*8192
         buflen = len(buf)
         file_chunks, file_remainder = divmod(file_size, buflen)
         file_buf = buf * file_chunks + buf[:file_remainder]
