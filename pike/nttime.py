@@ -85,7 +85,7 @@ def GMT_to_datetime(gmt_token):
     dt_obj -= timedelta(seconds=time.timezone)
     return dt_obj
 
-class NtTime(long):
+class NtTime(int):
     """
     NtTime may be initialized with any of the following values
       * string in ISO format or @GMT- format (timewarp)
