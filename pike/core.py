@@ -45,6 +45,8 @@ import array
 import struct
 import inspect
 
+from future.utils import with_metaclass
+
 class BufferOverrun(Exception):
     """Buffer overrun exception"""
     pass
@@ -533,7 +535,34 @@ class Register(object):
         cls._register.append((self.table,self.keyattrs))
         return cls
 
-class Enum(long):
+
+class EnumMeta(type):
+    def __new__(mcs, cname, bases, idict):
+        nametoval = {}
+        valtoname = {}
+        misc = {}
+
+        for (name,val) in idict.items():
+            if name[0].isupper():
+                nametoval[name] = val
+                valtoname[val] = name
+            else:
+                misc[name] = val
+
+        cls = type.__new__(mcs, cname, bases, misc)
+        cls._nametoval = nametoval
+        cls._valtoname = valtoname
+
+        return cls
+
+    def __getattribute__(cls, name):
+        nametoval = type.__getattribute__(cls, '_nametoval')
+        if name in nametoval:
+            return cls(nametoval[name])
+        else:
+            return type.__getattribute__(cls, name)
+
+class Enum(with_metaclass(EnumMeta, int)):
     """
     Enumeration abstract base
 
@@ -605,31 +634,6 @@ class Enum(long):
         # Just return string form
         return str(self)
 
-    class __metaclass__(type):
-        def __new__(mcs, cname, bases, idict):
-            nametoval = {}
-            valtoname = {}
-            misc = {}
-
-            for (name,val) in idict.items():
-                if name[0].isupper():
-                    nametoval[name] = val
-                    valtoname[val] = name
-                else:
-                    misc[name] = val
-
-            cls = type.__new__(mcs, cname, bases, misc)
-            cls._nametoval = nametoval
-            cls._valtoname = valtoname
-
-            return cls
-
-        def __getattribute__(cls, name):
-            nametoval = type.__getattribute__(cls, '_nametoval')
-            if name in nametoval:
-                return cls(nametoval[name])
-            else:
-                return type.__getattribute__(cls, name)
 
 class ValueEnum(Enum):
     """
