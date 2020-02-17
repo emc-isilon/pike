@@ -987,12 +987,12 @@ class Connection(transport.Transport):
                     context = self._pre_auth_integrity_hash
                 return digest.derive_key(
                         session_key,
-                        'SMBSigningKey',
+                        b'SMBSigningKey',
                         context)[:16]
             elif self.dialect_revision >= smb2.DIALECT_SMB3_0:
                 if context is None:
-                    context = 'SmbSign\0'
-                return digest.derive_key(session_key, 'SMB2AESCMAC', context)[:16]
+                    context = b'SmbSign\0'
+                return digest.derive_key(session_key, b'SMB2AESCMAC', context)[:16]
             else:
                 return session_key
 
