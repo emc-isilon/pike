@@ -1,3 +1,4 @@
+from __future__ import print_function
 #
 # Copyright (c) 2013, EMC Corporation
 # All rights reserved.
@@ -174,7 +175,7 @@ class PikeTest(unittest.TestCase):
 
     def setUp(self):
         if self.loglevel != logging.NOTSET:
-            print >>sys.stderr
+            print(file=sys.stderr)
 
         if hasattr(self, 'setup'):
             self.setup()
