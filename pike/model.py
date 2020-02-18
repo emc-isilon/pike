@@ -1687,10 +1687,17 @@ class Channel(object):
             buffer=None,
             remaining_bytes=0,
             flags=0):
-        if buffer and not isinstance(buffer, bytes):
+        if isinstance(buffer, array.array) and buffer.typecode != 'B':
+            raise ValueError(
+                "array.array must have typecode 'B', not {!r}".format(buffer.typecode))
+        elif isinstance(buffer, str):
             warnings.warn("buffer must be bytes, got {!r}, casting as str and encoding "
-                          "with 'ascii'".format(buffer), UnicodeWarning)
-            buffer = str(buffer).encode("ascii")
+                          "with 'ascii'".format(type(buffer)), UnicodeWarning)
+            buffer = buffer.encode("ascii")
+        if buffer is not None and not isinstance(buffer, (array.array, bytes)):
+            raise TypeError(
+                "buffer must be a byte string or byte array, not {!r}".format(
+                    type(buffer)))
         smb_req = self.request(obj=file)
         write_req = smb2.WriteRequest(smb_req)
 
