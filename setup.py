@@ -71,22 +71,42 @@ def pike_suite():
 
 def run_setup(with_extensions):
     ext_modules = []
-    cmdclass = { "build_py": ve_build_py }
+    cmdclass = {"build_py": ve_build_py}
     if with_extensions:
         ext_modules.append(lw_krb_module)
         cmdclass = dict(cmdclass, build_ext=ve_build_ext)
-    setup(name='Pike',
-          version=__version__,
+    setup(name='pike-smb2',
+          use_scm_version=True,
+          setup_requires=['setuptools_scm'],
           description='Pure python SMB client',
           author='Brian Koropoff',
           author_email='Brian.Koropoff@emc.com',
+          maintainer='eng-proto-validation',
+          maintainer_email='eng-proto-validation@isilon.com',
           url='https://github.com/emc-isilon/pike',
           packages=['pike', 'pike.test'],
+          python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,<4',
           install_requires=['pycryptodomex', 'future'],
           ext_modules=ext_modules,
           test_suite='setup.pike_suite',
           cmdclass=cmdclass,
+          classifiers=[
+              'Development Status :: 4 - Beta',
+              'Intended Audience :: Developers',
+              'Topic :: Software Development :: Testing',
+              'Programming Language :: Python',
+              'Programming Language :: Python :: 2',
+              'Programming Language :: Python :: 2.7',
+              'Programming Language :: Python :: 3',
+              'Programming Language :: Python :: 3.5',
+              'Programming Language :: Python :: 3.6',
+              'Programming Language :: Python :: 3.7',
+              'Programming Language :: Python :: Implementation :: CPython',
+              'Operating System :: OS Independent',
+          ],
           )
+
+
 try:
     run_setup(with_extensions=try_krb)
 except BuildFailed:
