@@ -514,8 +514,8 @@ class TestServerSideCopy(pike.test.PikeTest):
         this_offset = 0
 
         chunks = []
-        src_block = list(block)
-        dst_block = list(block)
+        src_block = array.array('B', block)
+        dst_block = array.array('B', block)
         while this_offset < total_len:
             offset = dst_offset = this_offset
             if offset - overlap_each_block > 0:
@@ -525,11 +525,11 @@ class TestServerSideCopy(pike.test.PikeTest):
             else:
                 length = total_len - this_offset
             chunks.append((offset, dst_offset, length))
-            dst_block[dst_offset:dst_offset+length] = \
-                    src_block[offset:offset+length]
+            dst_block[dst_offset:dst_offset + length] = \
+                src_block[offset:offset+length]
             this_offset += chunk_sz
         dst_len = dst_offset + length
-        dst_block = array.array('B', (dst_block[:dst_len])).tostring()
+        dst_block = dst_block[:dst_len].tostring()
 
         fh_src, fh_dst = self._open_src_dst(src_filename, dst_filename)
 
