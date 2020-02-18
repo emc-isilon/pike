@@ -447,7 +447,7 @@ class Frame(with_metaclass(FrameMeta)):
 
     def _value_str(self, value):
         if isinstance(value, array.array) and value.typecode == 'B':
-            return '0x' + ''.join(['%.2x'%b for b in value])
+            return '0x' + ''.join('%.2x' % b for b in value)
         else:
             return str(value)
 
