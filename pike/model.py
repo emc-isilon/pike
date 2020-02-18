@@ -1687,7 +1687,7 @@ class Channel(object):
             buffer=None,
             remaining_bytes=0,
             flags=0):
-        if not isinstance(buffer, bytes):
+        if buffer and not isinstance(buffer, bytes):
             warnings.warn("buffer must be bytes, got {!r}, casting as str and encoding "
                           "with 'ascii'".format(buffer), UnicodeWarning)
             buffer = str(buffer).encode("ascii")
