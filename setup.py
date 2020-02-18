@@ -11,7 +11,6 @@ except ImportError:
 from distutils.command.build_ext import build_ext
 from distutils.command.build_py import build_py
 from distutils.errors import CCompilerError, DistutilsExecError, DistutilsPlatformError
-from pike import __version__
 
 # attempt building the kerberos extension
 try_krb = True
