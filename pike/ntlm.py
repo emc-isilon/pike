@@ -676,7 +676,7 @@ class NtlmAuthenticator(object):
         self.key_exchange_key = self.session_base_key
 
         if extract_pair(ctarget_info, MsvAvTimestamp) is not None:
-            self.lm_challenge_response = "\0"*24
+            self.lm_challenge_response = b"\0" * 24
 
     def session_key(self):
         if self.auth_flags & NTLMSSP_NEGOTIATE_KEY_EXCH:
