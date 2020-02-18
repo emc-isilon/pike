@@ -587,14 +587,14 @@ class Enum(with_metaclass(EnumMeta, int)):
         """
         Returns a list of names of allowed enumeration values.
         """
-        return [name for (name,value) in list(cls.items())]
+        return list(cls._nametoval.keys())
 
     @classmethod
     def values(cls):
         """
         Returns a list of allowed enumeration values.
         """
-        return [value for (name,value) in list(cls.items())]
+        return list(cls._nametoval.values())
 
     @classmethod
     def import_items(cls, dictionary):
@@ -607,7 +607,7 @@ class Enum(with_metaclass(EnumMeta, int)):
 
             SomeEnumClass.import_items(globals())
         """
-        dictionary.update((name,cls(value)) for (name,value) in list(cls.items()))
+        dictionary.update((name, cls(value)) for (name, value) in cls.items())
 
     @classmethod
     def validate(cls, value):
