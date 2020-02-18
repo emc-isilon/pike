@@ -686,7 +686,7 @@ class FlagEnum(Enum):
     @classmethod
     def validate(cls, value):
         remaining = value
-        for flag in list(cls.values()):
+        for flag in cls.values():
             if flag & remaining == flag:
                 remaining &= ~flag
 
@@ -694,9 +694,9 @@ class FlagEnum(Enum):
             raise ValueError("Invalid %s: 0x%x (remainder 0x%x)" % (cls.__name__, value, remaining))
 
     def __str__(self):
-        names = [name for (name,flag) in list(self.items())
+        names = [name for (name, flag) in self.items()
                  if (flag != 0 and flag & self == flag) or
-                    (self == 0 and flag == 0)]
+                 (self == 0 and flag == 0)]
 
         return ' | '.join(names) if len(names) else '0'
 
