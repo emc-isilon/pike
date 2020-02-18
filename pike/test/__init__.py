@@ -36,9 +36,10 @@ from __future__ import division
 # Authors: Brian Koropoff (brian.koropoff@emc.com)
 #
 
-from builtins import str
+from future.utils import raise_from
 from past.utils import old_div
 from builtins import object
+from builtins import str
 import os
 import gc
 import logging
@@ -163,15 +164,14 @@ class PikeTest(unittest.TestCase):
 
         try:
             yield o
-        except model.ResponseError as err:
-            e = err
-
-        if e is None:
             raise self.failureException('No error raised when "%s" expected' % status)
-        elif e.response.status != status:
-            raise self.failureException('"%s" raised when "%s" expected' % (e.response.status, status))
-
-        o.response = e.response
+        except model.ResponseError as err:
+            o.response = err.response
+            if err.response.status != status:
+                raise_from(self.failureException(
+                    '"%s" raised when "%s" expected' % (err.response.status, status),
+                    err,
+                ))
 
     def setUp(self):
         if self.loglevel != logging.NOTSET:
