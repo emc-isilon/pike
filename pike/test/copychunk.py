@@ -35,7 +35,7 @@ from __future__ import division
 # Authors: Avi Bhandari (avi.bahndari@emc.com)
 #          Masen Furer (masen.furer@emc.com)
 #
-
+import array
 from builtins import chr
 from builtins import str
 from builtins import zip
@@ -528,8 +528,8 @@ class TestServerSideCopy(pike.test.PikeTest):
             dst_block[dst_offset:dst_offset+length] = \
                     src_block[offset:offset+length]
             this_offset += chunk_sz
-        dst_len = dst_offset+length
-        dst_block = "".join(dst_block[:dst_len])
+        dst_len = dst_offset + length
+        dst_block = array.array('B', (dst_block[:dst_len])).tostring()
 
         fh_src, fh_dst = self._open_src_dst(src_filename, dst_filename)
 
