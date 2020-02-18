@@ -386,7 +386,7 @@ class EdgeCreditTest(CreditTest):
         """
         fname = "test_sequence_number_wrap"
         # buf is 64k == 1 credit
-        buf = "\0\1\2\3\4\5\6\7"*8192
+        buf = b"\0\1\2\3\4\5\6\7" * 8192
         credits_per_req = 16
         sequence_number_target = 2080
 
@@ -437,7 +437,7 @@ class AsyncCreditTest(CreditTest):
         chan2, tree2 = self.tree_connect()
         chan2_starting_credits = chan2.connection.negotiate_response.parent.credit_response
         fname = "test_async_lock"
-        buf = "\0\1\2\3\4\5\6\7"
+        buf = b"\0\1\2\3\4\5\6\7"
         lock1 = (0, 8, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK)
         contend_locks = [
                 (0, 2, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK),
@@ -480,7 +480,7 @@ class AsyncCreditTest(CreditTest):
         for f in lock_futures:
             self.assertEqual(f.result().credit_response, 0)
         self.assertEqual(chan2.connection.credits, exp_credits)
-        buf = "\0\1\2\3\4\5\6\7"*8192
+        buf = b"\0\1\2\3\4\5\6\7" * 8192
 
         # send a request for all of our credits
         chan2.write(fh2, 0, buf*exp_credits)
@@ -507,8 +507,8 @@ class AsyncCreditTest(CreditTest):
         fname = "test_async_write"
         lkey = array.array('B',list(map(random.randint, [0]*16, [255]*16)))
         # buf is 64k
-        buf = "\0\1\2\3\4\5\6\7"*8192
-        write_request_multiples = [1,2,3,4]
+        buf = b"\0\1\2\3\4\5\6\7" * 8192
+        write_request_multiples = [1, 2, 3, 4]
         credit_req = 16
 
         fh1 = chan1.create(
