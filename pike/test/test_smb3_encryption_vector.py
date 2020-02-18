@@ -24,9 +24,9 @@ class bogus_connection(object):
 class bogus_300_connection(bogus_connection):
     def __init__(self, session_key):
         self._signing_key = digest.derive_key(
-                session_key,
-                'SMB2AESCMAC',
-                'SmbSign\0')[:16]
+            session_key,
+            b'SMB2AESCMAC',
+            b'SmbSign\0')[:16]
         self._encryption_context = crypto.EncryptionContext(
                 crypto.CryptoKeys300(session_key),
                 [crypto.SMB2_AES_128_CCM])
@@ -34,9 +34,9 @@ class bogus_300_connection(bogus_connection):
 class bogus_311_connection(bogus_connection):
     def __init__(self, session_key, pre_auth_integrity_value, ciphers):
         self._signing_key = digest.derive_key(
-                session_key,
-                'SMBSigningKey',
-                pre_auth_integrity_value)[:16]
+            session_key,
+            b'SMBSigningKey',
+            pre_auth_integrity_value)[:16]
         self._encryption_context = crypto.EncryptionContext(
                 crypto.CryptoKeys311(session_key,
                                      pre_auth_integrity_value),
@@ -129,9 +129,9 @@ class TestVector(unt.TestCase):
         self.assertEqual(h.hash, exp_pae_5)
         session_key = array.array('B', unhexlify("270E1BA896585EEB7AF3472D3B4C75A7"))
         signing_key = digest.derive_key(
-                session_key,
-                'SMBSigningKey',
-                h.hash)[:16]
+            session_key,
+            b'SMBSigningKey',
+            h.hash)[:16]
         exp_signing_key = array.array('B', unhexlify("73FE7A9A77BEF0BDE49C650D8CCB5F76"))
         self.assertEqual(signing_key, exp_signing_key)
 
@@ -157,11 +157,11 @@ class TestVector(unt.TestCase):
         smb_packet.flags = smb2.SMB2_FLAGS_SIGNED
         smb_packet.message_id = 4
         smb_packet.tree_id = 1
-        smb_packet.signature = "\0"*16
+        smb_packet.signature = b"\0" * 16
         smb_packet.session_id = session_id
         write_req = smb2.WriteRequest(smb_packet)
         write_req.file_id = (0x200003900000115, 0x23900000001)
-        write_req.buffer = "Smb3 encryption testing"
+        write_req.buffer = b"Smb3 encryption testing"
         write_req.write_channel_info_offset = 0x70
 
         exp_serialized = array.array('B', unhexlify(
@@ -243,11 +243,11 @@ class TestVector(unt.TestCase):
         smb_packet.flags = smb2.SMB2_FLAGS_SIGNED
         smb_packet.message_id = 5
         smb_packet.tree_id = 1
-        smb_packet.signature = "\0"*16
+        smb_packet.signature = b"\0" * 16
         smb_packet.session_id = session_id
         write_req = smb2.WriteRequest(smb_packet)
         write_req.file_id = (0x400000006, 0x400000001)
-        write_req.buffer = "Smb3 encryption testing"
+        write_req.buffer = b"Smb3 encryption testing"
         write_req.write_channel_info_offset = 0x70
 
         exp_serialized = array.array('B', unhexlify(
