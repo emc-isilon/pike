@@ -205,7 +205,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         for the_offset, the_length in reads:
             read_list.append(self.chan.read(
                 file_handle, the_length, the_offset + add_offset).tostring())
-        return "".join(read_list)
+        return b"".join(read_list)
 
     def _gen_16mega_file(self, filename):
         """
@@ -460,7 +460,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.assertBufferEqual(src_buf, block)
         if total_offset > 0:
             offs_buf = self.chan.read(fh_src, total_offset, total_len).tostring()
-            self.assertBufferEqual(offs_buf, "\x00"*total_offset)
+            self.assertBufferEqual(offs_buf, b"\x00" * total_offset)
         dst_buf = self.chan.read(fh_src, total_len, total_len+total_offset).tostring()
         self.assertBufferEqual(dst_buf, block)
 
@@ -468,7 +468,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.chan.close(fh_dst)
 
     def test_same_small_file(self):
-        block = "Hello"
+        block = b"Hello"
         num_of_chunks = 1
         self.generic_ssc_same_file_test_case(block, num_of_chunks)
 
@@ -483,7 +483,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.generic_ssc_same_file_test_case(block, num_of_chunks)
 
     def test_same_offset_small_file(self):
-        block = "Hello"
+        block = b"Hello"
         num_of_chunks = 1
         offset = 64
         self.generic_ssc_same_file_test_case(block, num_of_chunks, offset)
@@ -569,7 +569,7 @@ class TestServerSideCopy(pike.test.PikeTest):
                                              src_options=None, dst_options=None,
                                              src_brl=None, dst_brl=None,
                                        exp_error=None):
-        block = "Hello"
+        block = b"Hello"
         total_len = len(block)
         src_filename = "src_negative.txt"
         dst_filename = "dst_negative.txt"
