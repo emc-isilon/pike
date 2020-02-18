@@ -48,7 +48,6 @@ import Cryptodome.Hash.HMAC as HMAC
 import Cryptodome.Hash.MD4 as MD4
 import Cryptodome.Hash.MD5 as MD5
 from . import core
-from . import model
 from . import nttime
 
 def des_key_64(K):
