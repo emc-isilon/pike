@@ -6,6 +6,7 @@ import array
 import pytest
 
 import pike.model
+import pike.smb2
 
 
 @pytest.fixture
