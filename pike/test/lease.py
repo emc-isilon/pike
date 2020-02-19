@@ -45,8 +45,8 @@ import array
 @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_LEASING)
 class LeaseTest(pike.test.PikeTest):
     share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
-    lease1 = array.array('B',list(map(random.randint, [0]*16, [255]*16)))
-    lease2 = array.array('B',list(map(random.randint, [0]*16, [255]*16)))
+    lease1 = array.array('B', map(random.randint, [0] * 16, [255] * 16))
+    lease2 = array.array('B', map(random.randint, [0] * 16, [255] * 16))
     r = pike.smb2.SMB2_LEASE_READ_CACHING
     rw = r | pike.smb2.SMB2_LEASE_WRITE_CACHING
     rh = r | pike.smb2.SMB2_LEASE_HANDLE_CACHING
