@@ -40,7 +40,6 @@ from builtins import chr
 from builtins import str
 from builtins import zip
 from builtins import range
-from past.utils import old_div
 import pike.ntstatus
 import pike.smb2
 import pike.test
@@ -61,8 +60,8 @@ SIMPLE_5_CHUNKS = [(0, 0, 4000), (4000, 4000, 4000), (8000, 8000, 4000),
 SIMPLE_5_CHUNKS_LEN = 20000
 
 def _gen_test_buffer(length):
-    pattern = "".join([ chr(x) for x in range(ord(' '), ord('~'))])
-    buf = (pattern * (old_div(length, (len(pattern))) + 1))[:length]
+    pattern = "".join([chr(x) for x in range(ord(' '), ord('~'))])
+    buf = (pattern * ((length // len(pattern)) + 1))[:length]
     return buf.encode("ascii")
 
 def _gen_random_test_buffer(length):
@@ -258,7 +257,7 @@ class TestServerSideCopy(pike.test.PikeTest):
             dst_offset = random.randrange(1, 4294967295 - total_len)
         else:
             dst_offset = 0
-        num_of_chunks = old_div(total_len, chunk_sz) + (total_len % chunk_sz > 0)
+        num_of_chunks = (total_len // chunk_sz) + (total_len % chunk_sz > 0)
         this_offset = 0
         chunks = []
         while this_offset < total_len:
@@ -335,7 +334,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self._create_and_write(src_filename, block)
 
         total_len = len(block)
-        chunk_sz = (old_div(total_len, number_of_chunks)) + 1
+        chunk_sz = (total_len // number_of_chunks) + 1
         this_offset = 0
 
         chunks = []
@@ -435,7 +434,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self._create_and_write(filename, block)
 
         total_len = len(block)
-        chunk_sz = (old_div(total_len, number_of_chunks)) + 1
+        chunk_sz = (total_len // number_of_chunks) + 1
         this_offset = 0
 
         chunks = []
@@ -510,7 +509,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self._create_and_write(src_filename, block)
 
         total_len = len(block)
-        chunk_sz = (old_div(total_len, number_of_chunks)) + 1
+        chunk_sz = (total_len // number_of_chunks) + 1
         this_offset = 0
 
         chunks = []
@@ -839,10 +838,10 @@ class TestServerSideCopy(pike.test.PikeTest):
             fh_src, fh_dst, SIMPLE_5_CHUNKS)
         nb_req = ioctl_req.parent.parent
         read_req1 = self.chan.read_request(
-            pike.model.RelatedOpen(self.tree), old_div(SIMPLE_5_CHUNKS_LEN, 2), 0)
+            pike.model.RelatedOpen(self.tree), SIMPLE_5_CHUNKS_LEN // 2, 0)
         nb_req.adopt(read_req1.parent)
         read_req2 = self.chan.read_request(pike.model.RelatedOpen(
-            self.tree), old_div(SIMPLE_5_CHUNKS_LEN, 2), old_div(SIMPLE_5_CHUNKS_LEN, 2))
+            self.tree), SIMPLE_5_CHUNKS_LEN // 2, SIMPLE_5_CHUNKS_LEN // 2)
         nb_req.adopt(read_req2.parent)
         close_req = self.chan.close_request(pike.model.RelatedOpen(self.tree))
         nb_req.adopt(close_req.parent)
