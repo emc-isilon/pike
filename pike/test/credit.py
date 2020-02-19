@@ -504,7 +504,7 @@ class AsyncCreditTest(CreditTest):
         chan2, tree2 = self.tree_connect()
         chan2_starting_credits = chan2.connection.negotiate_response.parent.credit_response
         fname = "test_async_write"
-        lkey = array.array('B',list(map(random.randint, [0]*16, [255]*16)))
+        lkey = array.array('B', map(random.randint, [0] * 16, [255] * 16))
         # buf is 64k
         buf = b"\0\1\2\3\4\5\6\7" * 8192
         write_request_multiples = [1, 2, 3, 4]
