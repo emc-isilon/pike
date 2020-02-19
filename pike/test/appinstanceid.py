@@ -49,8 +49,9 @@ class AppInstanceIdTest(pike.test.PikeTest):
     def __init__(self, *args, **kwargs):
         super(AppInstanceIdTest, self).__init__(*args, **kwargs)
         self.share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
-        self.lease1 = array.array('B',list(map(random.randint, [0]*16, [255]*16)))
-        self.app_instance_id1 = array.array('B',list(map(random.randint, [0]*16, [255]*16)))
+        self.lease1 = array.array('B', map(random.randint, [0] * 16, [255] * 16))
+        self.app_instance_id1 = array.array('B',
+                                            map(random.randint, [0] * 16, [255] * 16))
         self.r = pike.smb2.SMB2_LEASE_READ_CACHING
         self.rw = self.r | pike.smb2.SMB2_LEASE_WRITE_CACHING
         self.rh = self.r | pike.smb2.SMB2_LEASE_HANDLE_CACHING
