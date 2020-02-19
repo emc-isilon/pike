@@ -37,7 +37,6 @@ from __future__ import division
 #
 
 from future.utils import raise_from
-from past.utils import old_div
 from builtins import object
 from builtins import str
 import os
@@ -220,8 +219,8 @@ class PikeTest(unittest.TestCase):
         low = 0
         high = len(buf1)
         while high - low > 1:
-            chunk_1 = (low, low+old_div((high-low),2))
-            chunk_2 = (low+old_div((high-low),2), high)
+            chunk_1 = (low, low + ((high - low) // 2))
+            chunk_2 = (low + ((high - low) // 2), high)
             if buf1[chunk_1[0]:chunk_1[1]] != buf2[chunk_1[0]:chunk_1[1]]:
                 low, high = chunk_1
             elif buf1[chunk_2[0]:chunk_2[1]] != buf2[chunk_2[0]:chunk_2[1]]:
