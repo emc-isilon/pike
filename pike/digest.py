@@ -37,7 +37,6 @@ from __future__ import division
 #
 
 from builtins import range
-from past.utils import old_div
 import Cryptodome.Hash.HMAC as HMAC
 import Cryptodome.Hash.SHA256 as SHA256
 import Cryptodome.Hash.SHA512 as SHA512
@@ -87,8 +86,8 @@ def aes128_cmac(key,message):
 
     message = array.array('B', message)
     mac = array.array('B', [0]*16)
-    scratch = array.array('B', [0]*16)
-    n = old_div((len(message) + 16 - 1), 16)
+    scratch = array.array('B', [0] * 16)
+    n = (len(message) + 16 - 1) // 16
     rem = len(message) % 16
     last_complete = n != 0 and rem == 0
     i = 0
