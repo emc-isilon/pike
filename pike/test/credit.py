@@ -39,7 +39,6 @@ from __future__ import division
 from builtins import map
 from builtins import range
 from builtins import object
-from past.utils import old_div
 import pike.model
 import pike.smb2
 import pike.test
@@ -119,12 +118,12 @@ class CreditTest(pike.test.PikeTest):
         then perform one large read operation and subsequently close the file
         """
         fname = self.id().rpartition(".")[-1]
-        buf = b"\0\1\2\3\4\5\6\7"*8192
+        buf = b"\0\1\2\3\4\5\6\7" * 8192
         buflen = len(buf)
-        file_chunks = old_div(file_size, buflen)
-        write_chunks = old_div(file_size, write_size)
-        write_buf = buf * (old_div(file_chunks, write_chunks))
-        write_credits_per_op = old_div(write_size, size_64k)
+        file_chunks = file_size // buflen
+        write_chunks = file_size // write_size
+        write_buf = buf * (file_chunks // write_chunks)
+        write_credits_per_op = write_size // size_64k
         chan, tree = self.tree_connect()
         starting_credits = chan.connection.negotiate_response.parent.credit_response
         self.info("creating {0} ({1} bytes)".format(fname, file_size))
@@ -134,7 +133,7 @@ class CreditTest(pike.test.PikeTest):
             fh = chan.create(tree, fname).result()
 
         self.info("writing {0} chunks of {1} bytes; {2} credits per op".format(
-                write_chunks,
+            write_chunks,
                 write_size,
                 write_credits_per_op))
         for ix in range(write_chunks):
@@ -164,19 +163,19 @@ class CreditTest(pike.test.PikeTest):
                   "{0} credits".format(exp_credits))
         self.assertGreaterEqual(chan.connection.credits, exp_credits)
 
-        read_chunks = old_div(file_size, read_size)
-        read_buf = buf * (old_div(file_chunks, read_chunks))
-        read_credits_per_op = old_div(read_size, size_64k)
+        read_chunks = file_size // read_size
+        read_buf = buf * (file_chunks // read_chunks)
+        read_credits_per_op = read_size // size_64k
         self.info("reading {0} chunks of {1} bytes; {2} credits per op".format(
-                read_chunks,
-                read_size,
-                read_credits_per_op))
+            read_chunks,
+            read_size,
+            read_credits_per_op))
         fh = chan.create(
-                tree,
-                fname,
-                access=pike.smb2.GENERIC_READ | pike.smb2.DELETE,
-                disposition=pike.smb2.FILE_OPEN,
-                options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
+            tree,
+            fname,
+            access=pike.smb2.GENERIC_READ | pike.smb2.DELETE,
+            disposition=pike.smb2.FILE_OPEN,
+            options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
         file_buffer = array.array("B")
         for ix in range(read_chunks):
             credit_assert_future = pike.model.Future()
