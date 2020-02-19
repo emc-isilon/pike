@@ -289,7 +289,7 @@ class Client(object):
         object.__init__(self)
 
         if client_guid is None:
-            client_guid = array.array('B',list(map(random.randint, [0]*16, [255]*16)))
+            client_guid = array.array('B', map(random.randint, [0] * 16, [255] * 16))
 
         self.dialects = dialects
         self.capabilities = capabilities
@@ -885,7 +885,7 @@ class Connection(transport.Transport):
         and returns a list of L{smb2.Smb2} response objects, one for each
         corresponding L{smb2.Smb2} frame in the request.
         """
-        return list(map(Future.result, self.submit(req)))
+        return [f.result() for f in self.submit(req)]
 
     def negotiate_request(self, hash_algorithms=None, salt=None, ciphers=None):
         smb_req = self.request()
@@ -913,7 +913,8 @@ class Connection(transport.Transport):
                 preauth_integrity_req.salt = salt
             else:
                 preauth_integrity_req.salt = array.array('B',
-                    list(map(random.randint, [0]*32, [255]*32)))
+                                                         map(random.randint, [0] * 32,
+                                                             [255] * 32))
         self._negotiate_request = neg_req
         return neg_req
 
@@ -1379,7 +1380,8 @@ class Channel(object):
             if persistent:
                 durable_req.flags = smb2.SMB2_DHANDLE_FLAG_PERSISTENT
             if create_guid is None:
-                create_guid = array.array('B',list(map(random.randint, [0]*16, [255]*16)))
+                create_guid = array.array('B',
+                                          map(random.randint, [0] * 16, [255] * 16))
             durable_req.create_guid = create_guid
 
         if app_instance_id:
