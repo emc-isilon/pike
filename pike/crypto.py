@@ -124,7 +124,7 @@ class TransformHeader(core.Frame):
         self.signature = None
         # the value of nonce is always used in the encryption routine
         self.nonce = array.array('B',
-                                 list(map(random.randint, [0]*16, [255]*16)))
+                                 map(random.randint, [0] * 16, [255] * 16))
         # if wire_nonce is set, it will be sent on the wire instead of nonce
         self.wire_nonce = None
         self.original_message_size = None
