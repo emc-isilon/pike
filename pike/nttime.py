@@ -38,7 +38,6 @@ from __future__ import division
 
 from builtins import str
 from past.builtins import basestring
-from past.utils import old_div
 from datetime import datetime, timedelta
 import math
 import time
@@ -70,11 +69,11 @@ def _nt_time_to_unix_time(t):
     # in Python's time library format such that times like "12:59.59.1"
     # don't turn into "01:00:00.0" when converted back. This
     # calculation below makes use of Python's bigint capabilities.
-    py_time = old_div((t << 32), _intervals_per_second)
+    py_time = (t << 32) // _intervals_per_second
     py_time -= _unix_time_offset << 32
     py_time_parts = divmod(py_time, 2**32)
     py_time = float(py_time_parts[0])
-    py_time += old_div(math.copysign(py_time_parts[1], py_time), 2**32)
+    py_time += math.copysign(py_time_parts[1], py_time) // 2 ** 32
     return py_time
 
 def GMT_to_datetime(gmt_token):
