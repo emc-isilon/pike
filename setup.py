@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import ctypes
-import sys
+import os
 import unittest
 
 try:
@@ -11,6 +11,9 @@ except ImportError:
 from distutils.command.build_ext import build_ext
 from distutils.command.build_py import build_py
 from distutils.errors import CCompilerError, DistutilsExecError, DistutilsPlatformError
+
+_HERED = os.path.abspath(os.path.dirname(__file__))
+_README = os.path.join(_HERED, 'README.md')
 
 # attempt building the kerberos extension
 try_krb = True
@@ -73,6 +76,11 @@ def pike_suite():
     return unittest.defaultTestLoader.discover("pike/test", pattern="*.py")
 
 
+# Get the long description from the README.md file
+with open(_README, encoding='utf-8') as f_:
+    long_description = f_.read()
+
+
 def run_setup(with_extensions):
     ext_modules = []
     cmdclass = {"build_py": ve_build_py}
@@ -84,6 +92,8 @@ def run_setup(with_extensions):
         use_scm_version=True,
         setup_requires=["setuptools_scm"],
         description="Pure python SMB client",
+        long_description_content_type='text/markdown',
+        long_description=long_description,
         author="Brian Koropoff",
         author_email="Brian.Koropoff@emc.com",
         maintainer="Masen Furer",
