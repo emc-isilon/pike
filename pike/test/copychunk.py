@@ -261,7 +261,6 @@ class TestServerSideCopy(pike.test.PikeTest):
             dst_offset = random.randrange(1, 4294967295 - total_len)
         else:
             dst_offset = 0
-        num_of_chunks = (total_len // chunk_sz) + (total_len % chunk_sz > 0)
         this_offset = 0
         chunks = []
         while this_offset < total_len:
