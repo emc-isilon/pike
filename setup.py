@@ -77,8 +77,8 @@ def pike_suite():
 
 
 # Get the long description from the README.md file
-with open(_README, encoding='utf-8') as f_:
-    long_description = f_.read()
+with open(_README, 'rb') as f_:
+    long_description = f_.read().decode("utf-8")
 
 
 def run_setup(with_extensions):
