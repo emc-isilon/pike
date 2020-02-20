@@ -71,14 +71,20 @@ def split_credentials(creds):
 class KerberosProvider(object):
     def __init__(self, conn, creds=None):
         if creds:
+            # XXX: NTLM support is only provided in likewise gssapi
+            raise NotImplementedError("NTLM via GSSAPI is not functional")
+            # This API doesn't accept strings with null terminators, so it cannot take
+            # utf-16-le (which is what would be expected), so prefer instead to be
+            # safe and only allow ascii characters.
+            cred_encoding = "ascii"
             domain, user, password = split_credentials(creds)
             (self.result,
              self.context) = kerberos.authGSSClientInit(
                 "cifs/" + conn.server,
                 gssmech=2,
-                user=user.encode("utf-8"),
-                password=password.encode("utf-8"),
-                domain=domain.encode("utf-8"))
+                user=user.encode(cred_encoding),
+                password=password.encode(cred_encoding),
+                domain=domain.encode(cred_encoding))
         else:
             (self.result,
              self.context) = kerberos.authGSSClientInit("cifs/" + conn.server,
