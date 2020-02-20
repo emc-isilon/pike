@@ -1391,7 +1391,7 @@ class Channel(object):
             query_on_disk_id_req = smb2.QueryOnDiskIDRequest(create_req)
 
         if extended_attributes:
-            ext_attr_len = len(list(extended_attributes.keys()))
+            ext_attr_len = len(extended_attributes)
             for name, value in extended_attributes.items():
                 ext_attr = smb2.ExtendedAttributeRequest(create_req)
                 if ext_attr_len == 1:
