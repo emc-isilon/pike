@@ -34,13 +34,12 @@
 # Authors: Rafal Szczesniak (rafal.szczesniak@isilon.com)
 #
 
+import datetime
+
 import pike.model
 import pike.smb2
 import pike.nttime
 import pike.test
-import datetime
-
-from pike.test import unittest
 
 
 class SetTest(pike.test.PikeTest):
