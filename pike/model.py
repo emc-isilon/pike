@@ -2050,26 +2050,39 @@ class Open(object):
 
         if self.oplock_level != smb2.SMB2_OPLOCK_LEVEL_NONE:
             if self.oplock_level == smb2.SMB2_OPLOCK_LEVEL_LEASE:
-                lease_res = [c for c in self.create_response if isinstance(c, smb2.LeaseResponse)][0]
+                lease_res = self.first_create_context(smb2.LeaseResponse)
                 self.lease = tree.session.client.lease(tree, lease_res)
             else:
                 self.arm_oplock_future()
 
-        durable_res = [c for c in self.create_response if isinstance(c, smb2.DurableHandleResponse)]
-
-        if durable_res != []:
+        durable_res = self.first_create_context(smb2.DurableHandleResponse)
+        if durable_res:
             self.is_durable = True
 
-        durable_v2_res = [c for c in self.create_response if isinstance(c, smb2.DurableHandleV2Response)]
-        if durable_v2_res != []:
-            self.durable_timeout = durable_v2_res[0].timeout
-            self.durable_flags = durable_v2_res[0].flags
+        durable_v2_res = self.first_create_context(smb2.DurableHandleV2Response)
+        if durable_v2_res:
+            self.durable_timeout = durable_v2_res.timeout
+            self.durable_flags = durable_v2_res.flags
 
         if self.durable_flags is not None:
             self.is_durable = True
             if self.durable_flags & smb2.SMB2_DHANDLE_FLAG_PERSISTENT != 0:
                 self.is_persistent = True
 
+    def iter_create_contexts(self, context_clz):
+        """
+        Iterate create contexts of the type context_clz
+        """
+        for ctx in self.create_response:
+            if isinstance(ctx, context_clz):
+                yield ctx
+
+    def first_create_context(self, context_clz):
+        """
+        Return the first create context of the type context_clz or None
+        """
+        for ctx in self.iter_create_contexts(context_clz):
+            return ctx
 
     def arm_oplock_future(self):
         """
