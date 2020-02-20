@@ -60,7 +60,7 @@ def aes128_cmac(key,message):
     def shiftleft(data):
         cin = 0
         cout = 0
-        for i in range(len(data), 0, -1):
+        for i in reversed(range(0,len(data))):
             cout = (data[i] & 0x80) >> 7
             data[i] = ((data[i] << 1) | cin) & 0xFF
             cin = cout
