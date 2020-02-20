@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 #
 # Copyright (c) 2013, EMC Corporation
 # All rights reserved.
@@ -34,19 +33,22 @@ from __future__ import absolute_import
 #
 # Authors: Masen Furer (masen.furer@emc.com)
 #
-
+from __future__ import absolute_import
 from builtins import chr
-from builtins import range
 from builtins import object
+from builtins import range
+
 import array
 import random
-import struct
 from socket import gethostname
+import struct
+
 import Cryptodome.Cipher.DES
 import Cryptodome.Cipher.ARC4 as RC4
 import Cryptodome.Hash.HMAC as HMAC
 import Cryptodome.Hash.MD4 as MD4
 import Cryptodome.Hash.MD5 as MD5
+
 from . import core
 from . import nttime
 
