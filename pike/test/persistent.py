@@ -35,14 +35,15 @@
 #
 
 from builtins import map
-import pike.model as model
+
+import array
+import random
+import time
+
+import pike.model
 import pike.smb2 as smb2
 import pike.test as test
 import pike.ntstatus as ntstatus
-import random
-import array
-import time
-import pike.model
 
 # Constants
 LEASE_R   = smb2.SMB2_LEASE_READ_CACHING
