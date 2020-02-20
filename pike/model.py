@@ -44,24 +44,24 @@ for exercising common elements of the protocol without manually
 constructing packets.
 """
 from __future__ import absolute_import
-
 from builtins import next
 from builtins import map
 from builtins import range
 from builtins import object
 from builtins import str
-import sys
-import socket
-import array
-import struct
-import random
-import logging
-import time
-import operator
-import contextlib
-import warnings
-
 from future.utils import raise_
+
+import array
+import contextlib
+from functools import reduce
+import logging
+import operator
+import random
+import socket
+import struct
+import sys
+import time
+import warnings
 
 from . import auth
 from . import core
@@ -72,7 +72,6 @@ from . import smb2
 from . import transport
 from . import ntstatus
 from . import digest
-from functools import reduce
 
 default_credit_request = 10
 default_timeout = 30
