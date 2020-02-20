@@ -1,5 +1,3 @@
-from __future__ import print_function
-from __future__ import division
 #
 # Copyright (c) 2013, EMC Corporation
 # All rights reserved.
@@ -35,16 +33,18 @@ from __future__ import division
 #
 # Authors: Brian Koropoff (brian.koropoff@emc.com)
 #
-
-from future.utils import raise_from
+from __future__ import print_function
+from __future__ import division
 from builtins import object
 from builtins import str
-import os
+from future.utils import raise_from
+
+import contextlib
 import gc
 import logging
-import sys
+import os
 import unittest
-import contextlib
+import sys
 
 import pike.model as model
 import pike.smb2 as smb2
