@@ -378,7 +378,7 @@ class SelectPoller(BasePoller):
     Roughly equivalent performance to using asyncore
     """
     def poll(self):
-        non_connected = [t._fileno for t in list(self.connections.values()) if not t.connected]
+        non_connected = [t._fileno for t in self.connections.values() if not t.connected]
         readers = list(self.connections.keys())
         writers = non_connected + list(self.deferred_writers)
         readables, writables, _ = select.select(readers,
