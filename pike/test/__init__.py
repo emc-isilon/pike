@@ -219,8 +219,9 @@ class PikeTest(unittest.TestCase):
         low = 0
         high = len(buf1)
         while high - low > 1:
+            # XXX: consider usage of stdlib bisect module
             chunk_1 = (low, low + ((high - low) // 2))
-            chunk_2 = (low + ((high - low) // 2), high)
+            chunk_2 = (chunk_1[1], high)
             if buf1[chunk_1[0]:chunk_1[1]] != buf2[chunk_1[0]:chunk_1[1]]:
                 low, high = chunk_1
             elif buf1[chunk_2[0]:chunk_2[1]] != buf2[chunk_2[0]:chunk_2[1]]:
