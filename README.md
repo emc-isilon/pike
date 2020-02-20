@@ -10,7 +10,7 @@ Prerequisites
 =============
 
 Required for basic functionality:
-* Python 2.7
+* Python 2.7, 3.6+
 * PyCryptodomex
 
 Required for building kerberos library:
