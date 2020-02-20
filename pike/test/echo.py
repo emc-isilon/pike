@@ -33,11 +33,8 @@
 #
 # Authors: Angela Bartholomaus (angela.bartholomaus@emc.com)
 #
-import pike.model
-import pike.smb2
 import pike.test
-import random
-import array
+
 
 class EchoTest(pike.test.PikeTest):
     # Test that ECHO works
