@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-from __future__ import division
 #
 # Copyright (c) 2013, EMC Corporation
 # All rights reserved.
@@ -35,14 +33,19 @@ from __future__ import division
 #
 # Authors: Brian Koropoff (brian.koropoff@emc.com)
 #
-
+from __future__ import absolute_import
+from __future__ import division
 from builtins import range
+
+import array
+
 import Cryptodome.Hash.HMAC as HMAC
 import Cryptodome.Hash.SHA256 as SHA256
 import Cryptodome.Hash.SHA512 as SHA512
 import Cryptodome.Cipher.AES as AES
-import array
+
 from . import core
+
 
 def sha256_hmac(key,message):
     return array.array('B',
