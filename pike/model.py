@@ -273,7 +273,7 @@ class Client(object):
                            smb2.DIALECT_SMB3_0,
                            smb2.DIALECT_SMB3_0_2,
                            smb2.DIALECT_SMB3_1_1],
-                 capabilities=smb2.GlobalCaps(reduce(operator.or_, list(smb2.GlobalCaps.values()))),
+                 capabilities=smb2.GlobalCaps(reduce(operator.or_, smb2.GlobalCaps.values())),
                  security_mode=smb2.SMB2_NEGOTIATE_SIGNING_ENABLED,
                  client_guid=None):
         """
