@@ -1,5 +1,3 @@
-from __future__ import print_function
-from __future__ import division
 #
 # Copyright (c) 2017, Dell EMC Corporation
 # All rights reserved.
@@ -35,17 +33,19 @@ from __future__ import division
 #
 # Authors: Masen Furer <masen.furer@dell.com>
 #
-
+from __future__ import division
+from __future__ import print_function
 from builtins import map
-from builtins import range
 from builtins import object
-import pike.model
-import pike.smb2
-import pike.test
+from builtins import range
+
 import array
 import random
 import sys
-import time
+
+import pike.model
+import pike.smb2
+import pike.test
 
 # common size constants
 size_64k = 2**16
