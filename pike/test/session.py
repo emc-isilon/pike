@@ -34,9 +34,8 @@
 # Authors: Brian Koropoff (brian.koropoff@emc.com)
 #
 
-import pike.model
-import pike.smb2
 import pike.test
+
 
 class SessionTest(pike.test.PikeTest):
     # Log off a session
