@@ -35,12 +35,14 @@
 #
 
 from builtins import map
+
+import array
+import random
+
 import pike.model
 import pike.smb2
 import pike.test
 import pike.ntstatus
-import array
-import random
 
 class ReadWriteTest(pike.test.PikeTest):
     # Test that we can write to a file
