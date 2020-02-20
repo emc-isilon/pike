@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 #
 # Copyright (c) 2016, EMC Corporation
 # All rights reserved.
@@ -34,17 +33,19 @@ from __future__ import absolute_import
 #
 # Authors: Masen Furer (masen.furer@dell.com)
 #
+from __future__ import absolute_import
 from builtins import map
 from builtins import range
 from builtins import object
-from . import core
-from . import digest
-from . import smb2
 
 import array
 import random
 
 from Cryptodome.Cipher import AES
+
+from . import core
+from . import digest
+from . import smb2
 
 
 def pad_right(value, length, byte=b'\0'):
