@@ -46,13 +46,14 @@ This makes it simple to correlate the code with the spec while
 maintaining a clear visual distinction between values and types.
 """
 from __future__ import absolute_import
-
 from builtins import str
 from builtins import range
+
 import array
+import re
+
 from . import core
 from . import nttime
-import re
 from . import ntstatus
 
 # Dialects constants
