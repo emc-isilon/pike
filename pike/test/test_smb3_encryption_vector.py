@@ -3,13 +3,16 @@
 # SMB 3.1.1 Encryption: https://blogs.msdn.microsoft.com/openspecification/2015/09/09/smb-3-1-1-encryption-in-windows-10/
 # SMB 3.1.1 Pre-auth integrity: https://blogs.msdn.microsoft.com/openspecification/2015/08/11/smb-3-1-1-pre-authentication-integrity-in-windows-10/
 from builtins import object
+
 import array
-import unittest as unt
+import unittest
+
 import pike.crypto as crypto
 import pike.digest as digest
 import pike.netbios as netbios
 import pike.smb2 as smb2
-from binascii import unhexlify, hexlify
+
+from binascii import unhexlify
 
 class bogus_connection(object):
     def signing_key(self, *args, **kwds):
@@ -50,7 +53,7 @@ class PAIntegrity(object):
             self.hash +
             data)
 
-class TestVector(unt.TestCase):
+class TestVector(unittest.TestCase):
     def test_pre_auth_integrity(self):
         h = PAIntegrity()
         negotiate_request = array.array('B', unhexlify(
@@ -304,4 +307,4 @@ class TestVector(unt.TestCase):
         self.assertEqual(nb[0].buf, exp_smb_message)
 
 if __name__ == "__main__":
-    unt.main()
+    unittest.main()
