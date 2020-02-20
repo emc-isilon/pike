@@ -1,4 +1,3 @@
-from __future__ import division
 #
 # Copyright (c) 2015, EMC Corporation
 # All rights reserved.
@@ -35,15 +34,18 @@ from __future__ import division
 # Authors: Avi Bhandari (avi.bahndari@emc.com)
 #          Masen Furer (masen.furer@emc.com)
 #
-import array
+from __future__ import division
 from builtins import chr
+from builtins import range
 from builtins import str
 from builtins import zip
-from builtins import range
+
+import array
+import random
+
 import pike.ntstatus
 import pike.smb2
 import pike.test
-import random
 
 share_all = pike.smb2.FILE_SHARE_READ | \
             pike.smb2.FILE_SHARE_WRITE | \
