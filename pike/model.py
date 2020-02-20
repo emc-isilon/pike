@@ -1688,6 +1688,16 @@ class Channel(object):
             buffer=None,
             remaining_bytes=0,
             flags=0):
+        """
+        Create a pike.smb2.WriteRequest from the given parameters
+
+        @param file: L{Open}
+        @param offset: int offset into the file
+        @param buffer: bytes or array.array('B'). If a unicode str is passed, it
+            can only contain ascii characters and a warning will be raised.
+        @param remaining_bytes:
+        @param flags: L{pike.smb2.WriteFlags}
+        """
         if isinstance(buffer, array.array) and buffer.typecode != 'B':
             raise ValueError(
                 "array.array must have typecode 'B', not {!r}".format(buffer.typecode))
