@@ -33,13 +33,14 @@
 #
 # Authors: Brian Koropoff (brian.koropoff@emc.com)
 #
-
 from builtins import map
+
+import array
+import random
+
 import pike.model
 import pike.smb2
 import pike.test
-import random
-import array
 
 @pike.test.RequireDialect(0x210)
 @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_LEASING)
