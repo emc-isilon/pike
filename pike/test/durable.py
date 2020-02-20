@@ -33,15 +33,16 @@
 #
 # Authors: Arlene Berry (arlene.berry@emc.com)
 #
-
 from builtins import map
+
+import array
+import random
+import time
+
 import pike.model
 import pike.smb2
 import pike.test
 import pike.ntstatus
-import random
-import array
-import time
 
 # for buffer too small
 class InvalidNetworkResiliencyRequestRequest(pike.smb2.NetworkResiliencyRequestRequest):
