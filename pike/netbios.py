@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 #
 # Copyright (c) 2013, EMC Corporation
 # All rights reserved.
@@ -34,6 +33,7 @@ from __future__ import absolute_import
 #
 # Authors: Brian Koropoff (brian.koropoff@emc.com)
 #
+from __future__ import absolute_import
 
 from . import core
 from . import crypto
