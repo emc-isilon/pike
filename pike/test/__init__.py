@@ -38,13 +38,8 @@ import os
 import gc
 import logging
 import sys
+import unittest
 import contextlib
-
-# Try and import backported unittest2 module in python2.6
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
 
 import pike.model as model
 import pike.smb2 as smb2
