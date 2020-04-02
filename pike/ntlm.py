@@ -38,11 +38,19 @@ import array
 import random
 import struct
 from socket import gethostname
-import Cryptodome.Cipher.DES
-import Cryptodome.Cipher.ARC4 as RC4
-import Cryptodome.Hash.HMAC as HMAC
-import Cryptodome.Hash.MD4 as MD4
-import Cryptodome.Hash.MD5 as MD5
+try:
+    import Crypto.Cipher.DES
+    import Crypto.Cipher.ARC4 as RC4
+    import Crypto.Hash.HMAC as HMAC
+    import Crypto.Hash.MD4 as MD4
+    import Crypto.Hash.MD5 as MD5
+except ImportError:
+    import Cryptodome.Cipher.DES
+    import Cryptodome.Cipher.ARC4 as RC4
+    import Cryptodome.Hash.HMAC as HMAC
+    import Cryptodome.Hash.MD4 as MD4
+    import Cryptodome.Hash.MD5 as MD5
+
 import core
 import model
 import nttime

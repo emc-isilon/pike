@@ -34,12 +34,20 @@
 # Authors: Brian Koropoff (brian.koropoff@emc.com)
 #
 
-import Cryptodome.Hash.HMAC as HMAC
-import Cryptodome.Hash.SHA256 as SHA256
-import Cryptodome.Hash.SHA512 as SHA512
-import Cryptodome.Cipher.AES as AES
 import array
 import core
+
+try:
+    import Crypto.Hash.HMAC as HMAC
+    import Crypto.Hash.SHA256 as SHA256
+    import Crypto.Hash.SHA512 as SHA512
+    import Crypto.Cipher.AES as AES
+except ImportError:
+    import Cryptodome.Hash.HMAC as HMAC
+    import Cryptodome.Hash.SHA256 as SHA256
+    import Cryptodome.Hash.SHA512 as SHA512
+    import Cryptodome.Cipher.AES as AES
+
 
 def sha256_hmac(key,message):
     return array.array('B',

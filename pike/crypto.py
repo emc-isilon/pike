@@ -40,7 +40,10 @@ import smb2
 import array
 import random
 
-from Cryptodome.Cipher import AES
+try:
+    from Crypto.Cipher import AES
+except ImportError:
+    from Cryptodome.Cipher import AES
 
 
 def pad_right(value, length, byte='\0'):
