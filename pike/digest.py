@@ -20,7 +20,7 @@ from builtins import range
 
 import array
 
-try
+try:
     import Crypto.Hash.HMAC as HMAC
     import Crypto.Hash.SHA256 as SHA256
     import Crypto.Hash.SHA512 as SHA512
