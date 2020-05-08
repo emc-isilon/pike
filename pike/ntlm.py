@@ -34,7 +34,6 @@
 # Authors: Masen Furer (masen.furer@emc.com)
 #
 from __future__ import absolute_import
-from builtins import chr
 from builtins import object
 from builtins import range
 
@@ -59,10 +58,10 @@ def des_key_64(K):
     K should be a 7 char string
     """
     in_key = K + "\0"
-    out_key = [K[0]]
+    out_key = array.array("B", K[0])
     for ix in range(1,len(in_key)):
-        out_key.append(chr( ((ord(in_key[ix-1]) << (8-ix)) & 0xFF) | (ord(in_key[ix]) >> ix)) )
-    return "".join(out_key)
+        out_key.append(((ord(in_key[ix-1]) << (8-ix)) & 0xFF) | (ord(in_key[ix]) >> ix))
+    return out_key.tostring()
 
 def DES(K, D):
     d1 = Cryptodome.Cipher.DES.new(des_key_64(K),
