@@ -78,3 +78,15 @@ class Netbios(core.Frame):
 
     def append(self, smb2_frame):
         self._smb2_frames.append(smb2_frame)
+
+    def adopt(self, child, related=True):
+        """
+        become the parent of child
+
+        :param related: if True and child is an Smb2 frame, set the flag
+                        SMB2_FLAGS_RELATED_OPERATIONS
+        """
+        self.append(child)
+        child.parent = self
+        if related and isinstance(child, smb2.Smb2):
+            child.flags |= smb2.SMB2_FLAGS_RELATED_OPERATIONS

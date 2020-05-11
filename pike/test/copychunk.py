@@ -39,7 +39,6 @@ import pike.ntstatus
 import pike.smb2
 import pike.test
 import random
-import pike.test.compound as compound
 
 share_all = pike.smb2.FILE_SHARE_READ | \
             pike.smb2.FILE_SHARE_WRITE | \
@@ -833,13 +832,13 @@ class TestServerSideCopy(pike.test.PikeTest):
             fh_src, fh_dst, SIMPLE_5_CHUNKS)
         nb_req = ioctl_req.parent.parent
         read_req1 = self.chan.read_request(
-            compound.RelatedOpen(self.tree), SIMPLE_5_CHUNKS_LEN / 2, 0)
-        compound.adopt(nb_req, read_req1.parent)
-        read_req2 = self.chan.read_request(compound.RelatedOpen(
+            pike.model.RelatedOpen(self.tree), SIMPLE_5_CHUNKS_LEN / 2, 0)
+        nb_req.adopt(read_req1.parent)
+        read_req2 = self.chan.read_request(pike.model.RelatedOpen(
             self.tree), SIMPLE_5_CHUNKS_LEN / 2, SIMPLE_5_CHUNKS_LEN / 2)
-        compound.adopt(nb_req, read_req2.parent)
-        close_req = self.chan.close_request(compound.RelatedOpen(self.tree))
-        compound.adopt(nb_req, close_req.parent)
+        nb_req.adopt(read_req2.parent)
+        close_req = self.chan.close_request(pike.model.RelatedOpen(self.tree))
+        nb_req.adopt(close_req.parent)
 
         (ssc_res,
          read1_res,
