@@ -1627,7 +1627,7 @@ class Channel(object):
         enum_req = smb2.EchoRequest(smb_req)
         # Get response  first [0] = first response, 2nd [0] = echo response
         # frame
-        self.connection.transceive(smb_req.parent)[0][0]
+        return self.connection.transceive(smb_req.parent)[0][0]
 
     def flush_request(self, file):
         smb_req = self.request(obj=file)
