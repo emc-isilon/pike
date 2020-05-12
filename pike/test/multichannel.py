@@ -59,8 +59,8 @@ class MultiChannelTest(pike.test.PikeTest):
     # Simulate a channel failover during a write and confirm that a
     # stale write sent on the original channel is rejected
     def test_write_fence_reject_stale(self):
-        data_stale = 'stale'
-        data_fresh = 'fresh'
+        data_stale = b'stale'
+        data_fresh = b'fresh'
         chan, tree = self.tree_connect()
         client = chan.connection.client
         

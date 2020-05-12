@@ -52,7 +52,7 @@ class QueryDirectoryTest(pike.test.PikeTest):
                            options=pike.smb2.FILE_DIRECTORY_FILE,
                            share=pike.smb2.FILE_SHARE_READ).result()
 
-        names = map(lambda info: info.file_name, chan.enum_directory(root))
+        names = [info.file_name for info in chan.enum_directory(root)]
 
         self.assertIn('.', names)
 
@@ -95,11 +95,11 @@ class QueryDirectoryTest(pike.test.PikeTest):
                            share=pike.smb2.FILE_SHARE_READ).result()
 
         result = chan.query_directory(root, file_information_class=pike.smb2.FILE_ID_BOTH_DIR_INFORMATION)
-        names = map(lambda info: info.file_name, result)
+        names = [info.file_name for info in result]
         self.assertIn('.', names)
         self.assertIn('..', names)
 
-        valid_file_ids = map(lambda info: info.file_id >= 0, result)
+        valid_file_ids = [info.file_id >= 0 for info in result]
         self.assertNotIn(False, valid_file_ids)
 
         chan.close(root)
@@ -114,13 +114,13 @@ class QueryDirectoryTest(pike.test.PikeTest):
                            share=pike.smb2.FILE_SHARE_READ).result()
 
         result = chan.query_directory(root)
-        names = map(lambda info: info.file_name, result)
+        names = [info.file_name for info in result]
         self.assertIn('.', names)
 
         result = chan.query_directory(root,
                                       flags=pike.smb2.SL_RESTART_SCAN,
                                       file_name='*')
-        names = map(lambda info: info.file_name, result)
+        names = [info.file_name for info in result]
         self.assertIn('.', names)
 
         chan.close(root)

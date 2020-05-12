@@ -34,13 +34,12 @@
 # Authors: Rafal Szczesniak (rafal.szczesniak@isilon.com)
 #
 
+import datetime
+
 import pike.model
 import pike.smb2
 import pike.nttime
 import pike.test
-import datetime
-
-from pike.test import unittest
 
 
 class SetTest(pike.test.PikeTest):
@@ -70,7 +69,7 @@ class SetTest(pike.test.PikeTest):
         handle = self.open_file()
         
         with self.chan.set_file_info(handle, pike.smb2.FilePositionInformation) as file_info:
-            file_info.current_byte_offset = 100L
+            file_info.current_byte_offset = 100
 
         self.chan.close(handle)
 

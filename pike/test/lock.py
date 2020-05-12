@@ -34,6 +34,7 @@
 # Authors: Arlene Berry (arlene.berry@emc.com)
 #
 
+from builtins import range
 import pike.model
 import pike.smb2
 import pike.test
@@ -136,7 +137,7 @@ class LockTest(pike.test.PikeTest):
                             disposition=pike.smb2.FILE_OPEN,
                             options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
 
-        cases = ((offset,size) for offset in xrange(0, 16) for size in xrange(0, 16))
+        cases = ((offset,size) for offset in range(0, 16) for size in range(0, 16))
 
         for (offset,size) in cases:
             if ranges_intersect(offset, offset+size, lock_offset, lock_offset + lock_size):

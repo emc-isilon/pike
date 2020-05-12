@@ -34,14 +34,16 @@
 # Authors: Paul Martin (paul.o.martin@emc.com)
 #
 
-import pike.model as model
+from builtins import map
+
+import array
+import random
+import time
+
+import pike.model
 import pike.smb2 as smb2
 import pike.test as test
 import pike.ntstatus as ntstatus
-import random
-import array
-import time
-import pike.model
 
 # Constants
 LEASE_R   = smb2.SMB2_LEASE_READ_CACHING
@@ -61,7 +63,7 @@ class InvalidNetworkResiliencyRequestRequest(pike.smb2.NetworkResiliencyRequestR
 class Persistent(test.PikeTest):
 
     def setup(self):
-        self.lease_key = array.array('B',map(random.randint, [0]*16, [255]*16))
+        self.lease_key = array.array('B', map(random.randint, [0] * 16, [255] * 16))
         self.channel, self.tree = self.tree_connect()
 
     def create_persistent(self, prev_handle = 0):

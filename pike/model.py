@@ -43,26 +43,35 @@ to be established and tracked.  It provides convenience functions
 for exercising common elements of the protocol without manually
 constructing packets.
 """
+from __future__ import absolute_import
+from builtins import next
+from builtins import map
+from builtins import range
+from builtins import object
+from builtins import str
+from future.utils import raise_
 
-import sys
-import socket
 import array
-import struct
-import random
-import logging
-import time
-import operator
 import contextlib
+from functools import reduce
+import logging
+import operator
+import random
+import socket
+import struct
+import sys
+import time
+import warnings
 
-import auth
-import core
-import crypto
-import netbios
-import nttime
-import smb2
-import transport
-import ntstatus
-import digest
+from . import auth
+from . import core
+from . import crypto
+from . import netbios
+from . import nttime
+from . import smb2
+from . import transport
+from . import ntstatus
+from . import digest
 
 default_credit_request = 10
 default_timeout = 30
@@ -215,7 +224,7 @@ class Future(object):
         if isinstance(self.response, BaseException):
             traceback = self.traceback
             self.traceback = None
-            raise self.response, None, traceback
+            raise_(self.response, None, traceback)
         else:
             return self.response
 
@@ -279,7 +288,7 @@ class Client(object):
         object.__init__(self)
 
         if client_guid is None:
-            client_guid = array.array('B',map(random.randint, [0]*16, [255]*16))
+            client_guid = array.array('B', map(random.randint, [0] * 16, [255] * 16))
 
         self.dialects = dialects
         self.capabilities = capabilities
@@ -490,7 +499,7 @@ class Connection(transport.Transport):
         self._binding = None
         self._binding_key = None
         self._settings = {}
-        self._pre_auth_integrity_hash = array.array('B', "\0"*64)
+        self._pre_auth_integrity_hash = array.array('B', b"\0"*64)
         self._negotiate_request = None
         self._negotiate_response = None
         self.callbacks = {}
@@ -693,11 +702,11 @@ class Connection(transport.Transport):
             future.complete(self.error, self.traceback)
         del self._out_queue[:]
 
-        for future in self._future_map.itervalues():
+        for future in self._future_map.values():
             future.complete(self.error, self.traceback)
         self._future_map.clear()
 
-        for session in self._sessions.values():
+        for session in list(self._sessions.values()):
             session.delchannel(self)
 
         self.traceback = None
@@ -840,20 +849,20 @@ class Connection(transport.Transport):
                     req,
                     "{0} is not a netbios.Netbios frame".format(repr(req)))
         if self.error is not None:
-            raise self.error, None, self.traceback
+            raise_(self.error, None, self.traceback)
         futures = []
         for smb_req in req:
             if isinstance(smb_req[0], smb2.Cancel):
                 # Find original future being canceled to return
                 if smb_req.async_id is not None:
                     # Cancel by async ID
-                    future = filter(lambda f: f.interim_response.async_id == smb_req.async_id, self._future_map.itervalues())[0]
+                    future = [f for f in iter(self._future_map.values()) if f.interim_response.async_id == smb_req.async_id][0]
                 elif smb_req.message_id in self._future_map:
                     # Cancel by message id, already in future map
                     future = self._future_map[smb_req.message_id]
                 else:
                     # Cancel by message id, still in send queue
-                    future = filter(lambda f: f.request.message_id == smb_req.message_id, self._out_queue)[0]
+                    future = [f for f in self._out_queue if f.request.message_id == smb_req.message_id][0]
                 # Add fake future for cancel since cancel has no response
                 self._out_queue.append(Future(smb_req))
                 futures.append(future)
@@ -875,7 +884,7 @@ class Connection(transport.Transport):
         and returns a list of L{smb2.Smb2} response objects, one for each
         corresponding L{smb2.Smb2} frame in the request.
         """
-        return map(Future.result, self.submit(req))
+        return [f.result() for f in self.submit(req)]
 
     def negotiate_request(self, hash_algorithms=None, salt=None, ciphers=None):
         smb_req = self.request()
@@ -903,7 +912,8 @@ class Connection(transport.Transport):
                 preauth_integrity_req.salt = salt
             else:
                 preauth_integrity_req.salt = array.array('B',
-                    map(random.randint, [0]*32, [255]*32))
+                                                         map(random.randint, [0] * 32,
+                                                             [255] * 32))
         self._negotiate_request = neg_req
         return neg_req
 
@@ -979,12 +989,12 @@ class Connection(transport.Transport):
                     context = self._pre_auth_integrity_hash
                 return digest.derive_key(
                         session_key,
-                        'SMBSigningKey',
+                        b'SMBSigningKey',
                         context)[:16]
             elif self.dialect_revision >= smb2.DIALECT_SMB3_0:
                 if context is None:
-                    context = 'SmbSign\0'
-                return digest.derive_key(session_key, 'SMB2AESCMAC', context)[:16]
+                    context = b'SmbSign\0'
+                return digest.derive_key(session_key, b'SMB2AESCMAC', context)[:16]
             else:
                 return session_key
 
@@ -1035,7 +1045,7 @@ class Connection(transport.Transport):
                 smb_req.flags = smb2.SMB2_FLAGS_SIGNED
                 session_req.flags = smb2.SMB2_SESSION_FLAG_BINDING
 
-            for (attr,value) in self._settings.iteritems():
+            for (attr,value) in self._settings.items():
                 setattr(session_req, attr, value)
 
             self.requests.append(smb_req)
@@ -1074,13 +1084,13 @@ class Connection(transport.Transport):
             Returns a L{Future} object, for the L{Channel} object
             """
             try:
-                res = self.next()
+                res = next(self)
                 res.then(self.submit)
             except StopIteration:
                 pass
             return self.session_future
 
-        def next(self):
+        def __next__(self):
             with self.session_future:
                 res = self._process()
                 if res is not None:
@@ -1156,7 +1166,7 @@ class Connection(transport.Transport):
         req = smb2.Smb2(parent, context=self)
         req.channel_sequence = self.client.channel_sequence
 
-        for (attr,value) in self._settings.iteritems():
+        for (attr,value) in self._settings.items():
             setattr(req, attr, value)
 
         return req
@@ -1223,7 +1233,7 @@ class Session(object):
         del self._channels[id(conn)]
 
     def first_channel(self):
-        return self._channels.itervalues().next()
+        return next(iter(self._channels.values()))
 
     def tree(self, tree_id):
         return self._trees.get(tree_id, None)
@@ -1297,7 +1307,7 @@ class Channel(object):
 
     def logoff_submit(self, logoff_req):
         def logoff_finish(f):
-            for channel in self.session._channels.itervalues():
+            for channel in self.session._channels.values():
                 del channel.connection._sessions[self.session.session_id]
         logoff_future = self.connection.submit(logoff_req.parent.parent)[0]
         logoff_future.then(logoff_finish)
@@ -1369,7 +1379,8 @@ class Channel(object):
             if persistent:
                 durable_req.flags = smb2.SMB2_DHANDLE_FLAG_PERSISTENT
             if create_guid is None:
-                create_guid = array.array('B',map(random.randint, [0]*16, [255]*16))
+                create_guid = array.array('B',
+                                          map(random.randint, [0] * 16, [255] * 16))
             durable_req.create_guid = create_guid
 
         if app_instance_id:
@@ -1380,8 +1391,8 @@ class Channel(object):
             query_on_disk_id_req = smb2.QueryOnDiskIDRequest(create_req)
 
         if extended_attributes:
-            ext_attr_len = len(extended_attributes.keys())
-            for name, value in extended_attributes.iteritems():
+            ext_attr_len = len(extended_attributes)
+            for name, value in extended_attributes.items():
                 ext_attr = smb2.ExtendedAttributeRequest(create_req)
                 if ext_attr_len == 1:
                     next_entry_offset = 0
@@ -1677,6 +1688,27 @@ class Channel(object):
             buffer=None,
             remaining_bytes=0,
             flags=0):
+        """
+        Create a pike.smb2.WriteRequest from the given parameters
+
+        @param file: L{Open}
+        @param offset: int offset into the file
+        @param buffer: bytes or array.array('B'). If a unicode str is passed, it
+            can only contain ascii characters and a warning will be raised.
+        @param remaining_bytes:
+        @param flags: L{pike.smb2.WriteFlags}
+        """
+        if isinstance(buffer, array.array) and buffer.typecode != 'B':
+            raise ValueError(
+                "array.array must have typecode 'B', not {!r}".format(buffer.typecode))
+        elif isinstance(buffer, str):
+            warnings.warn("buffer must be bytes, got {!r}, casting as str and encoding "
+                          "with 'ascii'".format(type(buffer)), UnicodeWarning)
+            buffer = buffer.encode("ascii")
+        if buffer is not None and not isinstance(buffer, (array.array, bytes)):
+            raise TypeError(
+                "buffer must be a byte string or byte array, not {!r}".format(
+                    type(buffer)))
         smb_req = self.request(obj=file)
         write_req = smb2.WriteRequest(smb_req)
 
@@ -2018,23 +2050,17 @@ class Open(object):
 
         if self.oplock_level != smb2.SMB2_OPLOCK_LEVEL_NONE:
             if self.oplock_level == smb2.SMB2_OPLOCK_LEVEL_LEASE:
-                lease_res = filter(
-                        lambda c: isinstance(c, smb2.LeaseResponse),
-                        self.create_response)[0]
+                lease_res = [c for c in self.create_response if isinstance(c, smb2.LeaseResponse)][0]
                 self.lease = tree.session.client.lease(tree, lease_res)
             else:
                 self.arm_oplock_future()
 
-        durable_res = filter(
-            lambda c: isinstance(c, smb2.DurableHandleResponse),
-            self.create_response)
+        durable_res = [c for c in self.create_response if isinstance(c, smb2.DurableHandleResponse)]
 
         if durable_res != []:
             self.is_durable = True
 
-        durable_v2_res = filter(
-                lambda c: isinstance(c, smb2.DurableHandleV2Response),
-                self.create_response)
+        durable_v2_res = [c for c in self.create_response if isinstance(c, smb2.DurableHandleV2Response)]
         if durable_v2_res != []:
             self.durable_timeout = durable_v2_res[0].timeout
             self.durable_flags = durable_v2_res[0].flags

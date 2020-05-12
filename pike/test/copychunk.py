@@ -34,11 +34,18 @@
 # Authors: Avi Bhandari (avi.bahndari@emc.com)
 #          Masen Furer (masen.furer@emc.com)
 #
+from __future__ import division
+from builtins import chr
+from builtins import range
+from builtins import str
+from builtins import zip
+
+import array
+import random
 
 import pike.ntstatus
 import pike.smb2
 import pike.test
-import random
 
 share_all = pike.smb2.FILE_SHARE_READ | \
             pike.smb2.FILE_SHARE_WRITE | \
@@ -55,19 +62,22 @@ SIMPLE_5_CHUNKS = [(0, 0, 4000), (4000, 4000, 4000), (8000, 8000, 4000),
 SIMPLE_5_CHUNKS_LEN = 20000
 
 def _gen_test_buffer(length):
-    pattern = "".join([ chr(x) for x in xrange(ord(' '), ord('~'))])
-    buf = (pattern * (length / (len(pattern)) + 1))[:length]
-    return buf
+    # XXX: refactor and push up into helper/util module
+    pattern = "".join([chr(x) for x in range(ord(' '), ord('~'))])
+    buf = (pattern * ((length // len(pattern)) + 1))[:length]
+    return buf.encode("ascii")
 
 def _gen_random_test_buffer(length):
+    # XXX: refactor and push up into helper/util module
     buf = ''
     random_str_seq = "0123456789" + \
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     for i in range(0, length):
         if i % length == 0 and i != 0:
             buf += '-'
+        # XXX: accidentally quadratic str concat
         buf += str(random_str_seq[random.randint(0, len(random_str_seq) - 1)])
-    return buf
+    return buf.encode("ascii")
 
 ###
 # Main test
@@ -198,7 +208,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         for the_offset, the_length in reads:
             read_list.append(self.chan.read(
                 file_handle, the_length, the_offset + add_offset).tostring())
-        return "".join(read_list)
+        return b"".join(read_list)
 
     def _gen_16mega_file(self, filename):
         """
@@ -209,9 +219,9 @@ class TestServerSideCopy(pike.test.PikeTest):
         block_64k = _gen_test_buffer(65536)
         self._create_and_write(file_64k, block_64k)
         list_offset_64k = [i * 65536 for i in range(16)]
-        chunks_64k_1m = zip([0] * 16, list_offset_64k, [65536] * 16)
+        chunks_64k_1m = list(zip([0] * 16, list_offset_64k, [65536] * 16))
         list_offset_1m = [i * 1048576 for i in range(16)]
-        chunks_1m_16m = zip([0] * 16, list_offset_1m, [1048576] * 16)
+        chunks_1m_16m = list(zip([0] * 16, list_offset_1m, [1048576] * 16))
         fh_64k = self.chan.create(self.tree,
                                   file_64k,
                                   access=access_rwd,
@@ -251,7 +261,6 @@ class TestServerSideCopy(pike.test.PikeTest):
             dst_offset = random.randrange(1, 4294967295 - total_len)
         else:
             dst_offset = 0
-        num_of_chunks = total_len / chunk_sz + (total_len % chunk_sz > 0)
         this_offset = 0
         chunks = []
         while this_offset < total_len:
@@ -328,7 +337,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self._create_and_write(src_filename, block)
 
         total_len = len(block)
-        chunk_sz = (total_len / number_of_chunks) + 1
+        chunk_sz = (total_len // number_of_chunks) + 1
         this_offset = 0
 
         chunks = []
@@ -367,7 +376,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.chan.close(fh_dst)
 
     def test_copy_small_file(self):
-        block = "Hello"
+        block = b"Hello"
         num_of_chunks = 1
         self.generic_ssc_test_case(block, num_of_chunks)
 
@@ -387,7 +396,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.generic_ssc_test_case(block, num_of_chunks)
 
     def test_offset_copy_small_file(self):
-        block = "Hello"
+        block = b"Hello"
         num_of_chunks = 1
         offset = 64
         self.generic_ssc_test_case(block, num_of_chunks, offset)
@@ -405,7 +414,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.generic_ssc_test_case(block, num_of_chunks, offset)
 
     def test_copy_write_small_file(self):
-        block = "Hello"
+        block = b"Hello"
         num_of_chunks = 1
         self.generic_ssc_test_case(block, num_of_chunks, write_flag=True)
 
@@ -428,7 +437,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self._create_and_write(filename, block)
 
         total_len = len(block)
-        chunk_sz = (total_len / number_of_chunks) + 1
+        chunk_sz = (total_len // number_of_chunks) + 1
         this_offset = 0
 
         chunks = []
@@ -453,7 +462,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.assertBufferEqual(src_buf, block)
         if total_offset > 0:
             offs_buf = self.chan.read(fh_src, total_offset, total_len).tostring()
-            self.assertBufferEqual(offs_buf, "\x00"*total_offset)
+            self.assertBufferEqual(offs_buf, b"\x00" * total_offset)
         dst_buf = self.chan.read(fh_src, total_len, total_len+total_offset).tostring()
         self.assertBufferEqual(dst_buf, block)
 
@@ -461,7 +470,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.chan.close(fh_dst)
 
     def test_same_small_file(self):
-        block = "Hello"
+        block = b"Hello"
         num_of_chunks = 1
         self.generic_ssc_same_file_test_case(block, num_of_chunks)
 
@@ -476,7 +485,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.generic_ssc_same_file_test_case(block, num_of_chunks)
 
     def test_same_offset_small_file(self):
-        block = "Hello"
+        block = b"Hello"
         num_of_chunks = 1
         offset = 64
         self.generic_ssc_same_file_test_case(block, num_of_chunks, offset)
@@ -503,12 +512,12 @@ class TestServerSideCopy(pike.test.PikeTest):
         self._create_and_write(src_filename, block)
 
         total_len = len(block)
-        chunk_sz = (total_len / number_of_chunks) + 1
+        chunk_sz = (total_len // number_of_chunks) + 1
         this_offset = 0
 
         chunks = []
-        src_block = list(block)
-        dst_block = list(block)
+        src_block = array.array('B', block)
+        dst_block = array.array('B', block)
         while this_offset < total_len:
             offset = dst_offset = this_offset
             if offset - overlap_each_block > 0:
@@ -518,11 +527,11 @@ class TestServerSideCopy(pike.test.PikeTest):
             else:
                 length = total_len - this_offset
             chunks.append((offset, dst_offset, length))
-            dst_block[dst_offset:dst_offset+length] = \
-                    src_block[offset:offset+length]
+            dst_block[dst_offset:dst_offset + length] = \
+                src_block[offset:offset+length]
             this_offset += chunk_sz
-        dst_len = dst_offset+length
-        dst_block = "".join(dst_block[:dst_len])
+        dst_len = dst_offset + length
+        dst_block = dst_block[:dst_len].tostring()
 
         fh_src, fh_dst = self._open_src_dst(src_filename, dst_filename)
 
@@ -562,7 +571,7 @@ class TestServerSideCopy(pike.test.PikeTest):
                                              src_options=None, dst_options=None,
                                              src_brl=None, dst_brl=None,
                                        exp_error=None):
-        block = "Hello"
+        block = b"Hello"
         total_len = len(block)
         src_filename = "src_negative.txt"
         dst_filename = "dst_negative.txt"
@@ -832,10 +841,10 @@ class TestServerSideCopy(pike.test.PikeTest):
             fh_src, fh_dst, SIMPLE_5_CHUNKS)
         nb_req = ioctl_req.parent.parent
         read_req1 = self.chan.read_request(
-            pike.model.RelatedOpen(self.tree), SIMPLE_5_CHUNKS_LEN / 2, 0)
+            pike.model.RelatedOpen(self.tree), SIMPLE_5_CHUNKS_LEN // 2, 0)
         nb_req.adopt(read_req1.parent)
         read_req2 = self.chan.read_request(pike.model.RelatedOpen(
-            self.tree), SIMPLE_5_CHUNKS_LEN / 2, SIMPLE_5_CHUNKS_LEN / 2)
+            self.tree), SIMPLE_5_CHUNKS_LEN // 2, SIMPLE_5_CHUNKS_LEN // 2)
         nb_req.adopt(read_req2.parent)
         close_req = self.chan.close_request(pike.model.RelatedOpen(self.tree))
         nb_req.adopt(close_req.parent)
@@ -905,9 +914,9 @@ class TestServerSideCopy(pike.test.PikeTest):
         # for loop to submit requests in short time
         for it in range(num_iter):
             for i in range(num_sess):
-                chunk_break = zip(*chunks)
+                chunk_break = list(zip(*chunks))
                 dst_list = [x + filepair[i][2] for x in chunk_break[1]]
-                newchunks = zip(chunk_break[0], dst_list, chunk_break[2])
+                newchunks = list(zip(chunk_break[0], dst_list, chunk_break[2]))
                 ssc_futures[it * num_sess +
                             i] = self._submit_ssc_async_request_in_other_channels(i, newchunks)
 

@@ -33,14 +33,16 @@
 #
 # Authors: Arlene Berry (arlene.berry@emc.com)
 #
+from builtins import map
+
+import array
+import random
+import time
 
 import pike.model
 import pike.smb2
 import pike.test
 import pike.ntstatus
-import random
-import array
-import time
 
 # for buffer too small
 class InvalidNetworkResiliencyRequestRequest(pike.smb2.NetworkResiliencyRequestRequest):
@@ -52,16 +54,16 @@ class InvalidNetworkResiliencyRequestRequest(pike.smb2.NetworkResiliencyRequestR
 @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_LEASING)
 class DurableHandleTest(pike.test.PikeTest):
     share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
-    lease1 = array.array('B',map(random.randint, [0]*16, [255]*16))
-    lease2 = array.array('B',map(random.randint, [0]*16, [255]*16))
+    lease1 = array.array('B', map(random.randint, [0] * 16, [255] * 16))
+    lease2 = array.array('B', map(random.randint, [0] * 16, [255] * 16))
     r = pike.smb2.SMB2_LEASE_READ_CACHING
     rw = r | pike.smb2.SMB2_LEASE_WRITE_CACHING
     rh = r | pike.smb2.SMB2_LEASE_HANDLE_CACHING
     rwh = rw | rh
     buffer_too_small_error = pike.ntstatus.STATUS_INVALID_PARAMETER
 
-
-    def create(self, chan, tree, durable, lease=rwh, lease_key=lease1, disposition=pike.smb2.FILE_SUPERSEDE):
+    def create(self, chan, tree, durable, lease=rwh, lease_key=lease1,
+               disposition=pike.smb2.FILE_SUPERSEDE):
         return chan.create(tree,
                            'durable.txt',
                            access=pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE,

@@ -34,9 +34,8 @@
 # Authors: Brian Koropoff (brian.koropoff@emc.com)
 #
 
-import pike.model
-import pike.smb2
 import pike.test
+
 
 class TreeTest(pike.test.PikeTest):
     # Connect a tree, then disconnect it

@@ -33,13 +33,19 @@
 #
 # Authors: Brian Koropoff (brian.koropoff@emc.com)
 #
+from __future__ import absolute_import
+from __future__ import division
+from builtins import range
+
+import array
 
 import Cryptodome.Hash.HMAC as HMAC
 import Cryptodome.Hash.SHA256 as SHA256
 import Cryptodome.Hash.SHA512 as SHA512
 import Cryptodome.Cipher.AES as AES
-import array
-import core
+
+from . import core
+
 
 def sha256_hmac(key,message):
     return array.array('B',
@@ -54,7 +60,7 @@ def aes128_cmac(key,message):
     def shiftleft(data):
         cin = 0
         cout = 0
-        for i in reversed(xrange(0,len(data))):
+        for i in reversed(range(0,len(data))):
             cout = (data[i] & 0x80) >> 7
             data[i] = ((data[i] << 1) | cin) & 0xFF
             cin = cout
@@ -62,7 +68,7 @@ def aes128_cmac(key,message):
         return cout
 
     def xor(data1, data2):
-        for i in xrange(0, len(data1)):
+        for i in range(0, len(data1)):
             data1[i] ^= data2[i]
 
     def subkeys(key):
@@ -83,8 +89,8 @@ def aes128_cmac(key,message):
 
     message = array.array('B', message)
     mac = array.array('B', [0]*16)
-    scratch = array.array('B', [0]*16)
-    n = (len(message) + 16 - 1) / 16
+    scratch = array.array('B', [0] * 16)
+    n = (len(message) + 16 - 1) // 16
     rem = len(message) % 16
     last_complete = n != 0 and rem == 0
     i = 0
@@ -94,7 +100,7 @@ def aes128_cmac(key,message):
 
     subkey1, subkey2 = subkeys(array.array('B',key))
 
-    for i in xrange(0, n - 1):
+    for i in range(0, n - 1):
         xor(mac, message[i*16:i*16+16])
         mac = array.array('B',aes.encrypt(mac.tostring()))
 

@@ -33,14 +33,19 @@
 #
 # Authors: Masen Furer <masen.furer@dell.com>
 #
+from __future__ import division
+from __future__ import print_function
+from builtins import map
+from builtins import object
+from builtins import range
+
+import array
+import random
+import sys
 
 import pike.model
 import pike.smb2
 import pike.test
-import array
-import random
-import sys
-import time
 
 # common size constants
 size_64k = 2**16
@@ -113,12 +118,12 @@ class CreditTest(pike.test.PikeTest):
         then perform one large read operation and subsequently close the file
         """
         fname = self.id().rpartition(".")[-1]
-        buf = "\0\1\2\3\4\5\6\7"*8192
+        buf = b"\0\1\2\3\4\5\6\7" * 8192
         buflen = len(buf)
-        file_chunks = file_size / buflen
-        write_chunks = file_size / write_size
-        write_buf = buf * (file_chunks / write_chunks)
-        write_credits_per_op = write_size / size_64k
+        file_chunks = file_size // buflen
+        write_chunks = file_size // write_size
+        write_buf = buf * (file_chunks // write_chunks)
+        write_credits_per_op = write_size // size_64k
         chan, tree = self.tree_connect()
         starting_credits = chan.connection.negotiate_response.parent.credit_response
         self.info("creating {0} ({1} bytes)".format(fname, file_size))
@@ -128,10 +133,10 @@ class CreditTest(pike.test.PikeTest):
             fh = chan.create(tree, fname).result()
 
         self.info("writing {0} chunks of {1} bytes; {2} credits per op".format(
-                write_chunks,
+            write_chunks,
                 write_size,
                 write_credits_per_op))
-        for ix in xrange(write_chunks):
+        for ix in range(write_chunks):
             credit_assert_future = pike.model.Future()
             with chan.connection.callback(
                     pike.model.EV_REQ_POST_SERIALIZE,
@@ -158,21 +163,21 @@ class CreditTest(pike.test.PikeTest):
                   "{0} credits".format(exp_credits))
         self.assertGreaterEqual(chan.connection.credits, exp_credits)
 
-        read_chunks = file_size / read_size
-        read_buf = buf * (file_chunks / read_chunks)
-        read_credits_per_op = read_size / size_64k
+        read_chunks = file_size // read_size
+        read_buf = buf * (file_chunks // read_chunks)
+        read_credits_per_op = read_size // size_64k
         self.info("reading {0} chunks of {1} bytes; {2} credits per op".format(
-                read_chunks,
-                read_size,
-                read_credits_per_op))
+            read_chunks,
+            read_size,
+            read_credits_per_op))
         fh = chan.create(
-                tree,
-                fname,
-                access=pike.smb2.GENERIC_READ | pike.smb2.DELETE,
-                disposition=pike.smb2.FILE_OPEN,
-                options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
+            tree,
+            fname,
+            access=pike.smb2.GENERIC_READ | pike.smb2.DELETE,
+            disposition=pike.smb2.FILE_OPEN,
+            options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
         file_buffer = array.array("B")
-        for ix in xrange(read_chunks):
+        for ix in range(read_chunks):
             credit_assert_future = pike.model.Future()
             with chan.connection.callback(
                     pike.model.EV_REQ_POST_SERIALIZE,
@@ -195,7 +200,7 @@ class CreditTest(pike.test.PikeTest):
         this version of the function works with arbitrary sizes
         """
         fname = self.id().rpartition(".")[-1]
-        buf = "\0\1\2\3\4\5\6\7"*8192
+        buf = b"\0\1\2\3\4\5\6\7"*8192
         buflen = len(buf)
         file_chunks, file_remainder = divmod(file_size, buflen)
         file_buf = buf * file_chunks + buf[:file_remainder]
@@ -229,7 +234,7 @@ class CreditTest(pike.test.PikeTest):
         # TODO: consolidate chunks to a list of tuples (file_offset, local_buffer_offset, length)
         # this would simplify the loop, instead of having the extra chunk
         # OR abstract the writing, asserting to a helper function (yeah better idea, retains the logic)
-        for ix in xrange(write_chunks):
+        for ix in range(write_chunks):
             credit_assert_future = pike.model.Future()
             with chan.connection.callback(
                     pike.model.EV_REQ_POST_SERIALIZE,
@@ -311,7 +316,7 @@ class CreditTest(pike.test.PikeTest):
                 disposition=pike.smb2.FILE_OPEN,
                 options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
         read_buffer = array.array("B")
-        for ix in xrange(read_chunks):
+        for ix in range(read_chunks):
             credit_assert_future = pike.model.Future()
             with chan.connection.callback(
                     pike.model.EV_REQ_POST_SERIALIZE,
@@ -380,7 +385,7 @@ class EdgeCreditTest(CreditTest):
         """
         fname = "test_sequence_number_wrap"
         # buf is 64k == 1 credit
-        buf = "\0\1\2\3\4\5\6\7"*8192
+        buf = b"\0\1\2\3\4\5\6\7" * 8192
         credits_per_req = 16
         sequence_number_target = 2080
 
@@ -431,7 +436,7 @@ class AsyncCreditTest(CreditTest):
         chan2, tree2 = self.tree_connect()
         chan2_starting_credits = chan2.connection.negotiate_response.parent.credit_response
         fname = "test_async_lock"
-        buf = "\0\1\2\3\4\5\6\7"
+        buf = b"\0\1\2\3\4\5\6\7"
         lock1 = (0, 8, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK)
         contend_locks = [
                 (0, 2, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK),
@@ -474,7 +479,7 @@ class AsyncCreditTest(CreditTest):
         for f in lock_futures:
             self.assertEqual(f.result().credit_response, 0)
         self.assertEqual(chan2.connection.credits, exp_credits)
-        buf = "\0\1\2\3\4\5\6\7"*8192
+        buf = b"\0\1\2\3\4\5\6\7" * 8192
 
         # send a request for all of our credits
         chan2.write(fh2, 0, buf*exp_credits)
@@ -499,10 +504,10 @@ class AsyncCreditTest(CreditTest):
         chan2, tree2 = self.tree_connect()
         chan2_starting_credits = chan2.connection.negotiate_response.parent.credit_response
         fname = "test_async_write"
-        lkey = array.array('B',map(random.randint, [0]*16, [255]*16))
+        lkey = array.array('B', map(random.randint, [0] * 16, [255] * 16))
         # buf is 64k
-        buf = "\0\1\2\3\4\5\6\7"*8192
-        write_request_multiples = [1,2,3,4]
+        buf = b"\0\1\2\3\4\5\6\7" * 8192
+        write_request_multiples = [1, 2, 3, 4]
         credit_req = 16
 
         fh1 = chan1.create(
@@ -554,7 +559,7 @@ class Generated_{name}_{tag}(pike.test.credit.CreditTest):
     def generate_multiple_64k_test_cases(cls, tag, n_cases, size_range_multiple, write_range_multiple, read_range_multiple):
         name = "Mult64k"
         print(cls.header.format(**locals()))
-        for ix in xrange(n_cases):
+        for ix in range(n_cases):
             file_size = 2**16 * random.randint(*size_range_multiple)
             write_size = 2**16 * random.randint(*write_range_multiple)
             read_size = 2**16 * random.randint(*read_range_multiple)
@@ -565,7 +570,7 @@ class Generated_{name}_{tag}(pike.test.credit.CreditTest):
     def generate_arbitrary_test_cases(cls, tag, n_cases, size_range, write_range, read_range):
         name = "Arb"
         print(cls.header.format(**locals()))
-        for ix in xrange(n_cases):
+        for ix in range(n_cases):
             file_size = random.randint(*size_range)
             write_size = random.randint(*write_range)
             read_size = random.randint(*read_range)

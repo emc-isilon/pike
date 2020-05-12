@@ -33,19 +33,23 @@
 #
 # Authors: Masen Furer (masen.furer@emc.com)
 #
+from __future__ import absolute_import
+from builtins import object
+from builtins import range
 
 import array
 import random
-import struct
 from socket import gethostname
+import struct
+
 import Cryptodome.Cipher.DES
 import Cryptodome.Cipher.ARC4 as RC4
 import Cryptodome.Hash.HMAC as HMAC
 import Cryptodome.Hash.MD4 as MD4
 import Cryptodome.Hash.MD5 as MD5
-import core
-import model
-import nttime
+
+from . import core
+from . import nttime
 
 def des_key_64(K):
     """
@@ -54,10 +58,10 @@ def des_key_64(K):
     K should be a 7 char string
     """
     in_key = K + "\0"
-    out_key = [K[0]]
-    for ix in xrange(1,len(in_key)):
-        out_key.append(chr( ((ord(in_key[ix-1]) << (8-ix)) & 0xFF) | (ord(in_key[ix]) >> ix)) )
-    return "".join(out_key)
+    out_key = array.array("B", K[0])
+    for ix in range(1,len(in_key)):
+        out_key.append(((ord(in_key[ix-1]) << (8-ix)) & 0xFF) | (ord(in_key[ix]) >> ix))
+    return out_key.tostring()
 
 def DES(K, D):
     d1 = Cryptodome.Cipher.DES.new(des_key_64(K),
@@ -68,7 +72,7 @@ def DESL(K, D):
     return DES(K[:7], D) + DES(K[7:14], D) + DES(K[14:16] + "\0"*5, D)
 
 def nonce(length):
-    return array.array("B", [random.getrandbits(8) for x in xrange(length) ])
+    return array.array("B", [random.getrandbits(8) for x in range(length) ])
 
 def encode_frame(frame):
     buffer = array.array('B')
@@ -76,7 +80,7 @@ def encode_frame(frame):
     return buffer
 
 
-NTLM_SIGNATURE = "NTLMSSP\x00"
+NTLM_SIGNATURE = b"NTLMSSP\x00"
 
 class MessageType(core.ValueEnum):
     NtLmNegotiate = 0x1
@@ -437,14 +441,14 @@ class NtLmAuthenticateMessage(core.Frame):
             if is_unicode:
                 cur.encode_utf16le(self.domain_name)
             else:
-                cur.encode_bytes(self.domain_name)
+                cur.encode_bytes(self.domain_name.encode("ascii"))
 
         user_name_offset_hole(cur - message_start)
         if user_name_len > 0:
             if is_unicode:
                 cur.encode_utf16le(self.user_name)
             else:
-                cur.encode_bytes(self.user_name)
+                cur.encode_bytes(self.user_name.encode("ascii"))
 
         workstation_name_offset_hole(cur - message_start)
         if workstation_name_len > 0:
@@ -529,8 +533,8 @@ class NTLMv2ClientChallenge(core.Frame):
         core.Frame.__init__(self, parent)
         if parent is not None:
             parent.challenge = self
-        self.time_stamp = array.array("B", "\0"*8)
-        self.challenge_from_client = array.array("B", "\0"*8)
+        self.time_stamp = array.array("B", b"\0"*8)
+        self.challenge_from_client = array.array("B", b"\0"*8)
         self.av_pairs = []
     def _encode(self, cur):
         cur.encode_uint8le(1)       # RespType
@@ -631,7 +635,7 @@ class NtlmAuthenticator(object):
         self.authenticate_buffer = None
 
     def ntlmv1(self):
-        self.lm_hash = LMOWFv1(self.password)
+        self.lm_hash = LMOWFv1(self.password.encode("ascii"))
         self.nt_hash = NTOWFv1(self.password)
         (self.nt_challenge_response,
          self.lm_challenge_response,
@@ -672,7 +676,7 @@ class NtlmAuthenticator(object):
         self.key_exchange_key = self.session_base_key
 
         if extract_pair(ctarget_info, MsvAvTimestamp) is not None:
-            self.lm_challenge_response = "\0"*24
+            self.lm_challenge_response = b"\0" * 24
 
     def session_key(self):
         if self.auth_flags & NTLMSSP_NEGOTIATE_KEY_EXCH:

@@ -38,9 +38,14 @@
 Core Pike infrastructure
 """
 
+from builtins import hex
+from builtins import str
+from builtins import object
 import array
 import struct
 import inspect
+
+from future.utils import with_metaclass
 
 class BufferOverrun(Exception):
     """Buffer overrun exception"""
@@ -239,7 +244,7 @@ class Cursor(object):
         self.encode_struct('<q', val)
 
     def encode_utf16le(self, val):
-        self.encode_bytes(unicode(val).encode('utf-16le'))
+        self.encode_bytes(str(val).encode('utf-16le'))
 
     def trunc(self):
         self._expand_to(self.offset)
@@ -351,7 +356,7 @@ class Cursor(object):
         def __getattr__(self, attr):
             if hasattr(self.cur.__class__, attr):
                 f = getattr(self.cur.__class__, attr)
-                if inspect.ismethod(f):
+                if callable(f):
                     copy = self.cur.copy()
                     def f2(*args, **kwargs):
                         offset = copy.offset
@@ -384,7 +389,36 @@ class Cursor(object):
 class BadPacket(Exception):
     pass
 
-class Frame(object):
+
+class FrameMeta(type):
+    def __new__(mcs, name, bases, dict):
+        # Inherit _register from bases
+        dict['_register'] = []
+        for base in bases:
+            if hasattr(base, '_register'):
+                dict['_register'] += base._register
+
+        # Inherit field_blacklist from bases
+        if 'field_blacklist' in dict:
+            for base in bases:
+                if hasattr(base,'field_blacklist'):
+                    dict['field_blacklist'] += base.field_blacklist
+
+        result = type.__new__(mcs, name, bases, dict)
+
+        # Register class in appropriate tables
+        for (table,keyattrs) in result._register:
+            if all(hasattr(result, a) for a in keyattrs):
+                key = [getattr(result, a) for a in keyattrs]
+                if len(key) == 1:
+                    key = key[0]
+                else:
+                    key = tuple(key)
+                table[key] = result
+
+        return result
+
+class Frame(with_metaclass(FrameMeta)):
     field_blacklist = ['fields','parent','start','end']
 
     def __init__(self, parent, context=None):
@@ -413,7 +447,7 @@ class Frame(object):
 
     def _value_str(self, value):
         if isinstance(value, array.array) and value.typecode == 'B':
-            return '0x' + ''.join(map(lambda b:'%.2x'%b,value))
+            return '0x' + ''.join('%.2x' % b for b in value)
         else:
             return str(value)
 
@@ -492,34 +526,6 @@ class Frame(object):
         children = self.parent.children
         return children.index(self) == len(children) - 1
 
-    class __metaclass__(type):
-        def __new__(mcs, name, bases, dict):
-            # Inherit _register from bases
-            dict['_register'] = []
-            for base in bases:
-                if hasattr(base, '_register'):
-                    dict['_register'] += base._register
-
-            # Inherit field_blacklist from bases
-            if 'field_blacklist' in dict:
-                for base in bases:
-                    if hasattr(base,'field_blacklist'):
-                        dict['field_blacklist'] += base.field_blacklist
-
-            result = type.__new__(mcs, name, bases, dict)
-
-            # Register class in appropriate tables
-            for (table,keyattrs) in result._register:
-                if all(hasattr(result, a) for a in keyattrs):
-                    key = [getattr(result, a) for a in keyattrs]
-                    if len(key) == 1:
-                        key = key[0]
-                    else:
-                        key = tuple(key)
-                    table[key] = result
-
-            return result
-
 class Register(object):
     def __init__(self, table, *keyattrs):
         self.table = table
@@ -530,7 +536,34 @@ class Register(object):
         cls._register.append((self.table,self.keyattrs))
         return cls
 
-class Enum(long):
+
+class EnumMeta(type):
+    def __new__(mcs, cname, bases, idict):
+        nametoval = {}
+        valtoname = {}
+        misc = {}
+
+        for (name,val) in idict.items():
+            if name[0].isupper():
+                nametoval[name] = val
+                valtoname[val] = name
+            else:
+                misc[name] = val
+
+        cls = type.__new__(mcs, cname, bases, misc)
+        cls._nametoval = nametoval
+        cls._valtoname = valtoname
+
+        return cls
+
+    def __getattribute__(cls, name):
+        nametoval = type.__getattribute__(cls, '_nametoval')
+        if name in nametoval:
+            return cls(nametoval[name])
+        else:
+            return type.__getattribute__(cls, name)
+
+class Enum(with_metaclass(EnumMeta, int)):
     """
     Enumeration abstract base
 
@@ -547,21 +580,21 @@ class Enum(long):
         """
         Returns a list of (name,value) pairs for allowed enumeration values.
         """
-        return cls._nametoval.iteritems()
+        return iter(cls._nametoval.items())
 
     @classmethod
     def names(cls):
         """
         Returns a list of names of allowed enumeration values.
         """
-        return [name for (name,value) in cls.items()]
+        return list(cls._nametoval.keys())
 
     @classmethod
     def values(cls):
         """
         Returns a list of allowed enumeration values.
         """
-        return [value for (name,value) in cls.items()]
+        return list(cls._nametoval.values())
 
     @classmethod
     def import_items(cls, dictionary):
@@ -574,7 +607,7 @@ class Enum(long):
 
             SomeEnumClass.import_items(globals())
         """
-        dictionary.update((name,cls(value)) for (name,value) in cls.items())
+        dictionary.update((name, cls(value)) for (name, value) in cls.items())
 
     @classmethod
     def validate(cls, value):
@@ -602,31 +635,6 @@ class Enum(long):
         # Just return string form
         return str(self)
 
-    class __metaclass__(type):
-        def __new__(mcs, cname, bases, idict):
-            nametoval = {}
-            valtoname = {}
-            misc = {}
-
-            for (name,val) in idict.iteritems():
-                if name[0].isupper():
-                    nametoval[name] = val
-                    valtoname[val] = name
-                else:
-                    misc[name] = val
-
-            cls = type.__new__(mcs, cname, bases, misc)
-            cls._nametoval = nametoval
-            cls._valtoname = valtoname
-
-            return cls
-
-        def __getattribute__(cls, name):
-            nametoval = type.__getattribute__(cls, '_nametoval')
-            if name in nametoval:
-                return cls(nametoval[name])
-            else:
-                return type.__getattribute__(cls, name)
 
 class ValueEnum(Enum):
     """
@@ -686,9 +694,9 @@ class FlagEnum(Enum):
             raise ValueError("Invalid %s: 0x%x (remainder 0x%x)" % (cls.__name__, value, remaining))
 
     def __str__(self):
-        names = [name for (name,flag) in self.items()
+        names = [name for (name, flag) in self.items()
                  if (flag != 0 and flag & self == flag) or
-                    (self == 0 and flag == 0)]
+                 (self == 0 and flag == 0)]
 
         return ' | '.join(names) if len(names) else '0'
 

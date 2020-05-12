@@ -33,10 +33,11 @@
 #
 # Authors: Brian Koropoff (brian.koropoff@emc.com)
 #
+from __future__ import absolute_import
 
-import core
-import crypto
-import smb2
+from . import core
+from . import crypto
+from . import smb2
 
 class Netbios(core.Frame):
     def __init__(self, context=None):
@@ -71,7 +72,7 @@ class Netbios(core.Frame):
         with cur.bounded(cur, end):
             while (cur < end):
                 signature = cur.copy().decode_bytes(4)
-                if (signature.tostring() == '\xfdSMB'):
+                if (signature.tostring() == b'\xfdSMB'):
                     crypto.TransformHeader(self).decode(cur)
                 else:
                     smb2.Smb2(self).decode(cur)

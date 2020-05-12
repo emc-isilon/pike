@@ -33,17 +33,22 @@
 #
 # Authors: Masen Furer (masen.furer@dell.com)
 #
-import core
-import digest
-import smb2
+from __future__ import absolute_import
+from builtins import map
+from builtins import range
+from builtins import object
 
 import array
 import random
 
 from Cryptodome.Cipher import AES
 
+from . import core
+from . import digest
+from . import smb2
 
-def pad_right(value, length, byte='\0'):
+
+def pad_right(value, length, byte=b'\0'):
     if len(value) > length:
         value = value[:length]
     elif len(value) < 16:
@@ -84,7 +89,7 @@ class EncryptionCapabilities(core.Frame):
 
     def _decode(self, cur):
         self.ciphers_count = cur.decode_uint16le()
-        for ix in xrange(self.ciphers_count):
+        for ix in range(self.ciphers_count):
             self.ciphers.append(Ciphers(cur.decode_uint16le()))
 
 
@@ -116,11 +121,11 @@ class TransformHeader(core.Frame):
     """
     def __init__(self, parent):
         core.Frame.__init__(self, parent)
-        self.protocol_id = array.array('B', "\xfdSMB")
+        self.protocol_id = array.array('B', b"\xfdSMB")
         self.signature = None
         # the value of nonce is always used in the encryption routine
         self.nonce = array.array('B',
-                                 map(random.randint, [0]*16, [255]*16))
+                                 map(random.randint, [0] * 16, [255] * 16))
         # if wire_nonce is set, it will be sent on the wire instead of nonce
         self.wire_nonce = None
         self.original_message_size = None
@@ -162,7 +167,7 @@ class TransformHeader(core.Frame):
         # the crypto header will be written in _encode_smb2
         self.crypto_header_offset = cur.offset
         # save a space for the wire nonce
-        self.wire_nonce_hole = cur.hole.encode_bytes('\0'*16)
+        self.wire_nonce_hole = cur.hole.encode_bytes(b'\0'*16)
         cur.advanceto(cur + 16)
 
         # the following fields are part of AdditionalAuthenticatedData and are
@@ -254,18 +259,18 @@ class CryptoKeys300(object):
     """ Key generation for SMB 0x300 and 0x302 """
     def __init__(self, session_key, *args, **kwds):
         self.encryption = digest.derive_key(
-            session_key, "SMB2AESCCM", "ServerIn \0")[:16].tostring()
+            session_key, b"SMB2AESCCM", b"ServerIn \0")[:16].tostring()
         self.decryption = digest.derive_key(
-            session_key, "SMB2AESCCM", "ServerOut\0")[:16].tostring()
+            session_key, b"SMB2AESCCM", b"ServerOut\0")[:16].tostring()
 
 
 class CryptoKeys311(object):
     """ Key generation for SMB 0x311 + """
     def __init__(self, session_key, pre_auth_integrity_hash, *args, **kwds):
         self.encryption = digest.derive_key(
-            session_key, "SMBC2SCipherKey", pre_auth_integrity_hash)[:16].tostring()
+            session_key, b"SMBC2SCipherKey", pre_auth_integrity_hash)[:16].tostring()
         self.decryption = digest.derive_key(
-            session_key, "SMBS2CCipherKey", pre_auth_integrity_hash)[:16].tostring()
+            session_key, b"SMBS2CCipherKey", pre_auth_integrity_hash)[:16].tostring()
 
 
 class EncryptionContext(object):

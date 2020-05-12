@@ -33,13 +33,18 @@
 #
 # Authors: Brian Koropoff (brian.koropoff@emc.com)
 #
+from __future__ import print_function
+from __future__ import division
+from builtins import object
+from builtins import str
+from future.utils import raise_from
 
-import os
+import contextlib
 import gc
 import logging
-import sys
+import os
 import unittest
-import contextlib
+import sys
 
 import pike.model as model
 import pike.smb2 as smb2
@@ -96,13 +101,9 @@ class PikeTest(unittest.TestCase):
         self._connections = []
         self.default_client = model.Client()
         if self.min_dialect is not None:
-            self.default_client.dialects = filter(
-                    lambda d: d >= self.min_dialect,
-                    self.default_client.dialects)
+            self.default_client.dialects = [d for d in self.default_client.dialects if d >= self.min_dialect]
         if self.max_dialect is not None:
-            self.default_client.dialects = filter(
-                    lambda d: d <= self.max_dialect,
-                    self.default_client.dialects)
+            self.default_client.dialects = [d for d in self.default_client.dialects if d <= self.max_dialect]
         if self.signing:
             self.default_client.security_mode = (smb2.SMB2_NEGOTIATE_SIGNING_ENABLED |
                                                  smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED)
@@ -162,19 +163,18 @@ class PikeTest(unittest.TestCase):
 
         try:
             yield o
-        except model.ResponseError as e:
-            pass
-
-        if e is None:
             raise self.failureException('No error raised when "%s" expected' % status)
-        elif e.response.status != status:
-            raise self.failureException('"%s" raised when "%s" expected' % (e.response.status, status))
-
-        o.response = e.response
+        except model.ResponseError as err:
+            o.response = err.response
+            if err.response.status != status:
+                raise_from(self.failureException(
+                    '"%s" raised when "%s" expected' % (err.response.status, status),
+                    err,
+                ))
 
     def setUp(self):
         if self.loglevel != logging.NOTSET:
-            print >>sys.stderr
+            print(file=sys.stderr)
 
         if hasattr(self, 'setup'):
             self.setup()
@@ -219,8 +219,9 @@ class PikeTest(unittest.TestCase):
         low = 0
         high = len(buf1)
         while high - low > 1:
-            chunk_1 = (low, low+(high-low)/2)
-            chunk_2 = (low+(high-low)/2, high)
+            # XXX: consider usage of stdlib bisect module
+            chunk_1 = (low, low + ((high - low) // 2))
+            chunk_2 = (chunk_1[1], high)
             if buf1[chunk_1[0]:chunk_1[1]] != buf2[chunk_1[0]:chunk_1[1]]:
                 low, high = chunk_1
             elif buf1[chunk_2[0]:chunk_2[1]] != buf2[chunk_2[0]:chunk_2[1]]:

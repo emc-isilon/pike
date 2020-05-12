@@ -2,13 +2,17 @@
 # SMB 3.0 Encryption: https://blogs.msdn.microsoft.com/openspecification/2012/10/05/encryption-in-smb-3-0-a-protocol-perspective/
 # SMB 3.1.1 Encryption: https://blogs.msdn.microsoft.com/openspecification/2015/09/09/smb-3-1-1-encryption-in-windows-10/
 # SMB 3.1.1 Pre-auth integrity: https://blogs.msdn.microsoft.com/openspecification/2015/08/11/smb-3-1-1-pre-authentication-integrity-in-windows-10/
+from builtins import object
+
 import array
-import unittest as unt
+import unittest
+
 import pike.crypto as crypto
 import pike.digest as digest
 import pike.netbios as netbios
 import pike.smb2 as smb2
-from binascii import unhexlify, hexlify
+
+from binascii import unhexlify
 
 class bogus_connection(object):
     def signing_key(self, *args, **kwds):
@@ -23,9 +27,9 @@ class bogus_connection(object):
 class bogus_300_connection(bogus_connection):
     def __init__(self, session_key):
         self._signing_key = digest.derive_key(
-                session_key,
-                'SMB2AESCMAC',
-                'SmbSign\0')[:16]
+            session_key,
+            b'SMB2AESCMAC',
+            b'SmbSign\0')[:16]
         self._encryption_context = crypto.EncryptionContext(
                 crypto.CryptoKeys300(session_key),
                 [crypto.SMB2_AES_128_CCM])
@@ -33,9 +37,9 @@ class bogus_300_connection(bogus_connection):
 class bogus_311_connection(bogus_connection):
     def __init__(self, session_key, pre_auth_integrity_value, ciphers):
         self._signing_key = digest.derive_key(
-                session_key,
-                'SMBSigningKey',
-                pre_auth_integrity_value)[:16]
+            session_key,
+            b'SMBSigningKey',
+            pre_auth_integrity_value)[:16]
         self._encryption_context = crypto.EncryptionContext(
                 crypto.CryptoKeys311(session_key,
                                      pre_auth_integrity_value),
@@ -43,13 +47,13 @@ class bogus_311_connection(bogus_connection):
 
 class PAIntegrity(object):
     def __init__(self):
-        self.hash = array.array('B', "\0"*64)
+        self.hash = array.array('B', b"\0"*64)
     def update(self, data):
         self.hash = digest.smb3_sha512(
             self.hash +
             data)
 
-class TestVector(unt.TestCase):
+class TestVector(unittest.TestCase):
     def test_pre_auth_integrity(self):
         h = PAIntegrity()
         negotiate_request = array.array('B', unhexlify(
@@ -128,9 +132,9 @@ class TestVector(unt.TestCase):
         self.assertEqual(h.hash, exp_pae_5)
         session_key = array.array('B', unhexlify("270E1BA896585EEB7AF3472D3B4C75A7"))
         signing_key = digest.derive_key(
-                session_key,
-                'SMBSigningKey',
-                h.hash)[:16]
+            session_key,
+            b'SMBSigningKey',
+            h.hash)[:16]
         exp_signing_key = array.array('B', unhexlify("73FE7A9A77BEF0BDE49C650D8CCB5F76"))
         self.assertEqual(signing_key, exp_signing_key)
 
@@ -156,11 +160,11 @@ class TestVector(unt.TestCase):
         smb_packet.flags = smb2.SMB2_FLAGS_SIGNED
         smb_packet.message_id = 4
         smb_packet.tree_id = 1
-        smb_packet.signature = "\0"*16
+        smb_packet.signature = b"\0" * 16
         smb_packet.session_id = session_id
         write_req = smb2.WriteRequest(smb_packet)
         write_req.file_id = (0x200003900000115, 0x23900000001)
-        write_req.buffer = "Smb3 encryption testing"
+        write_req.buffer = b"Smb3 encryption testing"
         write_req.write_channel_info_offset = 0x70
 
         exp_serialized = array.array('B', unhexlify(
@@ -242,11 +246,11 @@ class TestVector(unt.TestCase):
         smb_packet.flags = smb2.SMB2_FLAGS_SIGNED
         smb_packet.message_id = 5
         smb_packet.tree_id = 1
-        smb_packet.signature = "\0"*16
+        smb_packet.signature = b"\0" * 16
         smb_packet.session_id = session_id
         write_req = smb2.WriteRequest(smb_packet)
         write_req.file_id = (0x400000006, 0x400000001)
-        write_req.buffer = "Smb3 encryption testing"
+        write_req.buffer = b"Smb3 encryption testing"
         write_req.write_channel_info_offset = 0x70
 
         exp_serialized = array.array('B', unhexlify(
@@ -303,4 +307,4 @@ class TestVector(unt.TestCase):
         self.assertEqual(nb[0].buf, exp_smb_message)
 
 if __name__ == "__main__":
-    unt.main()
+    unittest.main()

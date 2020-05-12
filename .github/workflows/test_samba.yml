@@ -9,7 +9,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [2.7]
+        python-version: [2.7, 3.6, 3.7, 3.8]
 
     services:
       samba:
@@ -29,6 +29,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install Pike
       run: python setup.py install
+    - name: Install pytest
+      run: pip install pytest
     - name: Run Pike
       run: python -m unittest -v pike.test.samba_suite
       env:

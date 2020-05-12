@@ -103,7 +103,7 @@ class CompoundTest(pike.test.PikeTest):
     # Compound create/write/close & create/read/close
     def test_create_write_close(self):
         filename = "create_write_close"
-        buf = "compounded write"
+        buf = b"compounded write"
 
         chan, tree = self.tree_connect()
 

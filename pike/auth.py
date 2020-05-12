@@ -39,20 +39,27 @@ Authentication Plugins for Pike
 
 This module contains wrappers around external authentication mechanisms and APIs.
 """
+from __future__ import absolute_import
 
 
+from builtins import object
 import array
+import warnings
 try:
     import kerberos
 except ImportError:
     kerberos = None
 try:
-    import ntlm
+    from . import ntlm
 except ImportError:
     ntlm = None
 
 
 def split_credentials(creds):
+    if isinstance(creds, bytes):
+        warnings.warn("Pass creds as unicode string, got {!r}".format(creds),
+                      UnicodeWarning)
+        creds = creds.decode("utf-8")
     user, password = creds.split('%')
     if '\\' in user:
         domain, user = user.split('\\')
@@ -64,14 +71,20 @@ def split_credentials(creds):
 class KerberosProvider(object):
     def __init__(self, conn, creds=None):
         if creds:
+            # XXX: NTLM support is only provided in likewise gssapi
+            raise NotImplementedError("NTLM via GSSAPI is not functional")
+            # This API doesn't accept strings with null terminators, so it cannot take
+            # utf-16-le (which is what would be expected), so prefer instead to be
+            # safe and only allow ascii characters.
+            cred_encoding = "ascii"
             domain, user, password = split_credentials(creds)
             (self.result,
              self.context) = kerberos.authGSSClientInit(
                 "cifs/" + conn.server,
                 gssmech=2,
-                user=user,
-                password=password,
-                domain=domain)
+                user=user.encode(cred_encoding),
+                password=password.encode(cred_encoding),
+                domain=domain.encode(cred_encoding))
         else:
             (self.result,
              self.context) = kerberos.authGSSClientInit("cifs/" + conn.server,

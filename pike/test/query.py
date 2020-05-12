@@ -35,11 +35,9 @@
 #
 
 import pike.model
+import pike.ntstatus
 import pike.smb2
 import pike.test
-import pike.ntstatus
-
-from pike.test import unittest
 
 
 class QueryTest(pike.test.PikeTest):

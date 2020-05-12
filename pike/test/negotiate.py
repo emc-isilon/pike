@@ -37,11 +37,8 @@
 #
 
 import pike.crypto as crypto
-import pike.model as model
 import pike.smb2 as smb2
 import pike.test as test
-import random
-import array
 
 class CapTest(test.PikeTest):
     def setup(self):

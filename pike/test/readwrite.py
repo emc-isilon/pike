@@ -34,12 +34,15 @@
 # Authors: Arlene Berry (arlene.berry@emc.com)
 #
 
+from builtins import map
+
+import array
+import random
+
 import pike.model
 import pike.smb2
 import pike.test
 import pike.ntstatus
-import array
-import random
 
 class ReadWriteTest(pike.test.PikeTest):
     # Test that we can write to a file
@@ -167,7 +170,7 @@ class ReadWriteTest(pike.test.PikeTest):
     @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_LEASING)
     def test_write_none_lease(self):
         chan, tree = self.tree_connect()
-        lease1 = array.array('B',map(random.randint, [0]*16, [255]*16))
+        lease1 = array.array('B', map(random.randint, [0] * 16, [255] * 16))
 
         share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
 

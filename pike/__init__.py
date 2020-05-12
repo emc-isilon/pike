@@ -13,5 +13,5 @@ __all__ = [
         'test',
         'transport',
 ]
-__version_info__ = (0, 2, 25)
-__version__ = "{0}.{1}.{2}".format(*__version_info__)
+# __version__ is defined by setuptools_scm using git tag
+# https://github.com/pypa/setuptools_scm/

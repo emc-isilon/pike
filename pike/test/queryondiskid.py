@@ -35,7 +35,7 @@
 #
 
 import array
-import struct
+
 import pike.model
 import pike.smb2
 import pike.test

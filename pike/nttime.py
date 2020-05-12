@@ -34,14 +34,17 @@
 # Authors: Rafal Szczesniak (rafal.szczesniak@isilon.com)
 #          Masen Furer (masen.furer@dell.com)
 #
+from __future__ import division
+from builtins import str
+from past.builtins import basestring
 
 from datetime import datetime, timedelta
 import math
 import time
 
-_unix_time_offset = 11644473600L
+_unix_time_offset = 11644473600
 _unix_epoch = datetime.fromtimestamp(0) + timedelta(hours=time.localtime().tm_isdst)
-_intervals_per_second = 10000000L
+_intervals_per_second = 10000000
 
 def _unix_time_to_nt_time(t):
     return (t + _unix_time_offset) * _intervals_per_second
@@ -66,11 +69,11 @@ def _nt_time_to_unix_time(t):
     # in Python's time library format such that times like "12:59.59.1"
     # don't turn into "01:00:00.0" when converted back. This
     # calculation below makes use of Python's bigint capabilities.
-    py_time = (t << 32) / _intervals_per_second
+    py_time = (t << 32) // _intervals_per_second
     py_time -= _unix_time_offset << 32
     py_time_parts = divmod(py_time, 2**32)
     py_time = float(py_time_parts[0])
-    py_time += math.copysign(py_time_parts[1], py_time) / 2**32
+    py_time += math.copysign(py_time_parts[1], py_time) // (2 ** 32)
     return py_time
 
 def GMT_to_datetime(gmt_token):
@@ -81,7 +84,7 @@ def GMT_to_datetime(gmt_token):
     dt_obj -= timedelta(seconds=time.timezone)
     return dt_obj
 
-class NtTime(long):
+class NtTime(int):
     """
     NtTime may be initialized with any of the following values
       * string in ISO format or @GMT- format (timewarp)
@@ -98,7 +101,7 @@ class NtTime(long):
         elif isinstance(value, datetime):
             value = _datetime_to_nt_time(value)
 
-        return super(NtTime, cls).__new__(cls, long(value))
+        return super(NtTime, cls).__new__(cls, int(value))
 
     def __repr__(self):
         return str(self)
@@ -113,4 +116,4 @@ class NtTime(long):
         return _nt_time_to_unix_time(self)
 
     def to_unixtime(self):
-        return long(self.to_pytime())
+        return int(self.to_pytime())
