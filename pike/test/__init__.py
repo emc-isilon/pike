@@ -40,73 +40,355 @@ from builtins import str
 from future.utils import raise_from
 
 import contextlib
+import enum
 import gc
 import logging
 import os
 import unittest
 import sys
 
+import attr
+
 import pike.model as model
+import pike.ntstatus as ntstatus
 import pike.smb2 as smb2
+
+
+_NotSet = object()
+_Required = object()
+
+
+class MissingArgument(Exception):
+    pass
+
+
+class SequenceError(Exception):
+    """Raised when calling TreeConnect helpers in the wrong state"""
+
+
+class TestRequirementNotMet(Exception):
+    """The test requires some dialect or capability that was not met"""
+
+
+class DialectMissing(TestRequirementNotMet):
+    pass
+
+
+class CapabilityMissing(TestRequirementNotMet):
+    pass
+
+
+class ShareCapabilityMissing(TestRequirementNotMet):
+    pass
+
+class Options(enum.Enum):
+    PIKE_LOGLEVEL = "PIKE_LOGLEVEL"
+    PIKE_TRACE = "PIKE_TRACE"
+    PIKE_SERVER = "PIKE_SERVER"
+    PIKE_PORT = "PIKE_PORT"
+    PIKE_CREDS = "PIKE_CREDS"
+    PIKE_SHARE = "PIKE_SHARE"
+    PIKE_SIGN = "PIKE_SIGN"
+    PIKE_ENCRYPT = "PIKE_ENCRYPT"
+    PIKE_MIN_DIALECT = "PIKE_MIN_DIALECT"
+    PIKE_MAX_DIALECT = "PIKE_MAX_DIALECT"
+
+    @classmethod
+    def option(cls, name, default=None):
+        if isinstance(name, cls):
+            # convert from Enum type to str
+            name = name.value
+        value = os.environ.get(name, _NotSet)
+        if value is _NotSet or len(value) == 0:
+            if default is _Required:
+                raise MissingArgument(
+                    "Environment variable {!r} must be set".format(name))
+            value = default
+        return value
+
+    @classmethod
+    def booloption(cls, name, default='no'):
+        table = {'yes': True, 'true': True, 'no': False, 'false': False, '': False}
+        return table[cls.option(name, default=default).lower()]
+
+    @classmethod
+    def smb2constoption(cls, name, default=None):
+        return getattr(smb2, cls.option(name, '').upper(), default)
+
+    @classmethod
+    def loglevel(cls):
+        return getattr(logging, cls.option(cls.PIKE_LOGLEVEL, default='NOTSET').upper())
+
+    @classmethod
+    def trace(cls):
+        return cls.booloption(cls.PIKE_TRACE)
+
+    @classmethod
+    def server(cls):
+        return cls.option(cls.PIKE_SERVER, default=_Required)
+
+    @classmethod
+    def port(cls):
+        return int(cls.option(cls.PIKE_PORT, default='445'))
+
+    @classmethod
+    def creds(cls):
+        return cls.option(cls.PIKE_CREDS)
+
+    @classmethod
+    def share(cls):
+        return cls.option(cls.PIKE_SHARE, "c$")
+
+    @classmethod
+    def signing(cls):
+        return cls.booloption(cls.PIKE_SIGN)
+
+    @classmethod
+    def encryption(cls):
+        return cls.booloption(cls.PIKE_ENCRYPT)
+
+    @classmethod
+    def min_dialect(cls):
+        return cls.smb2constoption(cls.PIKE_MIN_DIALECT, default=0)
+
+    @classmethod
+    def max_dialect(cls):
+        return cls.smb2constoption(cls.PIKE_MAX_DIALECT, default=float('inf'))
+
+
+def default_client():
+    client = model.Client()
+    min_dialect = Options.min_dialect()
+    max_dialect = Options.max_dialect()
+    client.dialects = [d for d in client.dialects
+                       if min_dialect <= d <= max_dialect]
+    if Options.signing():
+        client.security_mode = (smb2.SMB2_NEGOTIATE_SIGNING_ENABLED |
+                                smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED)
+    return client
+
+
+@attr.s
+class TreeConnect(object):
+    """
+    Combines a Client, Connection, Channel, and Tree for simple access to an SMB share.
+    """
+    _client = attr.ib(default=None)
+    server = attr.ib(factory=Options.server)
+    port = attr.ib(factory=Options.port)
+    creds = attr.ib(factory=Options.creds)
+    share = attr.ib(factory=Options.share)
+    resume = attr.ib(default=None)
+    encryption = attr.ib(factory=Options.encryption)
+    require_dialect = attr.ib(default=None)
+    require_capabilities = attr.ib(default=None)
+    require_share_capabilities = attr.ib(default=None)
+    conn = attr.ib(default=None, init=False)
+    chan = attr.ib(default=None, init=False)
+    tree = attr.ib(default=None, init=False)
+
+    @require_dialect.validator
+    def _require_dialect_validator(self, attribute, value):
+        if value and len(value) != 2:
+            raise TypeError(
+                "require_dialect must be specified as a 2-tuple of (min_dialect, "
+                "max_dialect), not {!r}".format(value)
+            )
+
+    @property
+    def client(self):
+        return self._client or default_client()
+
+    def connect(self):
+        """
+        Establish a connection to the server and complete SMB2 NEGOTIATE.
+
+        If a require_dialect or require_capability is specified to __init__, then
+        an exception will be raised if the server does not support the required dialect
+        or does not advertise the required capability.
+
+        :return: connected pike.model.Connection
+        """
+        if self.conn and self.conn.connected:
+            raise SequenceError("Already connected: {!r}. Must call close() before reconnecting".format(self.conn))
+        self.conn = self.client.connect(server=self.server, port=self.port).negotiate()
+        negotiated_dialect = self.conn.negotiate_response.dialect_revision
+        if (self.require_dialect and
+                (negotiated_dialect < self.require_dialect[0] or
+                 negotiated_dialect > self.require_dialect[1])):
+            self.close()
+            raise DialectMissing("Dialect required: {}".format(self.require_dialect))
+
+        capabilities = self.conn.negotiate_response.capabilities
+        if (self.require_capabilities and
+                (capabilities & self.require_capabilities != self.require_capabilities)):
+            self.close()
+            raise CapabilityMissing("Server does not support: %s " %
+                                    str(self.require_capabilities & ~capabilities))
+        return self.conn
+
+    def session_setup(self):
+        """
+        Establish a session on the connection and complete SMB2 SESSION_SETUP.
+
+        If resume is specified to __init__, the new session will include the resumed
+        session as previous_session_id.
+
+        If encryption is specified to __init__ (or with PIKE_ENCRYPT environment var)
+        the new session will encrypt data by default.
+
+        :return: pike.model.Channel
+        """
+        if not self.conn or not self.conn.connected:
+            raise SequenceError("Not connected. Must call connect() first")
+        if self.chan:
+            raise SequenceError("Channel already established: {!r}. Must call close() before reconnecting".format(self.chan))
+        self.chan = self.conn.session_setup(self.creds, resume=self.resume)
+        if self.encryption:
+            self.chan.session.encrypt_data = True
+        return self.chan
+
+    def tree_connect(self):
+        """
+        Establish a tree connection on the session and complete SMB2 TREE_CONNECT.
+
+        If require_share_capability is specified to __init__, then
+        an exception will be raised if the share does not does not advertise the
+        required capability.
+
+        :return: pike.model.Tree
+        """
+        if not self.chan:
+            raise SequenceError("Channel not established. Must call session_setup() first")
+        if self.tree:
+            raise SequenceError("Tree already connected: {!r}. Must call close() before reconnecting".format(self.tree))
+        self.tree = self.chan.tree_connect(self.share)
+        capabilities = self.tree.tree_connect_response.capabilities
+        if (self.require_share_capabilities and
+                (capabilities & self.require_share_capabilities != self.require_share_capabilities)):
+            self.close()
+            raise ShareCapabilityMissing(
+                "Share does not support: %s" %
+                str(self.require_share_capabilities & ~capabilities)
+            )
+        return self.tree
+
+    def __call__(self):
+        """
+        Perform all initialization steps (if needed). If the connection, channel, or
+        tree is already established, this call is a no-op for those objects.
+
+        :return: the established TreeConnect instance
+        """
+        if not self.conn:
+            self.connect()
+        if not self.chan:
+            self.session_setup()
+        if not self.tree:
+            self.tree_connect()
+        return self
+
+    def close(self):
+        """
+        Perform de-initialization for all established objects. If any object has
+        already been disconnected or set to None, then nothing will happen.
+
+        For example, to perform SESSION_LOGOFF without first doing a TREE_DISCONNECT,
+        simply set self.tree = None before calling close().
+
+        Additionally, to disconnect without SESSION_LOGOFF, set self.chan = None.
+
+        If the tree has already been disconnected or channel already closed, then
+        errors related to cleaning up twice are suppressed.
+        """
+        if not self.conn or not self.conn.connected:
+            self.conn = self.chan = self.tree = None
+            return
+        if self.tree and self.chan:
+            try:
+                self.chan.tree_disconnect(self.tree)
+            except model.ResponseError as err:
+                if err.response.status == ntstatus.STATUS_USER_SESSION_DELETED:
+                    self.chan = None
+                elif err.response.status != ntstatus.STATUS_NETWORK_NAME_DELETED:
+                    raise
+            except EOFError:
+                self.chan = None
+            self.tree = None
+        if self.chan:
+            try:
+                self.chan.logoff()
+            except model.ResponseError as err:
+                if err.response.status != ntstatus.STATUS_USER_SESSION_DELETED:
+                    raise
+            except EOFError:
+                pass
+            self.chan = self.tree = None
+        if self.conn.connected:
+            self.conn.close()
+            self.conn = self.chan = self.tree = None
+
+    def __enter__(self):
+        """
+        Context manager protocol. Establish connection, channel, and tree if not
+        already established.
+
+        :return: self
+        """
+        return self()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Context manager protocol. Calls close() to close any open objects.
+        """
+        self.close()
+
+    def __del__(self):
+        """
+        Garbage collection. Calls close() to close any open objects.
+        """
+        self.close()
+
+    def __iter__(self):
+        """
+        Compatibility shim to mirror the previous return value of PikeTest.tree_connect
+        """
+        yield self.chan
+        yield self.tree
+
+    def __getitem__(self, item):
+        """
+        Compatibility shim to mirror the previous return value of PikeTest.tree_connect
+        """
+        return tuple(self)[item]
 
 
 class PikeTest(unittest.TestCase):
     init_done = False
 
     @staticmethod
-    def option(name, default=None):
-        if name in os.environ:
-            value = os.environ[name]
-            if len(value) == 0:
-                value = default
-        else:
-            value = default
-
-        return value
-
-    @staticmethod
-    def booloption(name, default='no'):
-        table = {'yes': True, 'no': False, '': False}
-        return table[PikeTest.option(name, 'no')]
-
-    @staticmethod
-    def smb2constoption(name, default=None):
-        return getattr(smb2, PikeTest.option(name, '').upper(), default)
-
-    @staticmethod
     def init_once():
         if not PikeTest.init_done:
-            PikeTest.loglevel = getattr(logging, PikeTest.option('PIKE_LOGLEVEL', 'NOTSET').upper())
+            PikeTest.loglevel = Options.loglevel()
             PikeTest.handler = logging.StreamHandler()
             PikeTest.handler.setLevel(PikeTest.loglevel)
             PikeTest.handler.setFormatter(logging.Formatter('%(asctime)s:%(name)s:%(levelname)s: %(message)s'))
             PikeTest.logger = logging.getLogger('pike')
             PikeTest.logger.addHandler(PikeTest.handler)
             PikeTest.logger.setLevel(PikeTest.loglevel)
-            PikeTest.trace = PikeTest.booloption('PIKE_TRACE')
-            model.trace = PikeTest.trace
+            model.trace = PikeTest.trace = Options.trace()
             PikeTest.init_done = True
 
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
         self.init_once()
-        self.server = self.option('PIKE_SERVER')
-        self.port = int(self.option('PIKE_PORT', '445'))
-        self.creds = self.option('PIKE_CREDS')
-        self.share = self.option('PIKE_SHARE', 'c$')
-        self.signing = self.booloption('PIKE_SIGN')
-        self.encryption = self.booloption('PIKE_ENCRYPT')
-        self.min_dialect = self.smb2constoption('PIKE_MIN_DIALECT')
-        self.max_dialect = self.smb2constoption('PIKE_MAX_DIALECT')
         self._connections = []
-        self.default_client = model.Client()
-        if self.min_dialect is not None:
-            self.default_client.dialects = [d for d in self.default_client.dialects if d >= self.min_dialect]
-        if self.max_dialect is not None:
-            self.default_client.dialects = [d for d in self.default_client.dialects if d <= self.max_dialect]
-        if self.signing:
-            self.default_client.security_mode = (smb2.SMB2_NEGOTIATE_SIGNING_ENABLED |
-                                                 smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED)
+        self.default_client = default_client()
+        self.server = Options.server()
+        self.port = Options.port()
+        self.creds = Options.creds()
+        self.share = Options.share()
+        self.encryption = Options.encryption()
 
     def debug(self, *args, **kwargs):
         self.logger.debug(*args, **kwargs)
@@ -124,34 +406,25 @@ class PikeTest(unittest.TestCase):
         self.logger.critical(*args, **kwargs)
 
     def tree_connect(self, client=None, resume=None):
-        dialect_range = self.required_dialect()
-        req_caps = self.required_capabilities()
-        req_share_caps = self.required_share_capabilities()
-
-        if client is None:
-            client = self.default_client
-
-        conn = client.connect(self.server, self.port).negotiate()
-
-        if (conn.negotiate_response.dialect_revision < dialect_range[0] or
-            conn.negotiate_response.dialect_revision > dialect_range[1]):
-            self.skipTest("Dialect required: %s" % str(dialect_range))
-
-        if conn.negotiate_response.capabilities & req_caps != req_caps:
-            self.skipTest("Capabilities missing: %s " %
-                          str(req_caps & ~conn.negotiate_response.capabilities))
-
-        chan = conn.session_setup(self.creds, resume=resume)
-        if self.encryption:
-            chan.session.encrypt_data = True
-
-        tree = chan.tree_connect(self.share)
-
-        if tree.tree_connect_response.capabilities & req_share_caps != req_share_caps:
-            self.skipTest("Share capabilities missing: %s" %
-                          str(req_share_caps & ~tree.tree_connect_response.capabilities))
-        self._connections.append(conn)
-        return (chan,tree)
+        tc = TreeConnect(
+            client=client or self.default_client,
+            server=self.server,
+            port=self.port,
+            creds=self.creds,
+            share=self.share,
+            resume=resume,
+            encryption=self.encryption,
+            require_dialect=self.required_dialect(),
+            require_capabilities=self.required_capabilities(),
+            require_share_capabilities=self.required_share_capabilities(),
+        )
+        try:
+            tc()
+        except TestRequirementNotMet as err:
+            raise_from(unittest.SkipTest(str(err)), err)
+        # save a reference to the TreeConnect object to avoid it being __del__'d
+        self._connections.append(tc)
+        return tc
 
     class _AssertErrorContext(object):
         pass
