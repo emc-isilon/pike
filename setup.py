@@ -101,7 +101,12 @@ def run_setup(with_extensions):
         url="https://github.com/emc-isilon/pike",
         packages=["pike", "pike.test"],
         python_requires=">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,<3.9",
-        install_requires=["pycryptodomex", "future"],
+        install_requires=[
+            'enum34~=1.1.6;  python_version ~= "2.7"',
+            'attrs~=19.3.0',
+            "pycryptodomex",
+            "future"
+        ],
         ext_modules=ext_modules,
         test_suite="setup.pike_suite",
         cmdclass=cmdclass,
