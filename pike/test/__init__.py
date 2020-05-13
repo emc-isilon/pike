@@ -388,7 +388,10 @@ class PikeTest(unittest.TestCase):
         self.port = Options.port()
         self.creds = Options.creds()
         self.share = Options.share()
+        self.signing = Options.signing()
         self.encryption = Options.encryption()
+        self.min_dialect = Options.min_dialect()
+        self.max_dialect = Options.max_dialect()
 
     def debug(self, *args, **kwargs):
         self.logger.debug(*args, **kwargs)
