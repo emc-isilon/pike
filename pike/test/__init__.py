@@ -409,13 +409,13 @@ class PikeTest(unittest.TestCase):
         if client is None:
             client = self.default_client
         if (min_dialect is not None and
-			min(client.dialects) != min_dialect):
-			client.dialects = [d for d in client.dialects
-                if d >= self.min_dialect]
+                min(client.dialects) != min_dialect):
+            client.dialects = [d for d in client.dialects
+                               if d >= min_dialect]
         if (max_dialect is not None and
-			max(client.dialects) != max_dialect):
-			client.dialects = [d for d in client.dialects
-                if d <= self.max_dialect]
+                max(client.dialects) != max_dialect):
+            client.dialects = [d for d in client.dialects
+                               if d <= max_dialect]
 
     def tree_connect(self, client=None, resume=None):
         tc = TreeConnect(
