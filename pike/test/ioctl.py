@@ -41,6 +41,7 @@ import pike.smb2 as smb2
 import pike.test as test
 import pike.ntstatus
 
+
 class ValidateNegotiateInfo(test.PikeTest):
     def __init__(self, *args, **kwds):
         super(ValidateNegotiateInfo, self).__init__(*args, **kwds)
