@@ -95,14 +95,7 @@ class PikeTest(unittest.TestCase):
         self.max_dialect = self.smb2constoption('PIKE_MAX_DIALECT')
         self._connections = []
         self.default_client = model.Client()
-        if self.min_dialect is not None:
-            self.default_client.dialects = filter(
-                    lambda d: d >= self.min_dialect,
-                    self.default_client.dialects)
-        if self.max_dialect is not None:
-            self.default_client.dialects = filter(
-                    lambda d: d <= self.max_dialect,
-                    self.default_client.dialects)
+        self.set_client_dialect(self.min_dialect, self.max_dialect)
         if self.signing:
             self.default_client.security_mode = (smb2.SMB2_NEGOTIATE_SIGNING_ENABLED |
                                                  smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED)
@@ -121,6 +114,19 @@ class PikeTest(unittest.TestCase):
 
     def critical(self, *args, **kwargs):
         self.logger.critical(*args, **kwargs)
+
+    def set_client_dialect(self, min_dialect=None, max_dialect=None,
+                           client=None):
+        if client is None:
+            client = self.default_client
+        if (min_dialect is not None and
+                min(client.dialects) != min_dialect):
+            client.dialects = filter(
+                lambda d: d >= min_dialect, client.dialects)
+        if (max_dialect is not None and
+                max(client.dialects) != max_dialect):
+            client.dialects = filter(
+                lambda d: d <= max_dialect, client.dialects)
 
     def tree_connect(self, client=None, resume=None):
         dialect_range = self.required_dialect()
