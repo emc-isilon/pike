@@ -870,6 +870,10 @@ class ShareAccess(core.FlagEnum):
 
 ShareAccess.import_items(globals())
 
+FILE_SHARE_ALL = (
+    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE
+)
+
 # Create dispositions
 class CreateDisposition(core.ValueEnum):
     FILE_SUPERSEDE    = 0x00000000
@@ -1219,6 +1223,11 @@ class LeaseState(core.FlagEnum):
     SMB2_LEASE_WRITE_CACHING  = 0x04
 
 LeaseState.import_items(globals())
+
+SMB2_LEASE_R = SMB2_LEASE_READ_CACHING
+SMB2_LEASE_RH = SMB2_LEASE_R | SMB2_LEASE_HANDLE_CACHING
+SMB2_LEASE_RW = SMB2_LEASE_R | SMB2_LEASE_WRITE_CACHING
+SMB2_LEASE_RWH = SMB2_LEASE_RH | SMB2_LEASE_RW
 
 class LeaseFlags(core.FlagEnum):
     SMB2_LEASE_FLAG_NONE              = 0x00
