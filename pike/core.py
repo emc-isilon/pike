@@ -42,14 +42,32 @@ from builtins import hex
 from builtins import str
 from builtins import object
 import array
+from binascii import hexlify
 import struct
-import inspect
 
 from future.utils import with_metaclass
 
+
 class BufferOverrun(Exception):
     """Buffer overrun exception"""
-    pass
+    def __init__(self, cursor, request, boundary):
+        self.cursor = cursor
+        self.request = request
+        self.boundary = boundary
+
+    @property
+    def message(self):
+        return "{} is {} bound {} in {!r}\nPacket buffer: {!r}".format(
+            self.request,
+            "below lower" if self.request < self.boundary else "above upper",
+            self.boundary,
+            self.cursor,
+            hexlify(self.cursor.array),
+        )
+
+    def __str__(self):
+        return self.message
+
 
 class Cursor(object):
     """
@@ -254,8 +272,10 @@ class Cursor(object):
         lower = self.bounds[0] if self.bounds[0] is not None else 0
         upper = self.bounds[1] if self.bounds[1] is not None else len(self.array)
 
-        if start < lower or end > upper:
-            raise BufferOverrun()
+        if start < lower:
+            raise BufferOverrun(self, start, lower)
+        if end > upper:
+            raise BufferOverrun(self, end, upper)
 
     def decode_bytes(self, size):
         self._check_bounds(self.offset, self.offset + size)
@@ -311,9 +331,10 @@ class Cursor(object):
 
     def seekto(self, o, lowerbound = None, upperbound = None):
         assert self.array is o.array
-        if (lowerbound is not None and o < lowerbound) or \
-           (upperbound is not None and o > upperbound):
-            raise BufferOverrun()
+        if lowerbound is not None and o < lowerbound:
+            raise BufferOverrun(self, o, lowerbound)
+        if upperbound is not None and o > upperbound:
+            raise BufferOverrun(self, o, upperbound)
         self.offset = o.offset
 
     def advanceto(self, o, bound = None):
