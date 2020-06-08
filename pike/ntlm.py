@@ -61,7 +61,7 @@ def des_key_64(K):
     out_key = array.array("B", K[0])
     for ix in range(1,len(in_key)):
         out_key.append(((ord(in_key[ix-1]) << (8-ix)) & 0xFF) | (ord(in_key[ix]) >> ix))
-    return out_key.tostring()
+    return out_key.tobytes()
 
 def DES(K, D):
     d1 = Cryptodome.Cipher.DES.new(des_key_64(K),
@@ -102,7 +102,7 @@ class Ntlm(core.Frame):
 
     def _decode(self, cur):
         signature = cur.decode_bytes(8)
-        if signature.tostring() != NTLM_SIGNATURE:
+        if signature.tobytes() != NTLM_SIGNATURE:
             raise core.BadPacket("Packet signature does not match")
         # determine the message type to pass off decoding
         message_type = cur.decode_uint32le()
@@ -575,7 +575,7 @@ def ComputeResponsev2(NegFlg, ResponseKeyNT, ResponseKeyLM, ServerChallenge,
     ntlmv2_client_challenge.challenge_from_client = ClientChallenge
     if av_pairs is not None:
         ntlmv2_client_challenge.av_pairs = av_pairs
-    temp = encode_frame(ntlmv2_client_challenge).tostring()
+    temp = encode_frame(ntlmv2_client_challenge).tobytes()
     NTProofStr = HMAC.new(ResponseKeyNT,
                           ServerChallenge + temp,
                           MD5).digest()
@@ -642,12 +642,12 @@ class NtlmAuthenticator(object):
          self.session_base_key) = ComputeResponsev1(self.auth_flags,
                                                     self.nt_hash,
                                                     self.lm_hash,
-                                                    self.server_challenge.tostring(),
-                                                    self.client_challenge.tostring())
+                                                    self.server_challenge.tobytes(),
+                                                    self.client_challenge.tobytes())
         self.key_exchange_key = KXKEY(self.auth_flags,
                                       self.session_base_key,
                                       self.lm_challenge_response,
-                                      self.server_challenge.tostring(),
+                                      self.server_challenge.tobytes(),
                                       self.lm_hash)
 
     def ntlmv2(self):
@@ -668,8 +668,8 @@ class NtlmAuthenticator(object):
          self.session_base_key) = ComputeResponsev2(self.auth_flags,
                                                     self.nt_hash,
                                                     self.nt_hash,
-                                                    self.server_challenge.tostring(),
-                                                    self.client_challenge.tostring(),
+                                                    self.server_challenge.tobytes(),
+                                                    self.client_challenge.tobytes(),
                                                     time,
                                                     server_name,
                                                     ctarget_info)
@@ -682,7 +682,7 @@ class NtlmAuthenticator(object):
         if self.auth_flags & NTLMSSP_NEGOTIATE_KEY_EXCH:
             r = RC4.new(self.key_exchange_key)
             self.exported_session_key = nonce(16)
-            return r.encrypt(self.exported_session_key.tostring())
+            return r.encrypt(self.exported_session_key.tobytes())
         else:
             self.exported_session_key = self.key_exchange_key
 

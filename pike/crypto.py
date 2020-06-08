@@ -259,18 +259,18 @@ class CryptoKeys300(object):
     """ Key generation for SMB 0x300 and 0x302 """
     def __init__(self, session_key, *args, **kwds):
         self.encryption = digest.derive_key(
-            session_key, b"SMB2AESCCM", b"ServerIn \0")[:16].tostring()
+            session_key, b"SMB2AESCCM", b"ServerIn \0")[:16].tobytes()
         self.decryption = digest.derive_key(
-            session_key, b"SMB2AESCCM", b"ServerOut\0")[:16].tostring()
+            session_key, b"SMB2AESCCM", b"ServerOut\0")[:16].tobytes()
 
 
 class CryptoKeys311(object):
     """ Key generation for SMB 0x311 + """
     def __init__(self, session_key, pre_auth_integrity_hash, *args, **kwds):
         self.encryption = digest.derive_key(
-            session_key, b"SMBC2SCipherKey", pre_auth_integrity_hash)[:16].tostring()
+            session_key, b"SMBC2SCipherKey", pre_auth_integrity_hash)[:16].tobytes()
         self.decryption = digest.derive_key(
-            session_key, b"SMBS2CCipherKey", pre_auth_integrity_hash)[:16].tostring()
+            session_key, b"SMBS2CCipherKey", pre_auth_integrity_hash)[:16].tobytes()
 
 
 class EncryptionContext(object):
@@ -293,18 +293,18 @@ class EncryptionContext(object):
     def encrypt(self, plaintext, authenticated_data, nonce):
         enc_cipher = AES.new(self.keys.encryption,
                              self.aes_mode,
-                             nonce=nonce[:self.nonce_length].tostring())
-        enc_cipher.update(authenticated_data.tostring())
-        ciphertext, signature = enc_cipher.encrypt_and_digest(plaintext.tostring())
+                             nonce=nonce[:self.nonce_length].tobytes())
+        enc_cipher.update(authenticated_data.tobytes())
+        ciphertext, signature = enc_cipher.encrypt_and_digest(plaintext.tobytes())
         return array.array('B', ciphertext), array.array('B', signature)
 
     def decrypt(self, ciphertext, signature, authenticated_data, nonce):
         dec_cipher = AES.new(self.keys.decryption,
                              self.aes_mode,
-                             nonce=nonce[:self.nonce_length].tostring())
-        dec_cipher.update(authenticated_data.tostring())
+                             nonce=nonce[:self.nonce_length].tobytes())
+        dec_cipher.update(authenticated_data.tobytes())
         return array.array(
                 'B',
                 dec_cipher.decrypt_and_verify(
-                    ciphertext.tostring(),
-                    signature.tostring()))
+                    ciphertext.tobytes(),
+                    signature.tobytes()))

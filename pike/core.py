@@ -301,7 +301,7 @@ class Cursor(object):
         return self.decode_struct('<q')[0]
 
     def decode_utf16le(self, size):
-        return self.decode_bytes(size).tostring().decode('utf-16le')
+        return self.decode_bytes(size).tobytes().decode('utf-16le')
 
     def align(self, base, val):
         assert self.array is base.array

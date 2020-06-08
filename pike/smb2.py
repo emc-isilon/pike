@@ -224,7 +224,7 @@ class Smb2(core.Frame):
         signature_hole(self.signature)
 
     def _decode(self, cur):
-        if (cur.decode_bytes(4).tostring() != b'\xfeSMB'):
+        if (cur.decode_bytes(4).tobytes() != b'\xfeSMB'):
             raise core.BadPacket()
         if (cur.decode_uint16le() != 64):
             raise core.BadPacket()
@@ -1131,7 +1131,7 @@ class CreateResponse(Response):
                     data_offset = cur.decode_uint16le()
                     data_length = cur.decode_uint32le()
 
-                    name = (con_start + name_offset).decode_bytes(name_length).tostring()
+                    name = (con_start + name_offset).decode_bytes(name_length).tobytes()
 
                     cur.seekto(con_start + data_offset)
                     with cur.bounded(cur, cur + data_length):
