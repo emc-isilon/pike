@@ -119,6 +119,9 @@ class TransformHeader(core.Frame):
     If the encryption_context is not explicitly specified, then it will be looked
     up based on session_id from the parent Netbios frame's connection reference
     """
+    LOG_CHILDREN_COUNT = False
+    LOG_CHILDREN_EXPAND = True
+
     def __init__(self, parent):
         core.Frame.__init__(self, parent)
         self.protocol_id = array.array('B', b"\xfdSMB")
@@ -138,6 +141,12 @@ class TransformHeader(core.Frame):
             parent.transform = self
         else:
             self._smb2_frames = []
+
+    def _log_str(self):
+        components = [type(self).__name__]
+        if self.children:
+            components.extend(self._log_str_children())
+        return " ".join(components)
 
     def _children(self):
         if self.parent is not None:

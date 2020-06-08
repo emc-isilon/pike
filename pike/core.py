@@ -420,6 +420,8 @@ class FrameMeta(type):
 
 class Frame(with_metaclass(FrameMeta)):
     field_blacklist = ['fields','parent','start','end']
+    LOG_CHILDREN_COUNT = False    # Include len(children) in __repr__
+    LOG_CHILDREN_EXPAND = False   # Include c._log_str for all children
 
     def __init__(self, parent, context=None):
         object.__setattr__(self, 'fields', [])
@@ -465,6 +467,41 @@ class Frame(with_metaclass(FrameMeta)):
             valstr = child._str(indent + 1)
             res += "\n" + "  " * indent + valstr
         return res
+
+    def _log_str_expand_children(self):
+        """
+        return a list of _log_str output for all children
+        """
+        return [c._log_str() for c in self.children]
+
+    def _log_str_count_children(self):
+        """
+        return a list containing a string count of children wrapped in
+        parentheses
+        """
+        if self.children:
+            return ["({})".format(len(self.children))]
+        return []
+
+    def _log_str_children(self):
+        """
+        return a list of string components summarizing the children
+        """
+        components = []
+        if self.LOG_CHILDREN_COUNT:
+            components.extend(self._log_str_count_children())
+        if self.LOG_CHILDREN_EXPAND:
+            components.extend(self._log_str_expand_children())
+        return components
+
+    def _log_str(self):
+        """
+        Short description used for logging. Should provide basic context and be
+        under 100 characters
+        """
+        components = [type(self).__name__]
+        components.extend(self._log_str_children())
+        return " ".join(components)
 
     def _encode_pre(self, cur):
         self.start = cur.copy()

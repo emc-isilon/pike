@@ -764,7 +764,7 @@ class Connection(transport.Transport):
                     self.client.logger.debug('send (%s/%s -> %s/%s): %s',
                                              self.local_addr[0], self.local_addr[1],
                                              self.remote_addr[0], self.remote_addr[1],
-                                             ', '.join(f[0].__class__.__name__ for f in req.parent))
+                                             req.parent._log_str())
             else:
                 # Not ready to send chain
                 result = None
@@ -796,7 +796,7 @@ class Connection(transport.Transport):
             self.client.logger.debug('recv (%s/%s -> %s/%s): %s',
                                      self.remote_addr[0], self.remote_addr[1],
                                      self.local_addr[0], self.local_addr[1],
-                                     ', '.join(f[0].__class__.__name__ for f in res))
+                                     res._log_str())
         self.process_callbacks(EV_RES_POST_DESERIALIZE, res)
         for smb_res in res:
             # TODO: move credit tracking to callbacks

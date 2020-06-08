@@ -40,12 +40,25 @@ from . import crypto
 from . import smb2
 
 class Netbios(core.Frame):
+    LOG_CHILDREN_COUNT = False
+    LOG_CHILDREN_EXPAND = True
+
     def __init__(self, context=None):
         core.Frame.__init__(self, None, context)
         self.len = None
         self.conn = context
         self.transform = None
         self._smb2_frames = []
+
+    def _log_str(self):
+        components = []
+        if self.transform:
+            return self.transform._log_str()
+        if not self.children:
+            components.append(type(self).__name__)
+        else:
+            components.append(", ".join(self._log_str_children()))
+        return " ".join(components)
 
     def _children(self):
         return self._smb2_frames
