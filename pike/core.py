@@ -44,7 +44,6 @@ from builtins import object
 import array
 from binascii import hexlify
 import struct
-import inspect
 
 from future.utils import with_metaclass
 
