@@ -207,7 +207,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         read_list = []
         for the_offset, the_length in reads:
             read_list.append(self.chan.read(
-                file_handle, the_length, the_offset + add_offset).tostring())
+                file_handle, the_length, the_offset + add_offset).tobytes())
         return b"".join(read_list)
 
     def _gen_16mega_file(self, filename):
@@ -364,11 +364,11 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.assertEqual(result[0][0].total_bytes_written, total_len)
 
         # read each file and verify the result
-        src_buf = self.chan.read(fh_src, total_len, 0).tostring()
+        src_buf = self.chan.read(fh_src, total_len, 0).tobytes()
         self.assertBufferEqual(src_buf, block)
         fh_dst_read = self._get_readable_handler(dst_filename)
         dst_buf = self.chan.read(
-            fh_dst_read, total_len, total_offset).tostring()
+            fh_dst_read, total_len, total_offset).tobytes()
         self.assertBufferEqual(dst_buf, block)
 
         self.chan.close(fh_dst_read)
@@ -458,12 +458,12 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.assertEqual(result[0][0].total_bytes_written, total_len)
 
         # read the file and verify the result
-        src_buf = self.chan.read(fh_src, total_len, 0).tostring()
+        src_buf = self.chan.read(fh_src, total_len, 0).tobytes()
         self.assertBufferEqual(src_buf, block)
         if total_offset > 0:
-            offs_buf = self.chan.read(fh_src, total_offset, total_len).tostring()
+            offs_buf = self.chan.read(fh_src, total_offset, total_len).tobytes()
             self.assertBufferEqual(offs_buf, b"\x00" * total_offset)
-        dst_buf = self.chan.read(fh_src, total_len, total_len+total_offset).tostring()
+        dst_buf = self.chan.read(fh_src, total_len, total_len+total_offset).tobytes()
         self.assertBufferEqual(dst_buf, block)
 
         self.chan.close(fh_src)
@@ -531,7 +531,7 @@ class TestServerSideCopy(pike.test.PikeTest):
                 src_block[offset:offset+length]
             this_offset += chunk_sz
         dst_len = dst_offset + length
-        dst_block = dst_block[:dst_len].tostring()
+        dst_block = dst_block[:dst_len].tobytes()
 
         fh_src, fh_dst = self._open_src_dst(src_filename, dst_filename)
 
@@ -540,9 +540,9 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.assertEqual(result[0][0].total_bytes_written, total_len)
 
         # read each file and verify the result
-        src_buf = self.chan.read(fh_src, total_len, 0).tostring()
+        src_buf = self.chan.read(fh_src, total_len, 0).tobytes()
         self.assertBufferEqual(src_buf, block)
-        dst_buf = self.chan.read(fh_dst, dst_len, 0).tostring()
+        dst_buf = self.chan.read(fh_dst, dst_len, 0).tobytes()
         self.assertBufferEqual(dst_buf, dst_block)
 
         self.chan.close(fh_src)
@@ -857,7 +857,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.assertEqual(ssc_res[0][0].chunks_written, len(SIMPLE_5_CHUNKS))
         self.assertEqual(
             ssc_res[0][0].total_bytes_written, SIMPLE_5_CHUNKS_LEN)
-        dst_buf = read1_res[0].data.tostring() + read2_res[0].data.tostring()
+        dst_buf = read1_res[0].data.tobytes() + read2_res[0].data.tobytes()
         self.assertBufferEqual(dst_buf, block)
         self.chan.close(fh_src)
 
@@ -885,9 +885,9 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.assertEqual(result[0][0].total_bytes_written, SIMPLE_5_CHUNKS_LEN)
 
         # read each file and verify the result
-        src_buf = self.chan.read(fh_src, SIMPLE_5_CHUNKS_LEN, 0).tostring()
+        src_buf = self.chan.read(fh_src, SIMPLE_5_CHUNKS_LEN, 0).tobytes()
         self.assertBufferEqual(src_buf, block)
-        dst_buf = chan2.read(fh_dst, SIMPLE_5_CHUNKS_LEN, 0).tostring()
+        dst_buf = chan2.read(fh_dst, SIMPLE_5_CHUNKS_LEN, 0).tobytes()
         self.assertBufferEqual(dst_buf, block)
         self.chan.close(fh_src)
         self.chan.close(fh_dst)
@@ -928,7 +928,7 @@ class TestServerSideCopy(pike.test.PikeTest):
             self.assertEqual(results[i][0][0].total_bytes_written, copy_len)
             if i < num_sess:
                 dst_buf = self.other_chan_list[i]["channel"].read(
-                    self.other_chan_list[i]["filehandles"][1], copy_len, filepair[i][2]).tostring()
+                    self.other_chan_list[i]["filehandles"][1], copy_len, filepair[i][2]).tobytes()
                 self.assertBufferEqual(dst_buf, blocks[i])
 
     def test_multiple_ssc_file(self):

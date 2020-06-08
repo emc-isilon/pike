@@ -88,7 +88,7 @@ class MultiChannelTest(pike.test.PikeTest):
                 chan.write(handle, 0, data_stale)
 
         # Read back data to ensure it is not stale value
-        result = chan2.read(handle, len(data_fresh), 0).tostring()
+        result = chan2.read(handle, len(data_fresh), 0).tobytes()
         self.assertEquals(result, data_fresh)
 
         # Close handle
