@@ -94,3 +94,42 @@ Note that you will probably need to specify the server by fully-qualified
 hostname in order for Kerberos to figure out which ticket to use.  If you
 get errors during session setup when using an IP address, this is probably
 the reason.
+
+
+Decoding BufferOverrun
+======================
+
+When pike encounters a buffer or boundary problem, `BufferOverrun` is
+raised with the full packet bytes. This can be used in two ways.
+
+With Pike
+---------
+
+For some problems, it may be necessary to run pike with a debugger
+while decoding the packet bytes to reproduce runtime parsing or decoding
+issues.
+
+    from binascii import unhexlify
+    import array
+    import pike.netbios
+
+    buf = array.array("B", unhexlify(b'00000114fe534d4240000000000000000000040001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000041000100110302008a8c2a17f5f24e5eb278dd8aaa90d42e1e0000000000010000001000000010006c52c4c7e53dd60166157c68c63dd60180005500d8000000605306062b0601050502a0493047a019301706092a864886f712010202060a2b06010401823702020aa32a3028a0261b246e6f745f646566696e65645f696e5f5246433431373840706c656173655f69676e6f72650000000100260000000000010020000100c93dfb463f3e99ed9030a66d28548c330a4ae9a65856237d00e61f68c14eb09f0000020004000000000001000200'))
+    nb = pike.netbios.Netbios()
+    nb.parse(buf)
+    
+With Wireshark
+--------------
+
+Other decoding problems may be easier to understand by looking at the packet
+with a pcap analysis tool.
+
+    echo '00000114fe534d4240000000000000000000040001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000041000100110302008a8c2a17f5f24e5eb278dd8aaa90d42e1e00000000000100000010000000100050cff0c2e43dd60166157c68c63dd60180005500d8000000605306062b0601050502a0493047a019301706092a864886f712010202060a2b06010401823702020aa32a3028a0261b246e6f745f646566696e65645f696e5f5246433431373840706c656173655f69676e6f7265000000010026000000000001002000010017af98eb38fdcd3db91bdca1303e9c72ef37b7e572abf897e47bd779aaa641d90000020004000000000001000200' \
+      | xxd -r -p - \
+      | od -Ax -tx1 -v \
+      | text2pcap -i46 -T 445,445 - - \
+      | tshark -P -V -r -
+
+* `xxd` decodes the ascii hex bytestream output from the BufferOverrun exception into binary
+* `od` dumps the output to a format [wireshark can read](https://www.wireshark.org/docs/wsug_html_chunked/ChIOImportSection.html)
+* `text2pcap` (wireshark) appends fake ethernet and IP headers to the SMB packet and writes a pcap file to stdout
+* `tshark` (wireshark) decodes the SMB packet and displays full packet details
