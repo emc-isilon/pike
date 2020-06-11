@@ -3196,12 +3196,14 @@ class FileNotifyInformation(core.Frame):
 
 class ChangeNotifyResponse(Response):
     command_id = SMB2_CHANGE_NOTIFY
+    allowed_status = [ntstatus.STATUS_SUCCESS, ntstatus.STATUS_NOTIFY_CLEANUP]
     structure_size = 9
 
     def __init__(self, parent):
         Response.__init__(self, parent)
         self.notifications = []
 
+    @property
     def children(self):
         return self.notifications
 

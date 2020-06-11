@@ -35,6 +35,7 @@
 #
 
 import pike.model
+import pike.ntstatus
 import pike.smb2
 import pike.test
 
@@ -77,3 +78,24 @@ class ChangeNotifyTest(pike.test.PikeTest):
         self.assertEqual(result.notifications[0].action, pike.smb2.SMB2_ACTION_ADDED)
         
         chan.close(root)
+
+    def test_change_notify_cancel(self):
+        chan, tree = self.tree_connect()
+
+        root = chan.create(tree,
+                           '',
+                           access=pike.smb2.GENERIC_READ,
+                           options=pike.smb2.FILE_DIRECTORY_FILE,
+                           share=pike.smb2.FILE_SHARE_READ).result()
+        cn_future = chan.change_notify(root)
+        # close the handle for the outstanding notify
+        chan.close(root)
+
+        smb2_resp = cn_future.result()
+        # [MS-SMB2] 3.3.5.10 - The Server MUST send an SMB2 CHANGE_NOTIFY Response with
+        # STATUS_NOTIFY_CLEANUP status code for all pending CHANGE_NOTIFY requests
+        # associated with the FileId that is closed.
+        self.assertEqual(smb2_resp.status, pike.ntstatus.STATUS_NOTIFY_CLEANUP)
+        notify_resp = smb2_resp[0]
+        # The response should contain no FileNotifyInformation structs
+        self.assertEqual(len(notify_resp), 0)
