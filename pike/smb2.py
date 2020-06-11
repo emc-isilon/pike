@@ -3202,6 +3202,7 @@ class ChangeNotifyResponse(Response):
         Response.__init__(self, parent)
         self.notifications = []
 
+    @property
     def children(self):
         return self.notifications
 
