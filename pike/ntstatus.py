@@ -1,12 +1,8 @@
 from __future__ import absolute_import
-import contextlib
-from . import core
 
-@contextlib.contextmanager
-def pike_status(exp_status):
-    with pytest.raises(pike.model.ResponseError) as excinfo:
-        yield
-    assert excinfo.value.response.status == exp_status
+from . import core
+from future.utils import raise_from
+
 
 class Status(core.ValueEnum):
     STATUS_SUCCESS = 0x00000000

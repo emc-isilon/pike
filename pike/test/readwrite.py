@@ -125,7 +125,7 @@ class ReadWriteTest(pike.test.PikeTest):
                            disposition=pike.smb2.FILE_SUPERSEDE,
                            oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_EXCLUSIVE).result()
        
-        with self.assert_error(pike.ntstatus.STATUS_ACCESS_DENIED):
+        with pike.model.pike_status(pike.ntstatus.STATUS_ACCESS_DENIED):
             chan.write(file, 0, None)
         
         chan.close(file)
