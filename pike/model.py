@@ -50,6 +50,7 @@ from builtins import range
 from builtins import object
 from builtins import str
 from future.utils import raise_
+from future.utils import raise_from
 
 import array
 import contextlib
@@ -111,6 +112,28 @@ class ResponseError(Exception):
     def __init__(self, response):
         Exception.__init__(self, response.command, response.status)
         self.response = response
+
+class AssertNtstatusContext(object):
+    response = None
+    exception = None
+
+@contextlib.contextmanager
+def pike_status(exp_status):
+    obj = AssertNtstatusContext()
+    try:
+        yield obj
+        if exp_status != ntstatus.STATUS_SUCCESS:
+            raise AssertionError("No error raised when "
+                                 "ResponseError({}) expected.".format(
+                                     exp_status))
+    except ResponseError as err:
+        obj.exception = err
+        obj.response = err.response
+        if err.response.status != exp_status:
+            raise_from(AssertionError("{} raised when "
+                                      "expecting ResponseError({})".format(
+                                          err.response.status, exp_status)),
+                       err)
 
 class Events(core.ValueEnum):
     """ Events used for callback functions """
