@@ -1,8 +1,5 @@
 from __future__ import absolute_import
-
 from . import core
-from future.utils import raise_from
-
 
 class Status(core.ValueEnum):
     STATUS_SUCCESS = 0x00000000
