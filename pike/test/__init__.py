@@ -160,8 +160,7 @@ def default_client():
     client = model.Client()
     min_dialect = Options.min_dialect()
     max_dialect = Options.max_dialect()
-    client.dialects = [d for d in client.dialects
-                       if min_dialect <= d <= max_dialect]
+    client.restrict_dialects(min_dialect, max_dialect)
     if Options.signing():
         client.security_mode = (smb2.SMB2_NEGOTIATE_SIGNING_ENABLED |
                                 smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED)
@@ -383,11 +382,15 @@ class PikeTest(unittest.TestCase):
         unittest.TestCase.__init__(self, *args, **kwargs)
         self.init_once()
         self._connections = []
-        self.default_client = model.Client()
-        self.set_client_dialect(self.min_dialect, self.max_dialect)
-        if self.signing:
-            self.default_client.security_mode = (smb2.SMB2_NEGOTIATE_SIGNING_ENABLED |
-                                                 smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED)
+        self.default_client = default_client()
+        self.server = Options.server()
+        self.port = Options.port()
+        self.creds = Options.creds()
+        self.share = Options.share()
+        self.signing = Options.signing()
+        self.encryption = Options.encryption()
+        self.min_dialect = Options.min_dialect()
+        self.max_dialect = Options.max_dialect()
 
     def debug(self, *args, **kwargs):
         self.logger.debug(*args, **kwargs)
@@ -408,14 +411,7 @@ class PikeTest(unittest.TestCase):
                            client=None):
         if client is None:
             client = self.default_client
-        if (min_dialect is not None and
-                min(client.dialects) != min_dialect):
-            client.dialects = [d for d in client.dialects
-                               if d >= min_dialect]
-        if (max_dialect is not None and
-                max(client.dialects) != max_dialect):
-            client.dialects = [d for d in client.dialects
-                               if d <= max_dialect]
+        client.restrict_dialects(min_dialect, max_dialect)
 
     def tree_connect(self, client=None, resume=None):
         tc = TreeConnect(
