@@ -361,6 +361,28 @@ class Client(object):
             return
         self.callbacks[ev].remove(cb)
 
+    def restrict_dialects(self, min_dialect=None, max_dialect=None):
+        """
+        Update the list of SMB2 dialects this Client will advertise support for.
+
+        This call will only remove dialects from the list.
+
+        Dialects should be from pike.smb2.Dialect enum, but technically may be any
+        int or float.
+
+        If either of min_dialect or max_dialect is None, the minimum or maximum dialect
+        supported will be used.
+
+        @param min_dialect: The minimum dialect to support (inclusive)
+        @param max_dialect: The maximum dialect to support (inclusive)
+        """
+        if min_dialect is None:
+            min_dialect = min(smb2.Dialect.values())
+        if max_dialect is None:
+            max_dialect = max(smb2.Dialect.values())
+        self.dialects = [d for d in self.dialects
+                         if min_dialect <= d <= max_dialect]
+
     def connect(self, server, port=445):
         """
         Create a connection.

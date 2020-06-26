@@ -160,8 +160,7 @@ def default_client():
     client = model.Client()
     min_dialect = Options.min_dialect()
     max_dialect = Options.max_dialect()
-    client.dialects = [d for d in client.dialects
-                       if min_dialect <= d <= max_dialect]
+    client.restrict_dialects(min_dialect, max_dialect)
     if Options.signing():
         client.security_mode = (smb2.SMB2_NEGOTIATE_SIGNING_ENABLED |
                                 smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED)
@@ -407,6 +406,12 @@ class PikeTest(unittest.TestCase):
 
     def critical(self, *args, **kwargs):
         self.logger.critical(*args, **kwargs)
+
+    def set_client_dialect(self, min_dialect=None, max_dialect=None,
+                           client=None):
+        if client is None:
+            client = self.default_client
+        client.restrict_dialects(min_dialect, max_dialect)
 
     def tree_connect(self, client=None, resume=None):
         tc = TreeConnect(
