@@ -615,7 +615,9 @@ class SambaPikeTestSuite(PikeTestSuite):
         "test_async_lock": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
         "test_async_write": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
         "test_sequence_number_wrap": "returns fail against dperson/samba:d1a453d8123e462b0ad0ca8df51fb8ac0e5716b9",
-        "test_qfid_diff_file": "returns fail agains dperson/samba:7767ceb85af2e5254477357976feee49ca7eab3a",
+        "test_qfid_diff_file": "returns fail against dperson/samba:7767ceb85af2e5254477357976feee49ca7eab3a",
+        "test_qfid_same_file_seq_delete": "returns fail against dperson/samba:7767ceb85af2e5254477357976feee49ca7eab3a",
+        "test_encryption_capabilities_both_prefer_ccm": "returns fail against dperson/samba:197dd6dac98274109c9c9c024f2bb1ebe2e075fa1ab901640a8fe94e875007d1",
     }
 
 
