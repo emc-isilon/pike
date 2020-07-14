@@ -463,7 +463,7 @@ class Client(object):
                 break
 
         if future.response is None:
-            self._lease_break_map[lease_key.tostring()] = future
+            self._lease_break_map[lease_key.tobytes()] = future
 
         return future
 
@@ -497,7 +497,7 @@ class Client(object):
         @param lease_res: The lease create context response.
         """
 
-        lease_key = lease_res.lease_key.tostring()
+        lease_key = lease_res.lease_key.tobytes()
         if lease_key not in self._leases:
             lease = Lease(tree)
             self._leases[lease_key] = lease
@@ -510,7 +510,7 @@ class Client(object):
 
     # Internal function to remove lease from table
     def dispose_lease(self, lease):
-        del self._leases[lease.lease_key.tostring()]
+        del self._leases[lease.lease_key.tobytes()]
 
 class Connection(transport.Transport):
     """
@@ -826,7 +826,7 @@ class Connection(transport.Transport):
         return None
 
     def _find_lease_future(self, lease_key):
-        lease_key = lease_key.tostring()
+        lease_key = lease_key.tobytes()
         if lease_key in self.client._lease_break_map:
             return self.client._lease_break_map.pop(lease_key)
         return None

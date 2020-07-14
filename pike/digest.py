@@ -50,12 +50,12 @@ from . import core
 def sha256_hmac(key,message):
     return array.array('B',
         HMAC.new(
-            key.tostring(),
-            message.tostring(),
+            key.tobytes(),
+            message.tobytes(),
             SHA256).digest())
 
 def aes128_cmac(key,message):
-    aes = AES.new(key.tostring(), mode=AES.MODE_ECB)
+    aes = AES.new(key.tobytes(), mode=AES.MODE_ECB)
 
     def shiftleft(data):
         cin = 0
@@ -75,7 +75,7 @@ def aes128_cmac(key,message):
         zero = array.array('B', [0]*16)
         rb = array.array('B', [0]*15 + [0x87])
 
-        key1 = array.array('B', aes.encrypt(zero.tostring()))
+        key1 = array.array('B', aes.encrypt(zero.tobytes()))
 
         if shiftleft(key1):
             xor(key1, rb)
@@ -102,7 +102,7 @@ def aes128_cmac(key,message):
 
     for i in range(0, n - 1):
         xor(mac, message[i*16:i*16+16])
-        mac = array.array('B',aes.encrypt(mac.tostring()))
+        mac = array.array('B',aes.encrypt(mac.tobytes()))
 
     if last_complete:
         scratch[0:16] = message[-16:]
@@ -113,13 +113,13 @@ def aes128_cmac(key,message):
         xor(scratch, subkey2)
 
     xor(mac, scratch)
-    mac = array.array('B',aes.encrypt(mac.tostring()))
+    mac = array.array('B',aes.encrypt(mac.tobytes()))
 
     return mac
 
 def smb3_sha512(message):
     return array.array('B',
-            SHA512.new(message.tostring()).digest())
+            SHA512.new(message.tobytes()).digest())
 
 def derive_key(key, label, context):
     message = array.array('B')

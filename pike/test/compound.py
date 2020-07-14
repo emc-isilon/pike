@@ -139,7 +139,7 @@ class CompoundTest(pike.test.PikeTest):
          read_res,
          close_res) = chan.connection.transceive(nb_req)
 
-        self.assertEqual(buf, read_res[0].data.tostring())
+        self.assertEqual(buf, read_res[0].data.tobytes())
 
     # Compound create/write/close with insufficient access
     def test_create_write_close_access_denied(self):

@@ -189,7 +189,7 @@ class CreditTest(pike.test.PikeTest):
             self.assertEqual(len(result), read_size)
             self.assertTrue(credit_assert_future.result())
         chan.close(fh)
-        self.assertEqual(file_buffer.tostring(), buf*file_chunks)
+        self.assertEqual(file_buffer.tobytes(), buf*file_chunks)
 
     def generic_arbitrary_mc_write_mc_read(self, file_size, write_size, read_size):
         """
@@ -348,7 +348,7 @@ class CreditTest(pike.test.PikeTest):
             self.assertTrue(credit_assert_future.result())
 
         chan.close(fh)
-        self.assertEqual(read_buffer.tostring(), file_buf)
+        self.assertEqual(read_buffer.tobytes(), file_buf)
 
 class PowerOf2CreditTest(CreditTest):
 

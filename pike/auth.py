@@ -93,7 +93,7 @@ class KerberosProvider(object):
     def step(self, sec_buf):
         self.result = kerberos.authGSSClientStep(
                 self.context,
-                sec_buf.tostring())
+                sec_buf.tobytes())
         if self.result == 0:
             return (array.array(
                     'B',
