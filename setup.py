@@ -100,6 +100,7 @@ def run_setup(with_extensions):
         maintainer_email="Masen.Furer@dell.com",
         url="https://github.com/emc-isilon/pike",
         packages=["pike", "pike.test"],
+        entry_points={"pytest11": ["pike = pike.pytest_support",]},
         python_requires=">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,<3.9",
         install_requires=[
             'enum34~=1.1.6;  python_version ~= "2.7"',
