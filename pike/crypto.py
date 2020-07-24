@@ -48,6 +48,16 @@ from . import digest
 from . import smb2
 
 
+def random_bytes(length):
+    """
+    Generate an array of random bytes.
+
+    :param length: How many bytes to return
+    :return: array.array('B') of length random bytes
+    """
+    return array.array('B', (random.randint(0, 255) for _ in range(length)))
+
+
 def pad_right(value, length, byte=b'\0'):
     if len(value) > length:
         value = value[:length]
