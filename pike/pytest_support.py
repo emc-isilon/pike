@@ -49,7 +49,6 @@ def get_mark_value(item, mark_name, default):
 
 @pytest.fixture
 def pike_TreeConnect(request):
-    item = request.item
     marks = (
         ("require_dialect", (0, float("inf"))),
         ("require_capabilities", 0),
@@ -60,8 +59,11 @@ def pike_TreeConnect(request):
         # update requirements from markers
         for mark_name, default_value in marks:
             kwargs[mark_name] = kwargs.get(
-                mark_name, get_mark_value(item, mark_name, default_value),
+                mark_name, get_mark_value(request.node, mark_name, default_value),
             )
+        # special case dialect range (must be a 2-tuple)
+        if not isinstance(kwargs["require_dialect"], tuple):
+            kwargs["require_dialect"] = (kwargs["require_dialect"], float("inf"))
         return pike.test.TreeConnect(*args, **kwargs)
 
     return TreeConnect
