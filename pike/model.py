@@ -1402,6 +1402,10 @@ class Channel(object):
                 max_req.timestamp = maximal_access
 
         if oplock_level == smb2.SMB2_OPLOCK_LEVEL_LEASE:
+            if lease_key is None:
+                lease_key = crypto.random_bytes(16)
+            if lease_state is None:
+                lease_state = smb2.SMB2_LEASE_RWH
             lease_req = smb2.LeaseRequest(create_req)
             lease_req.lease_key = lease_key
             lease_req.lease_state = lease_state
