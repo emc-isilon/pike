@@ -156,12 +156,14 @@ class Options(enum.Enum):
         return cls.smb2constoption(cls.PIKE_MAX_DIALECT, default=float('inf'))
 
 
-def default_client():
+def default_client(signing=None):
     client = model.Client()
     min_dialect = Options.min_dialect()
     max_dialect = Options.max_dialect()
     client.restrict_dialects(min_dialect, max_dialect)
-    if Options.signing():
+    if signing is None:
+        signing = Options.signing()
+    if signing:
         client.security_mode = (smb2.SMB2_NEGOTIATE_SIGNING_ENABLED |
                                 smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED)
     return client
@@ -178,6 +180,7 @@ class TreeConnect(object):
     creds = attr.ib(factory=Options.creds)
     share = attr.ib(factory=Options.share)
     resume = attr.ib(default=None)
+    signing = attr.ib(factory=Options.signing)
     encryption = attr.ib(factory=Options.encryption)
     require_dialect = attr.ib(default=None)
     require_capabilities = attr.ib(default=None)
@@ -196,7 +199,7 @@ class TreeConnect(object):
 
     @property
     def client(self):
-        return self._client or default_client()
+        return self._client or default_client(signing=self.signing)
 
     def connect(self):
         """
