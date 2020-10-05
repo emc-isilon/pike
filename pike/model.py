@@ -202,12 +202,14 @@ class Future(object):
         """
         self.interim_response = response
 
-    def wait(self, timeout=default_timeout):
+    def wait(self, timeout=None):
         """
         Wait for future result to become available.
 
         @param timeout: The time in seconds before giving up and raising TimeoutError
         """
+        if timeout is None:
+            timeout = default_timeout
         deadline = time.time() + timeout
         while self.response is None:
             now = time.time()
@@ -217,12 +219,14 @@ class Future(object):
 
         return self
 
-    def wait_interim(self, timeout=default_timeout):
+    def wait_interim(self, timeout=None):
         """
         Wait for interim response or actual result to become available.
 
         @param timeout: The time in seconds before giving up and raising TimeoutError
         """
+        if timeout is None:
+            timeout = default_timeout
         deadline = time.time() + timeout
         while self.response is None and self.interim_response is None:
             now = time.time()
@@ -232,7 +236,7 @@ class Future(object):
 
         return self
 
-    def result(self, timeout=default_timeout):
+    def result(self, timeout=None):
         """
         Return result of future.
 
