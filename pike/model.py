@@ -465,7 +465,7 @@ class Client(object):
         @param file_id: The file ID of the oplocked file.
         """
 
-        future = Future(None)
+        future = Future(request=("OplockBreak", file_id))
 
         for smb_res in self._oplock_break_queue[:]:
             if smb_res[0].file_id == file_id:
@@ -489,7 +489,7 @@ class Client(object):
         @param lease_key: The lease key for the lease.
         """
 
-        future = Future(None)
+        future = Future(request=("LeaseBreak", core.Frame._value_str(lease_key)))
 
         for smb_res in self._lease_break_queue[:]:
             if smb_res[0].lease_key == lease_key:
@@ -583,7 +583,7 @@ class Connection(transport.Transport):
         self._negotiate_request = None
         self._negotiate_response = None
         self.callbacks = {}
-        self.connection_future = Future()
+        self.connection_future = Future(request=(server, port))
         self.credits = 0
         self.client = client
         self.server = server
@@ -1045,7 +1045,7 @@ class Connection(transport.Transport):
             self.session_id = 0
             self.requests = []
             self.responses = []
-            self.session_future = Future()
+            self.session_future = Future(request=self.requests)
             self.interim_future = None
 
             if bind:
@@ -1359,7 +1359,7 @@ class Channel(object):
         return tree_req
 
     def tree_connect_submit(self, tree_req):
-        tree_future = Future()
+        tree_future = Future(request=tree_req.parent)
         resp_future = self.connection.submit(tree_req.parent.parent)[0]
         resp_future.then(lambda f: tree_future.complete(Tree(self.session,
                                                              tree_req.path,
@@ -1493,7 +1493,7 @@ class Channel(object):
             timewarp_req = smb2.TimewarpTokenRequest(create_req)
             timewarp_req.timestamp = nttime.NtTime(timewarp)
 
-        open_future = Future(None)
+        open_future = Future(request=create_req.parent)
         def finish(f):
             with open_future: open_future(
                     Open(
