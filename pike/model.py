@@ -245,7 +245,7 @@ class Future(object):
         while self.response is None:
             now = time.time()
             if now > deadline:
-                raise TimeoutError('Timed out after %s seconds' % timeout)
+                raise TimeoutError.with_future(self, 'Timed out after %s seconds' % timeout)
             loop(timeout=deadline-now, count=1)
 
         return self
@@ -262,7 +262,7 @@ class Future(object):
         while self.response is None and self.interim_response is None:
             now = time.time()
             if now > deadline:
-                raise TimeoutError('Timed out after %s seconds' % timeout)
+                raise TimeoutError.with_future(self, 'Timed out after %s seconds' % timeout)
             loop(timeout=deadline-now, count=1)
 
         return self
