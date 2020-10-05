@@ -468,7 +468,8 @@ class Frame(with_metaclass(FrameMeta)):
     def __str__(self):
         return self._str(1)
 
-    def _value_str(self, value):
+    @staticmethod
+    def _value_str(value):
         if isinstance(value, array.array) and value.typecode == 'B':
             return '0x' + ''.join('%.2x' % b for b in value)
         else:
