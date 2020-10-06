@@ -945,10 +945,10 @@ class Connection(transport.Transport):
                     # Cancel by message id, still in send queue
                     future = [f for f in self._out_queue if f.request.message_id == smb_req.message_id][0]
                 # Add fake future for cancel since cancel has no response
-                self._out_queue.append(Future(smb_req))
+                self._out_queue.append(Future(request=smb_req))
                 futures.append(future)
             else:
-                future = Future(smb_req)
+                future = Future(request=smb_req)
                 self._out_queue.append(future)
                 futures.append(future)
 
