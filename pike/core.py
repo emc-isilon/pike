@@ -32,6 +32,7 @@
 #        Core API
 #
 # Authors: Brian Koropoff (brian.koropoff@emc.com)
+#          Masen Furer (masen.furer@dell.com)
 #
 
 """
