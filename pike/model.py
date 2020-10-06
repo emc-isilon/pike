@@ -32,6 +32,7 @@
 #        Transport and object model
 #
 # Authors: Brian Koropoff (brian.koropoff@emc.com)
+#          Masen Furer (masen.furer@dell.com)
 #
 
 """
@@ -88,7 +89,38 @@ def loop(timeout=None, count=None):
     transport.loop(timeout=timeout, count=count)
 
 class TimeoutError(Exception):
-    pass
+    """Future completion timed out"""
+    future = None
+
+    @classmethod
+    def with_future(cls, future, *args):
+        """
+        Instantiate TimeoutError from a given future.
+
+        :param future: Future that timed out
+        :param args: passed to Exception.__init__
+        :return: TimeoutError
+        """
+        ex = cls(*args)
+        ex.future = future
+        return ex
+
+    def __str__(self):
+        s = super(TimeoutError, self).__str__()
+        if self.future is not None:
+            if self.future.request is not None:
+                requests = [str(self.future.request)]
+                if not isinstance(self.future.request, (core.Frame, str, bytes)):
+                    # attempt to recursively str format other iterables
+                    try:
+                        requests = [str(r) for r in self.future.request]
+                    except TypeError:
+                        pass
+                s += "\nRequest: {}".format("\n".join(requests))
+            if self.future.interim_response is not None:
+                s += "\nInterim: {}".format(self.future.interim_response)
+        return s
+
 
 class StateError(Exception):
     pass
@@ -202,37 +234,41 @@ class Future(object):
         """
         self.interim_response = response
 
-    def wait(self, timeout=default_timeout):
+    def wait(self, timeout=None):
         """
         Wait for future result to become available.
 
         @param timeout: The time in seconds before giving up and raising TimeoutError
         """
+        if timeout is None:
+            timeout = default_timeout
         deadline = time.time() + timeout
         while self.response is None:
             now = time.time()
             if now > deadline:
-                raise TimeoutError('Timed out after %s seconds' % timeout)
+                raise TimeoutError.with_future(self, 'Timed out after %s seconds' % timeout)
             loop(timeout=deadline-now, count=1)
 
         return self
 
-    def wait_interim(self, timeout=default_timeout):
+    def wait_interim(self, timeout=None):
         """
         Wait for interim response or actual result to become available.
 
         @param timeout: The time in seconds before giving up and raising TimeoutError
         """
+        if timeout is None:
+            timeout = default_timeout
         deadline = time.time() + timeout
         while self.response is None and self.interim_response is None:
             now = time.time()
             if now > deadline:
-                raise TimeoutError('Timed out after %s seconds' % timeout)
+                raise TimeoutError.with_future(self, 'Timed out after %s seconds' % timeout)
             loop(timeout=deadline-now, count=1)
 
         return self
 
-    def result(self, timeout=default_timeout):
+    def result(self, timeout=None):
         """
         Return result of future.
 
@@ -430,7 +466,7 @@ class Client(object):
         @param file_id: The file ID of the oplocked file.
         """
 
-        future = Future(None)
+        future = Future(request=("OplockBreak", file_id))
 
         for smb_res in self._oplock_break_queue[:]:
             if smb_res[0].file_id == file_id:
@@ -454,7 +490,7 @@ class Client(object):
         @param lease_key: The lease key for the lease.
         """
 
-        future = Future(None)
+        future = Future(request=("LeaseBreak", core.Frame._value_str(lease_key)))
 
         for smb_res in self._lease_break_queue[:]:
             if smb_res[0].lease_key == lease_key:
@@ -548,7 +584,7 @@ class Connection(transport.Transport):
         self._negotiate_request = None
         self._negotiate_response = None
         self.callbacks = {}
-        self.connection_future = Future()
+        self.connection_future = Future(request=(server, port))
         self.credits = 0
         self.client = client
         self.server = server
@@ -909,10 +945,10 @@ class Connection(transport.Transport):
                     # Cancel by message id, still in send queue
                     future = [f for f in self._out_queue if f.request.message_id == smb_req.message_id][0]
                 # Add fake future for cancel since cancel has no response
-                self._out_queue.append(Future(smb_req))
+                self._out_queue.append(Future(request=smb_req))
                 futures.append(future)
             else:
-                future = Future(smb_req)
+                future = Future(request=smb_req)
                 self._out_queue.append(future)
                 futures.append(future)
 
@@ -1010,7 +1046,7 @@ class Connection(transport.Transport):
             self.session_id = 0
             self.requests = []
             self.responses = []
-            self.session_future = Future()
+            self.session_future = Future(request=self.requests)
             self.interim_future = None
 
             if bind:
@@ -1324,7 +1360,7 @@ class Channel(object):
         return tree_req
 
     def tree_connect_submit(self, tree_req):
-        tree_future = Future()
+        tree_future = Future(request=tree_req.parent)
         resp_future = self.connection.submit(tree_req.parent.parent)[0]
         resp_future.then(lambda f: tree_future.complete(Tree(self.session,
                                                              tree_req.path,
@@ -1458,7 +1494,7 @@ class Channel(object):
             timewarp_req = smb2.TimewarpTokenRequest(create_req)
             timewarp_req.timestamp = nttime.NtTime(timewarp)
 
-        open_future = Future(None)
+        open_future = Future(request=create_req.parent)
         def finish(f):
             with open_future: open_future(
                     Open(
