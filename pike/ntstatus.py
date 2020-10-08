@@ -1,3 +1,9 @@
+#
+# Copyright (c) 2013-2020, Dell Inc. or its subsidiaries.
+# All rights reserved.
+# See file LICENSE for licensing information.
+#
+
 from __future__ import absolute_import
 from . import core
 

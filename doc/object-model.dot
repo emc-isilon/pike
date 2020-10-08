@@ -1,3 +1,8 @@
+/*
+   Copyright (c) 2013-2020, Dell Inc. or its subsidiaries.
+   All rights reserved.
+   See file LICENSE for licensing information.
+*/
 digraph model {
 	layout=neato
 	overlap=false

@@ -2,7 +2,6 @@ Pike
 ====
 
 Pike is a (nearly) pure-Python framework for writing SMB2/3 protocol correctness tests.
-See [LICENSE](LICENSE) for licensing information.
 
 There is also [API documentation from epydoc](http://emc-isilon.github.io/pike/api/index.html).
 
@@ -133,3 +132,10 @@ with a pcap analysis tool.
 * `od` dumps the output to a format [wireshark can read](https://www.wireshark.org/docs/wsug_html_chunked/ChIOImportSection.html)
 * `text2pcap` (wireshark) appends fake ethernet and IP headers to the SMB packet and writes a pcap file to stdout
 * `tshark` (wireshark) decodes the SMB packet and displays full packet details
+
+---
+
+This project, _pike_, is released under a Simplified BSD License granted by Dell Inc.'s Open Source Project program,
+except code under `pykerb/` which is released under an Apache 2.0 License granted by Apple Inc.
+All project contributions are entirely reflective of the respective author(s) and not of Dell Inc. or Apple Inc.
+See [LICENSE](LICENSE) for licensing information.
