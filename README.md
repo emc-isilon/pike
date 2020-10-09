@@ -135,7 +135,7 @@ with a pcap analysis tool.
 
 ---
 
-This project, _pike_, is released under a Simplified BSD License granted by Dell Inc.'s Open Source Project program,
+This project, _pike_ and _pike-smb2_, is released under a Simplified BSD License granted by Dell Inc.'s Open Source Project program,
 except code under `pykerb/` which is released under an Apache 2.0 License granted by Apple Inc.
 All project contributions are entirely reflective of the respective author(s) and not of Dell Inc. or Apple Inc.
 See [LICENSE](LICENSE) for licensing information.
