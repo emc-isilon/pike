@@ -137,7 +137,7 @@ with a pcap analysis tool.
       | text2pcap -i46 -T 445,445 - - \
       | tshark -P -V -r -
 
-* `xxd` decodes the ascii hex bytestream output from the BufferOverrun exception into binary
+* `xxd` decodes the ascii hex bytestream output from the `BufferOverrun` exception into binary
 * `od` dumps the output to a format [wireshark can read](https://www.wireshark.org/docs/wsug_html_chunked/ChIOImportSection.html)
 * `text2pcap` (wireshark) appends fake ethernet and IP headers to the SMB packet and writes a pcap file to stdout
 * `tshark` (wireshark) decodes the SMB packet and displays full packet details
