@@ -18,6 +18,7 @@ import pike.model
 import pike.smb2
 import pike.test
 
+
 class OplockTest(pike.test.PikeTest):
     # Open a handle with an oplock and break it
     def test_oplock_break(self):

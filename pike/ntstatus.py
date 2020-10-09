@@ -7,6 +7,7 @@
 from __future__ import absolute_import
 from . import core
 
+
 class Status(core.ValueEnum):
     STATUS_SUCCESS = 0x00000000
     #STATUS_WAIT_0 = 0x00000000
@@ -1801,5 +1802,6 @@ class Status(core.ValueEnum):
     STATUS_VHD_CHILD_PARENT_SIZE_MISMATCH = 0xC03A0017
     STATUS_VHD_DIFFERENCING_CHAIN_CYCLE_DETECTED = 0xC03A0018
     STATUS_VHD_DIFFERENCING_CHAIN_ERROR_IN_PARENT = 0xC03A0019
+
 
 Status.import_items(globals())

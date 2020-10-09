@@ -25,6 +25,7 @@ making it PEP-8 compliant. For example, FooBarBaz becomes foo_bar_baz.
 This makes it simple to correlate the code with the spec while
 maintaining a clear visual distinction between values and types.
 """
+
 from __future__ import absolute_import
 from builtins import str
 from builtins import range
@@ -36,6 +37,7 @@ from . import core
 from . import nttime
 from . import ntstatus
 
+
 # Dialects constants
 class Dialect(core.ValueEnum):
     DIALECT_SMB2_WILDCARD = 0x02FF
@@ -45,7 +47,9 @@ class Dialect(core.ValueEnum):
     DIALECT_SMB3_0_2      = 0x0302
     DIALECT_SMB3_1_1      = 0x0311
 
+
 Dialect.import_items(globals())
+
 
 # Flag constants
 class Flags(core.FlagEnum):
@@ -57,7 +61,9 @@ class Flags(core.FlagEnum):
     SMB2_FLAGS_DFS_OPERATIONS     = 0x10000000
     SMB2_FLAGS_REPLAY_OPERATION   = 0x20000000
 
+
 Flags.import_items(globals())
+
 
 # Command constants
 class CommandId(core.ValueEnum):
@@ -81,7 +87,9 @@ class CommandId(core.ValueEnum):
     SMB2_SET_INFO        = 0x0011
     SMB2_OPLOCK_BREAK    = 0x0012
 
+
 CommandId.import_items(globals())
+
 
 # Share Capabilities
 class ShareCaps(core.FlagEnum):
@@ -90,7 +98,9 @@ class ShareCaps(core.FlagEnum):
     SMB2_SHARE_CAP_SCALEOUT                = 0x00000020
     SMB2_SHARE_CAP_CLUSTER                 = 0x00000040
 
+
 ShareCaps.import_items(globals())
+
 
 # Share flags
 class ShareFlags(core.FlagEnum):
@@ -108,6 +118,7 @@ class ShareFlags(core.FlagEnum):
     SMB2_SHAREFLAG_ENABLE_HASH_V1 = 0x00002000
     SMB2_SHAREFLAG_ENABLE_HASH_V2 = 0x00004000
     SMB2_SHAREFLAG_ENCRYPT_DATA = 0x00008000
+
 
 ShareFlags.import_items(globals())
 
@@ -300,6 +311,7 @@ class Smb2(core.Frame):
             if signature != self.signature:
                 raise core.BadPacket()
 
+
 class Command(core.Frame):
     def __init__(self, parent):
         core.Frame.__init__(self, parent)
@@ -319,13 +331,16 @@ class Command(core.Frame):
 class Request(Command):
     pass
 
+
 @Smb2.response
 class Response(Command):
     allowed_status = [ntstatus.STATUS_SUCCESS]
 
+
 @Smb2.notification
 class Notification(Command):
     pass
+
 
 class ErrorResponse(Command):
     structure_size = 9
@@ -402,15 +417,19 @@ class ErrorResponseContext(core.Frame):
         if parent is not None:
             parent.append(self)
 
+
 class ErrorResponseDefault(ErrorResponseContext):
     error_id = SMB2_ERROR_ID_DEFAULT
     parent_status = None
+
     def _decode(self, cur):
         self.error_data = cur.decode_bytes(self.data_length)
+
 
 class ErrorResponseDefaultBufferSize(ErrorResponseContext):
     error_id = SMB2_ERROR_ID_DEFAULT
     parent_status = ntstatus.STATUS_BUFFER_TOO_SMALL
+
     def _decode(self, cur):
         self.error_data = cur.decode_uint32le()
         self.minimum_buffer_length = self.error_data
@@ -418,6 +437,7 @@ class ErrorResponseDefaultBufferSize(ErrorResponseContext):
 class SymbolicLinkErrorResponse(ErrorResponseContext):
     error_id = SMB2_ERROR_ID_DEFAULT
     parent_status = ntstatus.STATUS_STOPPED_ON_SYMLINK
+
     def _decode(self, cur):
         end = cur + self.data_length
         self.sym_link_length = cur.decode_uint32le()
@@ -430,6 +450,7 @@ class SymbolicLinkErrorResponse(ErrorResponseContext):
             self.error_data = reparse_data(self)
             self.error_data.decode(cur)
 
+
 class Cancel(Request):
     command_id = SMB2_CANCEL
     structure_size = 4
@@ -438,13 +459,16 @@ class Cancel(Request):
         # Reserved
         cur.encode_uint16le(0)
 
+
 # Negotiate constants
 class SecurityMode(core.FlagEnum):
     SMB2_NEGOTIATE_NONE             = 0x0000
     SMB2_NEGOTIATE_SIGNING_ENABLED  = 0x0001
     SMB2_NEGOTIATE_SIGNING_REQUIRED = 0x0002
 
+
 SecurityMode.import_items(globals())
+
 
 class GlobalCaps(core.FlagEnum):
     SMB2_GLOBAL_CAP_DFS                = 0x00000001
@@ -455,18 +479,24 @@ class GlobalCaps(core.FlagEnum):
     SMB2_GLOBAL_CAP_DIRECTORY_LEASING  = 0x00000020
     SMB2_GLOBAL_CAP_ENCRYPTION         = 0x00000040
 
+
 GlobalCaps.import_items(globals())
+
 
 class NegotiateContextType(core.ValueEnum):
     SMB2_PREAUTH_INTEGRITY_CAPABILITIES = 0x0001
     SMB2_ENCRYPTION_CAPABILITIES = 0x0002
 
+
 NegotiateContextType.import_items(globals())
+
 
 class HashAlgorithms(core.ValueEnum):
     SMB2_SHA_512 = 0x0001
 
+
 HashAlgorithms.import_items(globals())
+
 
 class NegotiateRequest(Request):
     command_id = SMB2_NEGOTIATE
@@ -530,6 +560,7 @@ class NegotiateRequest(Request):
 
     def append(self, e):
         self.negotiate_contexts.append(e)
+
 
 class NegotiateResponse(Response):
     command_id = SMB2_NEGOTIATE
@@ -599,6 +630,7 @@ class NegotiateResponse(Response):
     def append(self, e):
         self.negotiate_contexts.append(e)
 
+
 class NegotiateRequestContext(core.Frame):
     def __init__(self, parent):
         core.Frame.__init__(self, parent)
@@ -606,20 +638,25 @@ class NegotiateRequestContext(core.Frame):
             parent.append(self)
         self.data_length = None
 
+
 @NegotiateResponse.negotiate_context
 class NegotiateResponseContext(core.Frame):
+
     def __init__(self, parent):
         core.Frame.__init__(self, parent)
         if parent is not None:
             parent.append(self)
 
+
 class PreauthIntegrityCapabilities(core.Frame):
     context_type = SMB2_PREAUTH_INTEGRITY_CAPABILITIES
+
     def __init__(self):
         self.hash_algorithms = []
         self.hash_algorithms_count = None
         self.salt = b""
         self.salt_length = None
+
     def _encode(self, cur):
         if self.hash_algorithms_count is None:
             self.hash_algorithms_count = len(self.hash_algorithms)
@@ -630,6 +667,7 @@ class PreauthIntegrityCapabilities(core.Frame):
         for h in self.hash_algorithms:
             cur.encode_uint16le(h)
         cur.encode_bytes(self.salt)
+
     def _decode(self, cur):
         self.hash_algorithm_count = cur.decode_uint16le()
         self.salt_length = cur.decode_uint16le()
@@ -637,17 +675,20 @@ class PreauthIntegrityCapabilities(core.Frame):
             self.hash_algorithms.append(HashAlgorithms(cur.decode_uint16le()))
         self.salt = cur.decode_bytes(self.salt_length)
 
+
 class PreauthIntegrityCapabilitiesRequest(NegotiateRequestContext,
                                           PreauthIntegrityCapabilities):
     def __init__(self, parent):
         NegotiateRequestContext.__init__(self, parent)
         PreauthIntegrityCapabilities.__init__(self)
 
+
 class PreauthIntegrityCapabilitiesResponse(NegotiateResponseContext,
                                            PreauthIntegrityCapabilities):
     def __init__(self, parent):
         NegotiateResponseContext.__init__(self, parent)
         PreauthIntegrityCapabilities.__init__(self)
+
 
 # Session setup constants
 class SessionFlags(core.FlagEnum):
@@ -656,7 +697,9 @@ class SessionFlags(core.FlagEnum):
     SMB2_SESSION_FLAG_IS_NULL = 0x02
     SMB2_SESSION_FLAG_ENCRYPT_DATA = 0x04
 
+
 SessionFlags.import_items(globals())
+
 
 # SMB2_ECHO_REQUEST definition
 class EchoRequest(Request):
@@ -671,6 +714,7 @@ class EchoRequest(Request):
         # Reserved
         cur.encode_uint16le(self.reserved)
 
+
 # SMB2_ECHO_RESPONSE definition
 class EchoResponse(Response):
     # Expect response whenever SMB2_ECHO_REQUEST sent
@@ -683,6 +727,7 @@ class EchoResponse(Response):
     def _decode(self, cur):
         # Reserved
         cur.decode_uint16le()
+
 
 # SMB2_FLUSH_REQUEST definition
 class FlushRequest(Request):
@@ -703,6 +748,7 @@ class FlushRequest(Request):
         cur.encode_uint64le(self.file_id[0])
         cur.encode_uint64le(self.file_id[1])
 
+
 # SMB2_FLUSH_RESPONSE definition
 class FlushResponse(Response):
     # Expect response whenever SMB2_FLUSH_REQUEST sent
@@ -714,6 +760,7 @@ class FlushResponse(Response):
 
     def _decode(self, cur):
         self.reserved = cur.decode_uint16le()
+
 
 class SessionSetupRequest(Request):
     command_id = SMB2_SESSION_SETUP
@@ -747,6 +794,7 @@ class SessionSetupRequest(Request):
         sec_buf_ofs(self.security_buffer_offset)
         cur.encode_bytes(self.security_buffer)
 
+
 class SessionSetupResponse(Response):
     command_id = SMB2_SESSION_SETUP
     allowed_status = [ntstatus.STATUS_SUCCESS, ntstatus.STATUS_MORE_PROCESSING_REQUIRED]
@@ -765,6 +813,7 @@ class SessionSetupResponse(Response):
         # Advance to sec buffer
         cur.advanceto(self.parent.start + offset)
         self.security_buffer = cur.decode_bytes(length)
+
 
 class TreeConnectRequest(Request):
     command_id = SMB2_TREE_CONNECT
@@ -836,6 +885,7 @@ class TreeConnectResponse(Response):
         self.capabilities = cur.decode_uint32le()
         self.maximal_access = Access(cur.decode_uint32le())
 
+
 class TreeDisconnectRequest(Request):
     command_id = SMB2_TREE_DISCONNECT
     structure_size = 4
@@ -846,6 +896,7 @@ class TreeDisconnectRequest(Request):
     def _encode(self, cur):
         # Reserved
         cur.encode_uint16le(0)
+
 
 class TreeDisconnectResponse(Response):
     command_id = SMB2_TREE_DISCONNECT
@@ -858,6 +909,7 @@ class TreeDisconnectResponse(Response):
         # Ignore reserved
         cur.decode_uint16le()
 
+
 class LogoffRequest(Request):
     command_id = SMB2_LOGOFF
     structure_size = 4
@@ -868,6 +920,7 @@ class LogoffRequest(Request):
     def _encode(self, cur):
         # Reserved
         cur.encode_uint16le(0)
+
 
 class LogoffResponse(Response):
     command_id = SMB2_LOGOFF
@@ -880,6 +933,7 @@ class LogoffResponse(Response):
         # Ignore reserved
         cur.decode_uint16le()
 
+
 # Oplock levels
 class OplockLevel(core.ValueEnum):
     SMB2_OPLOCK_LEVEL_NONE      = 0x00
@@ -888,7 +942,9 @@ class OplockLevel(core.ValueEnum):
     SMB2_OPLOCK_LEVEL_BATCH     = 0x09
     SMB2_OPLOCK_LEVEL_LEASE     = 0xFF
 
+
 OplockLevel.import_items(globals())
+
 
 # Share access
 class ShareAccess(core.FlagEnum):
@@ -896,11 +952,13 @@ class ShareAccess(core.FlagEnum):
     FILE_SHARE_WRITE  = 0x00000002
     FILE_SHARE_DELETE = 0x00000004
 
+
 ShareAccess.import_items(globals())
 
 FILE_SHARE_ALL = (
     FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE
 )
+
 
 # Create dispositions
 class CreateDisposition(core.ValueEnum):
@@ -911,7 +969,9 @@ class CreateDisposition(core.ValueEnum):
     FILE_OVERWRITE    = 0x00000004
     FILE_OVERWRITE_IF = 0x00000005
 
+
 CreateDisposition.import_items(globals())
+
 
 # Create options
 class CreateOptions(core.FlagEnum):
@@ -934,7 +994,9 @@ class CreateOptions(core.FlagEnum):
     FILE_OPEN_NO_RECALL            = 0x00400000
     FILE_OPEN_FOR_FREE_SPACE_QUERY = 0x00800000
 
+
 CreateOptions.import_items(globals())
+
 
 # Access masks
 class Access(core.FlagEnum):
@@ -963,7 +1025,9 @@ class Access(core.FlagEnum):
     FILE_TRAVERSE           = 0x00000020
     FILE_DELETE_CHILD       = 0x00000040
 
+
 Access.import_items(globals())
+
 
 # File attributes
 class FileAttributes(core.FlagEnum):
@@ -982,7 +1046,9 @@ class FileAttributes(core.FlagEnum):
     FILE_ATTRIBUTE_NOT_CONTENT_INDEXED   = 0x00002000
     FILE_ATTRIBUTE_ENCRYPTED             = 0x00004000
 
+
 FileAttributes.import_items(globals())
+
 
 class CreateRequest(Request):
     command_id = SMB2_CREATE
@@ -1103,6 +1169,7 @@ class CreateRequest(Request):
     def append(self, e):
         self._create_contexts.append(e)
 
+
 class CreateResponse(Response):
     command_id = SMB2_CREATE
     structure_size = 89
@@ -1185,11 +1252,13 @@ class CreateResponse(Response):
     def append(self, e):
         self._create_contexts.append(e)
 
+
 class CreateRequestContext(core.Frame):
     def __init__(self, parent):
         core.Frame.__init__(self, parent)
         if parent is not None:
             parent.append(self)
+
 
 @CreateResponse.create_context
 class CreateResponseContext(core.Frame):
@@ -1197,6 +1266,7 @@ class CreateResponseContext(core.Frame):
         core.Frame.__init__(self, parent)
         if parent is not None:
             parent.append(self)
+
 
 class MaximalAccessRequest(CreateRequestContext):
     name = b'MxAc'
@@ -1209,6 +1279,7 @@ class MaximalAccessRequest(CreateRequestContext):
         if self.timestamp is not None:
             cur.encode_uint64le(self.timestamp)
 
+
 class MaximalAccessResponse(CreateResponseContext):
     name = b'MxAc'
 
@@ -1220,6 +1291,7 @@ class MaximalAccessResponse(CreateResponseContext):
     def _decode(self, cur):
         self.query_status = ntstatus.Status(cur.decode_uint32le())
         self.maximal_access = Access(cur.decode_uint32le())
+
 
 class AllocationSizeRequest(CreateRequestContext):
     name = b'AlSi'
@@ -1256,11 +1328,13 @@ class ExtendedAttributeRequest(CreateRequestContext):
             cur.encode_bytes(self.ea_name)
             cur.encode_bytes(self.ea_value)
 
+
 class LeaseState(core.FlagEnum):
     SMB2_LEASE_NONE           = 0x00
     SMB2_LEASE_READ_CACHING   = 0x01
     SMB2_LEASE_HANDLE_CACHING = 0x02
     SMB2_LEASE_WRITE_CACHING  = 0x04
+
 
 LeaseState.import_items(globals())
 
@@ -1269,11 +1343,14 @@ SMB2_LEASE_RH = SMB2_LEASE_R | SMB2_LEASE_HANDLE_CACHING
 SMB2_LEASE_RW = SMB2_LEASE_R | SMB2_LEASE_WRITE_CACHING
 SMB2_LEASE_RWH = SMB2_LEASE_RH | SMB2_LEASE_RW
 
+
 class LeaseFlags(core.FlagEnum):
     SMB2_LEASE_FLAG_NONE              = 0x00
     SMB2_LEASE_FLAG_BREAK_IN_PROGRESS = 0x02
 
+
 LeaseFlags.import_items(globals())
+
 
 class SecDescControl(core.FlagEnum):
     SR    = 0x0001
@@ -1292,6 +1369,7 @@ class SecDescControl(core.FlagEnum):
     DP    = 0x2000
     GD    = 0x4000
     OD    = 0x8000
+
 
 class AceType(core.ValueEnum):
     ACCESS_ALLOWED_ACE_TYPE                  = 0x00
@@ -1326,13 +1404,17 @@ class AceFlags(core.FlagEnum):
     SUCCESSFUL_ACCESS_ACE_FLAG = 0x40
     FAILED_ACCESS_ACE_FLAG     = 0x80
 
+
 AceFlags.import_items(globals())
+
 
 class AclRevision(core.ValueEnum):
     ACL_REVISION    = 0x02
     ACL_REVISION_DS = 0x04
 
+
 AclRevision.import_items(globals())
+
 
 class SecurityDescriptorRequest(CreateRequestContext):
     name = b'SecD'
@@ -1501,6 +1583,7 @@ class SecurityDescriptorRequest(CreateRequestContext):
                         owner_sid_size[0] + group_sid_size[0] + sacl_size[2]
         return off_owner,off_group,off_sacl,off_dacl
 
+
 class NT_ACL(core.Frame):
 
     def __init__(self):
@@ -1569,6 +1652,7 @@ class NT_ACL(core.Frame):
         if self.ace_count == -1:
             self.ace_count = len(self._entries)
         acl_count_hole(self.ace_count)
+
 
 class NT_ACE(core.Frame):
 
@@ -1688,8 +1772,10 @@ class NT_SID(core.Frame):
             self.sub_authority_count = len(self.sub_authority)
         subauth_count_hole(self.sub_authority_count)
 
+
 class LeaseRequest(CreateRequestContext):
     name = b'RqLs'
+
     # This class handles V2 requests as well.  Set
     # the lease_flags field to a non-None value
     # to enable the extended fields
@@ -1756,10 +1842,13 @@ class LeaseResponse(CreateResponseContext):
             self.parent_lease_key = None
             self.epoch = None
 
+
 class DurableFlags(core.FlagEnum):
     SMB2_DHANDLE_FLAG_PERSISTENT = 0x02
 
+
 DurableFlags.import_items(globals())
+
 
 class DurableHandleRequest(CreateRequestContext):
     name = b'DHnQ'
@@ -1809,6 +1898,7 @@ class DurableHandleV2Request(CreateRequestContext):
         cur.encode_uint64le(0)
         cur.encode_bytes(self.create_guid)
 
+
 class DurableHandleV2Response(CreateResponseContext):
     name = b'DH2Q'
 
@@ -1820,6 +1910,7 @@ class DurableHandleV2Response(CreateResponseContext):
     def _decode(self, cur):
         self.timeout = cur.decode_uint32le()
         self.flags = DurableFlags(cur.decode_uint32le())
+
 
 class DurableHandleReconnectV2Request(CreateRequestContext):
     name = b'DH2C'
@@ -1835,6 +1926,7 @@ class DurableHandleReconnectV2Request(CreateRequestContext):
         cur.encode_uint64le(self.file_id[1])
         cur.encode_bytes(self.create_guid)
         cur.encode_uint32le(self.flags)
+
 
 class AppInstanceIdRequest(CreateRequestContext):
     name = b'\x45\xBC\xA6\x6A\xEF\xA7\xF7\x4A\x90\x08\xFA\x46\x2E\x14\x4D\x74'
@@ -1859,6 +1951,7 @@ class QueryOnDiskIDRequest(CreateRequestContext):
     def _encode(self, cur):
         pass           # client sends no data to server
 
+
 class QueryOnDiskIDResponse(CreateResponseContext):
     name = b'QFid'
 
@@ -1868,6 +1961,7 @@ class QueryOnDiskIDResponse(CreateResponseContext):
 
     def _decode(self, cur):
         self.file_id = cur.decode_bytes(32)
+
 
 class TimewarpTokenRequest(CreateRequestContext):
     name = b'TWrp'
@@ -1904,10 +1998,13 @@ class CloseRequest(Request):
         cur.encode_uint64le(self.file_id[0])
         cur.encode_uint64le(self.file_id[1])
 
+
 class CloseFlags(core.FlagEnum):
     SMB2_CLOSE_FLAG_POSTQUERY_ATTRIB = 0x0001
 
+
 CloseFlags.import_items(globals())
+
 
 class CloseResponse(Response):
     command_id = SMB2_CLOSE
@@ -1934,6 +2031,7 @@ class CloseResponse(Response):
         self.allocation_size = cur.decode_uint64le()
         self.end_of_file = cur.decode_uint64le()
         self.file_attributes = FileAttributes(cur.decode_uint32le())
+
 
 class FileInformationClass(core.ValueEnum):
     FILE_SECURITY_INFORMATION = 0
@@ -2018,6 +2116,7 @@ class QueryDirectoryRequest(Request):
         cur.encode_utf16le(self.file_name)
         file_name_length_hole(cur - file_name_start)
 
+
 class QueryDirectoryResponse(Response):
     command_id = SMB2_QUERY_DIRECTORY
     structure_size = 9
@@ -2072,13 +2171,16 @@ class QueryDirectoryResponse(Response):
         else:
             Information(self, end).decode(cur)
 
+
 class InfoType(core.ValueEnum):
     SMB2_0_INFO_FILE       = 0x01
     SMB2_0_INFO_FILESYSTEM = 0x02
     SMB2_0_INFO_SECURITY   = 0x03
     SMB2_0_INFO_QUOTA      = 0x04
 
+
 InfoType.import_items(globals())
+
 
 class SecurityInformation(core.FlagEnum):
     OWNER_SECURITY_INFORMATION = 0x00000001
@@ -2087,14 +2189,18 @@ class SecurityInformation(core.FlagEnum):
     SACL_SECURITY_INFORMATION = 0x00000008
     ATTRIBUTE_SECURITY_INFORMATION = 0x00000020
 
+
 SecurityInformation.import_items(globals())
+
 
 class ScanFlags(core.FlagEnum):
     SL_RESTART_SCAN        = 0x00000001
     SL_RETURN_SINGLE_ENTRY = 0x00000002
     SL_INDEX_SPECIFIED     = 0x00000004
 
+
 ScanFlags.import_items(globals())
+
 
 class QueryInfoRequest(Request):
     command_id = SMB2_QUERY_INFO
@@ -2287,9 +2393,11 @@ class Information(core.Frame):
 class FileInformation(Information):
     info_type = SMB2_0_INFO_FILE
 
+
 @QueryInfoResponse.information
 class FileSystemInformation(Information):
     info_type = SMB2_0_INFO_FILESYSTEM
+
 
 class FileSecurityInformation(FileInformation):
     file_information_class = FILE_SECURITY_INFORMATION
@@ -2418,6 +2526,7 @@ class FileSecurityInformation(FileInformation):
             dacl_ofs(self.offset_dacl)
             self.dacl.encode(cur)
 
+
 class FileAccessInformation(FileInformation):
     file_information_class = FILE_ACCESS_INFORMATION
 
@@ -2427,6 +2536,7 @@ class FileAccessInformation(FileInformation):
 
     def _decode(self, cur):
         self.access_flags = Access(cur.decode_uint32le())
+
 
 # Alignment Requirement flags
 class Alignment(core.ValueEnum):
@@ -2443,6 +2553,7 @@ class Alignment(core.ValueEnum):
 
 Alignment.import_items(globals())
 
+
 class FileAlignmentInformation(FileInformation):
     file_information_class = FILE_ALIGNMENT_INFORMATION
 
@@ -2452,6 +2563,7 @@ class FileAlignmentInformation(FileInformation):
 
     def _decode(self, cur):
         self.alignment_requirement = Alignment(cur.decode_uint32le())
+
 
 class FileAllInformation(FileInformation):
     file_information_class = FILE_ALL_INFORMATION
@@ -2474,6 +2586,7 @@ class FileAllInformation(FileInformation):
             frame = getattr(self, field)
             if isinstance(frame, core.Frame):
                 frame.decode(cur)
+
 
 class FileDirectoryInformation(FileInformation):
     file_information_class = FILE_DIRECTORY_INFORMATION
@@ -2544,6 +2657,7 @@ class FileFullDirectoryInformation(FileInformation):
             cur.advanceto(self.start + next_offset)
         else:
             cur.advanceto(cur.upperbound)
+
 
 class FileIdFullDirectoryInformation(FileInformation):
     file_information_class = FILE_ID_FULL_DIR_INFORMATION
@@ -2721,6 +2835,7 @@ class CompressionFormat(core.ValueEnum):
     COMPRESSION_FORMAT_NONE = 0x0000
     COMPRESSION_FORMAT_LZNT1 = 0x0002
 
+
 CompressionFormat.import_items(globals())
 
 
@@ -2746,6 +2861,7 @@ class FileCompressionInformation(FileInformation):
         # This is a single reserved field of 3 bytes.
         self.reserved = cur.decode_uint8le() | (cur.decode_uint8le() << 8) | (cur.decode_uint8le() << 16)
 
+
 class FileInternalInformation(FileInformation):
     file_information_class = FILE_INTERNAL_INFORMATION
 
@@ -2755,6 +2871,7 @@ class FileInternalInformation(FileInformation):
 
     def _decode(self, cur):
         self.index_number = cur.decode_uint64le()
+
 
 class FileModeInformation(FileInformation):
     file_information_class = FILE_MODE_INFORMATION
@@ -2770,6 +2887,7 @@ class FileModeInformation(FileInformation):
     def _encode(self, cur):
         cur.encode_uint32le(self.mode)
 
+
 class FileNameInformation(FileInformation):
     file_information_class = FILE_NAME_INFORMATION
 
@@ -2780,6 +2898,7 @@ class FileNameInformation(FileInformation):
     def _decode(self, cur):
         file_name_length = cur.decode_uint32le()
         self.file_name = cur.decode_utf16le(file_name_length)
+
 
 class FileRenameInformation(FileInformation):
     file_information_class = FILE_RENAME_INFORMATION
@@ -2845,6 +2964,7 @@ class FileValidDataLengthInformation(FileInformation):
    def _encode(self, cur):
         cur.encode_int64le(self.valid_data_length)
 
+
 class FileNamesInformation(FileInformation):
     file_information_class = FILE_NAMES_INFORMATION
 
@@ -2906,6 +3026,7 @@ class FileStandardInformation(FileInformation):
         cur.encode_uint8le(self.directory)
         # Ignore 2-bytes Reserved field
         cur.encode_uint16le(0)
+
 
 class FileEaInformation(FileInformation):
     file_information_class = FILE_EA_INFORMATION
@@ -3118,6 +3239,7 @@ class FileFsObjectIdInformation(FileSystemInformation):
         for count in range(6):
             self.extended_info += str(cur.decode_uint64le())
 
+
 class CompletionFilter(core.FlagEnum):
     SMB2_NOTIFY_CHANGE_FILE_NAME    = 0x001
     SMB2_NOTIFY_CHANGE_DIR_NAME     = 0x002
@@ -3132,12 +3254,16 @@ class CompletionFilter(core.FlagEnum):
     SMB2_NOTIFY_CHANGE_STREAM_SIZE  = 0x400
     SMB2_NOTIFY_CHANGE_STREAM_WRITE = 0x800
 
+
 CompletionFilter.import_items(globals())
+
 
 class ChangeNotifyFlags(core.FlagEnum):
     SMB2_WATCH_TREE     = 0x01
 
+
 ChangeNotifyFlags.import_items(globals())
+
 
 class FileNotifyInfoAction(core.ValueEnum):
     SMB2_ACTION_ADDED               = 0x001
@@ -3150,7 +3276,9 @@ class FileNotifyInfoAction(core.ValueEnum):
     SMB2_ACTION_MODIFIED_STREAM     = 0x008
     SMB2_ACTION_REMOVED_BY_DELETE   = 0x009
 
+
 FileNotifyInfoAction.import_items(globals())
+
 
 class FileNotifyInformation(core.Frame):
     def __init__(self, parent = None):
@@ -3173,6 +3301,7 @@ class FileNotifyInformation(core.Frame):
         return "<{0} {1} '{2}'>".format(self.__class__.__name__,
                                         self.action,
                                         self.filename)
+
 
 class ChangeNotifyResponse(Response):
     command_id = SMB2_CHANGE_NOTIFY
@@ -3199,6 +3328,7 @@ class ChangeNotifyResponse(Response):
                 if neo == 0:
                     break
 
+
 class ChangeNotifyRequest(Request):
     command_id = SMB2_CHANGE_NOTIFY
     structure_size = 32
@@ -3219,11 +3349,14 @@ class ChangeNotifyRequest(Request):
         # Reserved
         cur.encode_uint32le(0)
 
+
 class BreakLeaseFlags(core.FlagEnum):
     SMB2_NOTIFY_BREAK_LEASE_FLAG_NONE         = 0x00
     SMB2_NOTIFY_BREAK_LEASE_FLAG_ACK_REQUIRED = 0x01
 
+
 BreakLeaseFlags.import_items(globals())
+
 
 class OplockBreakNotification(Notification):
     command_id = SMB2_OPLOCK_BREAK
@@ -3239,6 +3372,7 @@ class OplockBreakNotification(Notification):
         self.reserved1 = cur.decode_uint8le()
         self.reserved2 = cur.decode_uint32le()
         self.file_id = (cur.decode_uint64le(), cur.decode_uint64le())
+
 
 class LeaseBreakNotification(Notification):
     command_id = SMB2_OPLOCK_BREAK
@@ -3262,6 +3396,7 @@ class LeaseBreakNotification(Notification):
         self.access_mask_hint = cur.decode_uint32le()
         self.share_mask_hint = cur.decode_uint32le()
 
+
 class OplockBreakAcknowledgement(Request):
     command_id = SMB2_OPLOCK_BREAK
     structure_size = 24
@@ -3279,6 +3414,7 @@ class OplockBreakAcknowledgement(Request):
         cur.encode_uint32le(0)
         cur.encode_uint64le(self.file_id[0])
         cur.encode_uint64le(self.file_id[1])
+
 
 class LeaseBreakAcknowledgement(Request):
     command_id = SMB2_OPLOCK_BREAK
@@ -3299,6 +3435,7 @@ class LeaseBreakAcknowledgement(Request):
         # LeaseDuration is reserved
         cur.encode_uint64le(0)
 
+
 class OplockBreakResponse(Response):
     command_id = SMB2_OPLOCK_BREAK
     structure_size = 24
@@ -3313,6 +3450,7 @@ class OplockBreakResponse(Response):
         self.reserved1 = cur.decode_uint8le()
         self.reserved2 = cur.decode_uint32le()
         self.file_id = (cur.decode_uint64le(), cur.decode_uint64le())
+
 
 class LeaseBreakResponse(Response):
     command_id = SMB2_OPLOCK_BREAK
@@ -3330,6 +3468,7 @@ class LeaseBreakResponse(Response):
         self.lease_key = cur.decode_bytes(16)
         self.lease_state = LeaseState(cur.decode_uint32le())
         self.lease_duration = cur.decode_uint64le()
+
 
 class ReadRequest(Request):
     command_id = SMB2_READ
@@ -3416,11 +3555,14 @@ class ReadResponse(Response):
 
         self.data = cur.decode_bytes(self.length)
 
+
 # Flag constants
 class WriteFlags(core.FlagEnum):
     SMB2_WRITEFLAG_WRITE_THROUGH = 0x00000001
 
+
 WriteFlags.import_items(globals())
+
 
 class WriteRequest(Request):
     command_id = SMB2_WRITE
@@ -3478,6 +3620,7 @@ class WriteRequest(Request):
         if self.buffer:
             cur.encode_bytes(self.buffer)
 
+
 class WriteResponse(Response):
     command_id = SMB2_WRITE
     structure_size = 17
@@ -3506,13 +3649,16 @@ class WriteResponse(Response):
         self.write_channel_info_offset = cur.decode_uint16le()
         self.write_channel_info_length = cur.decode_uint16le()
 
+
 class LockFlags(core.FlagEnum):
     SMB2_LOCKFLAG_SHARED_LOCK      = 0x00000001
     SMB2_LOCKFLAG_EXCLUSIVE_LOCK   = 0x00000002
     SMB2_LOCKFLAG_UN_LOCK          = 0x00000004
     SMB2_LOCKFLAG_FAIL_IMMEDIATELY = 0x00000010
 
+
 LockFlags.import_items(globals())
+
 
 class LockRequest(Request):
     """
@@ -3546,6 +3692,7 @@ class LockRequest(Request):
             # Reserved
             cur.encode_uint32le(0)
 
+
 class LockResponse(Response):
     command_id = SMB2_LOCK
     structure_size = 4
@@ -3555,6 +3702,7 @@ class LockResponse(Response):
 
     def _decode(self, cur):
         self.reserved = cur.decode_uint16le()
+
 
 class IoctlCode(core.ValueEnum):
     FSCTL_DFS_GET_REFERRALS            = 0x00060194
@@ -3576,12 +3724,16 @@ class IoctlCode(core.ValueEnum):
     FSCTL_SET_ZERO_DATA                = 0x000980C8
     FSCTL_SET_SPARSE                   = 0x000900C4
 
+
 IoctlCode.import_items(globals())
+
 
 class IoctlFlags(core.FlagEnum):
     SMB2_0_IOCTL_IS_FSCTL = 0x00000001
 
+
 IoctlFlags.import_items(globals())
+
 
 class IoctlRequest(Request):
     command_id = SMB2_IOCTL
@@ -3639,6 +3791,7 @@ class IoctlRequest(Request):
         # Set the ioctl count, which is the length in bytes
         input_count_hole(cur - buffer_start)
 
+
 class IoctlResponse(Response):
     command_id = SMB2_IOCTL
     structure_size = 49
@@ -3677,11 +3830,13 @@ class IoctlResponse(Response):
         with cur.bounded(cur, end):
             ioctl(self).decode(cur)
 
+
 class IoctlInput(core.Frame):
     def __init__(self, parent):
         super(IoctlInput, self).__init__(parent)
         if parent is not None:
             parent.ioctl_input = self
+
 
 class ValidateNegotiateInfoRequest(IoctlInput):
     ioctl_ctl_code = FSCTL_VALIDATE_NEGOTIATE_INFO
@@ -3707,6 +3862,7 @@ class ValidateNegotiateInfoRequest(IoctlInput):
         for dialect in self.dialects:
             cur.encode_uint16le(dialect)
 
+
 class QueryNetworkInterfaceInfoRequest(IoctlInput):
     ioctl_ctl_code = FSCTL_QUERY_NETWORK_INTERFACE_INFO
 
@@ -3715,6 +3871,7 @@ class QueryNetworkInterfaceInfoRequest(IoctlInput):
 
     def  _encode(self, cur):
         pass
+
 
 class RequestResumeKeyRequest(IoctlInput):
     ioctl_ctl_code = FSCTL_SRV_REQUEST_RESUME_KEY
@@ -3725,6 +3882,7 @@ class RequestResumeKeyRequest(IoctlInput):
 
     def  _encode(self, cur):
         pass
+
 
 class NetworkResiliencyRequestRequest(IoctlInput):
     ioctl_ctl_code = FSCTL_LMR_REQUEST_RESILIENCY
@@ -3737,6 +3895,7 @@ class NetworkResiliencyRequestRequest(IoctlInput):
     def  _encode(self, cur):
         cur.encode_uint32le(self.timeout)
         cur.encode_uint32le(self.reserved)
+
 
 class CopyChunkCopyRequest(IoctlInput):
     ioctl_ctl_code = FSCTL_SRV_COPYCHUNK
@@ -3758,8 +3917,10 @@ class CopyChunkCopyRequest(IoctlInput):
         for chunk in self._children:
             chunk.encode(cur)
 
+
 class CopyChunkCopyWriteRequest(CopyChunkCopyRequest):
     ioctl_ctl_code = FSCTL_SRV_COPYCHUNK_WRITE
+
 
 class CopyChunk(core.Frame):
     def __init__(self, parent):
@@ -3775,6 +3936,7 @@ class CopyChunk(core.Frame):
         cur.encode_uint32le(self.length)
         cur.encode_uint32le(0)
 
+
 class SetReparsePointRequest(IoctlInput):
     ioctl_ctl_code = FSCTL_SET_REPARSE_POINT
 
@@ -3785,6 +3947,7 @@ class SetReparsePointRequest(IoctlInput):
     def _encode(self, cur):
         if self.reparse_data is not None:
             self.reparse_data.encode(cur)
+
 
 class GetReparsePointRequest(IoctlInput):
     ioctl_ctl_code = FSCTL_GET_REPARSE_POINT
@@ -3798,12 +3961,14 @@ class EnumerateSnapshotsRequest(IoctlInput):
     def _encode(self, *args, **kwds):
         pass
 
+
 @IoctlResponse.ioctl_ctl_code
 class IoctlOutput(core.Frame):
     def __init__(self, parent):
         super(IoctlOutput, self).__init__(parent)
         if parent is not None:
             parent.ioctl_output = self
+
 
 class ValidateNegotiateInfoResponse(IoctlOutput):
     ioctl_ctl_code = FSCTL_VALIDATE_NEGOTIATE_INFO
@@ -3821,6 +3986,7 @@ class ValidateNegotiateInfoResponse(IoctlOutput):
         self.security_mode = SecurityMode(cur.decode_uint16le())
         self.dialect = Dialect(cur.decode_uint16le())
 
+
 class QueryNetworkInterfaceInfoResponse(IoctlOutput):
     ioctl_ctl_code = FSCTL_QUERY_NETWORK_INTERFACE_INFO
 
@@ -3829,6 +3995,7 @@ class QueryNetworkInterfaceInfoResponse(IoctlOutput):
 
     def _decode(self, cur):
         pass
+
 
 class RequestResumeKeyResponse(IoctlOutput):
    ioctl_ctl_code = FSCTL_SRV_REQUEST_RESUME_KEY
@@ -3842,12 +4009,14 @@ class RequestResumeKeyResponse(IoctlOutput):
         self.resume_key = cur.decode_bytes(24)
         self.context_length = cur.decode_uint32le()
 
+
 class NetworkResiliencyRequestResponse(IoctlOutput):
 
     ioctl_ctl_code = FSCTL_LMR_REQUEST_RESILIENCY
 
     def _decode(self, cur):
         pass
+
 
 class CopyChunkCopyResponse(IoctlOutput):
    ioctl_ctl_code = FSCTL_SRV_COPYCHUNK
@@ -3863,13 +4032,16 @@ class CopyChunkCopyResponse(IoctlOutput):
         self.chunk_bytes_written = cur.decode_uint32le()
         self.total_bytes_written = cur.decode_uint32le()
 
+
 class CopyChunkCopyWriteResponse(CopyChunkCopyResponse):
     ioctl_ctl_code = FSCTL_SRV_COPYCHUNK_WRITE
+
 
 class SetReparsePointResponse(IoctlOutput):
     ioctl_ctl_code = FSCTL_SET_REPARSE_POINT
     def _decode(self, *args, **kwds):
         pass
+
 
 class GetReparsePointResponse(IoctlOutput):
     ioctl_ctl_code = FSCTL_GET_REPARSE_POINT
@@ -3890,6 +4062,7 @@ class GetReparsePointResponse(IoctlOutput):
         reparse_data = self._reparse_tag_map[self.tag]
         reparse_data(self).decode(cur)
 
+
 @GetReparsePointResponse.reparse_tag
 class ReparseDataBuffer(core.Frame):
     def __init__(self, parent):
@@ -3897,10 +4070,14 @@ class ReparseDataBuffer(core.Frame):
         if parent is not None:
             parent.reparse_data = self
 
+
 class SymbolicLinkFlags(core.FlagEnum):
     SYMLINK_FLAG_ABSOLUTE = 0x0
     SYMLINK_FLAG_RELATIVE = 0x1
+
+
 SymbolicLinkFlags.import_items(globals())
+
 
 class SymbolicLinkReparseBuffer(ReparseDataBuffer):
     reparse_tag = 0xA000000C
@@ -3960,6 +4137,7 @@ class SymbolicLinkReparseBuffer(ReparseDataBuffer):
         cur.seekto(buf_start + self.print_name_offset)
         self.print_name = cur.decode_utf16le(self.print_name_length)
 
+
 class EnumerateSnapshotsResponse(IoctlOutput):
     ioctl_ctl_code = FSCTL_SRV_ENUMERATE_SNAPSHOTS
 
@@ -3977,6 +4155,7 @@ class EnumerateSnapshotsResponse(IoctlOutput):
         snapshot_buffer = cur.decode_utf16le(self.snapshot_array_size)
         # TODO: handle the case where the buffer is too small
         self.snapshots = snapshot_buffer.strip("\0").split("\0")
+
 
 class SetZeroDataRequest(IoctlInput):
     ioctl_ctl_code = IoctlCode.FSCTL_SET_ZERO_DATA
@@ -4001,6 +4180,7 @@ class SetZeroDataResponse(IoctlOutput):
 
     def _decode(self, cur):
         pass
+
 
 class SetSparseRequest(IoctlInput):
     ioctl_ctl_code = IoctlCode.FSCTL_SET_SPARSE

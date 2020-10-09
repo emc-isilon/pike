@@ -28,6 +28,7 @@ access_rwd = pike.smb2.GENERIC_READ | \
              pike.smb2.DELETE
 null_fid = array.array('B', [0]*32)
 
+
 class TestQueryOnDiskID(pike.test.PikeTest):
     test_files = [ "qfid_file.bin", "qfid_same_file.bin",
                    "qfid_diff_file1.bin", "qfid_diff_file2.bin" ]

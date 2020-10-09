@@ -5,6 +5,7 @@
 #
 
 """Pike/pytest integration."""
+
 import pytest
 
 import pike.test

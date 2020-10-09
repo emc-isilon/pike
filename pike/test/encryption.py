@@ -19,6 +19,7 @@ import pike.model as model
 import pike.smb2 as smb2
 import pike.test
 
+
 class TestEncryption(pike.test.PikeTest):
     def test_smb_3_0_encryption(self):
         client = model.Client(dialects=[smb2.DIALECT_SMB3_0])
@@ -124,6 +125,7 @@ class TestEncryption(pike.test.PikeTest):
         self.assertIsNotNone(parent.transform)
         for r in resp:
             self.assertEqual(r.parent, parent)
+
 
 if __name__ == "__main__":
     pike.test.unittest.main()

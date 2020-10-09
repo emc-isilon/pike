@@ -24,6 +24,7 @@ import pike.smb2
 import pike.test
 import pike.ntstatus
 
+
 class ReadWriteTest(pike.test.PikeTest):
     # Test that we can write to a file
     def test_write(self):

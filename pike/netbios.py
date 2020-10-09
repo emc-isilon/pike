@@ -20,6 +20,7 @@ from . import core
 from . import crypto
 from . import smb2
 
+
 class Netbios(core.Frame):
     LOG_CHILDREN_COUNT = False
     LOG_CHILDREN_EXPAND = True

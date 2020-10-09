@@ -32,10 +32,12 @@ LEASE_RH  = LEASE_R | smb2.SMB2_LEASE_HANDLE_CACHING
 LEASE_RWH = LEASE_RW | LEASE_RH
 SHARE_ALL = smb2.FILE_SHARE_READ | smb2.FILE_SHARE_WRITE | smb2.FILE_SHARE_DELETE
 
+
 class InvalidNetworkResiliencyRequestRequest(pike.smb2.NetworkResiliencyRequestRequest):
     def  _encode(self, cur):
         cur.encode_uint32le(self.timeout)
         cur.encode_uint16le(self.reserved)
+
 
 @test.RequireDialect(smb2.DIALECT_SMB3_0)
 @test.RequireCapabilities(smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES)
@@ -202,7 +204,6 @@ class Persistent(test.PikeTest):
         # Because resiliency timeout, other opener has broken the persistent, so reconnect would fail
         with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND):
             handle3 = self.create_persistent(prev_handle=handle1)
-
 
     def test_resiliency_same_timeout_reconnect_after_timeout(self):
         handle1 = self.create_persistent()

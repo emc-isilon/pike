@@ -19,6 +19,7 @@ import pike.ntstatus as nt
 import pike.smb2 as smb2
 import pike.test
 
+
 class InvalidTreeTest(pike.test.PikeTest):
     def open_file(self, filename):
         self.chan, self.tree = self.tree_connect()
@@ -27,7 +28,6 @@ class InvalidTreeTest(pike.test.PikeTest):
             filename,
             disposition=smb2.FILE_SUPERSEDE).result()
         return fh
-
 
     def test_treeconnect(self):
         chan, tree = self.tree_connect()
@@ -58,7 +58,6 @@ class InvalidTreeTest(pike.test.PikeTest):
 
         chan.connection.close()
 
-
     def test_ioctl(self):
         fh = self.open_file("test.txt")
 
@@ -81,7 +80,6 @@ class InvalidTreeTest(pike.test.PikeTest):
             self.chan.connection.transceive(req1.parent)
 
         self.chan.connection.close()
-
 
     def test_oplock_break_ack(self):
         fh = self.open_file("test.txt")

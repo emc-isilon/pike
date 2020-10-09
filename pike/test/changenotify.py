@@ -19,6 +19,7 @@ import pike.ntstatus
 import pike.smb2
 import pike.test
 
+
 class ChangeNotifyTest(pike.test.PikeTest):
     def test_change_notify_file_name(self):
         filename = "change_notify.txt"

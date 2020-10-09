@@ -25,6 +25,7 @@ import pike.smb2
 import pike.test
 import pike.ntstatus
 
+
 # for buffer too small
 class InvalidNetworkResiliencyRequestRequest(pike.smb2.NetworkResiliencyRequestRequest):
     def  _encode(self, cur):

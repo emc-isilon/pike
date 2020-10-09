@@ -42,11 +42,13 @@ SIMPLE_5_CHUNKS = [(0, 0, 4000), (4000, 4000, 4000), (8000, 8000, 4000),
                    (12000, 12000, 4000), (16000, 16000, 4000)]
 SIMPLE_5_CHUNKS_LEN = 20000
 
+
 def _gen_test_buffer(length):
     # XXX: refactor and push up into helper/util module
     pattern = "".join([chr(x) for x in range(ord(' '), ord('~'))])
     buf = (pattern * ((length // len(pattern)) + 1))[:length]
     return buf.encode("ascii")
+
 
 def _gen_random_test_buffer(length):
     # XXX: refactor and push up into helper/util module
@@ -63,6 +65,7 @@ def _gen_random_test_buffer(length):
 ###
 # Main test
 ###
+
 class TestServerSideCopy(pike.test.PikeTest):
     # these values are valid for Windows -- other servers may need to adjust
     bad_resume_key_error = pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND

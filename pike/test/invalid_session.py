@@ -43,7 +43,6 @@ class InvalidSessionTest(pike.test.PikeTest):
             disposition=smb2.FILE_SUPERSEDE).result()
         return fh
 
-
     def test_treeconnect(self):
         chan, tree = self.tree_connect()
 
@@ -59,7 +58,6 @@ class InvalidSessionTest(pike.test.PikeTest):
             chan.connection.transceive(req1.parent)[0]
 
         chan.connection.close()
-
 
     def test_ioctl(self):
         fh = self.open_file("test.txt")
@@ -83,7 +81,6 @@ class InvalidSessionTest(pike.test.PikeTest):
             self.chan.connection.transceive(req1.parent)
 
         self.chan.connection.close()
-
 
     def test_oplock_break_ack(self):
         fh = self.open_file("test.txt")

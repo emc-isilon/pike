@@ -19,6 +19,7 @@ import pike.smb2
 import pike.test
 import pike.ntstatus
 
+
 @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
 @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL)
 class MultiChannelTest(pike.test.PikeTest):

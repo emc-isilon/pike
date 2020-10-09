@@ -20,6 +20,7 @@ import pike.crypto as crypto
 import pike.smb2 as smb2
 import pike.test as test
 
+
 class CapTest(test.PikeTest):
     def setup(self):
         # determine max capability and apply Required decorators
@@ -61,6 +62,7 @@ class CapTest(test.PikeTest):
         conn = self.negotiate(smb2.DIALECT_SMB2_002, cap)
         self.assertEqual(conn.negotiate_response.capabilities & cap, 0)
 
+
 class CapPersistent(CapTest):
     # persistent cap is advertised if we ask for it
     @test.RequireDialect(smb2.DIALECT_SMB3_0)
@@ -93,6 +95,7 @@ class CapPersistent(CapTest):
     def test_downlevel(self):
         self.downlevel_cap(smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES)
 
+
 class CapMultichannel(CapTest):
     # multichannel cap is advertised if we ask for it
     @test.RequireDialect(smb2.DIALECT_SMB3_0)
@@ -123,6 +126,7 @@ class CapMultichannel(CapTest):
     def test_downlevel(self):
         self.downlevel_cap(smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL)
 
+
 class CapMulticredit(CapTest):
     # largemtu cap is advertised if we ask for it
     @test.RequireDialect(smb2.DIALECT_SMB3_0)
@@ -148,6 +152,7 @@ class CapMulticredit(CapTest):
     # multicredit cap is not advertised to downlevel client
     def test_downlevel(self):
         self.downlevel_cap(smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
+
 
 @test.RequireDialect(smb2.DIALECT_SMB3_1_1)
 class NegotiateContext(test.PikeTest):

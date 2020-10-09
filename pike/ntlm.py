@@ -32,6 +32,7 @@ import Cryptodome.Hash.MD5 as MD5
 from . import core
 from . import nttime
 
+
 def des_key_64(K):
     """
     Return an 64-bit des key by adding a zero to the least significant bit
@@ -44,16 +45,20 @@ def des_key_64(K):
         out_key.append(((ord(in_key[ix-1]) << (8-ix)) & 0xFF) | (ord(in_key[ix]) >> ix))
     return out_key.tobytes()
 
+
 def DES(K, D):
     d1 = Cryptodome.Cipher.DES.new(des_key_64(K),
                                    Cryptodome.Cipher.DES.MODE_ECB)
     return d1.encrypt(D)
 
+
 def DESL(K, D):
     return DES(K[:7], D) + DES(K[7:14], D) + DES(K[14:16] + "\0"*5, D)
 
+
 def nonce(length):
     return array.array("B", [random.getrandbits(8) for x in range(length) ])
+
 
 def encode_frame(frame):
     buffer = array.array('B')
@@ -63,12 +68,14 @@ def encode_frame(frame):
 
 NTLM_SIGNATURE = b"NTLMSSP\x00"
 
+
 class MessageType(core.ValueEnum):
     NtLmNegotiate = 0x1
     NtLmChallenge = 0x2
     NtLmAuthenticate = 0x3
 
 MessageType.import_items(globals())
+
 
 class Ntlm(core.Frame):
 
@@ -92,6 +99,7 @@ class Ntlm(core.Frame):
             self.message.decode(cur)
         else:
             raise core.BadPacket("Unknown response message type: {0}".format(message_type))
+
 
 class NegotiateFlags(core.FlagEnum):
     NTLMSSP_NEGOTIATE_UNICODE                   = 0x00000001
@@ -117,14 +125,18 @@ class NegotiateFlags(core.FlagEnum):
     NTLMSSP_NEGOTIATE_KEY_EXCH                  = 0x40000000
     NTLMSSP_NEGOTIATE_56                        = 0x80000000
 
+
 NegotiateFlags.import_items(globals())
+
 
 class ProductMajorVersionFlags(core.ValueEnum):
     WINDOWS_MAJOR_VERSION_5     = 0x5
     WINDOWS_MAJOR_VERSION_6     = 0x6
     WINDOWS_MAJOR_VERSION_10    = 0xA
 
+
 ProductMajorVersionFlags.import_items(globals())
+
 
 class ProductMinorVersionFlags(core.ValueEnum):
     WINDOWS_MINOR_VERSION_0     = 0x0
@@ -132,13 +144,17 @@ class ProductMinorVersionFlags(core.ValueEnum):
     WINDOWS_MINOR_VERSION_2     = 0x2
     WINDOWS_MINOR_VERSION_3     = 0x3
 
+
 ProductMinorVersionFlags.import_items(globals())
+
 
 class NTLMRevisionCurrentFlags(core.ValueEnum):
     UNKNOWN                     = 0x0
     NTLMSSP_REVISION_W2K3       = 0x0F
 
+
 NTLMRevisionCurrentFlags.import_items(globals())
+
 
 class Version(core.Frame):
     def __init__(self, parent=None):
@@ -149,6 +165,7 @@ class Version(core.Frame):
         self.product_minor_version = WINDOWS_MINOR_VERSION_0
         self.product_build = 0
         self.ntlm_revision_current = NTLMSSP_REVISION_W2K3
+
     def _encode(self, cur):
         cur.encode_uint8le(self.product_major_version)
         cur.encode_uint8le(self.product_minor_version)
@@ -156,6 +173,7 @@ class Version(core.Frame):
         cur.encode_uint16le(0)  # reserved
         cur.encode_uint8le(0)   # reserved
         cur.encode_uint8le(self.ntlm_revision_current)
+
     def _decode(self, cur):
         self.product_major_version = ProductMajorVersionFlags(cur.decode_uint8le())
         self.product_minor_version = ProductMinorVersionFlags(cur.decode_uint8le())
@@ -164,8 +182,10 @@ class Version(core.Frame):
         reserved = cur.decode_uint8le()
         self.ntlm_revision_current = NTLMRevisionCurrentFlags(cur.decode_uint8le())
 
+
 class NtLmNegotiateMessage(core.Frame):
     message_type = NtLmNegotiate
+
     def __init__(self, parent=None):
         core.Frame.__init__(self, parent)
         if parent is not None:
@@ -222,6 +242,7 @@ class NtLmNegotiateMessage(core.Frame):
             else:
                 cur.encode_bytes(self.workstation_name)
 
+
 class AvId(core.ValueEnum):
     MsvAvEOL                = 0x0
     MsvAvNbComputerName     = 0x1
@@ -235,12 +256,15 @@ class AvId(core.ValueEnum):
     MsvAvTargetName         = 0x9
     MsvChannelBindings      = 0xA
 
+
 AvId.import_items(globals())
+
 
 class AvPair(core.Frame):
     text_fields = [ MsvAvNbComputerName, MsvAvNbDomainName,
                     MsvAvDnsComputerName, MsvAvDnsDomainName, MsvAvDnsTreeName,
                     MsvAvTargetName ]
+
     def __init__(self, parent=None):
         core.Frame.__init__(self, parent)
         if parent is not None:
@@ -268,13 +292,16 @@ class AvPair(core.Frame):
             else:
                 self.value = cur.decode_bytes(av_len)
 
+
 def extract_pair(av_pairs, av_id):
     for p in av_pairs:
         if p.av_id == av_id:
             return p
 
+
 class NtLmChallengeMessage(core.Frame):
     message_type = NtLmChallenge
+
     def __init__(self, parent=None):
         core.Frame.__init__(self, parent)
         if parent is not None:
@@ -284,6 +311,7 @@ class NtLmChallengeMessage(core.Frame):
         self.server_challenge = array.array('B', [0]*8)
         self.target_info = []
         self.version = None
+
     def _decode(self, cur):
         message_start = cur.copy() - 12
         target_name_len = cur.decode_uint16le()
@@ -323,6 +351,7 @@ class NtLmChallengeMessage(core.Frame):
 
 class NtLmAuthenticateMessage(core.Frame):
     message_type = NtLmAuthenticate
+
     def __init__(self, parent=None):
         core.Frame.__init__(self, parent)
         if parent is not None:
@@ -442,15 +471,19 @@ class NtLmAuthenticateMessage(core.Frame):
         if encrypted_random_session_key_len > 0:
             cur.encode_bytes(self.encrypted_random_session_key)
 
+
 class NtlmVersion(core.ValueEnum):
     NTLMv1      = 0x1
     NTLMv2      = 0x2
 
+
 NtlmVersion.import_items(globals())
+
 
 ########################
 ## NTLMv1 Implementation
 ########################
+
 
 def LMOWFv1(password):
     lm_passwd = (password.upper() + "\0"*14)
@@ -458,9 +491,11 @@ def LMOWFv1(password):
     return DES(lm_passwd[:7], magic) + \
            DES(lm_passwd[7:14], magic)
 
+
 def NTOWFv1(password):
     nt_passwd = password.encode("utf-16-le")
     return MD4.new(nt_passwd).digest()
+
 
 def ComputeResponsev1(NegFlg, ResponseKeyNT, ResponseKeyLM, ServerChallenge,
                       ClientChallenge, Time=None, ServerName=None):
@@ -474,6 +509,7 @@ def ComputeResponsev1(NegFlg, ResponseKeyNT, ResponseKeyLM, ServerChallenge,
         LmChallengeResponse = DESL(ResponseKeyLM, ServerChallenge)
     SessionBaseKey = MD4.new(ResponseKeyNT).digest()
     return NtChallengeResponse, LmChallengeResponse, SessionBaseKey
+
 
 def KXKEY(NegFlg, SessionBaseKey, LmChallengeResponse,
           ServerChallenge, ResponseKeyLM):
@@ -496,11 +532,14 @@ def KXKEY(NegFlg, SessionBaseKey, LmChallengeResponse,
                 KeyExchangeKey = SessionBaseKey
     return KeyExchangeKey
 
+
 ########################
 ## NTLMv2 Implementation
 ########################
 
+
 class NTLMv2Response(core.Frame):
+
     def __init__(self, parent=None):
         core.Frame.__init__(self, parent)
         self.response = None
@@ -509,7 +548,9 @@ class NTLMv2Response(core.Frame):
         cur.encode_bytes(self.response)
         self.challenge.encode(cur)
 
+
 class NTLMv2ClientChallenge(core.Frame):
+
     def __init__(self, parent=None):
         core.Frame.__init__(self, parent)
         if parent is not None:
@@ -517,6 +558,7 @@ class NTLMv2ClientChallenge(core.Frame):
         self.time_stamp = array.array("B", b"\0"*8)
         self.challenge_from_client = array.array("B", b"\0"*8)
         self.av_pairs = []
+
     def _encode(self, cur):
         cur.encode_uint8le(1)       # RespType
         cur.encode_uint8le(1)       # HiRespType
@@ -528,6 +570,7 @@ class NTLMv2ClientChallenge(core.Frame):
         for p in self.av_pairs:
             p.encode(cur)
 
+
 def NTOWFv2(password, user, userdom):
     nt_passwd = password.encode("utf-16-le")
     nt_hash_passwd = MD4.new(nt_passwd).digest()
@@ -535,6 +578,7 @@ def NTOWFv2(password, user, userdom):
     return HMAC.new(nt_hash_passwd,
                     nt_userdom,
                     MD5).digest()
+
 
 def ComputeResponsev2(NegFlg, ResponseKeyNT, ResponseKeyLM, ServerChallenge,
                       ClientChallenge, Time=None, ServerName=None, av_pairs=None):
@@ -567,6 +611,7 @@ def ComputeResponsev2(NegFlg, ResponseKeyNT, ResponseKeyLM, ServerChallenge,
                           ClientChallenge
     SessionBaseKey = HMAC.new(ResponseKeyNT, NTProofStr, MD5).digest()
     return NtChallengeResponse, LmChallengeResponse, SessionBaseKey
+
 
 class NtlmAuthenticator(object):
     """

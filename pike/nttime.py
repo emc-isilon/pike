@@ -27,15 +27,19 @@ _unix_time_offset = 11644473600
 _unix_epoch = datetime.fromtimestamp(0) + timedelta(hours=time.localtime().tm_isdst)
 _intervals_per_second = 10000000
 
+
 def _unix_time_to_nt_time(t):
     return (t + _unix_time_offset) * _intervals_per_second
+
 
 def _datetime_to_unix_time(t):
     td = (t - _unix_epoch)
     return td.seconds + (td.days * 24 * 3600)
 
+
 def _datetime_to_nt_time(t):
     return _unix_time_to_nt_time(_datetime_to_unix_time(t))
+
 
 def _nt_time_to_unix_time(t):
     """
@@ -57,6 +61,7 @@ def _nt_time_to_unix_time(t):
     py_time += math.copysign(py_time_parts[1], py_time) // (2 ** 32)
     return py_time
 
+
 def GMT_to_datetime(gmt_token):
     dt_obj = datetime.strptime(
             gmt_token,
@@ -64,6 +69,7 @@ def GMT_to_datetime(gmt_token):
     # apply timezone conversion
     dt_obj -= timedelta(seconds=time.timezone)
     return dt_obj
+
 
 class NtTime(int):
     """

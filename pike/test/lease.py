@@ -23,6 +23,7 @@ import pike.model
 import pike.smb2
 import pike.test
 
+
 @pike.test.RequireDialect(0x210)
 @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_LEASING)
 class LeaseTest(pike.test.PikeTest):

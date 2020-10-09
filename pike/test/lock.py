@@ -20,6 +20,7 @@ import pike.smb2
 import pike.test
 import pike.ntstatus
 
+
 class LockTest(pike.test.PikeTest):
     # Take a basic byte-range lock
     def test_lock(self):
@@ -162,8 +163,10 @@ class LockTest(pike.test.PikeTest):
         chan.close(file1)
         chan.close(file2)
 
+
 def range_contains(a1, a2, b):
     return b >= a1 and b < a2
+
 
 def ranges_intersect(a1, a2, b1, b2):
     return a2 > a1 and b2 > b1 and \

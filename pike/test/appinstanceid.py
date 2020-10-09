@@ -22,6 +22,7 @@ import pike.ntstatus
 import random
 import array
 
+
 @pike.test.RequireDialect(pike.smb2.DIALECT_SMB3_0)
 @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES)
 @pike.test.RequireShareCapabilities(pike.smb2.SMB2_SHARE_CAP_CONTINUOUS_AVAILABILITY)
