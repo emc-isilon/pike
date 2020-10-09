@@ -1,7 +1,14 @@
+#
+# Copyright (c) 2020, Dell Inc. or its subsidiaries.
+# All rights reserved.
+# See file LICENSE for licensing information.
+#
+
 import pike.core as core
 import pike.model as model
 import pike.smb2 as smb2
 import pike.test
+
 
 class TestClientCallbacks(pike.test.PikeTest):
     def test_pre_serialize(self):
@@ -102,6 +109,7 @@ class TestClientCallbacks(pike.test.PikeTest):
         conn.negotiate()
         self.assertTrue(pre_callback_future.result(timeout=2))
         self.assertTrue(post_callback_future.result(timeout=2))
+
 
 class TestConnectionCallbacks(pike.test.PikeTest):
     def test_pre_serialize(self):

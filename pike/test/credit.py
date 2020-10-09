@@ -1,27 +1,7 @@
 #
-# Copyright (c) 2017, Dell EMC Corporation
+# Copyright (c) 2017-2020, Dell Inc. or its subsidiaries.
 # All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#
-# 1. Redistributions of source code must retain the above copyright notice,
-# this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-# this list of conditions and the following disclaimer in the documentation
-# and/or other materials provided with the distribution.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
+# See file LICENSE for licensing information.
 #
 # Module Name:
 #
@@ -33,6 +13,7 @@
 #
 # Authors: Masen Furer <masen.furer@dell.com>
 #
+
 from __future__ import division
 from __future__ import print_function
 from builtins import map
@@ -61,6 +42,7 @@ size_8m = 2**23
 share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
 lease_rh = pike.smb2.SMB2_LEASE_READ_CACHING | pike.smb2.SMB2_LEASE_HANDLE_CACHING
 
+
 # debugging callback functions which are registered if debug logging is enabled
 def post_serialize_credit_assessment(nb):
     smb_res = nb[0]
@@ -71,6 +53,7 @@ def post_serialize_credit_assessment(nb):
         smb_res.credit_request,
         nb.conn.credits))
 
+
 def post_deserialize_credit_assessment(nb):
     smb_res = nb[0]
     print("{0} ({1}) ___ Charge: {2} / Response: {3} / Total: {4}".format(
@@ -79,6 +62,7 @@ def post_deserialize_credit_assessment(nb):
         smb_res.credit_charge,
         smb_res.credit_response,
         nb.conn.credits + smb_res.credit_response - smb_res.credit_charge))
+
 
 def post_serialize_credit_assert(exp_credit_charge, future):
     def cb(nb):
@@ -90,6 +74,7 @@ def post_serialize_credit_assert(exp_credit_charge, future):
                                 nb[0].credit_charge))
             future.complete(True)
     return cb
+
 
 @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
 class CreditTest(pike.test.PikeTest):
@@ -350,6 +335,7 @@ class CreditTest(pike.test.PikeTest):
         chan.close(fh)
         self.assertEqual(read_buffer.tobytes(), file_buf)
 
+
 class PowerOf2CreditTest(CreditTest):
 
     def test_1_1m_write_1_1m_read(self):
@@ -375,6 +361,7 @@ class PowerOf2CreditTest(CreditTest):
 
     def test_5_192k_write_1_960k_read(self):
         self.generic_mc_write_mc_read(size_960k, size_192k, size_960k)
+
 
 class EdgeCreditTest(CreditTest):
     def test_sequence_number_wrap(self):
@@ -420,6 +407,7 @@ class EdgeCreditTest(CreditTest):
 
         # at the end, next mid should be > target
         self.assertGreater(chan1.connection._next_mid, sequence_number_target)
+
 
 class AsyncCreditTest(CreditTest):
     def test_async_lock(self):
@@ -541,6 +529,7 @@ class AsyncCreditTest(CreditTest):
         chan2.close(fh2)
         chan1.close(fh1)
 
+
 class TestCaseGenerator(object):
     header = """#!/usr/bin/env python
 import pike.test
@@ -555,6 +544,7 @@ class Generated_{name}_{tag}(pike.test.credit.CreditTest):
     template = """
     def test_{name}_{tag}_{ix}(self):
         self.generic_arbitrary_mc_write_mc_read({file_size}, {write_size}, {read_size})"""
+
     @classmethod
     def generate_multiple_64k_test_cases(cls, tag, n_cases, size_range_multiple, write_range_multiple, read_range_multiple):
         name = "Mult64k"
@@ -576,6 +566,7 @@ class Generated_{name}_{tag}(pike.test.credit.CreditTest):
             read_size = random.randint(*read_range)
             print(cls.template.format(**locals()))
         print(cls.footer.format(**locals()))
+
 
 if __name__ == "__main__":
     import argparse

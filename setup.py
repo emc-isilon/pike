@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+#
+# Copyright (c) 2016-2020, Dell Inc. or its subsidiaries.
+# All rights reserved.
+# See file LICENSE for licensing information.
+#
 
 import ctypes
 import os

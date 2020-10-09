@@ -1,27 +1,7 @@
 #
-# Copyright (c) 2015, EMC Corporation
+# Copyright (c) 2015-2020, Dell Inc. or its subsidiaries.
 # All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#
-# 1. Redistributions of source code must retain the above copyright notice,
-# this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-# this list of conditions and the following disclaimer in the documentation
-# and/or other materials provided with the distribution.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
+# See file LICENSE for licensing information.
 #
 # Module Name:
 #
@@ -34,6 +14,7 @@
 # Authors: Avi Bhandari (avi.bahndari@emc.com)
 #          Masen Furer (masen.furer@emc.com)
 #
+
 from __future__ import division
 from builtins import chr
 from builtins import range
@@ -61,11 +42,13 @@ SIMPLE_5_CHUNKS = [(0, 0, 4000), (4000, 4000, 4000), (8000, 8000, 4000),
                    (12000, 12000, 4000), (16000, 16000, 4000)]
 SIMPLE_5_CHUNKS_LEN = 20000
 
+
 def _gen_test_buffer(length):
     # XXX: refactor and push up into helper/util module
     pattern = "".join([chr(x) for x in range(ord(' '), ord('~'))])
     buf = (pattern * ((length // len(pattern)) + 1))[:length]
     return buf.encode("ascii")
+
 
 def _gen_random_test_buffer(length):
     # XXX: refactor and push up into helper/util module
@@ -82,6 +65,7 @@ def _gen_random_test_buffer(length):
 ###
 # Main test
 ###
+
 class TestServerSideCopy(pike.test.PikeTest):
     # these values are valid for Windows -- other servers may need to adjust
     bad_resume_key_error = pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND

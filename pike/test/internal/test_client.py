@@ -1,3 +1,9 @@
+#
+# Copyright (c) 2020, Dell Inc. or its subsidiaries.
+# All rights reserved.
+# See file LICENSE for licensing information.
+#
+
 import pytest
 
 from pike.model import Client

@@ -1,4 +1,11 @@
+#
+# Copyright (c) 2020, Dell Inc. or its subsidiaries.
+# All rights reserved.
+# See file LICENSE for licensing information.
+#
+
 """Pike/pytest integration."""
+
 import pytest
 
 import pike.test
