@@ -1,3 +1,9 @@
+#
+# Copyright (c) 2020, Dell Inc. or its subsidiaries.
+# All rights reserved.
+# See file LICENSE for licensing information.
+#
+
 # test vectors from Microsoft openspecification group
 # SMB 3.0 Encryption: https://blogs.msdn.microsoft.com/openspecification/2012/10/05/encryption-in-smb-3-0-a-protocol-perspective/
 # SMB 3.1.1 Encryption: https://blogs.msdn.microsoft.com/openspecification/2015/09/09/smb-3-1-1-encryption-in-windows-10/

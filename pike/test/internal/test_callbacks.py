@@ -1,3 +1,9 @@
+#
+# Copyright (c) 2020, Dell Inc. or its subsidiaries.
+# All rights reserved.
+# See file LICENSE for licensing information.
+#
+
 import pike.core as core
 import pike.model as model
 import pike.smb2 as smb2
