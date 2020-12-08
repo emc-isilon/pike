@@ -1628,14 +1628,30 @@ class Channel(object):
                         file_information_class=smb2.FILE_BASIC_INFORMATION,
                         info_type=smb2.SMB2_0_INFO_FILE,
                         output_buffer_length=4096,
-                        additional_information=None):
-        return self.connection.transceive(
+                        additional_information=None,
+                        first_result_only=None):
+        if first_result_only is None:
+            warnings.warn(
+                "In a future release, query_file_info will return QueryInfoResponse "
+                "instead of the first result from QueryInfoResponse. To maintain "
+                "the previous behavior (and silence this warning) pass "
+                "`first_result_only=True`. To opt-in to the new behavior, pass "
+                "`first_result_only=False`, which will become the new default.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            first_result_only = True
+        resp = self.connection.transceive(
                 self.query_file_info_request(
                     create_res,
                     file_information_class,
                     info_type,
                     output_buffer_length,
-                    additional_information).parent.parent)[0][0][0]
+                    additional_information).parent.parent)[0][0]
+        if first_result_only:
+            # only returning the first child info
+            return resp[0]
+        return resp
 
     def set_file_info_request(
             self,
