@@ -2130,6 +2130,7 @@ class QueryDirectoryResponse(Response):
 
         # Try to figure out file information class by looking up
         # associated request in context
+        request = None
         context = self.context
 
         if context:
