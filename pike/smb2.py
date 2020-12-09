@@ -2130,6 +2130,7 @@ class QueryDirectoryResponse(Response):
 
         # Try to figure out file information class by looking up
         # associated request in context
+        request = None
         context = self.context
 
         if context:
@@ -2285,13 +2286,14 @@ class QueryInfoResponse(Response):
         end = cur + output_buffer_length
 
         key = (self._info_type, self._file_information_class)
-        if key in self._info_map:
-            cls = self._info_map[key]
-            with cur.bounded(cur, end):
-                if cls == FileSecurityInformation:
-                    cls(self, end).decode(cur)
-                else:
-                    cls(self).decode(cur)
+        info_cls = self._info_map.get(key)
+        if info_cls is not None:
+            if info_cls == FileSecurityInformation:
+                info_cls(self, end).decode(cur)
+            else:
+                with cur.bounded(cur, end):
+                    while cur < end:
+                        info_cls(self).decode(cur)
         else:
             Information(self, end).decode(cur)
 
@@ -2828,6 +2830,8 @@ class FileStreamInformation(FileInformation):
         self.stream_size = cur.decode_int64le()
         self.stream_allocation_size = cur.decode_int64le()
         self.stream_name = cur.decode_utf16le(self.stream_name_length)
+        if self.next_entry_offset:
+            cur.advanceto(self.start + self.next_entry_offset)
 
 
 # Compression Format

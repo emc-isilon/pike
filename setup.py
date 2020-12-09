@@ -111,7 +111,8 @@ def run_setup(with_extensions):
             'enum34~=1.1.6;  python_version ~= "2.7"',
             'attrs~=19.3.0',
             "pycryptodomex",
-            "future"
+            "future",
+            "six",
         ],
         ext_modules=ext_modules,
         test_suite="setup.pike_suite",
