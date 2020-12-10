@@ -26,7 +26,7 @@ RelatedOpen = pike.model.RelatedOpen
 class CompoundTest(pike.test.PikeTest):
 
     # Compounded create/close of the same file, with maximal access request
-    def test_create_close(self):
+    def generic_test_create_close(self, sid=None, tid=None):
         chan, tree = self.tree_connect()
 
         # Manually assemble a chained request
@@ -46,7 +46,36 @@ class CompoundTest(pike.test.PikeTest):
         close_req.file_id = pike.smb2.RELATED_FID
         smb_req2.flags |= pike.smb2.SMB2_FLAGS_RELATED_OPERATIONS
 
+        if sid is not None:
+            smb_req2.session_id = sid
+        if tid is not None:
+            smb_req2.tree_id = tid
+ 
         chan.connection.transceive(nb_req)
+
+    def test_create_close(self):
+        self.generic_test_create_close()
+
+    def test_create_close_with_invalid_sid(self):
+        # verify that compound request with invalid session-id works
+        self.generic_test_create_close(sid=pike.smb2.RELATED_SID)
+
+    def test_create_close_with_invalid_tid(self):
+        # verify that compound request with invalid tree-id works
+        self.generic_test_create_close(tid=pike.smb2.RELATED_TID)
+
+    def test_create_close_with_invalid_sid_and_tid(self):
+        # verify that compound request with invalid session & tree id's works
+        self.generic_test_create_close(sid=pike.smb2.RELATED_SID,
+                                        tid=pike.smb2.RELATED_TID)
+
+    def test_create_close_with_bogus_sid(self):
+        # verify that compound request with bogus session-id works
+        self.generic_test_create_close(sid=0xdeadbeef)
+
+    def test_create_close_with_bogus_sid_and_tid(self):
+        # verify that compound request with bogus session-id works
+        self.generic_test_create_close(sid=0xdeadbeef, tid=0xfeedface)
 
     # Compound create/query/close
     def test_create_query_close(self):
