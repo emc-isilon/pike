@@ -1,6 +1,8 @@
 # Copyright (c) 2020, Dell Inc. or its subsidiaries.
 # All rights reserved.
 # See file LICENSE for licensing information.
+#
+# Reference: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions (https://archive.vn/1aWt2)
 ---
 name: Run tests against samba
 
