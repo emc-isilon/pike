@@ -31,6 +31,7 @@ from future.utils import with_metaclass
 
 class BufferOverrun(Exception):
     """Buffer overrun exception"""
+
     def __init__(self, cursor, request, boundary):
         self.cursor = cursor
         self.request = request
@@ -112,7 +113,7 @@ class Cursor(object):
     @ivar bounds: Pair of lower and upper bound on offset
     """
 
-    def __init__(self, arr, offset, bounds=(None,None)):
+    def __init__(self, arr, offset, bounds=(None, None)):
         """
         Create a L{Cursor} for the given array
         at the given offset.
@@ -185,13 +186,21 @@ class Cursor(object):
             step = index.step
 
             self._check_bounds(start, stop)
-            return self.array.__getitem__(slice(start,stop,step))
+            return self.array.__getitem__(slice(start, stop, step))
         else:
-            self._check_bounds(index, index+1)
+            self._check_bounds(index, index + 1)
             return self.array.__getitem__(index)
 
     def __repr__(self):
-        return 'Cursor(' + object.__repr__(self.array) + ',' + repr(self.offset) + ',' + repr(self.bounds) + ')'
+        return (
+            "Cursor("
+            + object.__repr__(self.array)
+            + ","
+            + repr(self.offset)
+            + ","
+            + repr(self.bounds)
+            + ")"
+        )
 
     def copy(self):
         """ Create copy of cursor. """
@@ -199,14 +208,14 @@ class Cursor(object):
 
     def _expand_to(self, size):
         cur_size = len(self.array)
-        if (size > cur_size):
-            self.array.extend([0]*(size - cur_size))
+        if size > cur_size:
+            self.array.extend([0] * (size - cur_size))
 
     def encode_bytes(self, val):
         """ Encode bytes.  Accepts byte arrays, strings, and integer lists."""
         size = len(val)
         self._expand_to(self.offset + size)
-        self.array[self.offset:self.offset + size] = array.array('B',val)
+        self.array[self.offset : self.offset + size] = array.array("B", val)
         self.offset += size
 
     def encode_struct(self, fmt, *args):
@@ -216,38 +225,38 @@ class Cursor(object):
         self.offset += size
 
     def encode_uint8be(self, val):
-        self.encode_struct('>B', val)
+        self.encode_struct(">B", val)
 
     def encode_uint16be(self, val):
-        self.encode_struct('>H', val)
+        self.encode_struct(">H", val)
 
     def encode_uint32be(self, val):
-        self.encode_struct('>L', val)
+        self.encode_struct(">L", val)
 
     def encode_uint64be(self, val):
-        self.encode_struct('>Q', val)
+        self.encode_struct(">Q", val)
 
     def encode_uint8le(self, val):
-        self.encode_struct('<B', val)
+        self.encode_struct("<B", val)
 
     def encode_uint16le(self, val):
-        self.encode_struct('<H', val)
+        self.encode_struct("<H", val)
 
     def encode_uint32le(self, val):
-        self.encode_struct('<L', val)
+        self.encode_struct("<L", val)
 
     def encode_uint64le(self, val):
-        self.encode_struct('<Q', val)
+        self.encode_struct("<Q", val)
 
     def encode_int64le(self, val):
-        self.encode_struct('<q', val)
+        self.encode_struct("<q", val)
 
     def encode_utf16le(self, val):
-        self.encode_bytes(str(val).encode('utf-16le'))
+        self.encode_bytes(str(val).encode("utf-16le"))
 
     def trunc(self):
         self._expand_to(self.offset)
-        del self.array[self.offset:]
+        del self.array[self.offset :]
 
     def _check_bounds(self, start, end):
         lower = self.bounds[0] if self.bounds[0] is not None else 0
@@ -260,7 +269,7 @@ class Cursor(object):
 
     def decode_bytes(self, size):
         self._check_bounds(self.offset, self.offset + size)
-        result = self.array[self.offset:self.offset+size]
+        result = self.array[self.offset : self.offset + size]
         self.offset += size
         return result
 
@@ -272,37 +281,37 @@ class Cursor(object):
         return result
 
     def decode_uint8be(self):
-        return self.decode_struct('>B')[0]
+        return self.decode_struct(">B")[0]
 
     def decode_uint16be(self):
-        return self.decode_struct('>H')[0]
+        return self.decode_struct(">H")[0]
 
     def decode_uint32be(self):
-        return self.decode_struct('>L')[0]
+        return self.decode_struct(">L")[0]
 
     def decode_uint64be(self):
-        return self.decode_struct('>Q')[0]
+        return self.decode_struct(">Q")[0]
 
     def decode_uint8le(self):
-        return self.decode_struct('<B')[0]
+        return self.decode_struct("<B")[0]
 
     def decode_uint16le(self):
-        return self.decode_struct('<H')[0]
+        return self.decode_struct("<H")[0]
 
     def decode_uint32le(self):
-        return self.decode_struct('<L')[0]
+        return self.decode_struct("<L")[0]
 
     def decode_int32le(self):
-        return self.decode_struct('<l')[0]
+        return self.decode_struct("<l")[0]
 
     def decode_uint64le(self):
-        return self.decode_struct('<Q')[0]
+        return self.decode_struct("<Q")[0]
 
     def decode_int64le(self):
-        return self.decode_struct('<q')[0]
+        return self.decode_struct("<q")[0]
 
     def decode_utf16le(self, size):
-        return self.decode_bytes(size).tobytes().decode('utf-16le')
+        return self.decode_bytes(size).tobytes().decode("utf-16le")
 
     def align(self, base, val):
         assert self.array is base.array
@@ -310,7 +319,7 @@ class Cursor(object):
         if rem != 0:
             self.offset += val - rem
 
-    def seekto(self, o, lowerbound = None, upperbound = None):
+    def seekto(self, o, lowerbound=None, upperbound=None):
         assert self.array is o.array
         if lowerbound is not None and o < lowerbound:
             raise BufferOverrun(self, o, lowerbound)
@@ -318,10 +327,10 @@ class Cursor(object):
             raise BufferOverrun(self, o, upperbound)
         self.offset = o.offset
 
-    def advanceto(self, o, bound = None):
+    def advanceto(self, o, bound=None):
         self.seekto(o, self, bound)
 
-    def reverseto(self, o, bound = None):
+    def reverseto(self, o, bound=None):
         self.seekto(o, bound, self)
 
     @property
@@ -355,18 +364,20 @@ class Cursor(object):
     class Hole(object):
         def __init__(self, cur):
             self.cur = cur
+
         def __getattr__(self, attr):
             if hasattr(self.cur.__class__, attr):
                 f = getattr(self.cur.__class__, attr)
                 if callable(f):
                     copy = self.cur.copy()
+
                     def f2(*args, **kwargs):
                         offset = copy.offset
-                        f(copy,*args,**kwargs)
+                        f(copy, *args, **kwargs)
                         copy.offset = offset
 
                     def f1(*args, **kwargs):
-                        f(self.cur,*args,**kwargs)
+                        f(self.cur, *args, **kwargs)
                         return f2
 
                     return f1
@@ -378,7 +389,7 @@ class Cursor(object):
     class Bounds(object):
         def __init__(self, cur, lower, upper):
             self.cur = cur
-            self.bounds = (lower,upper)
+            self.bounds = (lower, upper)
 
         def __enter__(self):
             self.oldbounds = self.cur.bounds
@@ -388,6 +399,7 @@ class Cursor(object):
         def __exit__(self, exc_type, exc_value, traceback):
             self.cur.bounds = self.oldbounds
 
+
 class BadPacket(Exception):
     pass
 
@@ -395,21 +407,21 @@ class BadPacket(Exception):
 class FrameMeta(type):
     def __new__(mcs, name, bases, dict):
         # Inherit _register from bases
-        dict['_register'] = []
+        dict["_register"] = []
         for base in bases:
-            if hasattr(base, '_register'):
-                dict['_register'] += base._register
+            if hasattr(base, "_register"):
+                dict["_register"] += base._register
 
         # Inherit field_blacklist from bases
-        if 'field_blacklist' in dict:
+        if "field_blacklist" in dict:
             for base in bases:
-                if hasattr(base,'field_blacklist'):
-                    dict['field_blacklist'] += base.field_blacklist
+                if hasattr(base, "field_blacklist"):
+                    dict["field_blacklist"] += base.field_blacklist
 
         result = type.__new__(mcs, name, bases, dict)
 
         # Register class in appropriate tables
-        for (table,keyattrs) in result._register:
+        for (table, keyattrs) in result._register:
             if all(hasattr(result, a) for a in keyattrs):
                 key = [getattr(result, a) for a in keyattrs]
                 if len(key) == 1:
@@ -420,13 +432,14 @@ class FrameMeta(type):
 
         return result
 
+
 class Frame(with_metaclass(FrameMeta)):
-    field_blacklist = ['fields','parent','start','end']
-    LOG_CHILDREN_COUNT = False    # Include len(children) in __repr__
-    LOG_CHILDREN_EXPAND = False   # Include c._log_str for all children
+    field_blacklist = ["fields", "parent", "start", "end"]
+    LOG_CHILDREN_COUNT = False  # Include len(children) in __repr__
+    LOG_CHILDREN_EXPAND = False  # Include c._log_str for all children
 
     def __init__(self, parent, context=None):
-        object.__setattr__(self, 'fields', [])
+        object.__setattr__(self, "fields", [])
         self.parent = parent
         self._context = context
 
@@ -440,9 +453,11 @@ class Frame(with_metaclass(FrameMeta)):
         return self.children.__iter__()
 
     def __setattr__(self, name, value):
-        if not name.startswith('_') and \
-           name not in self.fields and \
-           name not in self.field_blacklist:
+        if (
+            not name.startswith("_")
+            and name not in self.fields
+            and name not in self.field_blacklist
+        ):
             self.fields.append(name)
         object.__setattr__(self, name, value)
 
@@ -451,8 +466,8 @@ class Frame(with_metaclass(FrameMeta)):
 
     @staticmethod
     def _value_str(value):
-        if isinstance(value, array.array) and value.typecode == 'B':
-            return '0x' + ''.join('%.2x' % b for b in value)
+        if isinstance(value, array.array) and value.typecode == "B":
+            return "0x" + "".join("%.2x" % b for b in value)
         else:
             return str(value)
 
@@ -529,7 +544,7 @@ class Frame(with_metaclass(FrameMeta)):
 
     @property
     def children(self):
-        return self._children() if hasattr(self, '_children') else []
+        return self._children() if hasattr(self, "_children") else []
 
     def encode(self, cur):
         self._encode_pre(cur)
@@ -542,7 +557,7 @@ class Frame(with_metaclass(FrameMeta)):
         self._decode_post(cur)
 
     def serialize(self):
-        self.buf = array.array('B')
+        self.buf = array.array("B")
         cursor = Cursor(self.buf, 0)
         self.encode(cursor)
         return self.buf
@@ -566,6 +581,7 @@ class Frame(with_metaclass(FrameMeta)):
         children = self.parent.children
         return children.index(self) == len(children) - 1
 
+
 class Register(object):
     def __init__(self, table, *keyattrs):
         self.table = table
@@ -573,7 +589,7 @@ class Register(object):
 
     def __call__(self, cls):
         assert issubclass(cls, Frame)
-        cls._register.append((self.table,self.keyattrs))
+        cls._register.append((self.table, self.keyattrs))
         return cls
 
 
@@ -583,7 +599,7 @@ class EnumMeta(type):
         valtoname = {}
         misc = {}
 
-        for (name,val) in idict.items():
+        for (name, val) in idict.items():
             if name[0].isupper():
                 nametoval[name] = val
                 valtoname[val] = name
@@ -597,11 +613,12 @@ class EnumMeta(type):
         return cls
 
     def __getattribute__(cls, name):
-        nametoval = type.__getattribute__(cls, '_nametoval')
+        nametoval = type.__getattribute__(cls, "_nametoval")
         if name in nametoval:
             return cls(nametoval[name])
         else:
             return type.__getattribute__(cls, name)
+
 
 class Enum(with_metaclass(EnumMeta, int)):
     """
@@ -705,6 +722,7 @@ class ValueEnum(Enum):
         else:
             return hex(self)
 
+
 class FlagEnum(Enum):
     """
     Flag Enumeration
@@ -731,20 +749,25 @@ class FlagEnum(Enum):
                 remaining &= ~flag
 
         if remaining != 0:
-            raise ValueError("Invalid %s: 0x%x (remainder 0x%x)" % (cls.__name__, value, remaining))
+            raise ValueError(
+                "Invalid %s: 0x%x (remainder 0x%x)" % (cls.__name__, value, remaining)
+            )
 
     def __str__(self):
-        names = [name for (name, flag) in self.items()
-                 if (flag != 0 and flag & self == flag) or
-                 (self == 0 and flag == 0)]
+        names = [
+            name
+            for (name, flag) in self.items()
+            if (flag != 0 and flag & self == flag) or (self == 0 and flag == 0)
+        ]
 
-        return ' | '.join(names) if len(names) else '0'
+        return " | ".join(names) if len(names) else "0"
 
     def __or__(self, o):
-        return self.__class__(super(FlagEnum,self).__or__(o))
+        return self.__class__(super(FlagEnum, self).__or__(o))
 
     def __and__(self, o):
-        return self.__class__(super(FlagEnum,self).__and__(o))
+        return self.__class__(super(FlagEnum, self).__and__(o))
+
 
 class Let(object):
     """
@@ -773,6 +796,7 @@ class Let(object):
         a_thing = fac.generate_thing()
         self.assertEqual(a_thing.this, "that")
     """
+
     def __init__(self, target, settings_dict):
         self.target = target
         self.settings_dict = settings_dict
