@@ -40,10 +40,10 @@ jobs:
       run: python setup.py install
     - name: Install pytest
       run: pip install pytest
-    - name: Run Pike
-      run: python -m unittest -v pike.test.samba_suite
+    - name: Test Pike
       env:
         PIKE_SERVER: 127.0.0.1
         PIKE_PORT: ${{ job.services.samba.ports[445] }}
         PIKE_SHARE: pike
         PIKE_CREDS: pike%GiThubCI123
+      run: python -m unittest -v pike.test.samba_suite
