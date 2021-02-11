@@ -17,7 +17,7 @@ jobs:
 
     services:
       samba:
-        image: dperson/samba:latest
+        image: dperson/samba@sha256:2d94eb73e10402751afff19af10d3ad91014b137843bdd960bb39f4188acdcfa
         env:
           USER: pike;GiThubCI123
           SHARE: pike;/share;;no;no;;pike;;
