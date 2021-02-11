@@ -17,7 +17,7 @@ jobs:
 
     services:
       samba:
-        image: dperson/samba:latest
+        image: dperson/samba@sha256:2d94eb73e10402751afff19af10d3ad91014b137843bdd960bb39f4188acdcfa
         env:
           USER: pike;GiThubCI123
           SHARE: pike;/share;;no;no;;pike;;
@@ -43,7 +43,7 @@ jobs:
     - name: Run Pike
       run: python -m unittest -v pike.test.samba_suite
       env:
-        PIKE_SERVER: localhost
+        PIKE_SERVER: 127.0.0.1
         PIKE_PORT: ${{ job.services.samba.ports[445] }}
         PIKE_SHARE: pike
         PIKE_CREDS: pike%GiThubCI123
