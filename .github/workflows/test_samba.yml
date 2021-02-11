@@ -43,7 +43,7 @@ jobs:
     - name: Run Pike
       run: python -m unittest -v pike.test.samba_suite
       env:
-        PIKE_SERVER: localhost
+        PIKE_SERVER: 127.0.0.1
         PIKE_PORT: ${{ job.services.samba.ports[445] }}
         PIKE_SHARE: pike
         PIKE_CREDS: pike%GiThubCI123
