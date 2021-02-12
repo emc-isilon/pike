@@ -2336,17 +2336,23 @@ class Open(object):
             self.lease.dispose()
             self.lease = None
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
+    def close(self):
+        if self.tree is None:
+            return
         try:
             chan = self.tree.session.first_channel()
             chan.close(self)
+            self.dispose()
         except StopIteration:
             # If the underlying connection for the channel is closed explicitly
             # open will not able to find an appropriate channel, to send close.
             pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
 
 class RelatedOpen(object):
