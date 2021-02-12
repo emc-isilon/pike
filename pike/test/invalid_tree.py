@@ -24,9 +24,8 @@ class InvalidTreeTest(pike.test.PikeTest):
     def open_file(self, filename):
         self.chan, self.tree = self.tree_connect()
         fh = self.chan.create(
-            self.tree,
-            filename,
-            disposition=smb2.FILE_SUPERSEDE).result()
+            self.tree, filename, disposition=smb2.FILE_SUPERSEDE
+        ).result()
         return fh
 
     def test_treeconnect(self):
@@ -38,7 +37,7 @@ class InvalidTreeTest(pike.test.PikeTest):
         tree_con_req1.path = tree.path
 
         # Set invalid tree id
-        req1.tree_id = 0xffffffff
+        req1.tree_id = 0xFFFFFFFF
 
         res1 = chan.connection.transceive(req1.parent)[0]
         # New tree id has to be new and unique
@@ -74,7 +73,7 @@ class InvalidTreeTest(pike.test.PikeTest):
         val_req1.dialects = self.chan.session.client.dialects
 
         # Set invalid tree id
-        req1.tree_id = 0xffffffff
+        req1.tree_id = 0xFFFFFFFF
 
         with self.assert_error(nt.STATUS_NETWORK_NAME_DELETED):
             self.chan.connection.transceive(req1.parent)
@@ -90,7 +89,7 @@ class InvalidTreeTest(pike.test.PikeTest):
         oplock_ack_req1.file_id = fh.file_id
 
         # Set invalid tree id
-        req1.tree_id = 0xffffffff
+        req1.tree_id = 0xFFFFFFFF
 
         with self.assert_error(nt.STATUS_NETWORK_NAME_DELETED):
             self.chan.connection.transceive(req1.parent)

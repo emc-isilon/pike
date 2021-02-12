@@ -28,33 +28,48 @@ import pike.ntstatus
 
 # for buffer too small
 class InvalidNetworkResiliencyRequestRequest(pike.smb2.NetworkResiliencyRequestRequest):
-    def  _encode(self, cur):
+    def _encode(self, cur):
         cur.encode_uint32le(self.timeout)
         cur.encode_uint16le(self.reserved)
 
 
 @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_LEASING)
 class DurableHandleTest(pike.test.PikeTest):
-    share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
-    lease1 = array.array('B', map(random.randint, [0] * 16, [255] * 16))
-    lease2 = array.array('B', map(random.randint, [0] * 16, [255] * 16))
+    share_all = (
+        pike.smb2.FILE_SHARE_READ
+        | pike.smb2.FILE_SHARE_WRITE
+        | pike.smb2.FILE_SHARE_DELETE
+    )
+    lease1 = array.array("B", map(random.randint, [0] * 16, [255] * 16))
+    lease2 = array.array("B", map(random.randint, [0] * 16, [255] * 16))
     r = pike.smb2.SMB2_LEASE_READ_CACHING
     rw = r | pike.smb2.SMB2_LEASE_WRITE_CACHING
     rh = r | pike.smb2.SMB2_LEASE_HANDLE_CACHING
     rwh = rw | rh
     buffer_too_small_error = pike.ntstatus.STATUS_INVALID_PARAMETER
 
-    def create(self, chan, tree, durable, lease=rwh, lease_key=lease1,
-               disposition=pike.smb2.FILE_SUPERSEDE):
-        return chan.create(tree,
-                           'durable.txt',
-                           access=pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE,
-                           share=self.share_all,
-                           disposition=disposition,
-                           oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
-                           lease_key = lease_key,
-                           lease_state = lease,
-                           durable=durable).result()
+    def create(
+        self,
+        chan,
+        tree,
+        durable,
+        lease=rwh,
+        lease_key=lease1,
+        disposition=pike.smb2.FILE_SUPERSEDE,
+    ):
+        return chan.create(
+            tree,
+            "durable.txt",
+            access=pike.smb2.FILE_READ_DATA
+            | pike.smb2.FILE_WRITE_DATA
+            | pike.smb2.DELETE,
+            share=self.share_all,
+            disposition=disposition,
+            oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
+            lease_key=lease_key,
+            lease_state=lease,
+            durable=durable,
+        ).result()
 
     def durable_test(self, durable):
         chan, tree = self.tree_connect()
@@ -123,12 +138,14 @@ class DurableHandleTest(pike.test.PikeTest):
         chan2, tree2 = self.tree_connect(client=pike.model.Client())
 
         # Invalidate handle from separate client
-        handle2 = self.create(chan2,
-                              tree2,
-                              durable=durable,
-                              lease=self.rw,
-                              lease_key=self.lease2,
-                              disposition=pike.smb2.FILE_OPEN)
+        handle2 = self.create(
+            chan2,
+            tree2,
+            durable=durable,
+            lease=self.rw,
+            lease_key=self.lease2,
+            disposition=pike.smb2.FILE_OPEN,
+        )
         self.assertEqual(handle2.lease.lease_state, self.rw)
         chan2.close(handle2)
 
@@ -157,12 +174,14 @@ class DurableHandleTest(pike.test.PikeTest):
 
         chan2, tree2 = self.tree_connect(client=pike.model.Client())
 
-        handle2 = self.create(chan2,
-                              tree2,
-                              durable=durable,
-                              lease=self.rw,
-                              lease_key=self.lease2,
-                              disposition=pike.smb2.FILE_OPEN)
+        handle2 = self.create(
+            chan2,
+            tree2,
+            durable=durable,
+            lease=self.rw,
+            lease_key=self.lease2,
+            disposition=pike.smb2.FILE_OPEN,
+        )
         # resiliency interact handle2's lease_status(before rw, now r)
         self.assertEqual(handle2.lease.lease_state, self.r)
         chan2.close(handle2)
@@ -191,18 +210,19 @@ class DurableHandleTest(pike.test.PikeTest):
 
         chan2, tree2 = self.tree_connect(client=pike.model.Client())
         # Invalidate handle from separate client
-        handle2 = self.create(chan2,
-                              tree2,
-                              durable=durable,
-                              lease=self.rw,
-                              lease_key=self.lease2,
-                              disposition=pike.smb2.FILE_OPEN)
+        handle2 = self.create(
+            chan2,
+            tree2,
+            durable=durable,
+            lease=self.rw,
+            lease_key=self.lease2,
+            disposition=pike.smb2.FILE_OPEN,
+        )
 
         self.assertEqual(handle2.lease.lease_state, self.rw)
         chan2.close(handle2)
         chan2.connection.close()
         chan3, tree3 = self.tree_connect()
-
 
         # Reconnect should fail(resiliency timeout)
         with self.assert_error(pike.ntstatus.STATUS_OBJECT_NAME_NOT_FOUND):
@@ -211,9 +231,7 @@ class DurableHandleTest(pike.test.PikeTest):
     @pike.test.RequireDialect(pike.smb2.DIALECT_SMB2_1)
     def test_resiliency_buffer_too_small(self, durable=True):
         chan, tree = self.tree_connect()
-        handle1 = self.create(chan,
-                          tree,
-                          durable=durable)
+        handle1 = self.create(chan, tree, durable=durable)
         self.assertEqual(handle1.is_durable, durable)
 
         timeout = 5
@@ -232,12 +250,14 @@ class DurableHandleTest(pike.test.PikeTest):
         chan.connection.close()
 
         chan2, tree2 = self.tree_connect(client=pike.model.Client())
-        handle2 = self.create(chan2,
-                          tree2,
-                          durable=durable,
-                          lease=self.rw,
-                          lease_key=self.lease2,
-                          disposition=pike.smb2.FILE_OPEN)
+        handle2 = self.create(
+            chan2,
+            tree2,
+            durable=durable,
+            lease=self.rw,
+            lease_key=self.lease2,
+            disposition=pike.smb2.FILE_OPEN,
+        )
 
         self.assertEqual(handle2.lease.lease_state, self.rw)
         chan2.close(handle2)

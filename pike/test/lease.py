@@ -27,9 +27,13 @@ import pike.test
 @pike.test.RequireDialect(0x210)
 @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_LEASING)
 class LeaseTest(pike.test.PikeTest):
-    share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
-    lease1 = array.array('B', map(random.randint, [0] * 16, [255] * 16))
-    lease2 = array.array('B', map(random.randint, [0] * 16, [255] * 16))
+    share_all = (
+        pike.smb2.FILE_SHARE_READ
+        | pike.smb2.FILE_SHARE_WRITE
+        | pike.smb2.FILE_SHARE_DELETE
+    )
+    lease1 = array.array("B", map(random.randint, [0] * 16, [255] * 16))
+    lease2 = array.array("B", map(random.randint, [0] * 16, [255] * 16))
     r = pike.smb2.SMB2_LEASE_READ_CACHING
     rw = r | pike.smb2.SMB2_LEASE_WRITE_CACHING
     rh = r | pike.smb2.SMB2_LEASE_HANDLE_CACHING
@@ -40,35 +44,43 @@ class LeaseTest(pike.test.PikeTest):
         chan, tree = self.tree_connect()
 
         # Request rw lease
-        handle1 = chan.create(tree,
-                              'lease.txt',
-                              share=self.share_all,
-                              oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
-                              lease_key = self.lease1,
-                              lease_state = self.rw).result()
+        handle1 = chan.create(
+            tree,
+            "lease.txt",
+            share=self.share_all,
+            oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
+            lease_key=self.lease1,
+            lease_state=self.rw,
+        ).result()
 
         self.assertEqual(handle1.lease.lease_state, self.rw)
 
-        handle2 = chan.create(tree,
-                              'lease.txt',
-                              share=self.share_all,
-                              oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
-                              lease_key = self.lease1,
-                              lease_state = self.rwh).result()
+        handle2 = chan.create(
+            tree,
+            "lease.txt",
+            share=self.share_all,
+            oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
+            lease_key=self.lease1,
+            lease_state=self.rwh,
+        ).result()
 
         self.assertIs(handle2.lease, handle1.lease)
         self.assertEqual(handle2.lease.lease_state, self.rwh)
 
         # On break, voluntarily give up handle caching
-        handle2.lease.on_break(lambda state: state & ~pike.smb2.SMB2_LEASE_HANDLE_CACHING)
+        handle2.lease.on_break(
+            lambda state: state & ~pike.smb2.SMB2_LEASE_HANDLE_CACHING
+        )
 
         # Break our lease
-        handle3 = chan.create(tree,
-                              'lease.txt',
-                              share=self.share_all,
-                              oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
-                              lease_key = self.lease2,
-                              lease_state = self.rwh).result()
+        handle3 = chan.create(
+            tree,
+            "lease.txt",
+            share=self.share_all,
+            oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
+            lease_key=self.lease2,
+            lease_state=self.rwh,
+        ).result()
 
         # First lease should have broken to r
         self.assertEqual(handle2.lease.lease_state, self.r)
@@ -83,28 +95,34 @@ class LeaseTest(pike.test.PikeTest):
     def test_lease_break_close_ack(self):
         chan, tree = self.tree_connect()
         # Request rw lease
-        handle1 = chan.create(tree,
-                              'lease.txt',
-                              share=self.share_all,
-                              oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
-                              lease_key = self.lease1,
-                              lease_state = self.rw).result()
+        handle1 = chan.create(
+            tree,
+            "lease.txt",
+            share=self.share_all,
+            oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
+            lease_key=self.lease1,
+            lease_state=self.rw,
+        ).result()
 
         # Upgrade to rwh
-        handle2 = chan.create(tree,
-                              'lease.txt',
-                              share=self.share_all,
-                              oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
-                              lease_key = self.lease1,
-                              lease_state = self.rwh).result()
+        handle2 = chan.create(
+            tree,
+            "lease.txt",
+            share=self.share_all,
+            oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
+            lease_key=self.lease1,
+            lease_state=self.rwh,
+        ).result()
 
         # Break our lease
-        handle3_future = chan.create(tree,
-                                     'lease.txt',
-                                     share=self.share_all,
-                                     oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
-                                     lease_key = self.lease2,
-                                     lease_state = self.rwh)
+        handle3_future = chan.create(
+            tree,
+            "lease.txt",
+            share=self.share_all,
+            oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
+            lease_key=self.lease2,
+            lease_state=self.rwh,
+        )
 
         # Wait for break
         handle1.lease.future.wait()
@@ -126,24 +144,28 @@ class LeaseTest(pike.test.PikeTest):
         chan, tree = self.tree_connect()
 
         # Request rwh lease
-        handle1 = chan.create(tree,
-                              'lease.txt',
-                              share=self.share_all,
-                              oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
-                              lease_key = self.lease1,
-                              lease_state = self.rwh).result()
+        handle1 = chan.create(
+            tree,
+            "lease.txt",
+            share=self.share_all,
+            oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
+            lease_key=self.lease1,
+            lease_state=self.rwh,
+        ).result()
         self.assertEqual(handle1.lease.lease_state, self.rwh)
 
         chan2, tree2 = self.tree_connect()
 
         # Request rwh lease to same file on separate connection,
         # which we should get
-        handle2 = chan2.create(tree2,
-                               'lease.txt',
-                               share=self.share_all,
-                               oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
-                               lease_key = self.lease1,
-                               lease_state = self.rwh).result()
+        handle2 = chan2.create(
+            tree2,
+            "lease.txt",
+            share=self.share_all,
+            oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
+            lease_key=self.lease1,
+            lease_state=self.rwh,
+        ).result()
         self.assertEqual(handle2.lease.lease_state, self.rwh)
 
         # Leases should be the same object

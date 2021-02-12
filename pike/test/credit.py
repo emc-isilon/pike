@@ -29,39 +29,47 @@ import pike.smb2
 import pike.test
 
 # common size constants
-size_64k = 2**16
-size_128k = 2**17
+size_64k = 2 ** 16
+size_128k = 2 ** 17
 size_192k = size_64k + size_128k
-size_512k = 2**19
+size_512k = 2 ** 19
 size_960k = size_192k * 5
-size_1m = 2**20
-size_2m = 2**21
-size_4m = 2**22
-size_8m = 2**23
+size_1m = 2 ** 20
+size_2m = 2 ** 21
+size_4m = 2 ** 22
+size_8m = 2 ** 23
 
-share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
+share_all = (
+    pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
+)
 lease_rh = pike.smb2.SMB2_LEASE_READ_CACHING | pike.smb2.SMB2_LEASE_HANDLE_CACHING
 
 
 # debugging callback functions which are registered if debug logging is enabled
 def post_serialize_credit_assessment(nb):
     smb_res = nb[0]
-    print("{0} ({1}) ___ Charge: {2} / Request: {3} / Total: {4}".format(
-        smb_res.command,
-        smb_res.message_id,
-        smb_res.credit_charge,
-        smb_res.credit_request,
-        nb.conn.credits))
+    print(
+        "{0} ({1}) ___ Charge: {2} / Request: {3} / Total: {4}".format(
+            smb_res.command,
+            smb_res.message_id,
+            smb_res.credit_charge,
+            smb_res.credit_request,
+            nb.conn.credits,
+        )
+    )
 
 
 def post_deserialize_credit_assessment(nb):
     smb_res = nb[0]
-    print("{0} ({1}) ___ Charge: {2} / Response: {3} / Total: {4}".format(
-        smb_res.command,
-        smb_res.message_id,
-        smb_res.credit_charge,
-        smb_res.credit_response,
-        nb.conn.credits + smb_res.credit_response - smb_res.credit_charge))
+    print(
+        "{0} ({1}) ___ Charge: {2} / Response: {3} / Total: {4}".format(
+            smb_res.command,
+            smb_res.message_id,
+            smb_res.credit_charge,
+            smb_res.credit_response,
+            nb.conn.credits + smb_res.credit_response - smb_res.credit_charge,
+        )
+    )
 
 
 def post_serialize_credit_assert(exp_credit_charge, future):
@@ -69,10 +77,12 @@ def post_serialize_credit_assert(exp_credit_charge, future):
         with future:
             if nb[0].credit_charge != exp_credit_charge:
                 raise AssertionError(
-                        "Expected credit_charge {0}. Actual {1}".format(
-                                exp_credit_charge,
-                                nb[0].credit_charge))
+                    "Expected credit_charge {0}. Actual {1}".format(
+                        exp_credit_charge, nb[0].credit_charge
+                    )
+                )
             future.complete(True)
+
     return cb
 
 
@@ -82,11 +92,11 @@ class CreditTest(pike.test.PikeTest):
         super(CreditTest, self).__init__(*args, **kwargs)
         if self.loglevel == pike.test.logging.DEBUG:
             self.default_client.register_callback(
-                    pike.model.EV_REQ_POST_SERIALIZE,
-                    post_serialize_credit_assessment)
+                pike.model.EV_REQ_POST_SERIALIZE, post_serialize_credit_assessment
+            )
             self.default_client.register_callback(
-                    pike.model.EV_RES_POST_DESERIALIZE,
-                    post_deserialize_credit_assessment)
+                pike.model.EV_RES_POST_DESERIALIZE, post_deserialize_credit_assessment
+            )
 
     # set the default credit request to 1 to make things more predictable
     def setUp(self):
@@ -117,25 +127,29 @@ class CreditTest(pike.test.PikeTest):
         with chan.let(credit_request=16):
             fh = chan.create(tree, fname).result()
 
-        self.info("writing {0} chunks of {1} bytes; {2} credits per op".format(
-            write_chunks,
-                write_size,
-                write_credits_per_op))
+        self.info(
+            "writing {0} chunks of {1} bytes; {2} credits per op".format(
+                write_chunks, write_size, write_credits_per_op
+            )
+        )
         for ix in range(write_chunks):
             credit_assert_future = pike.model.Future()
             with chan.connection.callback(
-                    pike.model.EV_REQ_POST_SERIALIZE,
-                    post_serialize_credit_assert(
-                            write_credits_per_op,
-                            credit_assert_future)):
-                result = chan.write(fh, write_size*ix, write_buf)
+                pike.model.EV_REQ_POST_SERIALIZE,
+                post_serialize_credit_assert(
+                    write_credits_per_op, credit_assert_future
+                ),
+            ):
+                result = chan.write(fh, write_size * ix, write_buf)
             self.assertEqual(result, write_size)
             self.assertTrue(credit_assert_future.result())
         chan.close(fh)
 
         # calculate a reasonable expected number of credits
         # from negotiate, session_setup (x2), tree_connect, create (+16), close
-        exp_credits = starting_credits + ((pike.model.default_credit_request - 1) * 4) + 15
+        exp_credits = (
+            starting_credits + ((pike.model.default_credit_request - 1) * 4) + 15
+        )
         credit_request_per_op = pike.model.default_credit_request
         # from the series of write requests
         if write_credits_per_op > credit_request_per_op:
@@ -144,37 +158,40 @@ class CreditTest(pike.test.PikeTest):
         # windows seems to have a credit wall of 128
         if exp_credits > 128:
             exp_credits = 128
-        self.info("Expect the server to have granted at least "
-                  "{0} credits".format(exp_credits))
+        self.info(
+            "Expect the server to have granted at least "
+            "{0} credits".format(exp_credits)
+        )
         self.assertGreaterEqual(chan.connection.credits, exp_credits)
 
         read_chunks = file_size // read_size
         read_buf = buf * (file_chunks // read_chunks)
         read_credits_per_op = read_size // size_64k
-        self.info("reading {0} chunks of {1} bytes; {2} credits per op".format(
-            read_chunks,
-            read_size,
-            read_credits_per_op))
+        self.info(
+            "reading {0} chunks of {1} bytes; {2} credits per op".format(
+                read_chunks, read_size, read_credits_per_op
+            )
+        )
         fh = chan.create(
             tree,
             fname,
             access=pike.smb2.GENERIC_READ | pike.smb2.DELETE,
             disposition=pike.smb2.FILE_OPEN,
-            options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
+            options=pike.smb2.FILE_DELETE_ON_CLOSE,
+        ).result()
         file_buffer = array.array("B")
         for ix in range(read_chunks):
             credit_assert_future = pike.model.Future()
             with chan.connection.callback(
-                    pike.model.EV_REQ_POST_SERIALIZE,
-                    post_serialize_credit_assert(
-                            read_credits_per_op,
-                            credit_assert_future)):
-                result = chan.read(fh, read_size, read_size*ix)
+                pike.model.EV_REQ_POST_SERIALIZE,
+                post_serialize_credit_assert(read_credits_per_op, credit_assert_future),
+            ):
+                result = chan.read(fh, read_size, read_size * ix)
             file_buffer.extend(result)
             self.assertEqual(len(result), read_size)
             self.assertTrue(credit_assert_future.result())
         chan.close(fh)
-        self.assertEqual(file_buffer.tobytes(), buf*file_chunks)
+        self.assertEqual(file_buffer.tobytes(), buf * file_chunks)
 
     def generic_arbitrary_mc_write_mc_read(self, file_size, write_size, read_size):
         """
@@ -185,7 +202,7 @@ class CreditTest(pike.test.PikeTest):
         this version of the function works with arbitrary sizes
         """
         fname = self.id().rpartition(".")[-1]
-        buf = b"\0\1\2\3\4\5\6\7"*8192
+        buf = b"\0\1\2\3\4\5\6\7" * 8192
         buflen = len(buf)
         file_chunks, file_remainder = divmod(file_size, buflen)
         file_buf = buf * file_chunks + buf[:file_remainder]
@@ -211,10 +228,11 @@ class CreditTest(pike.test.PikeTest):
         with chan.let(credit_request=16):
             fh = chan.create(tree, fname).result()
 
-        self.info("writing {0} chunks of {1} bytes; {2} credits per op".format(
-                write_chunks,
-                write_size,
-                write_credits_per_op))
+        self.info(
+            "writing {0} chunks of {1} bytes; {2} credits per op".format(
+                write_chunks, write_size, write_credits_per_op
+            )
+        )
         ix = None
         # TODO: consolidate chunks to a list of tuples (file_offset, local_buffer_offset, length)
         # this would simplify the loop, instead of having the extra chunk
@@ -222,43 +240,44 @@ class CreditTest(pike.test.PikeTest):
         for ix in range(write_chunks):
             credit_assert_future = pike.model.Future()
             with chan.connection.callback(
-                    pike.model.EV_REQ_POST_SERIALIZE,
-                    post_serialize_credit_assert(
-                            write_credits_per_op,
-                            credit_assert_future)):
+                pike.model.EV_REQ_POST_SERIALIZE,
+                post_serialize_credit_assert(
+                    write_credits_per_op, credit_assert_future
+                ),
+            ):
                 result = chan.write(
-                        fh,
-                        write_size*ix,
-                        file_buf[write_size*ix:write_size*(ix+1)])
+                    fh,
+                    write_size * ix,
+                    file_buf[write_size * ix : write_size * (ix + 1)],
+                )
             self.assertEqual(result, write_size)
             self.assertTrue(credit_assert_future.result())
         if extra_write is not None:
             if ix is None:
                 extra_write_offset = 0
             else:
-                extra_write_offset = write_size*(ix+1)
+                extra_write_offset = write_size * (ix + 1)
                 ix = None
-            self.info("writing extra chunk of {0} bytes @ {1}; {2} credits".format(
-                    extra_write[0],
-                    extra_write_offset,
-                    extra_write[1]))
+            self.info(
+                "writing extra chunk of {0} bytes @ {1}; {2} credits".format(
+                    extra_write[0], extra_write_offset, extra_write[1]
+                )
+            )
             credit_assert_future = pike.model.Future()
             with chan.connection.callback(
-                    pike.model.EV_REQ_POST_SERIALIZE,
-                    post_serialize_credit_assert(
-                            extra_write[1],
-                            credit_assert_future)):
-                result = chan.write(
-                        fh,
-                        extra_write_offset,
-                        file_buf[-extra_write[0]:])
+                pike.model.EV_REQ_POST_SERIALIZE,
+                post_serialize_credit_assert(extra_write[1], credit_assert_future),
+            ):
+                result = chan.write(fh, extra_write_offset, file_buf[-extra_write[0] :])
             self.assertEqual(result, extra_write[0])
             self.assertTrue(credit_assert_future.result())
         chan.close(fh)
 
         # calculate a reasonable expected number of credits
         # from negotiate, session_setup (x2), tree_connect, create (+16), close
-        exp_credits = starting_credits + ((pike.model.default_credit_request - 1) * 4) + 15
+        exp_credits = (
+            starting_credits + ((pike.model.default_credit_request - 1) * 4) + 15
+        )
         credit_request_per_op = pike.model.default_credit_request
         # from the series of write requests
         if write_credits_per_op > credit_request_per_op:
@@ -269,12 +288,14 @@ class CreditTest(pike.test.PikeTest):
             credit_request_per_op = pike.model.default_credit_request
             if extra_write[1] > credit_request_per_op:
                 credit_request_per_op = extra_write[1]
-            exp_credits += (credit_request_per_op - extra_write[1])
+            exp_credits += credit_request_per_op - extra_write[1]
         # windows seems to have a credit wall of 128
         if exp_credits > 128:
             exp_credits = 128
-        self.info("Expect the server to have granted at least "
-                  "{0} credits".format(exp_credits))
+        self.info(
+            "Expect the server to have granted at least "
+            "{0} credits".format(exp_credits)
+        )
         self.assertGreaterEqual(chan.connection.credits, exp_credits)
 
         read_chunks, read_remainder = divmod(file_size, read_size)
@@ -290,25 +311,26 @@ class CreditTest(pike.test.PikeTest):
                 c += 1
             extra_read = (read_remainder, c)
 
-        self.info("reading {0} chunks of {1} bytes; {2} credits per op".format(
-                read_chunks,
-                read_size,
-                read_credits_per_op))
+        self.info(
+            "reading {0} chunks of {1} bytes; {2} credits per op".format(
+                read_chunks, read_size, read_credits_per_op
+            )
+        )
         fh = chan.create(
-                tree,
-                fname,
-                access=pike.smb2.GENERIC_READ | pike.smb2.DELETE,
-                disposition=pike.smb2.FILE_OPEN,
-                options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
+            tree,
+            fname,
+            access=pike.smb2.GENERIC_READ | pike.smb2.DELETE,
+            disposition=pike.smb2.FILE_OPEN,
+            options=pike.smb2.FILE_DELETE_ON_CLOSE,
+        ).result()
         read_buffer = array.array("B")
         for ix in range(read_chunks):
             credit_assert_future = pike.model.Future()
             with chan.connection.callback(
-                    pike.model.EV_REQ_POST_SERIALIZE,
-                    post_serialize_credit_assert(
-                            read_credits_per_op,
-                            credit_assert_future)):
-                result = chan.read(fh, read_size, read_size*ix)
+                pike.model.EV_REQ_POST_SERIALIZE,
+                post_serialize_credit_assert(read_credits_per_op, credit_assert_future),
+            ):
+                result = chan.read(fh, read_size, read_size * ix)
             read_buffer.extend(result)
             self.assertEqual(len(result), read_size)
             self.assertTrue(credit_assert_future.result())
@@ -316,17 +338,17 @@ class CreditTest(pike.test.PikeTest):
             if ix is None:
                 extra_read_offset = 0
             else:
-                extra_read_offset = read_size*(ix+1)
-            self.info("reading extra chunk of {0} bytes @ {1}; {2} credits".format(
-                    extra_read[0],
-                    extra_read_offset,
-                    extra_read[1]))
+                extra_read_offset = read_size * (ix + 1)
+            self.info(
+                "reading extra chunk of {0} bytes @ {1}; {2} credits".format(
+                    extra_read[0], extra_read_offset, extra_read[1]
+                )
+            )
             credit_assert_future = pike.model.Future()
             with chan.connection.callback(
-                    pike.model.EV_REQ_POST_SERIALIZE,
-                    post_serialize_credit_assert(
-                            extra_read[1],
-                            credit_assert_future)):
+                pike.model.EV_REQ_POST_SERIALIZE,
+                post_serialize_credit_assert(extra_read[1], credit_assert_future),
+            ):
                 result = chan.read(fh, extra_read[0], extra_read_offset)
             read_buffer.extend(result)
             self.assertEqual(len(result), extra_read[0])
@@ -337,7 +359,6 @@ class CreditTest(pike.test.PikeTest):
 
 
 class PowerOf2CreditTest(CreditTest):
-
     def test_1_1m_write_1_1m_read(self):
         self.generic_mc_write_mc_read(size_1m, size_1m, size_1m)
 
@@ -381,21 +402,20 @@ class EdgeCreditTest(CreditTest):
         self.assertEqual(chan1.connection.credits, starting_credits)
 
         with chan1.let(credit_request=credits_per_req):
-            fh1 = chan1.create(
-                    tree1,
-                    fname).result()
+            fh1 = chan1.create(tree1, fname).result()
         exp_credits = starting_credits + credits_per_req - 1
         self.assertEqual(chan1.connection.credits, exp_credits)
 
         # build up the sequence number to the target
         while chan1.connection._next_mid < sequence_number_target:
-            smb_req = chan1.write_request(fh1, 0, buf*credits_per_req).parent
+            smb_req = chan1.write_request(fh1, 0, buf * credits_per_req).parent
             smb_future = chan1.connection.submit(smb_req.parent)[0]
             smb_resp = smb_future.result()
             if smb_future.interim_response:
                 # if server granted credits on interim
-                self.assertEqual(smb_future.interim_response.credit_response,
-                                 credits_per_req)
+                self.assertEqual(
+                    smb_future.interim_response.credit_response, credits_per_req
+                )
                 # then server should grant 0 credits on final resp
                 self.assertEqual(smb_resp.credit_response, 0)
             else:
@@ -422,24 +442,21 @@ class AsyncCreditTest(CreditTest):
         """
         chan1, tree1 = self.tree_connect()
         chan2, tree2 = self.tree_connect()
-        chan2_starting_credits = chan2.connection.negotiate_response.parent.credit_response
+        chan2_starting_credits = (
+            chan2.connection.negotiate_response.parent.credit_response
+        )
         fname = "test_async_lock"
         buf = b"\0\1\2\3\4\5\6\7"
         lock1 = (0, 8, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK)
         contend_locks = [
-                (0, 2, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK),
-                (2, 2, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK),
-                (4, 4, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK)]
+            (0, 2, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK),
+            (2, 2, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK),
+            (4, 4, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK),
+        ]
         credit_req = 3
 
-        fh1 = chan1.create(
-                tree1,
-                fname,
-                share=share_all).result()
-        fh2 = chan2.create(
-                tree2,
-                fname,
-                share=share_all).result()
+        fh1 = chan1.create(tree1, fname, share=share_all).result()
+        fh2 = chan2.create(tree2, fname, share=share_all).result()
         self.assertEqual(chan2.connection.credits, chan2_starting_credits)
         chan1.lock(fh1, [lock1]).result()
 
@@ -470,14 +487,17 @@ class AsyncCreditTest(CreditTest):
         buf = b"\0\1\2\3\4\5\6\7" * 8192
 
         # send a request for all of our credits
-        chan2.write(fh2, 0, buf*exp_credits)
+        chan2.write(fh2, 0, buf * exp_credits)
         self.assertEqual(chan2.connection.credits, exp_credits)
 
         # send a request for all of our credits + 1 (this should disconnect the client)
         with self.assertRaises(EOFError):
-            chan2.write(fh2, 0, buf*(exp_credits + 1))
-            self.fail("We should have {0} credits, but an {1} credit request succeeds".format(
-                    exp_credits, exp_credits + 1))
+            chan2.write(fh2, 0, buf * (exp_credits + 1))
+            self.fail(
+                "We should have {0} credits, but an {1} credit request succeeds".format(
+                    exp_credits, exp_credits + 1
+                )
+            )
 
     def test_async_write(self):
         """
@@ -490,30 +510,32 @@ class AsyncCreditTest(CreditTest):
         """
         chan1, tree1 = self.tree_connect()
         chan2, tree2 = self.tree_connect()
-        chan2_starting_credits = chan2.connection.negotiate_response.parent.credit_response
+        chan2_starting_credits = (
+            chan2.connection.negotiate_response.parent.credit_response
+        )
         fname = "test_async_write"
-        lkey = array.array('B', map(random.randint, [0] * 16, [255] * 16))
+        lkey = array.array("B", map(random.randint, [0] * 16, [255] * 16))
         # buf is 64k
         buf = b"\0\1\2\3\4\5\6\7" * 8192
         write_request_multiples = [1, 2, 3, 4]
         credit_req = 16
 
         fh1 = chan1.create(
-                tree1,
-                fname,
-                share=share_all,
-                oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
-                lease_key=lkey,
-                lease_state=lease_rh).result()
-        fh2 = chan2.create(
-                tree2,
-                fname,
-                share=share_all).result()
+            tree1,
+            fname,
+            share=share_all,
+            oplock_level=pike.smb2.SMB2_OPLOCK_LEVEL_LEASE,
+            lease_key=lkey,
+            lease_state=lease_rh,
+        ).result()
+        fh2 = chan2.create(tree2, fname, share=share_all).result()
         self.assertEqual(chan2.connection.credits, chan2_starting_credits)
         write_futures = []
         for n_credits in write_request_multiples:
             with chan2.let(credit_request=credit_req):
-                f = chan2.connection.submit(chan2.write_request(fh2, 0, buf*n_credits).parent.parent)[0]
+                f = chan2.connection.submit(
+                    chan2.write_request(fh2, 0, buf * n_credits).parent.parent
+                )[0]
                 f.wait_interim()
                 if f.interim_response is not None:
                     self.assertEqual(f.interim_response.credit_response, credit_req)
@@ -546,18 +568,27 @@ class Generated_{name}_{tag}(pike.test.credit.CreditTest):
         self.generic_arbitrary_mc_write_mc_read({file_size}, {write_size}, {read_size})"""
 
     @classmethod
-    def generate_multiple_64k_test_cases(cls, tag, n_cases, size_range_multiple, write_range_multiple, read_range_multiple):
+    def generate_multiple_64k_test_cases(
+        cls,
+        tag,
+        n_cases,
+        size_range_multiple,
+        write_range_multiple,
+        read_range_multiple,
+    ):
         name = "Mult64k"
         print(cls.header.format(**locals()))
         for ix in range(n_cases):
-            file_size = 2**16 * random.randint(*size_range_multiple)
-            write_size = 2**16 * random.randint(*write_range_multiple)
-            read_size = 2**16 * random.randint(*read_range_multiple)
+            file_size = 2 ** 16 * random.randint(*size_range_multiple)
+            write_size = 2 ** 16 * random.randint(*write_range_multiple)
+            read_size = 2 ** 16 * random.randint(*read_range_multiple)
             print(cls.template.format(**locals()))
         print(cls.footer.format(**locals()))
 
     @classmethod
-    def generate_arbitrary_test_cases(cls, tag, n_cases, size_range, write_range, read_range):
+    def generate_arbitrary_test_cases(
+        cls, tag, n_cases, size_range, write_range, read_range
+    ):
         name = "Arb"
         print(cls.header.format(**locals()))
         for ix in range(n_cases):
@@ -570,8 +601,13 @@ class Generated_{name}_{tag}(pike.test.credit.CreditTest):
 
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
     if len(sys.argv) > 1 and sys.argv[1].startswith("64"):
-        TestCaseGenerator.generate_multiple_64k_test_cases("gen1", 8, (1, 128), (1, 16), (1, 16)) 
+        TestCaseGenerator.generate_multiple_64k_test_cases(
+            "gen1", 8, (1, 128), (1, 16), (1, 16)
+        )
     else:
-        TestCaseGenerator.generate_arbitrary_test_cases("iter1", 32, (45*1024, 2**23), (2**15, 2**20), (2**15, 2**20))
+        TestCaseGenerator.generate_arbitrary_test_cases(
+            "iter1", 32, (45 * 1024, 2 ** 23), (2 ** 15, 2 ** 20), (2 ** 15, 2 ** 20)
+        )

@@ -26,11 +26,13 @@ class ChangeNotifyTest(pike.test.PikeTest):
         chan, tree = self.tree_connect()
 
         # connect to the root of the share
-        root = chan.create(tree,
-                           '',
-                           access=pike.smb2.GENERIC_READ,
-                           options=pike.smb2.FILE_DIRECTORY_FILE,
-                           share=pike.smb2.FILE_SHARE_READ).result()
+        root = chan.create(
+            tree,
+            "",
+            access=pike.smb2.GENERIC_READ,
+            options=pike.smb2.FILE_DIRECTORY_FILE,
+            share=pike.smb2.FILE_SHARE_READ,
+        ).result()
 
         # build a change notify request
         smb_req = chan.request(obj=root)
@@ -41,15 +43,21 @@ class ChangeNotifyTest(pike.test.PikeTest):
         futures = chan.connection.submit(smb_req.parent)
 
         # create a file on the share to trigger the notification
-        file = chan.create(tree,
-                           filename,
-                           access=pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE,
-                           share=pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE,
-                           options=pike.smb2.FILE_DELETE_ON_CLOSE,
-                           disposition=pike.smb2.FILE_SUPERSEDE).result()
-       
+        file = chan.create(
+            tree,
+            filename,
+            access=pike.smb2.FILE_READ_DATA
+            | pike.smb2.FILE_WRITE_DATA
+            | pike.smb2.DELETE,
+            share=pike.smb2.FILE_SHARE_READ
+            | pike.smb2.FILE_SHARE_WRITE
+            | pike.smb2.FILE_SHARE_DELETE,
+            options=pike.smb2.FILE_DELETE_ON_CLOSE,
+            disposition=pike.smb2.FILE_SUPERSEDE,
+        ).result()
+
         chan.close(file)
-        
+
         # collect the change notify response
         result = futures[0].result()[0]
 
@@ -57,17 +65,19 @@ class ChangeNotifyTest(pike.test.PikeTest):
         self.assertEqual(len(result.notifications), 1)
         self.assertEqual(result.notifications[0].filename, filename)
         self.assertEqual(result.notifications[0].action, pike.smb2.SMB2_ACTION_ADDED)
-        
+
         chan.close(root)
 
     def test_change_notify_cancel(self):
         chan, tree = self.tree_connect()
 
-        root = chan.create(tree,
-                           '',
-                           access=pike.smb2.GENERIC_READ,
-                           options=pike.smb2.FILE_DIRECTORY_FILE,
-                           share=pike.smb2.FILE_SHARE_READ).result()
+        root = chan.create(
+            tree,
+            "",
+            access=pike.smb2.GENERIC_READ,
+            options=pike.smb2.FILE_DIRECTORY_FILE,
+            share=pike.smb2.FILE_SHARE_READ,
+        ).result()
         cn_future = chan.change_notify(root)
         # close the handle for the outstanding notify
         chan.close(root)

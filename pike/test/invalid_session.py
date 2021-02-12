@@ -28,7 +28,7 @@ class InvalidSessionTest(pike.test.PikeTest):
         logoff_req = smb2.LogoffRequest(req)
 
         # Set invalid session id
-        req.session_id = 0xffffffffffffffff
+        req.session_id = 0xFFFFFFFFFFFFFFFF
 
         with self.assert_error(nt.STATUS_USER_SESSION_DELETED):
             conn.transceive(req.parent)[0]
@@ -38,9 +38,8 @@ class InvalidSessionTest(pike.test.PikeTest):
     def open_file(self, filename):
         self.chan, self.tree = self.tree_connect()
         fh = self.chan.create(
-            self.tree,
-            filename,
-            disposition=smb2.FILE_SUPERSEDE).result()
+            self.tree, filename, disposition=smb2.FILE_SUPERSEDE
+        ).result()
         return fh
 
     def test_treeconnect(self):
@@ -52,7 +51,7 @@ class InvalidSessionTest(pike.test.PikeTest):
         tree_con_req1.path = tree.path
 
         # Set invalid session id
-        req1.session_id = 0xffffffffffffffff
+        req1.session_id = 0xFFFFFFFFFFFFFFFF
 
         with self.assert_error(nt.STATUS_USER_SESSION_DELETED):
             chan.connection.transceive(req1.parent)[0]
@@ -75,7 +74,7 @@ class InvalidSessionTest(pike.test.PikeTest):
         val_req1.dialects = self.chan.session.client.dialects
 
         # Set invalid session
-        req1.session_id = 0xffffffffffffffff
+        req1.session_id = 0xFFFFFFFFFFFFFFFF
 
         with self.assert_error(nt.STATUS_USER_SESSION_DELETED):
             self.chan.connection.transceive(req1.parent)
@@ -91,7 +90,7 @@ class InvalidSessionTest(pike.test.PikeTest):
         oplock_ack_req1.file_id = fh.file_id
 
         # Set invalid session and tree id
-        req1.session_id = 0xffffffffffffffff
+        req1.session_id = 0xFFFFFFFFFFFFFFFF
 
         with self.assert_error(nt.STATUS_USER_SESSION_DELETED):
             self.chan.connection.transceive(req1.parent)

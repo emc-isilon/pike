@@ -22,6 +22,7 @@ class SessionTest(pike.test.PikeTest):
     def test_session_logoff(self):
         chan, tree = self.tree_connect()
         chan.logoff()
+
     def test_session_multiplex(self):
         chan, tree = self.tree_connect()
         chan2 = chan.connection.session_setup(self.creds)

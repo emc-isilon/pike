@@ -21,7 +21,6 @@ import pike.test
 
 
 class QueryTest(pike.test.PikeTest):
-
     def __init__(self, *args, **kwargs):
         super(QueryTest, self).__init__(*args, **kwargs)
         self.chan = None
@@ -30,13 +29,21 @@ class QueryTest(pike.test.PikeTest):
     def open_file(self):
         """Helper to open basic file"""
         self.chan, self.tree = self.tree_connect()
-        return self.chan.create(self.tree, "test.txt", disposition=pike.smb2.FILE_SUPERSEDE).result()
+        return self.chan.create(
+            self.tree, "test.txt", disposition=pike.smb2.FILE_SUPERSEDE
+        ).result()
 
-    def basic_test(self, level, info_type=pike.smb2.SMB2_0_INFO_FILE, additional_information=None):
+    def basic_test(
+        self, level, info_type=pike.smb2.SMB2_0_INFO_FILE, additional_information=None
+    ):
         """Helper to perform a basic query test"""
         handle = self.open_file()
         info = self.chan.query_file_info(
-            handle, level, info_type=info_type, additional_information=additional_information)
+            handle,
+            level,
+            info_type=info_type,
+            additional_information=additional_information,
+        )
         self.chan.close(handle)
 
     def mismatch_test(self, level, size):
@@ -53,30 +60,40 @@ class QueryTest(pike.test.PikeTest):
 
     def test_query_file_sec_info_owner(self):
         sec_info = pike.smb2.OWNER_SECURITY_INFORMATION
-        self.basic_test(pike.smb2.FILE_SECURITY_INFORMATION,
-                        info_type=pike.smb2.SMB2_0_INFO_SECURITY,
-                        additional_information=sec_info)
+        self.basic_test(
+            pike.smb2.FILE_SECURITY_INFORMATION,
+            info_type=pike.smb2.SMB2_0_INFO_SECURITY,
+            additional_information=sec_info,
+        )
 
     def test_query_file_sec_info_group(self):
         sec_info = pike.smb2.GROUP_SECURITY_INFORMATION
-        self.basic_test(pike.smb2.FILE_SECURITY_INFORMATION,
-                        info_type=pike.smb2.SMB2_0_INFO_SECURITY,
-                        additional_information=sec_info)
+        self.basic_test(
+            pike.smb2.FILE_SECURITY_INFORMATION,
+            info_type=pike.smb2.SMB2_0_INFO_SECURITY,
+            additional_information=sec_info,
+        )
 
     def test_query_file_sec_info_dacl(self):
         sec_info = pike.smb2.DACL_SECURITY_INFORMATION
-        self.basic_test(pike.smb2.FILE_SECURITY_INFORMATION,
-                        info_type=pike.smb2.SMB2_0_INFO_SECURITY,
-                        additional_information=sec_info)
+        self.basic_test(
+            pike.smb2.FILE_SECURITY_INFORMATION,
+            info_type=pike.smb2.SMB2_0_INFO_SECURITY,
+            additional_information=sec_info,
+        )
 
     def test_query_file_sec_info_all(self):
-        sec_info = (pike.smb2.OWNER_SECURITY_INFORMATION +
-                    pike.smb2.GROUP_SECURITY_INFORMATION +
-                    pike.smb2.DACL_SECURITY_INFORMATION)
+        sec_info = (
+            pike.smb2.OWNER_SECURITY_INFORMATION
+            + pike.smb2.GROUP_SECURITY_INFORMATION
+            + pike.smb2.DACL_SECURITY_INFORMATION
+        )
 
-        self.basic_test(pike.smb2.FILE_SECURITY_INFORMATION,
-                        info_type=pike.smb2.SMB2_0_INFO_SECURITY,
-                        additional_information=sec_info)
+        self.basic_test(
+            pike.smb2.FILE_SECURITY_INFORMATION,
+            info_type=pike.smb2.SMB2_0_INFO_SECURITY,
+            additional_information=sec_info,
+        )
 
     def test_query_file_standard_info(self):
         self.basic_test(pike.smb2.FILE_STANDARD_INFORMATION)
@@ -130,7 +147,9 @@ class QueryTest(pike.test.PikeTest):
         smb2_req = self.chan.request(obj=handle)
         query_req = pike.smb2.QueryInfoRequest(smb2_req)
         query_req.info_type = pike.smb2.SMB2_0_INFO_SECURITY
-        query_req.additional_information = pike.smb2.OWNER_SECURITY_INFORMATION | pike.smb2.DACL_SECURITY_INFORMATION
+        query_req.additional_information = (
+            pike.smb2.OWNER_SECURITY_INFORMATION | pike.smb2.DACL_SECURITY_INFORMATION
+        )
         query_req.output_buffer_length = 0
         query_req.file_id = handle.file_id
 
