@@ -432,10 +432,12 @@ class PikeTest(unittest.TestCase):
         except model.ResponseError as err:
             o.response = err.response
             if err.response.status != status:
-                raise_from(self.failureException(
-                    '"%s" raised when "%s" expected' % (err.response.status, status),
-                    err,
-                ))
+                raise_from(
+                    self.failureException(
+                         '"%s" raised when "%s" expected' % (err.response.status, status),
+                    ),
+                    err
+                )
 
     def setUp(self):
         if self.loglevel != logging.NOTSET:
