@@ -692,6 +692,13 @@ class Connection(transport.Transport):
             else 0x0
         )
 
+    @property
+    def hostname(self):
+        port = ""
+        if self.port != 445:
+            port = ":{}".format(self.port)
+        return self.server + port
+
     def next_mid_range(self, length):
         """
         multicredit requests must reserve 1 message id per credit charged.
