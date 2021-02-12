@@ -98,3 +98,14 @@ def test_join_from_root(test_path, pike_TreeConnect):
             with model.pike_status(ntstatus.STATUS_SHARING_VIOLATION):
                 from_root = PikePath(tc2.tree).join_from_root(pth)
                 print(from_root.read_text())
+
+def test_symlink(test_path):
+    buf = "this is my content\n"
+    subdir = test_path / "subdir"
+    subdir.mkdir()
+    target = subdir / "target"
+    target.write_text(buf)
+    link = test_path / "link"
+    link.symlink_to(target)
+    assert link.read_text() == buf
+    assert link.resolve() == target
