@@ -18,7 +18,7 @@ ACCESS_RWD = smb2.GENERIC_READ | smb2.GENERIC_WRITE | smb2.DELETE
 @pytest.fixture
 def test_path(pike_TreeConnect):
     with pike_TreeConnect() as tc:
-        test_root = tc.tree / "test_{}".format(uuid.uuid4())
+        test_root = tc / "test_{}".format(uuid.uuid4())
         test_root.mkdir()
         yield test_root
 
