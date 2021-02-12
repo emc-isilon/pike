@@ -60,6 +60,7 @@ default_credit_request = 10
 default_timeout = 30
 trace = False
 
+
 def loop(timeout=None, count=None):
     """
     wrapper for blocking on the underlying event loop for the given timeout
@@ -69,8 +70,10 @@ def loop(timeout=None, count=None):
         timeout = default_timeout
     transport.loop(timeout=timeout, count=count)
 
+
 class TimeoutError(Exception):
     """Future completion timed out"""
+
     future = None
 
     @classmethod
@@ -106,8 +109,10 @@ class TimeoutError(Exception):
 class StateError(Exception):
     pass
 
+
 class CreditError(Exception):
     pass
+
 
 class RequestError(Exception):
     def __init__(self, request, message=None):
@@ -116,19 +121,23 @@ class RequestError(Exception):
         Exception.__init__(self, message)
         self.request = request
 
+
 class CallbackError(Exception):
     """
     the callback was not suitable
     """
+
 
 class ResponseError(Exception):
     def __init__(self, response):
         Exception.__init__(self, response.command, response.status)
         self.response = response
 
+
 class AssertNtstatusContext(object):
     response = None
     exception = None
+
 
 @contextlib.contextmanager
 def pike_status(exp_status):
@@ -136,29 +145,39 @@ def pike_status(exp_status):
     try:
         yield obj
         if exp_status != ntstatus.STATUS_SUCCESS:
-            raise AssertionError("No error raised when "
-                                 "ResponseError({}) expected.".format(
-                                     exp_status))
+            raise AssertionError(
+                "No error raised when " "ResponseError({}) expected.".format(exp_status)
+            )
     except ResponseError as err:
         obj.exception = err
         obj.response = err.response
         if err.response.status != exp_status:
-            raise_from(AssertionError("{} raised when "
-                                      "expecting ResponseError({})".format(
-                                          err.response.status, exp_status)),
-                       err)
+            raise_from(
+                AssertionError(
+                    "{} raised when "
+                    "expecting ResponseError({})".format(
+                        err.response.status, exp_status
+                    )
+                ),
+                err,
+            )
+
 
 class Events(core.ValueEnum):
     """ Events used for callback functions """
-    EV_REQ_PRE_SERIALIZE = 0x1      # cb expects Netbios frame
-    EV_REQ_POST_SERIALIZE = 0x2     # cb expects Netbios frame
-    EV_REQ_PRE_SEND = 0x3           # cb expects a buffer to send
-    EV_REQ_POST_SEND = 0x4          # cb expects an integer of bytes sent
-    EV_RES_PRE_RECV = 0x5           # cb expects an integer of bytes to read
-    EV_RES_POST_RECV = 0x6          # cb expects a buffer that was read
-    EV_RES_PRE_DESERIALIZE = 0x7    # cb expects a complete netbios buffer
-    EV_RES_POST_DESERIALIZE = 0x8   # cb expects a Netbios frame
+
+    EV_REQ_PRE_SERIALIZE = 0x1  # cb expects Netbios frame
+    EV_REQ_POST_SERIALIZE = 0x2  # cb expects Netbios frame
+    EV_REQ_PRE_SEND = 0x3  # cb expects a buffer to send
+    EV_REQ_POST_SEND = 0x4  # cb expects an integer of bytes sent
+    EV_RES_PRE_RECV = 0x5  # cb expects an integer of bytes to read
+    EV_RES_POST_RECV = 0x6  # cb expects a buffer that was read
+    EV_RES_PRE_DESERIALIZE = 0x7  # cb expects a complete netbios buffer
+    EV_RES_POST_DESERIALIZE = 0x8  # cb expects a Netbios frame
+
+
 Events.import_items(globals())
+
 
 class Future(object):
     """
@@ -227,8 +246,10 @@ class Future(object):
         while self.response is None:
             now = time.time()
             if now > deadline:
-                raise TimeoutError.with_future(self, 'Timed out after %s seconds' % timeout)
-            loop(timeout=deadline-now, count=1)
+                raise TimeoutError.with_future(
+                    self, "Timed out after %s seconds" % timeout
+                )
+            loop(timeout=deadline - now, count=1)
 
         return self
 
@@ -244,8 +265,10 @@ class Future(object):
         while self.response is None and self.interim_response is None:
             now = time.time()
             if now > deadline:
-                raise TimeoutError.with_future(self, 'Timed out after %s seconds' % timeout)
-            loop(timeout=deadline-now, count=1)
+                raise TimeoutError.with_future(
+                    self, "Timed out after %s seconds" % timeout
+                )
+            loop(timeout=deadline - now, count=1)
 
         return self
 
@@ -294,6 +317,7 @@ class Future(object):
     def __call__(self, *params, **kwparams):
         self.complete(*params, **kwparams)
 
+
 class Client(object):
     """
     Client
@@ -307,15 +331,20 @@ class Client(object):
     @ivar client_guid: Client GUID
     @ivar channel_sequence: Current channel sequence number
     """
-    def __init__(self,
-                 dialects=[smb2.DIALECT_SMB2_002,
-                           smb2.DIALECT_SMB2_1,
-                           smb2.DIALECT_SMB3_0,
-                           smb2.DIALECT_SMB3_0_2,
-                           smb2.DIALECT_SMB3_1_1],
-                 capabilities=smb2.GlobalCaps(reduce(operator.or_, smb2.GlobalCaps.values())),
-                 security_mode=smb2.SMB2_NEGOTIATE_SIGNING_ENABLED,
-                 client_guid=None):
+
+    def __init__(
+        self,
+        dialects=[
+            smb2.DIALECT_SMB2_002,
+            smb2.DIALECT_SMB2_1,
+            smb2.DIALECT_SMB3_0,
+            smb2.DIALECT_SMB3_0_2,
+            smb2.DIALECT_SMB3_1_1,
+        ],
+        capabilities=smb2.GlobalCaps(reduce(operator.or_, smb2.GlobalCaps.values())),
+        security_mode=smb2.SMB2_NEGOTIATE_SIGNING_ENABLED,
+        client_guid=None,
+    ):
         """
         Constructor.
 
@@ -328,7 +357,7 @@ class Client(object):
         object.__init__(self)
 
         if client_guid is None:
-            client_guid = array.array('B', map(random.randint, [0] * 16, [255] * 16))
+            client_guid = array.array("B", map(random.randint, [0] * 16, [255] * 16))
 
         self.dialects = dialects
         self.capabilities = capabilities
@@ -343,7 +372,7 @@ class Client(object):
         self._connections = []
         self._leases = {}
 
-        self.logger = logging.getLogger('pike')
+        self.logger = logging.getLogger("pike")
 
     @contextlib.contextmanager
     def callback(self, event, cb):
@@ -397,8 +426,7 @@ class Client(object):
             min_dialect = min(smb2.Dialect.values())
         if max_dialect is None:
             max_dialect = max(smb2.Dialect.values())
-        self.dialects = [d for d in self.dialects
-                         if min_dialect <= d <= max_dialect]
+        self.dialects = [d for d in self.dialects if min_dialect <= d <= max_dialect]
 
     def connect(self, server, port=445):
         """
@@ -529,6 +557,7 @@ class Client(object):
     def dispose_lease(self, lease):
         del self._leases[lease.lease_key.tobytes()]
 
+
 class Connection(transport.Transport):
     """
     Connection to server.
@@ -541,6 +570,7 @@ class Connection(transport.Transport):
     @ivar server: The server name or address
     @ivar port: The server port
     """
+
     def __init__(self, client, server, port=445):
         """
         Constructor.
@@ -550,7 +580,7 @@ class Connection(transport.Transport):
         """
         super(Connection, self).__init__()
         self._no_delay = True
-        self._in_buffer = array.array('B')
+        self._in_buffer = array.array("B")
         self._watermark = 4
         self._out_buffer = None
         self._next_mid = 0
@@ -561,7 +591,7 @@ class Connection(transport.Transport):
         self._binding = None
         self._binding_key = None
         self._settings = {}
-        self._pre_auth_integrity_hash = array.array('B', b"\0"*64)
+        self._pre_auth_integrity_hash = array.array("B", b"\0" * 64)
         self._negotiate_request = None
         self._negotiate_response = None
         self.callbacks = {}
@@ -577,10 +607,9 @@ class Connection(transport.Transport):
         self.error = None
         self.traceback = None
 
-        for result in socket.getaddrinfo(server, port,
-                                         0,
-                                         socket.SOCK_STREAM,
-                                         socket.IPPROTO_TCP):
+        for result in socket.getaddrinfo(
+            server, port, 0, socket.SOCK_STREAM, socket.IPPROTO_TCP
+        ):
             family, socktype, proto, canonname, sockaddr = result
             break
         self.create_socket(family, socktype)
@@ -649,17 +678,19 @@ class Connection(transport.Transport):
         if value.dialect_revision < smb2.DIALECT_SMB3_1_1:
             return
         self._pre_auth_integrity_hash = digest.smb3_sha512(
-                self._pre_auth_integrity_hash +
-                self._negotiate_request.parent.serialize())
+            self._pre_auth_integrity_hash + self._negotiate_request.parent.serialize()
+        )
         self._pre_auth_integrity_hash = digest.smb3_sha512(
-                self._pre_auth_integrity_hash +
-                value.parent.parent.buf[4:])
+            self._pre_auth_integrity_hash + value.parent.parent.buf[4:]
+        )
 
     @property
     def dialect_revision(self):
-        return (self.negotiate_response.dialect_revision
-                if self.negotiate_response is not None
-                else 0x0)
+        return (
+            self.negotiate_response.dialect_revision
+            if self.negotiate_response is not None
+            else 0x0
+        )
 
     def next_mid_range(self, length):
         """
@@ -670,7 +701,7 @@ class Connection(transport.Transport):
             length = 1
         start_range = self._next_mid
         while True:
-            r = set(range(start_range, start_range+length))
+            r = set(range(start_range, start_range + length))
             if not r.intersection(self._mid_blacklist):
                 break
             start_range += 1
@@ -689,26 +720,30 @@ class Connection(transport.Transport):
             self.local_addr = self.socket.getsockname()
             self.remote_addr = self.socket.getpeername()
 
-            self.client.logger.debug('connect: %s/%s -> %s/%s',
-                                     self.local_addr[0], self.local_addr[1],
-                                     self.remote_addr[0], self.remote_addr[1])
+            self.client.logger.debug(
+                "connect: %s/%s -> %s/%s",
+                self.local_addr[0],
+                self.local_addr[1],
+                self.remote_addr[0],
+                self.remote_addr[1],
+            )
         self.connection_future(self)
 
     def handle_read(self):
         # Try to read the next netbios frame
         remaining = self._watermark - len(self._in_buffer)
         self.process_callbacks(EV_RES_PRE_RECV, remaining)
-        data = array.array('B', self.recv(remaining))
+        data = array.array("B", self.recv(remaining))
         self.process_callbacks(EV_RES_POST_RECV, data)
         self._in_buffer.extend(data)
         avail = len(self._in_buffer)
         if avail >= 4:
-            self._watermark = 4 + struct.unpack('>L', self._in_buffer[0:4])[0]
+            self._watermark = 4 + struct.unpack(">L", self._in_buffer[0:4])[0]
         if avail == self._watermark:
             nb = self.frame()
             self.process_callbacks(EV_RES_PRE_DESERIALIZE, self._in_buffer)
             nb.parse(self._in_buffer)
-            self._in_buffer = array.array('B')
+            self._in_buffer = array.array("B")
             self._watermark = 4
             self._dispatch_incoming(nb)
 
@@ -728,7 +763,7 @@ class Connection(transport.Transport):
         self.close()
 
     def handle_error(self):
-        (_,self.error,self.traceback) = sys.exc_info()
+        (_, self.error, self.traceback) = sys.exc_info()
         self.close()
 
     def close(self):
@@ -753,10 +788,14 @@ class Connection(transport.Transport):
         super(Connection, self).close()
 
         if self.remote_addr is not None:
-            self.client.logger.debug("disconnect (%s/%s -> %s/%s): %s",
-                                     self.local_addr[0], self.local_addr[1],
-                                     self.remote_addr[0], self.remote_addr[1],
-                                     self.error)
+            self.client.logger.debug(
+                "disconnect (%s/%s -> %s/%s): %s",
+                self.local_addr[0],
+                self.local_addr[1],
+                self.remote_addr[0],
+                self.remote_addr[1],
+                self.error,
+            )
 
         self.client._connections.remove(self)
 
@@ -789,14 +828,14 @@ class Connection(transport.Transport):
                 for cmd in req:
                     if isinstance(cmd, smb2.ReadRequest) and cmd.length > 0:
                         # special handling, 1 credit per 64k
-                        req.credit_charge, remainder = divmod(cmd.length, 2**16)
+                        req.credit_charge, remainder = divmod(cmd.length, 2 ** 16)
                     elif isinstance(cmd, smb2.WriteRequest) and cmd.buffer is not None:
                         # special handling, 1 credit per 64k
                         if cmd.length is None:
                             cmd.length = len(cmd.buffer)
-                        req.credit_charge, remainder = divmod(cmd.length, 2**16)
+                        req.credit_charge, remainder = divmod(cmd.length, 2 ** 16)
                     else:
-                        remainder = 1       # assume 1 credit per command
+                        remainder = 1  # assume 1 credit per command
                     if remainder > 0:
                         req.credit_charge += 1
             # do credit accounting based on our calculations (MS-SMB2 3.2.5.1)
@@ -805,7 +844,7 @@ class Connection(transport.Transport):
             if req.credit_request is None:
                 req.credit_request = default_credit_request
                 if req.credit_charge > req.credit_request:
-                    req.credit_request = req.credit_charge      # try not to fall behind
+                    req.credit_request = req.credit_charge  # try not to fall behind
 
             del self._out_queue[0]
 
@@ -818,15 +857,23 @@ class Connection(transport.Transport):
                 result = req.parent.serialize()
                 self.process_callbacks(EV_REQ_POST_SERIALIZE, req.parent)
                 if trace:
-                    self.client.logger.debug('send (%s/%s -> %s/%s): %s',
-                                             self.local_addr[0], self.local_addr[1],
-                                             self.remote_addr[0], self.remote_addr[1],
-                                             req.parent)
+                    self.client.logger.debug(
+                        "send (%s/%s -> %s/%s): %s",
+                        self.local_addr[0],
+                        self.local_addr[1],
+                        self.remote_addr[0],
+                        self.remote_addr[1],
+                        req.parent,
+                    )
                 else:
-                    self.client.logger.debug('send (%s/%s -> %s/%s): %s',
-                                             self.local_addr[0], self.local_addr[1],
-                                             self.remote_addr[0], self.remote_addr[1],
-                                             req.parent._log_str())
+                    self.client.logger.debug(
+                        "send (%s/%s -> %s/%s): %s",
+                        self.local_addr[0],
+                        self.local_addr[1],
+                        self.remote_addr[0],
+                        self.remote_addr[1],
+                        req.parent._log_str(),
+                    )
             else:
                 # Not ready to send chain
                 result = None
@@ -850,15 +897,23 @@ class Connection(transport.Transport):
 
     def _dispatch_incoming(self, res):
         if trace:
-            self.client.logger.debug('recv (%s/%s -> %s/%s): %s',
-                                     self.remote_addr[0], self.remote_addr[1],
-                                     self.local_addr[0], self.local_addr[1],
-                                     res)
+            self.client.logger.debug(
+                "recv (%s/%s -> %s/%s): %s",
+                self.remote_addr[0],
+                self.remote_addr[1],
+                self.local_addr[0],
+                self.local_addr[1],
+                res,
+            )
         else:
-            self.client.logger.debug('recv (%s/%s -> %s/%s): %s',
-                                     self.remote_addr[0], self.remote_addr[1],
-                                     self.local_addr[0], self.local_addr[1],
-                                     res._log_str())
+            self.client.logger.debug(
+                "recv (%s/%s -> %s/%s): %s",
+                self.remote_addr[0],
+                self.remote_addr[1],
+                self.local_addr[0],
+                self.local_addr[1],
+                res._log_str(),
+            )
         self.process_callbacks(EV_RES_POST_DESERIALIZE, res)
         for smb_res in res:
             # TODO: move credit tracking to callbacks
@@ -890,8 +945,10 @@ class Connection(transport.Transport):
                 future = self._future_map[smb_res.message_id]
                 if smb_res.status == ntstatus.STATUS_PENDING:
                     future.interim(smb_res)
-                elif isinstance(smb_res[0], smb2.ErrorResponse) or \
-                     smb_res.status not in smb_res[0].allowed_status:
+                elif (
+                    isinstance(smb_res[0], smb2.ErrorResponse)
+                    or smb_res.status not in smb_res[0].allowed_status
+                ):
                     future.complete(ResponseError(smb_res))
                     del self._future_map[smb_res.message_id]
                 else:
@@ -908,8 +965,8 @@ class Connection(transport.Transport):
         """
         if not isinstance(req, netbios.Netbios):
             raise RequestError(
-                    req,
-                    "{0} is not a netbios.Netbios frame".format(repr(req)))
+                req, "{0} is not a netbios.Netbios frame".format(repr(req))
+            )
         if self.error is not None:
             raise_(self.error, None, self.traceback)
         futures = []
@@ -918,13 +975,21 @@ class Connection(transport.Transport):
                 # Find original future being canceled to return
                 if smb_req.async_id is not None:
                     # Cancel by async ID
-                    future = [f for f in iter(self._future_map.values()) if f.interim_response.async_id == smb_req.async_id][0]
+                    future = [
+                        f
+                        for f in iter(self._future_map.values())
+                        if f.interim_response.async_id == smb_req.async_id
+                    ][0]
                 elif smb_req.message_id in self._future_map:
                     # Cancel by message id, already in future map
                     future = self._future_map[smb_req.message_id]
                 else:
                     # Cancel by message id, still in send queue
-                    future = [f for f in self._out_queue if f.request.message_id == smb_req.message_id][0]
+                    future = [
+                        f
+                        for f in self._out_queue
+                        if f.request.message_id == smb_req.message_id
+                    ][0]
                 # Add fake future for cancel since cancel has no response
                 self._out_queue.append(Future(request=smb_req))
                 futures.append(future)
@@ -950,7 +1015,7 @@ class Connection(transport.Transport):
 
     def negotiate_request(self, hash_algorithms=None, salt=None, ciphers=None):
         smb_req = self.request()
-        smb_req.credit_charge = 0       # negotiate requests are free
+        smb_req.credit_charge = 0  # negotiate requests are free
         neg_req = smb2.NegotiateRequest(smb_req)
 
         neg_req.dialects = self.client.dialects
@@ -960,8 +1025,7 @@ class Connection(transport.Transport):
 
         if smb2.DIALECT_SMB3_1_1 in neg_req.dialects:
             if ciphers is None:
-                ciphers = [crypto.SMB2_AES_128_GCM,
-                           crypto.SMB2_AES_128_CCM]
+                ciphers = [crypto.SMB2_AES_128_GCM, crypto.SMB2_AES_128_CCM]
             if ciphers:
                 encryption_req = crypto.EncryptionCapabilitiesRequest(neg_req)
                 encryption_req.ciphers = ciphers
@@ -973,16 +1037,18 @@ class Connection(transport.Transport):
             if salt is not None:
                 preauth_integrity_req.salt = salt
             else:
-                preauth_integrity_req.salt = array.array('B',
-                                                         map(random.randint, [0] * 32,
-                                                             [255] * 32))
+                preauth_integrity_req.salt = array.array(
+                    "B", map(random.randint, [0] * 32, [255] * 32)
+                )
         self._negotiate_request = neg_req
         return neg_req
 
     def negotiate_submit(self, negotiate_request):
         negotiate_future = self.submit(negotiate_request.parent.parent)[0]
+
         def assign_response(f):
             self.negotiate_response = f.result()[0]
+
         negotiate_future.then(assign_response)
         return negotiate_future
 
@@ -994,16 +1060,12 @@ class Connection(transport.Transport):
         L{Connection.session_setup}().
         """
         self.negotiate_submit(
-                self.negotiate_request(
-                    hash_algorithms,
-                    salt,
-                    ciphers
-        )).result()
+            self.negotiate_request(hash_algorithms, salt, ciphers)
+        ).result()
         return self
 
     class SessionSetupContext(object):
-        def __init__(self, conn, creds=None, bind=None, resume=None,
-                     ntlm_version=None):
+        def __init__(self, conn, creds=None, bind=None, resume=None, ntlm_version=None):
             assert conn.negotiate_response is not None
 
             self.conn = conn
@@ -1019,8 +1081,9 @@ class Connection(transport.Transport):
             elif auth.kerberos is not None:
                 self.auth = auth.KerberosProvider(conn, creds)
             else:
-                raise ImportError("Neither ntlm nor kerberos authentication "
-                                  "methods are available")
+                raise ImportError(
+                    "Neither ntlm nor kerberos authentication " "methods are available"
+                )
 
             self._settings = {}
             self.prev_session_id = 0
@@ -1049,14 +1112,11 @@ class Connection(transport.Transport):
             if self.dialect_revision >= smb2.DIALECT_SMB3_1_1:
                 if context is None:
                     context = self._pre_auth_integrity_hash
-                return digest.derive_key(
-                        session_key,
-                        b'SMBSigningKey',
-                        context)[:16]
+                return digest.derive_key(session_key, b"SMBSigningKey", context)[:16]
             elif self.dialect_revision >= smb2.DIALECT_SMB3_0:
                 if context is None:
-                    context = b'SmbSign\0'
-                return digest.derive_key(session_key, b'SMB2AESCMAC', context)[:16]
+                    context = b"SmbSign\0"
+                return digest.derive_key(session_key, b"SMB2AESCMAC", context)[:16]
             else:
                 return session_key
 
@@ -1068,32 +1128,37 @@ class Connection(transport.Transport):
                     if isinstance(nctx, crypto.EncryptionCapabilitiesResponse):
                         try:
                             return crypto.EncryptionContext(
-                                crypto.CryptoKeys311(
-                                    self.session_key,
-                                    context),
-                                nctx.ciphers)
+                                crypto.CryptoKeys311(self.session_key, context),
+                                nctx.ciphers,
+                            )
                         except crypto.CipherMismatch:
                             pass
             elif self.dialect_revision >= smb2.DIALECT_SMB3_0:
-                if self.conn.negotiate_response.capabilities & smb2.SMB2_GLOBAL_CAP_ENCRYPTION:
+                if (
+                    self.conn.negotiate_response.capabilities
+                    & smb2.SMB2_GLOBAL_CAP_ENCRYPTION
+                ):
                     return crypto.EncryptionContext(
                         crypto.CryptoKeys300(self.session_key),
-                        [crypto.SMB2_AES_128_CCM])
+                        [crypto.SMB2_AES_128_CCM],
+                    )
 
         def _update_pre_auth_integrity(self, packet, data=None):
             if smb2.DIALECT_SMB3_1_1 not in self.conn.client.dialects:
                 # hash only applies if client requests 3.1.1
                 return
             neg_resp = self.conn.negotiate_response
-            if (neg_resp is not None and
-                neg_resp.dialect_revision < smb2.DIALECT_SMB3_1_1):
+            if (
+                neg_resp is not None
+                and neg_resp.dialect_revision < smb2.DIALECT_SMB3_1_1
+            ):
                 # hash only applies if server negotiates 3.1.1
                 return
             if data is None:
                 data = packet.serialize()
             self._pre_auth_integrity_hash = digest.smb3_sha512(
-                    self._pre_auth_integrity_hash +
-                    data)
+                self._pre_auth_integrity_hash + data
+            )
 
         def _send_session_setup(self, sec_buf):
             smb_req = self.conn.request()
@@ -1107,7 +1172,7 @@ class Connection(transport.Transport):
                 smb_req.flags = smb2.SMB2_FLAGS_SIGNED
                 session_req.flags = smb2.SMB2_SESSION_FLAG_BINDING
 
-            for (attr,value) in self._settings.items():
+            for (attr, value) in self._settings.items():
                 setattr(session_req, attr, value)
 
             self.requests.append(smb_req)
@@ -1127,11 +1192,13 @@ class Connection(transport.Transport):
                 self.conn._binding_key = None
                 session = self.bind
             else:
-                session = Session(self.conn.client,
-                                  self.session_id,
-                                  self.session_key,
-                                  encryption_context,
-                                  smb_res)
+                session = Session(
+                    self.conn.client,
+                    self.session_id,
+                    self.session_key,
+                    encryption_context,
+                    smb_res,
+                )
                 session.user = self.auth.username()
 
             return session.addchannel(self.conn, signing_key)
@@ -1164,7 +1231,8 @@ class Connection(transport.Transport):
             if not self.interim_future and not self.responses:
                 # send the initial request
                 out_buf, self.session_key = self.auth.step(
-                        self.conn.negotiate_response.security_buffer)
+                    self.conn.negotiate_response.security_buffer
+                )
 
             elif self.interim_future:
                 # handle pre-auth integrity on the previous request
@@ -1187,10 +1255,12 @@ class Connection(transport.Transport):
                     session_res = smb_res[0]
                     if self.bind:
                         # Need to verify intermediate signatures
-                        smb_res.verify(self.conn.signing_digest(),
-                                       self.conn._binding_key)
+                        smb_res.verify(
+                            self.conn.signing_digest(), self.conn._binding_key
+                        )
                     out_buf, self.session_key = self.auth.step(
-                            session_res.security_buffer)
+                        session_res.security_buffer
+                    )
             if out_buf:
                 # submit additional requests if necessary
                 self.interim_future = self._send_session_setup(out_buf)
@@ -1228,7 +1298,7 @@ class Connection(transport.Transport):
         req = smb2.Smb2(parent, context=self)
         req.channel_sequence = self.client.channel_sequence
 
-        for (attr,value) in self._settings.items():
+        for (attr, value) in self._settings.items():
             setattr(req, attr, value)
 
         return req
@@ -1268,17 +1338,19 @@ class Connection(transport.Transport):
         else:
             return None
 
+
 class Session(object):
-    def __init__(self, client, session_id, session_key,
-                 encryption_context, smb_res):
+    def __init__(self, client, session_id, session_key, encryption_context, smb_res):
         object.__init__(self)
         self.client = client
         self.session_id = session_id
         self.session_key = session_key
         self.encryption_context = encryption_context
         self.encrypt_data = False
-        if smb_res[0].session_flags & smb2.SMB2_SESSION_FLAG_ENCRYPT_DATA and \
-            self.encryption_context is not None:
+        if (
+            smb_res[0].session_flags & smb2.SMB2_SESSION_FLAG_ENCRYPT_DATA
+            and self.encryption_context is not None
+        ):
             self.encrypt_data = True
         self._channels = {}
         self._trees = {}
@@ -1300,6 +1372,7 @@ class Session(object):
     def tree(self, tree_id):
         return self._trees.get(tree_id, None)
 
+
 class Channel(object):
     def __init__(self, connection, session, signing_key):
         object.__init__(self)
@@ -1308,7 +1381,7 @@ class Channel(object):
         self.signing_key = signing_key
 
     def cancel_request(self, future):
-        if (future.response is not None):
+        if future.response is not None:
             raise StateError("Cannot cancel completed request")
 
         smb_req = self.request()
@@ -1343,15 +1416,15 @@ class Channel(object):
     def tree_connect_submit(self, tree_req):
         tree_future = Future(request=tree_req.parent)
         resp_future = self.connection.submit(tree_req.parent.parent)[0]
-        resp_future.then(lambda f: tree_future.complete(Tree(self.session,
-                                                             tree_req.path,
-                                                             f.result())))
+        resp_future.then(
+            lambda f: tree_future.complete(
+                Tree(self.session, tree_req.path, f.result())
+            )
+        )
         return tree_future
 
     def tree_connect(self, path):
-        return self.tree_connect_submit(
-                self.tree_connect_request(
-                    path)).result()
+        return self.tree_connect_submit(self.tree_connect_request(path)).result()
 
     def tree_disconnect_request(self, tree):
         smb_req = self.request(obj=tree)
@@ -1360,7 +1433,8 @@ class Channel(object):
 
     def tree_disconnect(self, tree):
         return self.connection.transceive(
-                self.tree_disconnect_request(tree).parent.parent)[0]
+            self.tree_disconnect_request(tree).parent.parent
+        )[0]
 
     def logoff_request(self):
         smb_req = self.request()
@@ -1371,34 +1445,35 @@ class Channel(object):
         def logoff_finish(f):
             for channel in self.session._channels.values():
                 del channel.connection._sessions[self.session.session_id]
+
         logoff_future = self.connection.submit(logoff_req.parent.parent)[0]
         logoff_future.then(logoff_finish)
         return logoff_future
 
     def logoff(self):
-        return self.logoff_submit(
-                self.logoff_request()).result()
+        return self.logoff_submit(self.logoff_request()).result()
 
     def create_request(
-            self,
-            tree,
-            path,
-            access=smb2.GENERIC_READ | smb2.GENERIC_WRITE,
-            attributes=smb2.FILE_ATTRIBUTE_NORMAL,
-            share=0,
-            disposition=smb2.FILE_OPEN_IF,
-            options=0,
-            maximal_access=None,
-            oplock_level=smb2.SMB2_OPLOCK_LEVEL_NONE,
-            lease_key=None,
-            lease_state=None,
-            durable=False,
-            persistent=False,
-            create_guid=None,
-            app_instance_id=None,
-            query_on_disk_id=False,
-            extended_attributes=None,
-            timewarp=None):
+        self,
+        tree,
+        path,
+        access=smb2.GENERIC_READ | smb2.GENERIC_WRITE,
+        attributes=smb2.FILE_ATTRIBUTE_NORMAL,
+        share=0,
+        disposition=smb2.FILE_OPEN_IF,
+        options=0,
+        maximal_access=None,
+        oplock_level=smb2.SMB2_OPLOCK_LEVEL_NONE,
+        lease_key=None,
+        lease_state=None,
+        durable=False,
+        persistent=False,
+        create_guid=None,
+        app_instance_id=None,
+        query_on_disk_id=False,
+        extended_attributes=None,
+        timewarp=None,
+    ):
 
         prev_open = None
 
@@ -1445,8 +1520,9 @@ class Channel(object):
             if persistent:
                 durable_req.flags = smb2.SMB2_DHANDLE_FLAG_PERSISTENT
             if create_guid is None:
-                create_guid = array.array('B',
-                                          map(random.randint, [0] * 16, [255] * 16))
+                create_guid = array.array(
+                    "B", map(random.randint, [0] * 16, [255] * 16)
+                )
             durable_req.create_guid = create_guid
 
         if app_instance_id:
@@ -1476,13 +1552,13 @@ class Channel(object):
             timewarp_req.timestamp = nttime.NtTime(timewarp)
 
         open_future = Future(request=create_req.parent)
+
         def finish(f):
-            with open_future: open_future(
-                    Open(
-                        tree,
-                        f.result(),
-                        create_guid=create_guid,
-                        prev=prev_open))
+            with open_future:
+                open_future(
+                    Open(tree, f.result(), create_guid=create_guid, prev=prev_open)
+                )
+
         create_req.open_future = open_future
         create_req.finish = finish
 
@@ -1490,33 +1566,34 @@ class Channel(object):
 
     def create_submit(self, create_req):
         open_future = create_req.open_future
-        open_future.request_future = self.connection.submit(
-                create_req.parent.parent)[0]
+        open_future.request_future = self.connection.submit(create_req.parent.parent)[0]
         open_future.request_future.then(create_req.finish)
 
         return open_future
 
     def create(
-            self,
-            tree,
-            path,
-            access=smb2.GENERIC_READ | smb2.GENERIC_WRITE,
-            attributes=smb2.FILE_ATTRIBUTE_NORMAL,
-            share=0,
-            disposition=smb2.FILE_OPEN_IF,
-            options=0,
-            maximal_access=None,
-            oplock_level=smb2.SMB2_OPLOCK_LEVEL_NONE,
-            lease_key=None,
-            lease_state=None,
-            durable=False,
-            persistent=False,
-            create_guid=None,
-            app_instance_id=None,
-            query_on_disk_id=False,
-            extended_attributes=None,
-            timewarp=None):
-        return self.create_submit(self.create_request(
+        self,
+        tree,
+        path,
+        access=smb2.GENERIC_READ | smb2.GENERIC_WRITE,
+        attributes=smb2.FILE_ATTRIBUTE_NORMAL,
+        share=0,
+        disposition=smb2.FILE_OPEN_IF,
+        options=0,
+        maximal_access=None,
+        oplock_level=smb2.SMB2_OPLOCK_LEVEL_NONE,
+        lease_key=None,
+        lease_state=None,
+        durable=False,
+        persistent=False,
+        create_guid=None,
+        app_instance_id=None,
+        query_on_disk_id=False,
+        extended_attributes=None,
+        timewarp=None,
+    ):
+        return self.create_submit(
+            self.create_request(
                 tree,
                 path,
                 access,
@@ -1534,7 +1611,9 @@ class Channel(object):
                 app_instance_id,
                 query_on_disk_id,
                 extended_attributes,
-                timewarp))
+                timewarp,
+            )
+        )
 
     def close_request(self, handle):
         smb_req = self.request(obj=handle)
@@ -1550,17 +1629,17 @@ class Channel(object):
         return resp_future
 
     def close(self, handle):
-        return self.close_submit(
-                self.close_request(handle)).result()
+        return self.close_submit(self.close_request(handle)).result()
 
     def query_directory_request(
-            self,
-            handle,
-            file_information_class=smb2.FILE_DIRECTORY_INFORMATION,
-            flags=0,
-            file_index=0,
-            file_name='*',
-            output_buffer_length=8192):
+        self,
+        handle,
+        file_information_class=smb2.FILE_DIRECTORY_INFORMATION,
+        flags=0,
+        file_index=0,
+        file_name="*",
+        output_buffer_length=8192,
+    ):
         smb_req = self.request(obj=handle)
         enum_req = smb2.QueryDirectoryRequest(smb_req)
         enum_req.file_id = handle.file_id
@@ -1571,33 +1650,41 @@ class Channel(object):
         enum_req.file_index = file_index
         return enum_req
 
-    def query_directory(self,
-                        handle,
-                        file_information_class=smb2.FILE_DIRECTORY_INFORMATION,
-                        flags=0,
-                        file_index=0,
-                        file_name='*',
-                        output_buffer_length=8192):
+    def query_directory(
+        self,
+        handle,
+        file_information_class=smb2.FILE_DIRECTORY_INFORMATION,
+        flags=0,
+        file_index=0,
+        file_name="*",
+        output_buffer_length=8192,
+    ):
         return self.connection.transceive(
-                self.query_directory_request(
-                    handle,
-                    file_information_class,
-                    flags,
-                    file_index,
-                    file_name,
-                    output_buffer_length).parent.parent)[0][0]
+            self.query_directory_request(
+                handle,
+                file_information_class,
+                flags,
+                file_index,
+                file_name,
+                output_buffer_length,
+            ).parent.parent
+        )[0][0]
 
-    def enum_directory(self,
-                       handle,
-                       file_information_class=smb2.FILE_DIRECTORY_INFORMATION,
-                       file_name = '*',
-                       output_buffer_length=8192):
+    def enum_directory(
+        self,
+        handle,
+        file_information_class=smb2.FILE_DIRECTORY_INFORMATION,
+        file_name="*",
+        output_buffer_length=8192,
+    ):
         while True:
             try:
-                for info in self.query_directory(handle,
-                                                 file_information_class=file_information_class,
-                                                 file_name=file_name,
-                                                 output_buffer_length=output_buffer_length):
+                for info in self.query_directory(
+                    handle,
+                    file_information_class=file_information_class,
+                    file_name=file_name,
+                    output_buffer_length=output_buffer_length,
+                ):
                     yield info
             except ResponseError as e:
                 if e.response.status == ntstatus.STATUS_NO_MORE_FILES:
@@ -1606,12 +1693,13 @@ class Channel(object):
                     raise
 
     def query_file_info_request(
-            self,
-            create_res,
-            file_information_class=smb2.FILE_BASIC_INFORMATION,
-            info_type=smb2.SMB2_0_INFO_FILE,
-            output_buffer_length=4096,
-            additional_information=None):
+        self,
+        create_res,
+        file_information_class=smb2.FILE_BASIC_INFORMATION,
+        info_type=smb2.SMB2_0_INFO_FILE,
+        output_buffer_length=4096,
+        additional_information=None,
+    ):
         smb_req = self.request(obj=create_res)
         query_req = smb2.QueryInfoRequest(smb_req)
 
@@ -1623,13 +1711,15 @@ class Channel(object):
             query_req.additional_information = additional_information
         return query_req
 
-    def query_file_info(self,
-                        create_res,
-                        file_information_class=smb2.FILE_BASIC_INFORMATION,
-                        info_type=smb2.SMB2_0_INFO_FILE,
-                        output_buffer_length=4096,
-                        additional_information=None,
-                        first_result_only=None):
+    def query_file_info(
+        self,
+        create_res,
+        file_information_class=smb2.FILE_BASIC_INFORMATION,
+        info_type=smb2.SMB2_0_INFO_FILE,
+        output_buffer_length=4096,
+        additional_information=None,
+        first_result_only=None,
+    ):
         if first_result_only is None:
             warnings.warn(
                 "In a future release, query_file_info will return QueryInfoResponse "
@@ -1642,24 +1732,27 @@ class Channel(object):
             )
             first_result_only = True
         resp = self.connection.transceive(
-                self.query_file_info_request(
-                    create_res,
-                    file_information_class,
-                    info_type,
-                    output_buffer_length,
-                    additional_information).parent.parent)[0][0]
+            self.query_file_info_request(
+                create_res,
+                file_information_class,
+                info_type,
+                output_buffer_length,
+                additional_information,
+            ).parent.parent
+        )[0][0]
         if first_result_only:
             # only returning the first child info
             return resp[0]
         return resp
 
     def set_file_info_request(
-            self,
-            handle,
-            file_information_class=smb2.FILE_BASIC_INFORMATION,
-            info_type=smb2.SMB2_0_INFO_FILE,
-            input_buffer_length=4096,
-            additional_information=None):
+        self,
+        handle,
+        file_information_class=smb2.FILE_BASIC_INFORMATION,
+        info_type=smb2.SMB2_0_INFO_FILE,
+        input_buffer_length=4096,
+        additional_information=None,
+    ):
         smb_req = self.request(obj=handle)
         set_req = smb2.SetInfoRequest(smb_req)
         set_req.file_id = handle.file_id
@@ -1678,19 +1771,21 @@ class Channel(object):
         if hasattr(cls, "file_information_class"):
             file_information_class = cls.file_information_class
         set_req = self.set_file_info_request(
-                handle,
-                file_information_class,
-                info_type,
-                additional_information=additional_information)
+            handle,
+            file_information_class,
+            info_type,
+            additional_information=additional_information,
+        )
         yield cls(set_req)
         self.connection.transceive(set_req.parent.parent)[0]
 
     def change_notify_request(
-            self,
-            handle,
-            completion_filter=smb2.SMB2_NOTIFY_CHANGE_CREATION,
-            flags=0,
-            buffer_length=4096):
+        self,
+        handle,
+        completion_filter=smb2.SMB2_NOTIFY_CHANGE_CREATION,
+        flags=0,
+        buffer_length=4096,
+    ):
         smb_req = self.request(obj=handle)
         cnotify_req = smb2.ChangeNotifyRequest(smb_req)
         cnotify_req.file_id = handle.file_id
@@ -1700,17 +1795,17 @@ class Channel(object):
         return cnotify_req
 
     def change_notify(
-            self,
-            handle,
-            completion_filter=smb2.SMB2_NOTIFY_CHANGE_CREATION,
-            flags=0,
-            buffer_length=4096):
+        self,
+        handle,
+        completion_filter=smb2.SMB2_NOTIFY_CHANGE_CREATION,
+        flags=0,
+        buffer_length=4096,
+    ):
         return self.connection.submit(
-                self.change_notify_request(
-                    handle,
-                    completion_filter,
-                    flags,
-                    buffer_length=4096).parent.parent)[0]
+            self.change_notify_request(
+                handle, completion_filter, flags, buffer_length=4096
+            ).parent.parent
+        )[0]
 
     # Send an echo request and get a response
     def echo(self):
@@ -1731,13 +1826,7 @@ class Channel(object):
     def flush(self, file):
         self.connection.transceive(self.flush_request(file).parent.parent)
 
-    def read_request(
-            self,
-            file,
-            length,
-            offset,
-            minimum_count=0,
-            remaining_bytes=0):
+    def read_request(self, file, length, offset, minimum_count=0, remaining_bytes=0):
         smb_req = self.request(obj=file)
         read_req = smb2.ReadRequest(smb_req)
 
@@ -1748,28 +1837,14 @@ class Channel(object):
         read_req.file_id = file.file_id
         return read_req
 
-    def read(
-            self,
-            file,
-            length,
-            offset,
-            minimum_count=0,
-            remaining_bytes=0):
+    def read(self, file, length, offset, minimum_count=0, remaining_bytes=0):
         return self.connection.transceive(
-                self.read_request(
-                    file,
-                    length,
-                    offset,
-                    minimum_count,
-                    remaining_bytes).parent.parent)[0][0].data
+            self.read_request(
+                file, length, offset, minimum_count, remaining_bytes
+            ).parent.parent
+        )[0][0].data
 
-    def write_request(
-            self,
-            file,
-            offset,
-            buffer=None,
-            remaining_bytes=0,
-            flags=0):
+    def write_request(self, file, offset, buffer=None, remaining_bytes=0, flags=0):
         """
         Create a pike.smb2.WriteRequest from the given parameters
 
@@ -1780,17 +1855,23 @@ class Channel(object):
         @param remaining_bytes:
         @param flags: L{pike.smb2.WriteFlags}
         """
-        if isinstance(buffer, array.array) and buffer.typecode != 'B':
+        if isinstance(buffer, array.array) and buffer.typecode != "B":
             raise ValueError(
-                "array.array must have typecode 'B', not {!r}".format(buffer.typecode))
+                "array.array must have typecode 'B', not {!r}".format(buffer.typecode)
+            )
         elif isinstance(buffer, str):
-            warnings.warn("buffer must be bytes, got {!r}, casting as str and encoding "
-                          "with 'ascii'".format(type(buffer)), UnicodeWarning)
+            warnings.warn(
+                "buffer must be bytes, got {!r}, casting as str and encoding "
+                "with 'ascii'".format(type(buffer)),
+                UnicodeWarning,
+            )
             buffer = buffer.encode("ascii")
         if buffer is not None and not isinstance(buffer, (array.array, bytes)):
             raise TypeError(
                 "buffer must be a byte string or byte array, not {!r}".format(
-                    type(buffer)))
+                    type(buffer)
+                )
+            )
         smb_req = self.request(obj=file)
         write_req = smb2.WriteRequest(smb_req)
 
@@ -1801,19 +1882,12 @@ class Channel(object):
         write_req.flags = flags
         return write_req
 
-    def write(self,
-              file,
-              offset,
-              buffer=None,
-              remaining_bytes=0,
-              flags=0):
+    def write(self, file, offset, buffer=None, remaining_bytes=0, flags=0):
         smb_res = self.connection.transceive(
-                self.write_request(
-                    file,
-                    offset,
-                    buffer,
-                    remaining_bytes,
-                    flags).parent.parent)
+            self.write_request(
+                file, offset, buffer, remaining_bytes, flags
+            ).parent.parent
+        )
 
         return smb_res[0][0].count
 
@@ -1834,10 +1908,8 @@ class Channel(object):
         @param locks: A list of lock tuples, each of which consists of (offset, length, flags).
         """
         return self.connection.submit(
-                self.lock_request(
-                    handle,
-                    locks,
-                    sequence).parent.parent)[0]
+            self.lock_request(handle, locks, sequence).parent.parent
+        )[0]
 
     def validate_negotiate_info(self, tree):
         smb_req = self.request(obj=tree)
@@ -1871,8 +1943,8 @@ class Channel(object):
 
     def query_network_interface_info(self, tree):
         return self.connection.transceive(
-            self.query_network_interface_info_request(
-                tree).parent.parent)[0]
+            self.query_network_interface_info_request(tree).parent.parent
+        )[0]
 
     def resume_key(self, file):
         smb_req = self.request(obj=file.tree)
@@ -1902,13 +1974,16 @@ class Channel(object):
                 # 3.3.5.15.9 Handling a Resiliency Request
                 file.is_durable = False
                 file.is_resilient = True
+
         nrr_future = self.connection.submit(
             self.network_resiliency_request_request(file, timeout).parent.parent
         )[0]
         nrr_future.then(update_handle)
         return nrr_future.result()
 
-    def copychunk_request(self, source_file, target_file, chunks, resume_key=None, write_flag=False):
+    def copychunk_request(
+        self, source_file, target_file, chunks, resume_key=None, write_flag=False
+    ):
         """
         @param source_file: L{Open}
         @param target_file: L{Open}
@@ -1937,19 +2012,19 @@ class Channel(object):
             chunk.length = length
         return ioctl_req
 
-    def copychunk(self, source_file, target_file, chunks, resume_key=None, write_flag=False):
+    def copychunk(
+        self, source_file, target_file, chunks, resume_key=None, write_flag=False
+    ):
         """
         @param source_file: L{Open}
         @param target_file: L{Open}
         @param chunks: sequence of tuples (source_offset, target_offset, length)
         """
         return self.connection.transceive(
-                self.copychunk_request(
-                    source_file,
-                    target_file,
-                    chunks,
-                    resume_key,
-                    write_flag).parent.parent)[0]
+            self.copychunk_request(
+                source_file, target_file, chunks, resume_key, write_flag
+            ).parent.parent
+        )[0]
 
     def set_symlink_request(self, file, target_name, flags):
         smb_req = self.request(obj=file.tree)
@@ -1966,10 +2041,8 @@ class Channel(object):
 
     def set_symlink(self, file, target_name, flags):
         return self.connection.transceive(
-                self.set_symlink_request(
-                    file,
-                    target_name,
-                    flags).parent.parent)[0]
+            self.set_symlink_request(file, target_name, flags).parent.parent
+        )[0]
 
     def get_symlink_request(self, file):
         smb_req = self.request(obj=file.tree)
@@ -1981,8 +2054,9 @@ class Channel(object):
         return ioctl_req
 
     def get_symlink(self, file):
-        return self.connection.transceive(
-                self.get_symlink_request(file).parent.parent)[0]
+        return self.connection.transceive(self.get_symlink_request(file).parent.parent)[
+            0
+        ]
 
     def fsctl_request(self, smb_req, fh, buflen=16384):
         ioctl_req = smb2.IoctlRequest(smb_req)
@@ -1991,32 +2065,33 @@ class Channel(object):
         ioctl_req.file_id = fh.file_id
         return ioctl_req
 
-    def enumerate_snapshots_request(self, fh,
-                                    snap_request=smb2.EnumerateSnapshotsRequest,
-                                    max_output_response=16384):
+    def enumerate_snapshots_request(
+        self, fh, snap_request=smb2.EnumerateSnapshotsRequest, max_output_response=16384
+    ):
         smb_req = self.request(obj=fh.tree)
-        fsctl_req = self.fsctl_request(smb_req, fh,
-                                          buflen=max_output_response)
+        fsctl_req = self.fsctl_request(smb_req, fh, buflen=max_output_response)
         enum_req = snap_request(fsctl_req)
         return enum_req
 
     def enumerate_snapshots(self, fh, snap_request=smb2.EnumerateSnapshotsRequest):
         return self.connection.transceive(
-                self.enumerate_snapshots_request(fh,
-                    snap_request).parent.parent.parent)[0]
+            self.enumerate_snapshots_request(fh, snap_request).parent.parent.parent
+        )[0]
 
-    def enumerate_snapshots_list(self, fh,
-                                 snap_request=smb2.EnumerateSnapshotsRequest):
+    def enumerate_snapshots_list(self, fh, snap_request=smb2.EnumerateSnapshotsRequest):
         return self.enumerate_snapshots(fh, snap_request)[0][0].snapshots
 
     def zero_data(self, tree, src_offsets, dst_offsets, src_filename):
         """ Send a FSCTL_SET_ZERO_DATA ioctl request """
-        fh_src = self.create(tree, src_filename,
-                             access=smb2.FILE_READ_DATA | smb2.FILE_WRITE_DATA,
-                             share=(smb2.FILE_SHARE_READ |
-                                    smb2.FILE_SHARE_WRITE |
-                                    smb2.FILE_SHARE_DELETE),
-                             disposition=smb2.FILE_OPEN_IF).result()
+        fh_src = self.create(
+            tree,
+            src_filename,
+            access=smb2.FILE_READ_DATA | smb2.FILE_WRITE_DATA,
+            share=(
+                smb2.FILE_SHARE_READ | smb2.FILE_SHARE_WRITE | smb2.FILE_SHARE_DELETE
+            ),
+            disposition=smb2.FILE_OPEN_IF,
+        ).result()
         smb_req = self.request(obj=tree)
         fsctl_req = self.fsctl_request(smb_req, fh_src)
         smb2.SetSparseRequest(fsctl_req)
@@ -2088,14 +2163,19 @@ class Channel(object):
             transform = crypto.TransformHeader(smb_req.parent)
             transform.encryption_context = self.session.encryption_context
             transform.session_id = self.session.session_id
-        elif self.connection.negotiate_response.security_mode & smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED or \
-           self.connection.client.security_mode & smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED:
-           smb_req.flags |= smb2.SMB2_FLAGS_SIGNED
+        elif (
+            self.connection.negotiate_response.security_mode
+            & smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED
+            or self.connection.client.security_mode
+            & smb2.SMB2_NEGOTIATE_SIGNING_REQUIRED
+        ):
+            smb_req.flags |= smb2.SMB2_FLAGS_SIGNED
 
         return smb_req
 
     def let(self, **kwargs):
         return self.connection.let(**kwargs)
+
 
 class Tree(object):
     def __init__(self, session, path, smb_res):
@@ -2108,6 +2188,7 @@ class Tree(object):
         if smb_res[0].share_flags & smb2.SMB2_SHAREFLAG_ENCRYPT_DATA:
             self.encrypt_data = True
         self.session._trees[self.tree_id] = self
+
 
 class Open(object):
     def __init__(self, tree, smb_res, create_guid=None, prev=None):
@@ -2132,17 +2213,25 @@ class Open(object):
 
         if self.oplock_level != smb2.SMB2_OPLOCK_LEVEL_NONE:
             if self.oplock_level == smb2.SMB2_OPLOCK_LEVEL_LEASE:
-                lease_res = [c for c in self.create_response if isinstance(c, smb2.LeaseResponse)][0]
+                lease_res = [
+                    c for c in self.create_response if isinstance(c, smb2.LeaseResponse)
+                ][0]
                 self.lease = tree.session.client.lease(tree, lease_res)
             else:
                 self.arm_oplock_future()
 
-        durable_res = [c for c in self.create_response if isinstance(c, smb2.DurableHandleResponse)]
+        durable_res = [
+            c for c in self.create_response if isinstance(c, smb2.DurableHandleResponse)
+        ]
 
         if durable_res != []:
             self.is_durable = True
 
-        durable_v2_res = [c for c in self.create_response if isinstance(c, smb2.DurableHandleV2Response)]
+        durable_v2_res = [
+            c
+            for c in self.create_response
+            if isinstance(c, smb2.DurableHandleV2Response)
+        ]
         if durable_v2_res != []:
             self.durable_timeout = durable_v2_res[0].timeout
             self.durable_flags = durable_v2_res[0].flags
@@ -2152,14 +2241,12 @@ class Open(object):
             if self.durable_flags & smb2.SMB2_DHANDLE_FLAG_PERSISTENT != 0:
                 self.is_persistent = True
 
-
     def arm_oplock_future(self):
         """
         (Re)arm the oplock future for this open. This function should be called
         when an oplock changes level to anything except SMB2_OPLOCK_LEVEL_NONE
         """
-        self.oplock_future = self.tree.session.client.oplock_break_future(
-                self.file_id)
+        self.oplock_future = self.tree.session.client.oplock_break_future(self.file_id)
 
     def on_oplock_break(self, cb):
         """
@@ -2167,6 +2254,7 @@ class Open(object):
         @param cb: callable taking 1 parameter: the break request oplock level
                    should return the desired oplock level to break to
         """
+
         def simple_handle_break(op, smb_res, cb_ctx):
             """
             note that op is not used in this callback,
@@ -2184,6 +2272,7 @@ class Open(object):
                 self.oplock_level = ack_res.oplock_level
             else:
                 self.oplock_level = notify.oplock_level
+
         self.on_oplock_break_request(simple_handle_break)
 
     def on_oplock_break_request(self, cb, cb_ctx=None):
@@ -2197,9 +2286,11 @@ class Open(object):
                    callback is also responsible for re-arming the future
                    and updating the oplock_level (if changed)
         """
+
         def handle_break(f):
             smb_res = f.result()
             cb(self, smb_res, cb_ctx)
+
         self.oplock_future.then(handle_break)
 
     def dispose(self):
@@ -2226,6 +2317,7 @@ class RelatedOpen(object):
     Use in place of a real `Open` object in compound requests to use a handle
     from previous Create in the chain
     """
+
     def __init__(self, tree=None):
         self.tree_id = tree.tree_id
         self.file_id = smb2.RELATED_FID
@@ -2264,6 +2356,7 @@ class Lease(object):
         @param cb: callable taking 1 parameter: the break request lease state
                    should return the desired lease state to break to
         """
+
         def simple_handle_break(lease, smb_res, cb_ctx):
             """
             note that lease is not used in this callback,
@@ -2281,6 +2374,7 @@ class Lease(object):
                 self.lease_state = ack_res.lease_state
             else:
                 self.lease_state = notify.new_lease_state
+
         self.on_break_request(simple_handle_break)
 
     def on_break_request(self, cb, cb_ctx=None):
@@ -2294,7 +2388,9 @@ class Lease(object):
                    callback is also responsible for re-arming the future
                    and updating the lease_state (if changed)
         """
+
         def handle_break(f):
             smb_res = f.result()
             cb(self, smb_res, cb_ctx)
+
         self.future.then(handle_break)

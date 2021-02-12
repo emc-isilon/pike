@@ -26,15 +26,17 @@ class QueryDirectoryTest(pike.test.PikeTest):
     def test_file_directory_info(self):
 
         chan, tree = self.tree_connect()
-        root = chan.create(tree,
-                           '',
-                           access=pike.smb2.GENERIC_READ,
-                           options=pike.smb2.FILE_DIRECTORY_FILE,
-                           share=pike.smb2.FILE_SHARE_READ).result()
+        root = chan.create(
+            tree,
+            "",
+            access=pike.smb2.GENERIC_READ,
+            options=pike.smb2.FILE_DIRECTORY_FILE,
+            share=pike.smb2.FILE_SHARE_READ,
+        ).result()
 
         names = [info.file_name for info in chan.enum_directory(root)]
 
-        self.assertIn('.', names)
+        self.assertIn(".", names)
 
         chan.close(root)
 
@@ -43,19 +45,23 @@ class QueryDirectoryTest(pike.test.PikeTest):
     # fails with STATUS_NO_MORE_FILES the second.
     def test_specific_name(self):
         chan, tree = self.tree_connect()
-        name = 'hello.txt'
+        name = "hello.txt"
 
-        hello = chan.create(tree,
-                            name,
-                            access=pike.smb2.GENERIC_WRITE | pike.smb2.GENERIC_READ | pike.smb2.DELETE,
-                            disposition=pike.smb2.FILE_SUPERSEDE,
-                            options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
+        hello = chan.create(
+            tree,
+            name,
+            access=pike.smb2.GENERIC_WRITE | pike.smb2.GENERIC_READ | pike.smb2.DELETE,
+            disposition=pike.smb2.FILE_SUPERSEDE,
+            options=pike.smb2.FILE_DELETE_ON_CLOSE,
+        ).result()
 
-        root = chan.create(tree,
-                           '',
-                           access=pike.smb2.GENERIC_READ,
-                           options=pike.smb2.FILE_DIRECTORY_FILE,
-                           share=pike.smb2.FILE_SHARE_READ).result()
+        root = chan.create(
+            tree,
+            "",
+            access=pike.smb2.GENERIC_READ,
+            options=pike.smb2.FILE_DIRECTORY_FILE,
+            share=pike.smb2.FILE_SHARE_READ,
+        ).result()
 
         query1 = chan.query_directory(root, file_name=name)
 
@@ -68,16 +74,20 @@ class QueryDirectoryTest(pike.test.PikeTest):
     def test_file_id_both_directory_information(self):
 
         chan, tree = self.tree_connect()
-        root = chan.create(tree,
-                           '',
-                           access=pike.smb2.GENERIC_READ,
-                           options=pike.smb2.FILE_DIRECTORY_FILE,
-                           share=pike.smb2.FILE_SHARE_READ).result()
+        root = chan.create(
+            tree,
+            "",
+            access=pike.smb2.GENERIC_READ,
+            options=pike.smb2.FILE_DIRECTORY_FILE,
+            share=pike.smb2.FILE_SHARE_READ,
+        ).result()
 
-        result = chan.query_directory(root, file_information_class=pike.smb2.FILE_ID_BOTH_DIR_INFORMATION)
+        result = chan.query_directory(
+            root, file_information_class=pike.smb2.FILE_ID_BOTH_DIR_INFORMATION
+        )
         names = [info.file_name for info in result]
-        self.assertIn('.', names)
-        self.assertIn('..', names)
+        self.assertIn(".", names)
+        self.assertIn("..", names)
 
         valid_file_ids = [info.file_id >= 0 for info in result]
         self.assertNotIn(False, valid_file_ids)
@@ -87,20 +97,22 @@ class QueryDirectoryTest(pike.test.PikeTest):
     def test_restart_scan(self):
 
         chan, tree = self.tree_connect()
-        root = chan.create(tree,
-                           '',
-                           access=pike.smb2.GENERIC_READ,
-                           options=pike.smb2.FILE_DIRECTORY_FILE,
-                           share=pike.smb2.FILE_SHARE_READ).result()
+        root = chan.create(
+            tree,
+            "",
+            access=pike.smb2.GENERIC_READ,
+            options=pike.smb2.FILE_DIRECTORY_FILE,
+            share=pike.smb2.FILE_SHARE_READ,
+        ).result()
 
         result = chan.query_directory(root)
         names = [info.file_name for info in result]
-        self.assertIn('.', names)
+        self.assertIn(".", names)
 
-        result = chan.query_directory(root,
-                                      flags=pike.smb2.SL_RESTART_SCAN,
-                                      file_name='*')
+        result = chan.query_directory(
+            root, flags=pike.smb2.SL_RESTART_SCAN, file_name="*"
+        )
         names = [info.file_name for info in result]
-        self.assertIn('.', names)
+        self.assertIn(".", names)
 
         chan.close(root)

@@ -24,29 +24,35 @@ import pike.ntstatus
 @pike.test.RequireCapabilities(pike.smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL)
 class MultiChannelTest(pike.test.PikeTest):
     def session_bind(self, chan):
-        return chan.connection.client.connect(self.server).negotiate().session_setup(self.creds, bind=chan.session)
+        return (
+            chan.connection.client.connect(self.server)
+            .negotiate()
+            .session_setup(self.creds, bind=chan.session)
+        )
 
     # Open a file, binding session to second channel, and close it there
     def test_open_bind_close(self):
         chan, tree = self.tree_connect()
-        handle = chan.create(tree, 'hello.txt').result()
+        handle = chan.create(tree, "hello.txt").result()
 
         # Open a second channel and bind the session
         chan2 = self.session_bind(chan)
-    
+
         # Close the handle on the second channel
         chan2.close(handle)
 
     # Simulate a channel failover during a write and confirm that a
     # stale write sent on the original channel is rejected
     def test_write_fence_reject_stale(self):
-        data_stale = b'stale'
-        data_fresh = b'fresh'
+        data_stale = b"stale"
+        data_fresh = b"fresh"
         chan, tree = self.tree_connect()
         client = chan.connection.client
-        
+
         # Open a file
-        handle = chan.create(tree, 'hello.txt', disposition=pike.smb2.FILE_SUPERSEDE).result()
+        handle = chan.create(
+            tree, "hello.txt", disposition=pike.smb2.FILE_SUPERSEDE
+        ).result()
 
         # Open a second channel
         chan2 = self.session_bind(chan)

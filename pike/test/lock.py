@@ -26,24 +26,37 @@ class LockTest(pike.test.PikeTest):
     def test_lock(self):
         chan, tree = self.tree_connect()
         buffer = "0123456789012345678901"
-        locks = [(8, 8, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK | pike.smb2.SMB2_LOCKFLAG_FAIL_IMMEDIATELY)]
+        locks = [
+            (
+                8,
+                8,
+                pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK
+                | pike.smb2.SMB2_LOCKFLAG_FAIL_IMMEDIATELY,
+            )
+        ]
 
-        share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
+        share_all = (
+            pike.smb2.FILE_SHARE_READ
+            | pike.smb2.FILE_SHARE_WRITE
+            | pike.smb2.FILE_SHARE_DELETE
+        )
 
-        file = chan.create(tree,
-                              'lock.txt',
-                              access=pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE,
-                              share=share_all,
-                              disposition=pike.smb2.FILE_SUPERSEDE,
-                              options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
-       
-        bytes_written = chan.write(file,
-                                   0,
-                                   buffer)
+        file = chan.create(
+            tree,
+            "lock.txt",
+            access=pike.smb2.FILE_READ_DATA
+            | pike.smb2.FILE_WRITE_DATA
+            | pike.smb2.DELETE,
+            share=share_all,
+            disposition=pike.smb2.FILE_SUPERSEDE,
+            options=pike.smb2.FILE_DELETE_ON_CLOSE,
+        ).result()
+
+        bytes_written = chan.write(file, 0, buffer)
         self.assertEqual(bytes_written, len(buffer))
 
         chan.lock(file, locks).result()
-        
+
         chan.close(file)
 
     # Test that pending lock request can be cancelled, yielding STATUS_CANCELLED
@@ -52,30 +65,36 @@ class LockTest(pike.test.PikeTest):
         buffer = "0123456789012345678901"
         locks = [(8, 8, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK)]
 
-        share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
+        share_all = (
+            pike.smb2.FILE_SHARE_READ
+            | pike.smb2.FILE_SHARE_WRITE
+            | pike.smb2.FILE_SHARE_DELETE
+        )
         access = pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE
 
         # Create file, lock
-        file1 = chan.create(tree,
-                            'lock.txt',
-                            access=access,
-                            share=share_all,
-                            disposition=pike.smb2.FILE_SUPERSEDE).result()
-       
-        bytes_written = chan.write(file1,
-                                   0,
-                                   buffer)
+        file1 = chan.create(
+            tree,
+            "lock.txt",
+            access=access,
+            share=share_all,
+            disposition=pike.smb2.FILE_SUPERSEDE,
+        ).result()
+
+        bytes_written = chan.write(file1, 0, buffer)
         self.assertEqual(bytes_written, len(buffer))
 
         chan.lock(file1, locks).result()
 
         # Open file again (with delete on close)
-        file2 = chan.create(tree,
-                            'lock.txt',
-                            access=access,
-                            share=share_all,
-                            disposition=pike.smb2.FILE_OPEN,
-                            options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
+        file2 = chan.create(
+            tree,
+            "lock.txt",
+            access=access,
+            share=share_all,
+            disposition=pike.smb2.FILE_OPEN,
+            options=pike.smb2.FILE_DELETE_ON_CLOSE,
+        ).result()
 
         # This will block since the lock is already held, so only wait for interim response
         lock_future = chan.lock(file2, locks)
@@ -84,7 +103,7 @@ class LockTest(pike.test.PikeTest):
         # Cancel, wait for response, verify error response
         with self.assert_error(pike.ntstatus.STATUS_CANCELLED):
             chan.cancel(lock_future).result()
-        
+
         chan.close(file1)
         chan.close(file2)
 
@@ -95,35 +114,45 @@ class LockTest(pike.test.PikeTest):
         lock_size = 8
         locks = [(lock_offset, lock_size, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK)]
 
-        share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
+        share_all = (
+            pike.smb2.FILE_SHARE_READ
+            | pike.smb2.FILE_SHARE_WRITE
+            | pike.smb2.FILE_SHARE_DELETE
+        )
         access = pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE
 
         # Create file, lock
-        file1 = chan.create(tree,
-                            'lock.txt',
-                            access=access,
-                            share=share_all,
-                            disposition=pike.smb2.FILE_SUPERSEDE).result()
-       
+        file1 = chan.create(
+            tree,
+            "lock.txt",
+            access=access,
+            share=share_all,
+            disposition=pike.smb2.FILE_SUPERSEDE,
+        ).result()
+
         bytes_written = chan.write(file1, 0, buffer)
         self.assertEqual(bytes_written, len(buffer))
 
         chan.lock(file1, locks).result()
 
         # Open file again (with delete on close)
-        file2 = chan.create(tree,
-                            'lock.txt',
-                            access=access,
-                            share=share_all,
-                            disposition=pike.smb2.FILE_OPEN,
-                            options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
+        file2 = chan.create(
+            tree,
+            "lock.txt",
+            access=access,
+            share=share_all,
+            disposition=pike.smb2.FILE_OPEN,
+            options=pike.smb2.FILE_DELETE_ON_CLOSE,
+        ).result()
 
-        cases = ((offset,size) for offset in range(0, 16) for size in range(0, 16))
+        cases = ((offset, size) for offset in range(0, 16) for size in range(0, 16))
 
-        for (offset,size) in cases:
-            if ranges_intersect(offset, offset+size, lock_offset, lock_offset + lock_size):
+        for (offset, size) in cases:
+            if ranges_intersect(
+                offset, offset + size, lock_offset, lock_offset + lock_size
+            ):
                 with self.assert_error(pike.ntstatus.STATUS_FILE_LOCK_CONFLICT):
-                    chan.write(file2, offset, 'a' * size)
+                    chan.write(file2, offset, "a" * size)
 
         chan.close(file1)
         chan.close(file2)
@@ -135,28 +164,36 @@ class LockTest(pike.test.PikeTest):
         lock_size = 8
         locks = [(lock_offset, lock_size, pike.smb2.SMB2_LOCKFLAG_EXCLUSIVE_LOCK)]
 
-        share_all = pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
+        share_all = (
+            pike.smb2.FILE_SHARE_READ
+            | pike.smb2.FILE_SHARE_WRITE
+            | pike.smb2.FILE_SHARE_DELETE
+        )
         access = pike.smb2.FILE_READ_DATA | pike.smb2.FILE_WRITE_DATA | pike.smb2.DELETE
 
         # Create file, lock
-        file1 = chan.create(tree,
-                            'lock.txt',
-                            access=access,
-                            share=share_all,
-                            disposition=pike.smb2.FILE_SUPERSEDE).result()
-       
+        file1 = chan.create(
+            tree,
+            "lock.txt",
+            access=access,
+            share=share_all,
+            disposition=pike.smb2.FILE_SUPERSEDE,
+        ).result()
+
         bytes_written = chan.write(file1, 0, buffer)
         self.assertEqual(bytes_written, len(buffer))
 
         chan.lock(file1, locks).result()
 
         # Open file again (with delete on close)
-        file2 = chan.create(tree,
-                            'lock.txt',
-                            access=access,
-                            share=share_all,
-                            disposition=pike.smb2.FILE_OPEN,
-                            options=pike.smb2.FILE_DELETE_ON_CLOSE).result()
+        file2 = chan.create(
+            tree,
+            "lock.txt",
+            access=access,
+            share=share_all,
+            disposition=pike.smb2.FILE_OPEN,
+            options=pike.smb2.FILE_DELETE_ON_CLOSE,
+        ).result()
 
         chan.write(file2, lock_offset + 1, None)
 
@@ -169,7 +206,13 @@ def range_contains(a1, a2, b):
 
 
 def ranges_intersect(a1, a2, b1, b2):
-    return a2 > a1 and b2 > b1 and \
-        (range_contains(a1, a2, b1) or range_contains(a1, a2, b2-1) or \
-         range_contains(b1, b2, a1) or range_contains(b1, b2, a2-1))
-            
+    return (
+        a2 > a1
+        and b2 > b1
+        and (
+            range_contains(a1, a2, b1)
+            or range_contains(a1, a2, b2 - 1)
+            or range_contains(b1, b2, a1)
+            or range_contains(b1, b2, a2 - 1)
+        )
+    )

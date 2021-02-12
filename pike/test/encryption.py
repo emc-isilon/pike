@@ -25,15 +25,14 @@ class TestEncryption(pike.test.PikeTest):
         client = model.Client(dialects=[smb2.DIALECT_SMB3_0])
         conn = client.connect(self.server)
         conn.negotiate()
-        self.assertEqual(conn.negotiate_response.dialect_revision,
-                         smb2.DIALECT_SMB3_0)
-        self.assertTrue(conn.negotiate_response.capabilities &
-                        smb2.SMB2_GLOBAL_CAP_ENCRYPTION)
+        self.assertEqual(conn.negotiate_response.dialect_revision, smb2.DIALECT_SMB3_0)
+        self.assertTrue(
+            conn.negotiate_response.capabilities & smb2.SMB2_GLOBAL_CAP_ENCRYPTION
+        )
         chan = conn.session_setup(self.creds)
         chan.session.encrypt_data = True
         self.assertIsNotNone(chan.session.encryption_context)
-        self.assertEqual(chan.session.encryption_context.aes_mode,
-                         crypto.AES.MODE_CCM)
+        self.assertEqual(chan.session.encryption_context.aes_mode, crypto.AES.MODE_CCM)
         tree = chan.tree_connect(self.share)
         self.assertIsNotNone(tree.tree_connect_response.parent.parent.transform)
 
@@ -41,66 +40,67 @@ class TestEncryption(pike.test.PikeTest):
         client = model.Client(dialects=[smb2.DIALECT_SMB3_0_2])
         conn = client.connect(self.server)
         conn.negotiate()
-        self.assertEqual(conn.negotiate_response.dialect_revision,
-                         smb2.DIALECT_SMB3_0_2)
-        self.assertTrue(conn.negotiate_response.capabilities &
-                        smb2.SMB2_GLOBAL_CAP_ENCRYPTION)
+        self.assertEqual(
+            conn.negotiate_response.dialect_revision, smb2.DIALECT_SMB3_0_2
+        )
+        self.assertTrue(
+            conn.negotiate_response.capabilities & smb2.SMB2_GLOBAL_CAP_ENCRYPTION
+        )
         chan = conn.session_setup(self.creds)
         chan.session.encrypt_data = True
         self.assertIsNotNone(chan.session.encryption_context)
-        self.assertEqual(chan.session.encryption_context.aes_mode,
-                         crypto.AES.MODE_CCM)
+        self.assertEqual(chan.session.encryption_context.aes_mode, crypto.AES.MODE_CCM)
         tree = chan.tree_connect(self.share)
         self.assertIsNotNone(tree.tree_connect_response.parent.parent.transform)
 
     def test_smb_3_1_1_encryption_gcm(self):
-        client = model.Client(dialects=[smb2.DIALECT_SMB3_0,
-                                        smb2.DIALECT_SMB3_1_1])
+        client = model.Client(dialects=[smb2.DIALECT_SMB3_0, smb2.DIALECT_SMB3_1_1])
         conn = client.connect(self.server)
         conn.negotiate(ciphers=[crypto.SMB2_AES_128_GCM])
-        self.assertEqual(conn.negotiate_response.dialect_revision,
-                         smb2.DIALECT_SMB3_1_1)
-        self.assertFalse(conn.negotiate_response.capabilities &
-                        smb2.SMB2_GLOBAL_CAP_ENCRYPTION)
+        self.assertEqual(
+            conn.negotiate_response.dialect_revision, smb2.DIALECT_SMB3_1_1
+        )
+        self.assertFalse(
+            conn.negotiate_response.capabilities & smb2.SMB2_GLOBAL_CAP_ENCRYPTION
+        )
         chan = conn.session_setup(self.creds)
         chan.session.encrypt_data = True
         self.assertIsNotNone(chan.session.encryption_context)
-        self.assertEqual(chan.session.encryption_context.aes_mode,
-                         crypto.AES.MODE_GCM)
+        self.assertEqual(chan.session.encryption_context.aes_mode, crypto.AES.MODE_GCM)
         tree = chan.tree_connect(self.share)
         self.assertIsNotNone(tree.tree_connect_response.parent.parent.transform)
 
     def test_smb_3_1_1_encryption_ccm(self):
-        client = model.Client(dialects=[smb2.DIALECT_SMB3_0,
-                                        smb2.DIALECT_SMB3_1_1])
+        client = model.Client(dialects=[smb2.DIALECT_SMB3_0, smb2.DIALECT_SMB3_1_1])
         conn = client.connect(self.server)
         conn.negotiate(ciphers=[crypto.SMB2_AES_128_CCM])
-        self.assertEqual(conn.negotiate_response.dialect_revision,
-                         smb2.DIALECT_SMB3_1_1)
-        self.assertFalse(conn.negotiate_response.capabilities &
-                        smb2.SMB2_GLOBAL_CAP_ENCRYPTION)
+        self.assertEqual(
+            conn.negotiate_response.dialect_revision, smb2.DIALECT_SMB3_1_1
+        )
+        self.assertFalse(
+            conn.negotiate_response.capabilities & smb2.SMB2_GLOBAL_CAP_ENCRYPTION
+        )
         chan = conn.session_setup(self.creds)
         chan.session.encrypt_data = True
         self.assertIsNotNone(chan.session.encryption_context)
-        self.assertEqual(chan.session.encryption_context.aes_mode,
-                         crypto.AES.MODE_CCM)
+        self.assertEqual(chan.session.encryption_context.aes_mode, crypto.AES.MODE_CCM)
         tree = chan.tree_connect(self.share)
         self.assertIsNotNone(tree.tree_connect_response.parent.parent.transform)
 
     def test_smb_3_1_1_compound(self):
-        client = model.Client(dialects=[smb2.DIALECT_SMB3_0,
-                                        smb2.DIALECT_SMB3_1_1])
+        client = model.Client(dialects=[smb2.DIALECT_SMB3_0, smb2.DIALECT_SMB3_1_1])
         conn = client.connect(self.server)
         conn.negotiate(ciphers=[crypto.SMB2_AES_128_GCM])
-        self.assertEqual(conn.negotiate_response.dialect_revision,
-                         smb2.DIALECT_SMB3_1_1)
-        self.assertFalse(conn.negotiate_response.capabilities &
-                        smb2.SMB2_GLOBAL_CAP_ENCRYPTION)
+        self.assertEqual(
+            conn.negotiate_response.dialect_revision, smb2.DIALECT_SMB3_1_1
+        )
+        self.assertFalse(
+            conn.negotiate_response.capabilities & smb2.SMB2_GLOBAL_CAP_ENCRYPTION
+        )
         chan = conn.session_setup(self.creds)
         chan.session.encrypt_data = True
         self.assertIsNotNone(chan.session.encryption_context)
-        self.assertEqual(chan.session.encryption_context.aes_mode,
-                         crypto.AES.MODE_GCM)
+        self.assertEqual(chan.session.encryption_context.aes_mode, crypto.AES.MODE_GCM)
         chan.session.encrypt_data = True
         tree = chan.tree_connect(self.share)
         self.assertIsNotNone(tree.tree_connect_response.parent.parent.transform)
@@ -111,7 +111,7 @@ class TestEncryption(pike.test.PikeTest):
         create_req = smb2.CreateRequest(smb_req1)
         close_req = smb2.CloseRequest(smb_req2)
 
-        create_req.name = 'hello.txt'
+        create_req.name = "hello.txt"
         create_req.desired_access = pike.smb2.GENERIC_READ | pike.smb2.GENERIC_WRITE
         create_req.file_attributes = pike.smb2.FILE_ATTRIBUTE_NORMAL
         create_req.create_disposition = pike.smb2.FILE_OPEN_IF

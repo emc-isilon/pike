@@ -36,14 +36,14 @@ def random_bytes(length):
     :param length: How many bytes to return
     :return: array.array('B') of length random bytes
     """
-    return array.array('B', (random.randint(0, 255) for _ in range(length)))
+    return array.array("B", (random.randint(0, 255) for _ in range(length)))
 
 
-def pad_right(value, length, byte=b'\0'):
+def pad_right(value, length, byte=b"\0"):
     if len(value) > length:
         value = value[:length]
     elif len(value) < 16:
-        value += array.array('B', byte*(length - len(value)))
+        value += array.array("B", byte * (length - len(value)))
     return value
 
 
@@ -56,11 +56,12 @@ class Ciphers(core.ValueEnum):
     SMB2_AES_128_CCM = 0x0001
     SMB2_AES_128_GCM = 0x0002
 
+
 Ciphers.import_items(globals())
 
 cipher_map = {
-        SMB2_AES_128_CCM: (AES.MODE_CCM, 11),
-        SMB2_AES_128_GCM: (AES.MODE_GCM, 12)
+    SMB2_AES_128_CCM: (AES.MODE_CCM, 11),
+    SMB2_AES_128_GCM: (AES.MODE_GCM, 12),
 }
 
 
@@ -84,15 +85,17 @@ class EncryptionCapabilities(core.Frame):
             self.ciphers.append(Ciphers(cur.decode_uint16le()))
 
 
-class EncryptionCapabilitiesRequest(smb2.NegotiateRequestContext,
-                                    EncryptionCapabilities):
+class EncryptionCapabilitiesRequest(
+    smb2.NegotiateRequestContext, EncryptionCapabilities
+):
     def __init__(self, parent):
         smb2.NegotiateRequestContext.__init__(self, parent)
         EncryptionCapabilities.__init__(self)
 
 
-class EncryptionCapabilitiesResponse(smb2.NegotiateResponseContext,
-                                     EncryptionCapabilities):
+class EncryptionCapabilitiesResponse(
+    smb2.NegotiateResponseContext, EncryptionCapabilities
+):
     def __init__(self, parent):
         smb2.NegotiateResponseContext.__init__(self, parent)
         EncryptionCapabilities.__init__(self)
@@ -110,16 +113,16 @@ class TransformHeader(core.Frame):
     If the encryption_context is not explicitly specified, then it will be looked
     up based on session_id from the parent Netbios frame's connection reference
     """
+
     LOG_CHILDREN_COUNT = False
     LOG_CHILDREN_EXPAND = True
 
     def __init__(self, parent):
         core.Frame.__init__(self, parent)
-        self.protocol_id = array.array('B', b"\xfdSMB")
+        self.protocol_id = array.array("B", b"\xfdSMB")
         self.signature = None
         # the value of nonce is always used in the encryption routine
-        self.nonce = array.array('B',
-                                 map(random.randint, [0] * 16, [255] * 16))
+        self.nonce = array.array("B", map(random.randint, [0] * 16, [255] * 16))
         # if wire_nonce is set, it will be sent on the wire instead of nonce
         self.wire_nonce = None
         self.original_message_size = None
@@ -127,7 +130,7 @@ class TransformHeader(core.Frame):
         self.flags = 0x1
         self.session_id = None
         self.encryption_context = None
-        self.additional_authenticated_data_buf = array.array('B')
+        self.additional_authenticated_data_buf = array.array("B")
         if parent is not None:
             parent.transform = self
         else:
@@ -158,7 +161,9 @@ class TransformHeader(core.Frame):
     def _encode_header(self, cur):
         # look up the encryption context if not specified
         if self.encryption_context is None and self.parent is not None:
-            self.encryption_context = self.parent.conn.encryption_context(self.session_id)
+            self.encryption_context = self.parent.conn.encryption_context(
+                self.session_id
+            )
         cur.encode_bytes(self.protocol_id)
 
         # the signature will be written in _encode_smb2
@@ -167,7 +172,7 @@ class TransformHeader(core.Frame):
         # the crypto header will be written in _encode_smb2
         self.crypto_header_offset = cur.offset
         # save a space for the wire nonce
-        self.wire_nonce_hole = cur.hole.encode_bytes(b'\0'*16)
+        self.wire_nonce_hole = cur.hole.encode_bytes(b"\0" * 16)
         cur.advanceto(cur + 16)
 
         # the following fields are part of AdditionalAuthenticatedData and are
@@ -185,18 +190,16 @@ class TransformHeader(core.Frame):
 
     def _encode_smb2(self, cur):
         # serialize all chained Smb2 commands into one buffer
-        original_message_buf = array.array('B')
+        original_message_buf = array.array("B")
         original_message_cur = core.Cursor(original_message_buf, 0)
         for smb_frame in self.parent:
             smb_frame.encode(original_message_cur)
         if self.original_message_size is None:
             self.original_message_size = len(original_message_buf)
         self.original_message_size_hole(self.original_message_size)
-        (self.ciphertext,
-         crypto_hmac) = self.encryption_context.encrypt(
-                                original_message_buf,
-                                self.additional_authenticated_data_buf,
-                                self.nonce)
+        (self.ciphertext, crypto_hmac) = self.encryption_context.encrypt(
+            original_message_buf, self.additional_authenticated_data_buf, self.nonce
+        )
         cur.encode_bytes(self.ciphertext)
 
         # fill in the signature hole
@@ -226,51 +229,57 @@ class TransformHeader(core.Frame):
         self.crypto_header_start = cur.offset
         self.nonce = cur.decode_bytes(16)
         self.original_message_size = cur.decode_uint32le()
-        self.reserved = cur.decode_uint16le()   # reserved
+        self.reserved = cur.decode_uint16le()  # reserved
         self.flags = cur.decode_uint16le()
         self.session_id = cur.decode_uint64le()
         self.crypto_header_end = cur.offset
         if self.encryption_context is None and self.parent is not None:
-            self.encryption_context = self.parent.conn.encryption_context(self.session_id)
+            self.encryption_context = self.parent.conn.encryption_context(
+                self.session_id
+            )
 
     def _decode_smb2(self, cur):
         self.encrypted_data = cur.decode_bytes(self.original_message_size)
-        crypto_header = cur.array[self.crypto_header_start:self.crypto_header_end]
+        crypto_header = cur.array[self.crypto_header_start : self.crypto_header_end]
         self.plaintext = self.encryption_context.decrypt(
-                        self.encrypted_data,
-                        self.signature,
-                        crypto_header,
-                        self.nonce)
+            self.encrypted_data, self.signature, crypto_header, self.nonce
+        )
         # scan through the plaintext for chained messages
         pt_cur = core.Cursor(self.plaintext, 0)
         end = pt_cur + len(self.plaintext)
         with pt_cur.bounded(pt_cur, end):
-            while (pt_cur < end):
+            while pt_cur < end:
                 start = pt_cur.offset
                 message = smb2.Smb2(self.parent)
                 message.decode(pt_cur)
-                message.buf = pt_cur.array[start:pt_cur.offset]
+                message.buf = pt_cur.array[start : pt_cur.offset]
 
     def verify(self, *args, **kwds):
-        pass        # verification occurs at the point of decryption
+        pass  # verification occurs at the point of decryption
 
 
 class CryptoKeys300(object):
     """ Key generation for SMB 0x300 and 0x302 """
+
     def __init__(self, session_key, *args, **kwds):
-        self.encryption = digest.derive_key(
-            session_key, b"SMB2AESCCM", b"ServerIn \0")[:16].tobytes()
-        self.decryption = digest.derive_key(
-            session_key, b"SMB2AESCCM", b"ServerOut\0")[:16].tobytes()
+        self.encryption = digest.derive_key(session_key, b"SMB2AESCCM", b"ServerIn \0")[
+            :16
+        ].tobytes()
+        self.decryption = digest.derive_key(session_key, b"SMB2AESCCM", b"ServerOut\0")[
+            :16
+        ].tobytes()
 
 
 class CryptoKeys311(object):
     """ Key generation for SMB 0x311 + """
+
     def __init__(self, session_key, pre_auth_integrity_hash, *args, **kwds):
         self.encryption = digest.derive_key(
-            session_key, b"SMBC2SCipherKey", pre_auth_integrity_hash)[:16].tobytes()
+            session_key, b"SMBC2SCipherKey", pre_auth_integrity_hash
+        )[:16].tobytes()
         self.decryption = digest.derive_key(
-            session_key, b"SMBS2CCipherKey", pre_auth_integrity_hash)[:16].tobytes()
+            session_key, b"SMBS2CCipherKey", pre_auth_integrity_hash
+        )[:16].tobytes()
 
 
 class EncryptionContext(object):
@@ -278,6 +287,7 @@ class EncryptionContext(object):
     Encapsulates all information needed to encrypt and decrypt messages.
     This context is attached to an SMB Session object
     """
+
     def __init__(self, keys, ciphers):
         self.keys = keys
         for c in ciphers:
@@ -287,24 +297,28 @@ class EncryptionContext(object):
                 break
         else:
             raise CipherMismatch(
-                    "Client did not recognize any ciphers returned by the "
-                    "server: {0}".format(ciphers))
+                "Client did not recognize any ciphers returned by the "
+                "server: {0}".format(ciphers)
+            )
 
     def encrypt(self, plaintext, authenticated_data, nonce):
-        enc_cipher = AES.new(self.keys.encryption,
-                             self.aes_mode,
-                             nonce=nonce[:self.nonce_length].tobytes())
+        enc_cipher = AES.new(
+            self.keys.encryption,
+            self.aes_mode,
+            nonce=nonce[: self.nonce_length].tobytes(),
+        )
         enc_cipher.update(authenticated_data.tobytes())
         ciphertext, signature = enc_cipher.encrypt_and_digest(plaintext.tobytes())
-        return array.array('B', ciphertext), array.array('B', signature)
+        return array.array("B", ciphertext), array.array("B", signature)
 
     def decrypt(self, ciphertext, signature, authenticated_data, nonce):
-        dec_cipher = AES.new(self.keys.decryption,
-                             self.aes_mode,
-                             nonce=nonce[:self.nonce_length].tobytes())
+        dec_cipher = AES.new(
+            self.keys.decryption,
+            self.aes_mode,
+            nonce=nonce[: self.nonce_length].tobytes(),
+        )
         dec_cipher.update(authenticated_data.tobytes())
         return array.array(
-                'B',
-                dec_cipher.decrypt_and_verify(
-                    ciphertext.tobytes(),
-                    signature.tobytes()))
+            "B",
+            dec_cipher.decrypt_and_verify(ciphertext.tobytes(), signature.tobytes()),
+        )

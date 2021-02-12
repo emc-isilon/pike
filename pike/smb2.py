@@ -41,11 +41,11 @@ from . import ntstatus
 # Dialects constants
 class Dialect(core.ValueEnum):
     DIALECT_SMB2_WILDCARD = 0x02FF
-    DIALECT_SMB2_002      = 0x0202
-    DIALECT_SMB2_1        = 0x0210
-    DIALECT_SMB3_0        = 0x0300
-    DIALECT_SMB3_0_2      = 0x0302
-    DIALECT_SMB3_1_1      = 0x0311
+    DIALECT_SMB2_002 = 0x0202
+    DIALECT_SMB2_1 = 0x0210
+    DIALECT_SMB3_0 = 0x0300
+    DIALECT_SMB3_0_2 = 0x0302
+    DIALECT_SMB3_1_1 = 0x0311
 
 
 Dialect.import_items(globals())
@@ -53,13 +53,13 @@ Dialect.import_items(globals())
 
 # Flag constants
 class Flags(core.FlagEnum):
-    SMB2_FLAGS_NONE               = 0x00000000
-    SMB2_FLAGS_SERVER_TO_REDIR    = 0x00000001
-    SMB2_FLAGS_ASYNC_COMMAND      = 0x00000002
+    SMB2_FLAGS_NONE = 0x00000000
+    SMB2_FLAGS_SERVER_TO_REDIR = 0x00000001
+    SMB2_FLAGS_ASYNC_COMMAND = 0x00000002
     SMB2_FLAGS_RELATED_OPERATIONS = 0x00000004
-    SMB2_FLAGS_SIGNED             = 0x00000008
-    SMB2_FLAGS_DFS_OPERATIONS     = 0x10000000
-    SMB2_FLAGS_REPLAY_OPERATION   = 0x20000000
+    SMB2_FLAGS_SIGNED = 0x00000008
+    SMB2_FLAGS_DFS_OPERATIONS = 0x10000000
+    SMB2_FLAGS_REPLAY_OPERATION = 0x20000000
 
 
 Flags.import_items(globals())
@@ -67,25 +67,25 @@ Flags.import_items(globals())
 
 # Command constants
 class CommandId(core.ValueEnum):
-    SMB2_NEGOTIATE       = 0x0000
-    SMB2_SESSION_SETUP   = 0x0001
-    SMB2_LOGOFF          = 0x0002
-    SMB2_TREE_CONNECT    = 0x0003
+    SMB2_NEGOTIATE = 0x0000
+    SMB2_SESSION_SETUP = 0x0001
+    SMB2_LOGOFF = 0x0002
+    SMB2_TREE_CONNECT = 0x0003
     SMB2_TREE_DISCONNECT = 0x0004
-    SMB2_CREATE          = 0x0005
-    SMB2_CLOSE           = 0x0006
-    SMB2_FLUSH           = 0x0007
-    SMB2_READ            = 0x0008
-    SMB2_WRITE           = 0x0009
-    SMB2_LOCK            = 0x000a
-    SMB2_IOCTL           = 0x000b
-    SMB2_CANCEL          = 0x000c
-    SMB2_ECHO            = 0x000d
-    SMB2_QUERY_DIRECTORY = 0x000e
-    SMB2_CHANGE_NOTIFY   = 0x000f
-    SMB2_QUERY_INFO      = 0x0010
-    SMB2_SET_INFO        = 0x0011
-    SMB2_OPLOCK_BREAK    = 0x0012
+    SMB2_CREATE = 0x0005
+    SMB2_CLOSE = 0x0006
+    SMB2_FLUSH = 0x0007
+    SMB2_READ = 0x0008
+    SMB2_WRITE = 0x0009
+    SMB2_LOCK = 0x000A
+    SMB2_IOCTL = 0x000B
+    SMB2_CANCEL = 0x000C
+    SMB2_ECHO = 0x000D
+    SMB2_QUERY_DIRECTORY = 0x000E
+    SMB2_CHANGE_NOTIFY = 0x000F
+    SMB2_QUERY_INFO = 0x0010
+    SMB2_SET_INFO = 0x0011
+    SMB2_OPLOCK_BREAK = 0x0012
 
 
 CommandId.import_items(globals())
@@ -93,10 +93,10 @@ CommandId.import_items(globals())
 
 # Share Capabilities
 class ShareCaps(core.FlagEnum):
-    SMB2_SHARE_CAP_DFS                     = 0x00000008
+    SMB2_SHARE_CAP_DFS = 0x00000008
     SMB2_SHARE_CAP_CONTINUOUS_AVAILABILITY = 0x00000010
-    SMB2_SHARE_CAP_SCALEOUT                = 0x00000020
-    SMB2_SHARE_CAP_CLUSTER                 = 0x00000040
+    SMB2_SHARE_CAP_SCALEOUT = 0x00000020
+    SMB2_SHARE_CAP_CLUSTER = 0x00000040
 
 
 ShareCaps.import_items(globals())
@@ -123,8 +123,8 @@ class ShareFlags(core.FlagEnum):
 ShareFlags.import_items(globals())
 
 # Misc
-RELATED_FID = (2**64-1,2**64-1)
-UNSOLICITED_MESSAGE_ID = (2**64-1)
+RELATED_FID = (2 ** 64 - 1, 2 ** 64 - 1)
+UNSOLICITED_MESSAGE_ID = 2 ** 64 - 1
 
 
 class Smb2(core.Frame):
@@ -134,9 +134,9 @@ class Smb2(core.Frame):
     _response_table = {}
     _notification_table = {}
     # Decorators to register class as request/response/notification payload
-    request = core.Register(_request_table, 'command_id', 'structure_size')
-    response = core.Register(_response_table, 'command_id', 'structure_size')
-    notification = core.Register(_notification_table, 'command_id', 'structure_size')
+    request = core.Register(_request_table, "command_id", "structure_size")
+    response = core.Register(_response_table, "command_id", "structure_size")
+    notification = core.Register(_notification_table, "command_id", "structure_size")
 
     def __init__(self, parent, context=None):
         core.Frame.__init__(self, parent, context)
@@ -170,7 +170,7 @@ class Smb2(core.Frame):
         return [self._command] if self._command is not None else []
 
     def _encode(self, cur):
-        cur.encode_bytes(b'\xfeSMB')
+        cur.encode_bytes(b"\xfeSMB")
         cur.encode_uint16le(64)
         cur.encode_uint16le(self.credit_charge)
         if self.flags & SMB2_FLAGS_SERVER_TO_REDIR:
@@ -194,11 +194,11 @@ class Smb2(core.Frame):
         if self.flags & SMB2_FLAGS_ASYNC_COMMAND:
             cur.encode_uint64le(self.async_id)
         else:
-            cur.encode_uint32le(0xfeff)     # default process id
+            cur.encode_uint32le(0xFEFF)  # default process id
             cur.encode_uint32le(self.tree_id)
         cur.encode_uint64le(self.session_id)
         # Set Signature to 0 for now
-        signature_hole = cur.hole.encode_bytes([0]*16)
+        signature_hole = cur.hole.encode_bytes([0] * 16)
 
         # Encode command body
         self._command.encode(cur)
@@ -223,14 +223,14 @@ class Smb2(core.Frame):
                 key = self.context.signing_key(self.session_id)
                 self.signature = digest(key, self.start[:cur])[:16]
             else:
-                self.signature = array.array('B',[0]*16)
+                self.signature = array.array("B", [0] * 16)
 
         signature_hole(self.signature)
 
     def _decode(self, cur):
-        if (cur.decode_bytes(4).tobytes() != b'\xfeSMB'):
+        if cur.decode_bytes(4).tobytes() != b"\xfeSMB":
             raise core.BadPacket()
-        if (cur.decode_uint16le() != 64):
+        if cur.decode_uint16le() != 64:
             raise core.BadPacket()
         self.credit_charge = cur.decode_uint16le()
         # Look ahead and decode flags first
@@ -266,7 +266,7 @@ class Smb2(core.Frame):
         self.signature = cur.decode_bytes(16)
 
         # Peek ahead at structure_size
-        structure_size = (cur+0).decode_uint16le()
+        structure_size = (cur + 0).decode_uint16le()
 
         key = (self.command, structure_size)
 
@@ -279,8 +279,10 @@ class Smb2(core.Frame):
                     raise core.BadPacket()
             elif key in Smb2._response_table:
                 cls = Smb2._response_table[key]
-                if self.status not in cls.allowed_status and \
-                   structure_size == ErrorResponse.structure_size:
+                if (
+                    self.status not in cls.allowed_status
+                    and structure_size == ErrorResponse.structure_size
+                ):
                     cls = ErrorResponse
             else:
                 cls = ErrorResponse
@@ -302,9 +304,9 @@ class Smb2(core.Frame):
 
     def verify(self, digest, key):
         if self.flags & SMB2_FLAGS_SIGNED:
-            message = self.start[:self.end]
+            message = self.start[: self.end]
             # Zero out signature in message
-            message[12*4:12*4+16] = array.array('B',[0]*16)
+            message[12 * 4 : 12 * 4 + 16] = array.array("B", [0] * 16)
             # Calculate signature
             signature = digest(key, message)[:16]
             # Check that signatures match
@@ -346,12 +348,14 @@ class ErrorResponse(Command):
     structure_size = 9
 
     _context_table = {}
-    error_context = core.Register(_context_table, 'error_id', 'parent_status')
-    special_statuses = [ntstatus.STATUS_STOPPED_ON_SYMLINK,
-                        ntstatus.STATUS_BUFFER_TOO_SMALL]
+    error_context = core.Register(_context_table, "error_id", "parent_status")
+    special_statuses = [
+        ntstatus.STATUS_STOPPED_ON_SYMLINK,
+        ntstatus.STATUS_BUFFER_TOO_SMALL,
+    ]
 
     def __init__(self, parent):
-        super(ErrorResponse,self).__init__(parent)
+        super(ErrorResponse, self).__init__(parent)
         parent._command = self
         self.byte_count = None
         self.error_context_count = 0
@@ -403,10 +407,13 @@ class ErrorResponse(Command):
                 self.error_data = ctx(self, self.byte_count)
                 self.error_data.decode(cur)
 
+
 class ErrorId(core.ValueEnum):
     SMB2_ERROR_ID_DEFAULT = 0x0
 
+
 ErrorId.import_items(globals())
+
 
 @ErrorResponse.error_context
 class ErrorResponseContext(core.Frame):
@@ -433,6 +440,7 @@ class ErrorResponseDefaultBufferSize(ErrorResponseContext):
     def _decode(self, cur):
         self.error_data = cur.decode_uint32le()
         self.minimum_buffer_length = self.error_data
+
 
 class SymbolicLinkErrorResponse(ErrorResponseContext):
     error_id = SMB2_ERROR_ID_DEFAULT
@@ -462,8 +470,8 @@ class Cancel(Request):
 
 # Negotiate constants
 class SecurityMode(core.FlagEnum):
-    SMB2_NEGOTIATE_NONE             = 0x0000
-    SMB2_NEGOTIATE_SIGNING_ENABLED  = 0x0001
+    SMB2_NEGOTIATE_NONE = 0x0000
+    SMB2_NEGOTIATE_SIGNING_ENABLED = 0x0001
     SMB2_NEGOTIATE_SIGNING_REQUIRED = 0x0002
 
 
@@ -471,13 +479,13 @@ SecurityMode.import_items(globals())
 
 
 class GlobalCaps(core.FlagEnum):
-    SMB2_GLOBAL_CAP_DFS                = 0x00000001
-    SMB2_GLOBAL_CAP_LEASING            = 0x00000002
-    SMB2_GLOBAL_CAP_LARGE_MTU          = 0x00000004
-    SMB2_GLOBAL_CAP_MULTI_CHANNEL      = 0x00000008
+    SMB2_GLOBAL_CAP_DFS = 0x00000001
+    SMB2_GLOBAL_CAP_LEASING = 0x00000002
+    SMB2_GLOBAL_CAP_LARGE_MTU = 0x00000004
+    SMB2_GLOBAL_CAP_MULTI_CHANNEL = 0x00000008
     SMB2_GLOBAL_CAP_PERSISTENT_HANDLES = 0x00000010
-    SMB2_GLOBAL_CAP_DIRECTORY_LEASING  = 0x00000020
-    SMB2_GLOBAL_CAP_ENCRYPTION         = 0x00000040
+    SMB2_GLOBAL_CAP_DIRECTORY_LEASING = 0x00000020
+    SMB2_GLOBAL_CAP_ENCRYPTION = 0x00000040
 
 
 GlobalCaps.import_items(globals())
@@ -506,7 +514,7 @@ class NegotiateRequest(Request):
         Request.__init__(self, parent)
         self.security_mode = 0
         self.capabilities = 0
-        self.client_guid = [0]*16
+        self.client_guid = [0] * 16
         self.dialects = []
         self.negotiate_contexts_count = None
         self.negotiate_contexts_offset = None
@@ -517,9 +525,11 @@ class NegotiateRequest(Request):
         return self.negotiate_contexts
 
     def _has_negotiate_contexts(self):
-        return (self.negotiate_contexts or
-                self.negotiate_contexts_offset is not None or
-                self.negotiate_contexts_count is not None)
+        return (
+            self.negotiate_contexts
+            or self.negotiate_contexts_offset is not None
+            or self.negotiate_contexts_count is not None
+        )
 
     def _encode(self, cur):
         cur.encode_uint16le(len(self.dialects))
@@ -532,7 +542,7 @@ class NegotiateRequest(Request):
             if self.negotiate_contexts_count is None:
                 self.negotiate_contexts_count = len(self.negotiate_contexts)
             cur.encode_uint16le(self.negotiate_contexts_count)
-            cur.encode_uint16le(0)      #reserved
+            cur.encode_uint16le(0)  # reserved
         else:
             cur.encode_uint64le(0)
         for dialect in self.dialects:
@@ -542,8 +552,7 @@ class NegotiateRequest(Request):
             cur.align(self.parent.start, 8)
             cur.seekto(cur + self.negotiate_contexts_alignment_skew)
             if self.negotiate_contexts_offset is not None:
-                negotiate_contexts_offset_hole(
-                        self.negotiate_contexts_offset)
+                negotiate_contexts_offset_hole(self.negotiate_contexts_offset)
             else:
                 negotiate_contexts_offset_hole(cur - self.parent.start)
 
@@ -551,7 +560,7 @@ class NegotiateRequest(Request):
                 cur.align(self.parent.start, 8)
                 cur.encode_uint16le(ctx.context_type)
                 data_length_hole = cur.hole.encode_uint16le(0)
-                cur.encode_uint32le(0)      # reserved
+                cur.encode_uint32le(0)  # reserved
                 data_start = cur.copy()
                 ctx.encode(cur)
                 if ctx.data_length is None:
@@ -567,13 +576,13 @@ class NegotiateResponse(Response):
     structure_size = 65
 
     _context_table = {}
-    negotiate_context = core.Register(_context_table, 'context_type')
+    negotiate_context = core.Register(_context_table, "context_type")
 
     def __init__(self, parent):
         Response.__init__(self, parent)
         self.security_mode = 0
         self.dialect_revision = 0
-        self.server_guid = [0]*16
+        self.server_guid = [0] * 16
         self.capabilities = 0
         self.max_transact_size = 0
         self.max_read_size = 0
@@ -589,7 +598,7 @@ class NegotiateResponse(Response):
         components = [
             super(NegotiateResponse, self)._log_str(),
             str(self.dialect_revision),
-            ]
+        ]
         if self.capabilities:
             components.append("({})".format(self.capabilities))
         return " ".join(components)
@@ -623,7 +632,7 @@ class NegotiateResponse(Response):
                 cur.align(self.parent.start, 8)
                 context_type = cur.decode_uint16le()
                 data_length = cur.decode_uint16le()
-                cur.decode_uint32le()       # reserved
+                cur.decode_uint32le()  # reserved
                 ctx = self._context_table[context_type]
                 ctx(self).decode(cur)
 
@@ -641,7 +650,6 @@ class NegotiateRequestContext(core.Frame):
 
 @NegotiateResponse.negotiate_context
 class NegotiateResponseContext(core.Frame):
-
     def __init__(self, parent):
         core.Frame.__init__(self, parent)
         if parent is not None:
@@ -676,15 +684,17 @@ class PreauthIntegrityCapabilities(core.Frame):
         self.salt = cur.decode_bytes(self.salt_length)
 
 
-class PreauthIntegrityCapabilitiesRequest(NegotiateRequestContext,
-                                          PreauthIntegrityCapabilities):
+class PreauthIntegrityCapabilitiesRequest(
+    NegotiateRequestContext, PreauthIntegrityCapabilities
+):
     def __init__(self, parent):
         NegotiateRequestContext.__init__(self, parent)
         PreauthIntegrityCapabilities.__init__(self)
 
 
-class PreauthIntegrityCapabilitiesResponse(NegotiateResponseContext,
-                                           PreauthIntegrityCapabilities):
+class PreauthIntegrityCapabilitiesResponse(
+    NegotiateResponseContext, PreauthIntegrityCapabilities
+):
     def __init__(self, parent):
         NegotiateResponseContext.__init__(self, parent)
         PreauthIntegrityCapabilities.__init__(self)
@@ -692,7 +702,7 @@ class PreauthIntegrityCapabilitiesResponse(NegotiateResponseContext,
 
 # Session setup constants
 class SessionFlags(core.FlagEnum):
-    SMB2_SESSION_FLAG_NONE    = 0x00
+    SMB2_SESSION_FLAG_NONE = 0x00
     SMB2_SESSION_FLAG_BINDING = 0x01
     SMB2_SESSION_FLAG_IS_NULL = 0x02
     SMB2_SESSION_FLAG_ENCRYPT_DATA = 0x04
@@ -771,7 +781,7 @@ class SessionSetupRequest(Request):
         self.flags = 0
         self.security_mode = 0
         self.capabilities = 0
-        self.channel = 0            # must not be used
+        self.channel = 0  # must not be used
         self.previous_session_id = 0
         self.security_buffer = None
         self.security_buffer_offset = None
@@ -830,7 +840,7 @@ class TreeConnectRequest(Request):
         components = [
             super(TreeConnectRequest, self)._log_str(),
             str(self.path),
-            ]
+        ]
         if self.flags:
             components.append("({})".format(self.flags))
         return " ".join(components)
@@ -870,7 +880,7 @@ class TreeConnectResponse(Response):
     def _log_str(self):
         components = [
             super(TreeConnectResponse, self)._log_str(),
-            ]
+        ]
         if self.share_flags:
             components.append(str(self.share_flags))
         if self.capabilities:
@@ -936,11 +946,11 @@ class LogoffResponse(Response):
 
 # Oplock levels
 class OplockLevel(core.ValueEnum):
-    SMB2_OPLOCK_LEVEL_NONE      = 0x00
-    SMB2_OPLOCK_LEVEL_II        = 0x01
+    SMB2_OPLOCK_LEVEL_NONE = 0x00
+    SMB2_OPLOCK_LEVEL_II = 0x01
     SMB2_OPLOCK_LEVEL_EXCLUSIVE = 0x08
-    SMB2_OPLOCK_LEVEL_BATCH     = 0x09
-    SMB2_OPLOCK_LEVEL_LEASE     = 0xFF
+    SMB2_OPLOCK_LEVEL_BATCH = 0x09
+    SMB2_OPLOCK_LEVEL_LEASE = 0xFF
 
 
 OplockLevel.import_items(globals())
@@ -948,25 +958,23 @@ OplockLevel.import_items(globals())
 
 # Share access
 class ShareAccess(core.FlagEnum):
-    FILE_SHARE_READ   = 0x00000001
-    FILE_SHARE_WRITE  = 0x00000002
+    FILE_SHARE_READ = 0x00000001
+    FILE_SHARE_WRITE = 0x00000002
     FILE_SHARE_DELETE = 0x00000004
 
 
 ShareAccess.import_items(globals())
 
-FILE_SHARE_ALL = (
-    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE
-)
+FILE_SHARE_ALL = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE
 
 
 # Create dispositions
 class CreateDisposition(core.ValueEnum):
-    FILE_SUPERSEDE    = 0x00000000
-    FILE_OPEN         = 0x00000001
-    FILE_CREATE       = 0x00000002
-    FILE_OPEN_IF      = 0x00000003
-    FILE_OVERWRITE    = 0x00000004
+    FILE_SUPERSEDE = 0x00000000
+    FILE_OPEN = 0x00000001
+    FILE_CREATE = 0x00000002
+    FILE_OPEN_IF = 0x00000003
+    FILE_OVERWRITE = 0x00000004
     FILE_OVERWRITE_IF = 0x00000005
 
 
@@ -975,23 +983,23 @@ CreateDisposition.import_items(globals())
 
 # Create options
 class CreateOptions(core.FlagEnum):
-    FILE_DIRECTORY_FILE            = 0x00000001
-    FILE_WRITE_THROUGH             = 0x00000002
-    FILE_SEQUENTIAL_ONLY           = 0x00000004
+    FILE_DIRECTORY_FILE = 0x00000001
+    FILE_WRITE_THROUGH = 0x00000002
+    FILE_SEQUENTIAL_ONLY = 0x00000004
     FILE_NO_INTERMEDIATE_BUFFERING = 0x00000008
-    FILE_SYNCHRONOUS_IO_ALERT      = 0x00000010
-    FILE_SYNCRHONOUS_IO_NONALERT   = 0x00000020
-    FILE_NON_DIRECTORY_FILE        = 0x00000040
-    FILE_COMPLETE_IF_OPLOCKED      = 0x00000100
-    FILE_NO_EA_KNOWLEDGE           = 0x00000200
-    FILE_RANDOM_ACCESS             = 0x00000800
-    FILE_DELETE_ON_CLOSE           = 0x00001000
-    FILE_OPEN_BY_FILE_ID           = 0x00002000
-    FILE_OPEN_FOR_BACKUP_INTENT    = 0x00004000
-    FILE_NO_COMPRESSION            = 0x00008000
-    FILE_RESERVE_OPFILTER          = 0x00100000
-    FILE_OPEN_REPARSE_POINT        = 0x00200000
-    FILE_OPEN_NO_RECALL            = 0x00400000
+    FILE_SYNCHRONOUS_IO_ALERT = 0x00000010
+    FILE_SYNCRHONOUS_IO_NONALERT = 0x00000020
+    FILE_NON_DIRECTORY_FILE = 0x00000040
+    FILE_COMPLETE_IF_OPLOCKED = 0x00000100
+    FILE_NO_EA_KNOWLEDGE = 0x00000200
+    FILE_RANDOM_ACCESS = 0x00000800
+    FILE_DELETE_ON_CLOSE = 0x00001000
+    FILE_OPEN_BY_FILE_ID = 0x00002000
+    FILE_OPEN_FOR_BACKUP_INTENT = 0x00004000
+    FILE_NO_COMPRESSION = 0x00008000
+    FILE_RESERVE_OPFILTER = 0x00100000
+    FILE_OPEN_REPARSE_POINT = 0x00200000
+    FILE_OPEN_NO_RECALL = 0x00400000
     FILE_OPEN_FOR_FREE_SPACE_QUERY = 0x00800000
 
 
@@ -1000,30 +1008,30 @@ CreateOptions.import_items(globals())
 
 # Access masks
 class Access(core.FlagEnum):
-    FILE_READ_DATA          = 0x00000001
-    FILE_WRITE_DATA         = 0x00000002
-    FILE_APPEND_DATA        = 0x00000004
-    FILE_READ_EA            = 0x00000008
-    FILE_WRITE_EA           = 0x00000010
-    FILE_EXECUTE            = 0x00000020
-    FILE_READ_ATTRIBUTES    = 0x00000080
-    FILE_WRITE_ATTRIBUTES   = 0x00000100
-    DELETE                  = 0x00010000
-    READ_CONTROL            = 0x00020000
-    WRITE_DAC               = 0x00040000
-    WRITE_OWNER             = 0x00080000
-    SYNCHRONIZE             = 0x00100000
-    ACCESS_SYSTEM_SECURITY  = 0x01000000
-    MAXIMUM_ALLOWED         = 0x02000000
-    GENERIC_ALL             = 0x10000000
-    GENERIC_EXECUTE         = 0x20000000
-    GENERIC_WRITE           = 0x40000000
-    GENERIC_READ            = 0x80000000
-    FILE_LIST_DIRECTORY     = 0x00000001
-    FILE_ADD_FILE           = 0x00000002
-    FILE_ADD_SUBDIRECTORY   = 0x00000004
-    FILE_TRAVERSE           = 0x00000020
-    FILE_DELETE_CHILD       = 0x00000040
+    FILE_READ_DATA = 0x00000001
+    FILE_WRITE_DATA = 0x00000002
+    FILE_APPEND_DATA = 0x00000004
+    FILE_READ_EA = 0x00000008
+    FILE_WRITE_EA = 0x00000010
+    FILE_EXECUTE = 0x00000020
+    FILE_READ_ATTRIBUTES = 0x00000080
+    FILE_WRITE_ATTRIBUTES = 0x00000100
+    DELETE = 0x00010000
+    READ_CONTROL = 0x00020000
+    WRITE_DAC = 0x00040000
+    WRITE_OWNER = 0x00080000
+    SYNCHRONIZE = 0x00100000
+    ACCESS_SYSTEM_SECURITY = 0x01000000
+    MAXIMUM_ALLOWED = 0x02000000
+    GENERIC_ALL = 0x10000000
+    GENERIC_EXECUTE = 0x20000000
+    GENERIC_WRITE = 0x40000000
+    GENERIC_READ = 0x80000000
+    FILE_LIST_DIRECTORY = 0x00000001
+    FILE_ADD_FILE = 0x00000002
+    FILE_ADD_SUBDIRECTORY = 0x00000004
+    FILE_TRAVERSE = 0x00000020
+    FILE_DELETE_CHILD = 0x00000040
 
 
 Access.import_items(globals())
@@ -1031,20 +1039,20 @@ Access.import_items(globals())
 
 # File attributes
 class FileAttributes(core.FlagEnum):
-    FILE_ATTRIBUTE_READONLY              = 0x00000001
-    FILE_ATTRIBUTE_HIDDEN                = 0x00000002
-    FILE_ATTRIBUTE_SYSTEM                = 0x00000004
-    FILE_ATTRIBUTE_DIRECTORY             = 0x00000010
-    FILE_ATTRIBUTE_ARCHIVE               = 0x00000020
-    FILE_ATTRIBUTE_DEVICE                = 0x00000040
-    FILE_ATTRIBUTE_NORMAL                = 0x00000080
-    FILE_ATTRIBUTE_TEMPORARY             = 0x00000100
-    FILE_ATTRIBUTE_SPARSE_FILE           = 0x00000200
-    FILE_ATTRIBUTE_REPARSE_POINT         = 0x00000400
-    FILE_ATTRIBUTE_COMPRESSED            = 0x00000800
-    FILE_ATTRIBUTE_OFFLINE               = 0x00001000
-    FILE_ATTRIBUTE_NOT_CONTENT_INDEXED   = 0x00002000
-    FILE_ATTRIBUTE_ENCRYPTED             = 0x00004000
+    FILE_ATTRIBUTE_READONLY = 0x00000001
+    FILE_ATTRIBUTE_HIDDEN = 0x00000002
+    FILE_ATTRIBUTE_SYSTEM = 0x00000004
+    FILE_ATTRIBUTE_DIRECTORY = 0x00000010
+    FILE_ATTRIBUTE_ARCHIVE = 0x00000020
+    FILE_ATTRIBUTE_DEVICE = 0x00000040
+    FILE_ATTRIBUTE_NORMAL = 0x00000080
+    FILE_ATTRIBUTE_TEMPORARY = 0x00000100
+    FILE_ATTRIBUTE_SPARSE_FILE = 0x00000200
+    FILE_ATTRIBUTE_REPARSE_POINT = 0x00000400
+    FILE_ATTRIBUTE_COMPRESSED = 0x00000800
+    FILE_ATTRIBUTE_OFFLINE = 0x00001000
+    FILE_ATTRIBUTE_NOT_CONTENT_INDEXED = 0x00002000
+    FILE_ATTRIBUTE_ENCRYPTED = 0x00004000
 
 
 FileAttributes.import_items(globals())
@@ -1074,10 +1082,7 @@ class CreateRequest(Request):
         self._create_contexts = []
 
     def _log_str(self):
-        return " ".join([
-                super(CreateRequest, self)._log_str(),
-                self.name,
-                ])
+        return " ".join([super(CreateRequest, self)._log_str(), self.name,])
 
     def _children(self):
         return self._create_contexts
@@ -1107,15 +1112,14 @@ class CreateRequest(Request):
 
         buffer_start = cur.copy()
 
-
-        if  self.name_offset is None:
+        if self.name_offset is None:
             self.name_offset = cur - self.parent.start
         name_offset_hole(self.name_offset)
 
         name_start = cur.copy()
         cur.encode_utf16le(self.name)
 
-        if  self.name_length is None:
+        if self.name_length is None:
             self.name_length = cur - name_start
         name_length_hole(self.name_length)
 
@@ -1175,7 +1179,7 @@ class CreateResponse(Response):
     structure_size = 89
 
     _context_table = {}
-    create_context = core.Register(_context_table, 'name')
+    create_context = core.Register(_context_table, "name")
 
     def __init__(self, parent):
         Response.__init__(self, parent)
@@ -1190,16 +1194,18 @@ class CreateResponse(Response):
         self.end_of_file = 0
         self.file_attributes = 0
         self.reserved2 = 0
-        self.file_id = (0,0)
+        self.file_id = (0, 0)
         self.create_contexts_offset = 0
         self.create_contexts_length = 0
         self._create_contexts = []
 
     def _log_str(self):
-        return " ".join([
+        return " ".join(
+            [
                 super(CreateResponse, self)._log_str(),
                 "(0x{:x}, 0x{:x})".format(*self.file_id),
-                ])
+            ]
+        )
 
     def _children(self):
         return self._create_contexts
@@ -1217,7 +1223,7 @@ class CreateResponse(Response):
         self.file_attributes = FileAttributes(cur.decode_uint32le())
         # Ignore Reserved2
         self.reserved2 = cur.decode_uint32le()
-        self.file_id = (cur.decode_uint64le(),cur.decode_uint64le())
+        self.file_id = (cur.decode_uint64le(), cur.decode_uint64le())
         self.create_contexts_offset = cur.decode_uint32le()
         self.create_contexts_length = cur.decode_uint32le()
 
@@ -1269,7 +1275,7 @@ class CreateResponseContext(core.Frame):
 
 
 class MaximalAccessRequest(CreateRequestContext):
-    name = b'MxAc'
+    name = b"MxAc"
 
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
@@ -1281,7 +1287,7 @@ class MaximalAccessRequest(CreateRequestContext):
 
 
 class MaximalAccessResponse(CreateResponseContext):
-    name = b'MxAc'
+    name = b"MxAc"
 
     def __init__(self, parent):
         CreateResponseContext.__init__(self, parent)
@@ -1294,7 +1300,7 @@ class MaximalAccessResponse(CreateResponseContext):
 
 
 class AllocationSizeRequest(CreateRequestContext):
-    name = b'AlSi'
+    name = b"AlSi"
 
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
@@ -1305,10 +1311,10 @@ class AllocationSizeRequest(CreateRequestContext):
 
 
 class ExtendedAttributeRequest(CreateRequestContext):
-    name = b'ExtA'
+    name = b"ExtA"
 
-    def __init__(self,parent):
-        CreateRequestContext.__init__(self,parent)
+    def __init__(self, parent):
+        CreateRequestContext.__init__(self, parent)
         self.next_entry_offset = 0
         self.flags = 0x00000000
         self.ea_name_length = 0
@@ -1316,13 +1322,13 @@ class ExtendedAttributeRequest(CreateRequestContext):
         self.ea_name = None
         self.ea_value = None
 
-    def _encode(self,cur):
+    def _encode(self, cur):
         cur.encode_uint32le(self.next_entry_offset)
         cur.encode_uint8le(self.flags)
         if self.ea_name is not None:
-            self.ea_name = array.array('B',self.ea_name)
+            self.ea_name = array.array("B", self.ea_name)
             self.ea_name.append(00)
-            self.ea_value = array.array('B',self.ea_value)
+            self.ea_value = array.array("B", self.ea_value)
             cur.encode_uint8le(self.ea_name_length)
             cur.encode_uint16le(self.ea_value_length)
             cur.encode_bytes(self.ea_name)
@@ -1330,10 +1336,10 @@ class ExtendedAttributeRequest(CreateRequestContext):
 
 
 class LeaseState(core.FlagEnum):
-    SMB2_LEASE_NONE           = 0x00
-    SMB2_LEASE_READ_CACHING   = 0x01
+    SMB2_LEASE_NONE = 0x00
+    SMB2_LEASE_READ_CACHING = 0x01
     SMB2_LEASE_HANDLE_CACHING = 0x02
-    SMB2_LEASE_WRITE_CACHING  = 0x04
+    SMB2_LEASE_WRITE_CACHING = 0x04
 
 
 LeaseState.import_items(globals())
@@ -1345,7 +1351,7 @@ SMB2_LEASE_RWH = SMB2_LEASE_RH | SMB2_LEASE_RW
 
 
 class LeaseFlags(core.FlagEnum):
-    SMB2_LEASE_FLAG_NONE              = 0x00
+    SMB2_LEASE_FLAG_NONE = 0x00
     SMB2_LEASE_FLAG_BREAK_IN_PROGRESS = 0x02
 
 
@@ -1353,63 +1359,65 @@ LeaseFlags.import_items(globals())
 
 
 class SecDescControl(core.FlagEnum):
-    SR    = 0x0001
-    RM    = 0x0002
-    PS    = 0x0004
-    PD    = 0x0008
-    SI    = 0x0010
-    DI    = 0x0020
-    SC    = 0x0040
-    DC    = 0x0080
-    SS    = 0x0100
-    DT    = 0x0200
-    SD    = 0x0400
-    SP    = 0x0800
-    DD    = 0x1000
-    DP    = 0x2000
-    GD    = 0x4000
-    OD    = 0x8000
+    SR = 0x0001
+    RM = 0x0002
+    PS = 0x0004
+    PD = 0x0008
+    SI = 0x0010
+    DI = 0x0020
+    SC = 0x0040
+    DC = 0x0080
+    SS = 0x0100
+    DT = 0x0200
+    SD = 0x0400
+    SP = 0x0800
+    DD = 0x1000
+    DP = 0x2000
+    GD = 0x4000
+    OD = 0x8000
 
 
 class AceType(core.ValueEnum):
-    ACCESS_ALLOWED_ACE_TYPE                  = 0x00
-    ACCESS_DENIED_ACE_TYPE                   = 0x01
-    SYSTEM_AUDIT_ACE_TYPE                    = 0x02
-    SYSTEM_ALARM_ACE_TYPE                    = 0x03
-    ACCESS_ALLOWED_COMPOUND_ACE_TYPE         = 0x04
-    ACCESS_ALLOWED_OBJECT_ACE_TYPE           = 0x05
-    ACCESS_DENIED_OBJECT_ACE_TYPE            = 0x06
-    SYSTEM_AUDIT_OBJECT_ACE_TYPE             = 0x07
-    SYSTEM_ALARM_OBJECT_ACE_TYPE             = 0x08
-    ACCESS_ALLOWED_CALLBACK_ACE_TYPE         = 0x09
-    ACCESS_DENIED_CALLBACK_ACE_TYPE          = 0x0A
-    ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE  = 0x0B
-    ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE   = 0x0C
-    SYSTEM_AUDIT_CALLBACK_ACE_TYPE           = 0x0D
-    SYSTEM_ALARM_CALLBACK_ACE_TYPE           = 0x0E
-    SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE    = 0x0F
-    SYSTEM_ALARM_CALLBACK_OBJECT_ACE_TYPE    = 0x10
-    SYSTEM_MANDATORY_LABEL_ACE_TYPE          = 0x11
-    SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE       = 0x12
-    SYSTEM_SCOPED_POLICY_ID_ACE_TYPE         = 0x13
+    ACCESS_ALLOWED_ACE_TYPE = 0x00
+    ACCESS_DENIED_ACE_TYPE = 0x01
+    SYSTEM_AUDIT_ACE_TYPE = 0x02
+    SYSTEM_ALARM_ACE_TYPE = 0x03
+    ACCESS_ALLOWED_COMPOUND_ACE_TYPE = 0x04
+    ACCESS_ALLOWED_OBJECT_ACE_TYPE = 0x05
+    ACCESS_DENIED_OBJECT_ACE_TYPE = 0x06
+    SYSTEM_AUDIT_OBJECT_ACE_TYPE = 0x07
+    SYSTEM_ALARM_OBJECT_ACE_TYPE = 0x08
+    ACCESS_ALLOWED_CALLBACK_ACE_TYPE = 0x09
+    ACCESS_DENIED_CALLBACK_ACE_TYPE = 0x0A
+    ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE = 0x0B
+    ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE = 0x0C
+    SYSTEM_AUDIT_CALLBACK_ACE_TYPE = 0x0D
+    SYSTEM_ALARM_CALLBACK_ACE_TYPE = 0x0E
+    SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE = 0x0F
+    SYSTEM_ALARM_CALLBACK_OBJECT_ACE_TYPE = 0x10
+    SYSTEM_MANDATORY_LABEL_ACE_TYPE = 0x11
+    SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE = 0x12
+    SYSTEM_SCOPED_POLICY_ID_ACE_TYPE = 0x13
+
 
 AceType.import_items(globals())
 
+
 class AceFlags(core.FlagEnum):
-    OBJECT_INHERIT_ACE         = 0x01
-    CONTAINER_INHERIT_ACE      = 0x02
-    NO_PROPAGATE_INHERIT_ACE   = 0x04
-    INHERIT_ONLY_ACE           = 0x08
-    INHERITED_ACE              = 0x10
+    OBJECT_INHERIT_ACE = 0x01
+    CONTAINER_INHERIT_ACE = 0x02
+    NO_PROPAGATE_INHERIT_ACE = 0x04
+    INHERIT_ONLY_ACE = 0x08
+    INHERITED_ACE = 0x10
     SUCCESSFUL_ACCESS_ACE_FLAG = 0x40
-    FAILED_ACCESS_ACE_FLAG     = 0x80
+    FAILED_ACCESS_ACE_FLAG = 0x80
 
 
 AceFlags.import_items(globals())
 
 
 class AclRevision(core.ValueEnum):
-    ACL_REVISION    = 0x02
+    ACL_REVISION = 0x02
     ACL_REVISION_DS = 0x04
 
 
@@ -1417,10 +1425,10 @@ AclRevision.import_items(globals())
 
 
 class SecurityDescriptorRequest(CreateRequestContext):
-    name = b'SecD'
+    name = b"SecD"
 
-    def __init__(self,parent):
-        CreateRequestContext.__init__(self,parent)
+    def __init__(self, parent):
+        CreateRequestContext.__init__(self, parent)
         self.revision = 1
         self.sbz1 = 0
         self.control = None
@@ -1431,10 +1439,18 @@ class SecurityDescriptorRequest(CreateRequestContext):
         self.sacl_aces = None
         self.dacl_aces = None
 
-    def _encode(self,cur):
-        self.offset_owner,self.offset_group,self.offset_sacl,self.offset_dacl=\
-                    self._get_offset(owner_sid = self.owner_sid ,group_sid=\
-                    self.group_sid ,sacl = self.sacl_aces ,dacl = self.dacl_aces)
+    def _encode(self, cur):
+        (
+            self.offset_owner,
+            self.offset_group,
+            self.offset_sacl,
+            self.offset_dacl,
+        ) = self._get_offset(
+            owner_sid=self.owner_sid,
+            group_sid=self.group_sid,
+            sacl=self.sacl_aces,
+            dacl=self.dacl_aces,
+        )
         cur.encode_uint8le(self.revision)
         cur.encode_uint8le(self.sbz1)
         cur.encode_uint16le(self.control)
@@ -1445,19 +1461,19 @@ class SecurityDescriptorRequest(CreateRequestContext):
 
         if self.offset_owner != 0:
             id_auth, sub_auth = self._get_sid(self.owner_sid)
-            self._encode_sid(cur,id_auth,sub_auth)
+            self._encode_sid(cur, id_auth, sub_auth)
 
         if self.offset_group != 0:
             id_auth, sub_auth = self._get_sid(self.group_sid)
-            self._encode_sid(cur,id_auth,sub_auth)
+            self._encode_sid(cur, id_auth, sub_auth)
 
-        if self.offset_sacl!= 0:
+        if self.offset_sacl != 0:
             # Acl Revision
             cur.encode_uint8le(self.sacl)
             # sbz1
             cur.encode_uint8le(0)
             # Acl Size
-            sid_size,ace_size,acl_size = self._get_size(acl=self.sacl_aces)
+            sid_size, ace_size, acl_size = self._get_size(acl=self.sacl_aces)
             cur.encode_uint16le(acl_size)
             # Ace Count
             cur.encode_uint16le(len(self.sacl_aces))
@@ -1469,19 +1485,19 @@ class SecurityDescriptorRequest(CreateRequestContext):
                 # Ace flags
                 cur.encode_uint8le(ace[1])
                 # Ace Size
-                sid_size,ace_size,acl_size = self._get_size(ace_val=ace)
+                sid_size, ace_size, acl_size = self._get_size(ace_val=ace)
                 cur.encode_uint16le(ace_size)
                 # Ace Mask
                 cur.encode_uint32le(ace[2])
                 id_auth, sub_auth = self._get_sid(ace[3])
-                self._encode_sid(cur,id_auth,sub_auth)
-        if self.offset_dacl!= 0:
+                self._encode_sid(cur, id_auth, sub_auth)
+        if self.offset_dacl != 0:
             # Acl Revision
             cur.encode_uint8le(self.dacl)
             # sbz1
             cur.encode_uint8le(0)
             # Acl Size
-            sid_size,ace_size,acl_size = self._get_size(acl=self.dacl_aces)
+            sid_size, ace_size, acl_size = self._get_size(acl=self.dacl_aces)
             cur.encode_uint16le(acl_size)
             # Ace Count
             cur.encode_uint16le(len(self.dacl_aces))
@@ -1493,99 +1509,131 @@ class SecurityDescriptorRequest(CreateRequestContext):
                 # Ace flags
                 cur.encode_uint8le(ace[1])
                 # Ace Size
-                sid_size,ace_size,acl_size = self._get_size(ace_val=ace)
+                sid_size, ace_size, acl_size = self._get_size(ace_val=ace)
                 cur.encode_uint16le(ace_size)
                 # Ace Mask
                 cur.encode_uint32le(ace[2])
                 id_auth, sub_auth = self._get_sid(ace[3])
-                self._encode_sid(cur,id_auth,sub_auth)
+                self._encode_sid(cur, id_auth, sub_auth)
 
-    def _encode_sid(self,cur,id_auth,sub_auth):
+    def _encode_sid(self, cur, id_auth, sub_auth):
         sub_auth = [int(i) for i in sub_auth]
         # Revision
         cur.encode_uint8le(0x01)
         # Sub Authrty Count
         cur.encode_uint8le(len(sub_auth))
         # Identifier Authority
-        tmp_id_auth = array.array('B',[0x00,0x00,0x00,0x00,0x00])
+        tmp_id_auth = array.array("B", [0x00, 0x00, 0x00, 0x00, 0x00])
         tmp_id_auth.append(int(id_auth))
-        for tmp in tmp_id_auth :
+        for tmp in tmp_id_auth:
             cur.encode_uint8le(tmp)
         # Sub Authority
         for tmp_sub_auth in sub_auth:
             cur.encode_uint32le(tmp_sub_auth)
 
-    def _get_sid(self,sid):
-        pat = r'S-1-(\d)-(.*)'
-        match = re.search(pat,sid)
-        id_auth= match.group(1)
-        sub_auth = (match.group(2)).split('-')
-        return id_auth,sub_auth
+    def _get_sid(self, sid):
+        pat = r"S-1-(\d)-(.*)"
+        match = re.search(pat, sid)
+        id_auth = match.group(1)
+        sub_auth = (match.group(2)).split("-")
+        return id_auth, sub_auth
 
-    def _get_size(self,sid = None,ace_val = None,acl = None):
-        sid_size=0
-        ace_size=0
-        acl_size=0
+    def _get_size(self, sid=None, ace_val=None, acl=None):
+        sid_size = 0
+        ace_size = 0
+        acl_size = 0
         # All Sizes are in Bytes
-        sbz1                  = 1
-        sbz2                  = 2
-        revision_size         = 1
-        ace_type_size         = 1
-        ace_flags_size        = 1
-        ace_size_param        = 2
-        ace_mask_size         = 4
-        acl_revision_size     = 1
-        acl_size_param        = 2
-        ace_count_size        = 2
-        sub_auth_count_size   = 1
-        identifier_auth_size  = 6
-        sub_auth_size         = 0
+        sbz1 = 1
+        sbz2 = 2
+        revision_size = 1
+        ace_type_size = 1
+        ace_flags_size = 1
+        ace_size_param = 2
+        ace_mask_size = 4
+        acl_revision_size = 1
+        acl_size_param = 2
+        ace_count_size = 2
+        sub_auth_count_size = 1
+        identifier_auth_size = 6
+        sub_auth_size = 0
         if sid != None:
             id_auth, sub_auth = self._get_sid(sid)
-            sub_auth_size+= len(sub_auth) * 4
-            sid_size =revision_size + sub_auth_count_size+\
-                      identifier_auth_size + sub_auth_size
+            sub_auth_size += len(sub_auth) * 4
+            sid_size = (
+                revision_size
+                + sub_auth_count_size
+                + identifier_auth_size
+                + sub_auth_size
+            )
         elif ace_val != None:
             sub_auth_size = 0
             id_auth, sub_auth = self._get_sid(ace_val[3])
-            sub_auth_size+= len(sub_auth) * 4
-            sid_size = revision_size + sub_auth_count_size+\
-                       identifier_auth_size + sub_auth_size
-            ace_size = ace_type_size + ace_flags_size +\
-                       ace_size_param + ace_mask_size + sid_size
+            sub_auth_size += len(sub_auth) * 4
+            sid_size = (
+                revision_size
+                + sub_auth_count_size
+                + identifier_auth_size
+                + sub_auth_size
+            )
+            ace_size = (
+                ace_type_size
+                + ace_flags_size
+                + ace_size_param
+                + ace_mask_size
+                + sid_size
+            )
         elif acl != None:
-            tmp_acl_size=0
+            tmp_acl_size = 0
             for aces in acl:
-               sub_auth_size = 0
-               id_auth, sub_auth = self._get_sid(aces[3])
-               sub_auth_size+= len(sub_auth) * 4
-               sid_size = revision_size + sub_auth_count_size +\
-                          identifier_auth_size + sub_auth_size
-               ace_size = ace_type_size + ace_flags_size + \
-                          ace_size_param + ace_mask_size + sid_size
-               tmp_acl_size += ace_size
-               acl_size = acl_revision_size + sbz1 + acl_size_param + \
-                          ace_count_size + sbz2  + tmp_acl_size
-        return sid_size,ace_size,acl_size
+                sub_auth_size = 0
+                id_auth, sub_auth = self._get_sid(aces[3])
+                sub_auth_size += len(sub_auth) * 4
+                sid_size = (
+                    revision_size
+                    + sub_auth_count_size
+                    + identifier_auth_size
+                    + sub_auth_size
+                )
+                ace_size = (
+                    ace_type_size
+                    + ace_flags_size
+                    + ace_size_param
+                    + ace_mask_size
+                    + sid_size
+                )
+                tmp_acl_size += ace_size
+                acl_size = (
+                    acl_revision_size
+                    + sbz1
+                    + acl_size_param
+                    + ace_count_size
+                    + sbz2
+                    + tmp_acl_size
+                )
+        return sid_size, ace_size, acl_size
 
-    def _get_offset(self,owner_sid=None,group_sid=None,sacl=None,dacl=None):
+    def _get_offset(self, owner_sid=None, group_sid=None, sacl=None, dacl=None):
         default_offset = 20
-        owner_sid_size = self._get_size(sid = owner_sid)
+        owner_sid_size = self._get_size(sid=owner_sid)
         off_owner = 0 if owner_sid_size[0] == 0 else default_offset
-        group_sid_size = self._get_size(sid = group_sid)
-        off_group = 0 if group_sid_size[0] == 0 else  default_offset +\
-                                                owner_sid_size[0]
-        sacl_size = self._get_size(acl = sacl)
-        off_sacl = 0 if sacl_size[2] == 0  else default_offset +\
-                            owner_sid_size[0] + group_sid_size[0]
-        dacl_size = self._get_size(acl = dacl)
-        off_dacl = 0 if dacl_size[2] == 0  else default_offset +\
-                        owner_sid_size[0] + group_sid_size[0] + sacl_size[2]
-        return off_owner,off_group,off_sacl,off_dacl
+        group_sid_size = self._get_size(sid=group_sid)
+        off_group = 0 if group_sid_size[0] == 0 else default_offset + owner_sid_size[0]
+        sacl_size = self._get_size(acl=sacl)
+        off_sacl = (
+            0
+            if sacl_size[2] == 0
+            else default_offset + owner_sid_size[0] + group_sid_size[0]
+        )
+        dacl_size = self._get_size(acl=dacl)
+        off_dacl = (
+            0
+            if dacl_size[2] == 0
+            else default_offset + owner_sid_size[0] + group_sid_size[0] + sacl_size[2]
+        )
+        return off_owner, off_group, off_sacl, off_dacl
 
 
 class NT_ACL(core.Frame):
-
     def __init__(self):
         super(NT_ACL, self).__init__(parent=None)
         self._entries = []
@@ -1594,7 +1642,7 @@ class NT_ACL(core.Frame):
         self.acl_size = -1
         self.ace_count = -1
         self.sbz2 = 0
-        self.raw_data = ''
+        self.raw_data = ""
 
     def _children(self):
         return self._entries
@@ -1609,7 +1657,7 @@ class NT_ACL(core.Frame):
         acl = NT_ACL()
         acl.acl_revision = self.acl_revision
         if self.raw_data:
-            acl.raw_data = array.array('B', self.raw_data)
+            acl.raw_data = array.array("B", self.raw_data)
         for ace in self:
             ace.clone(new_parent=acl)
         return acl
@@ -1637,7 +1685,7 @@ class NT_ACL(core.Frame):
         cur.encode_uint8le(self.acl_revision)
         # Reserved
         cur.encode_uint8le(0)
-        #hole for acl_size and acl_count
+        # hole for acl_size and acl_count
         acl_size_hole = cur.hole.encode_uint16le(0)
         acl_count_hole = cur.hole.encode_uint16le(0)
         # Reserved
@@ -1655,7 +1703,6 @@ class NT_ACL(core.Frame):
 
 
 class NT_ACE(core.Frame):
-
     def __init__(self, parent=None, end=None):
         super(NT_ACE, self).__init__(parent)
         if parent is not None:
@@ -1665,7 +1712,7 @@ class NT_ACE(core.Frame):
         self.ace_size = -1
         self.access_mask = 0
         self.sid = None
-        self.raw_data = ''
+        self.raw_data = ""
         self._entries = []
 
     def clone(self, new_parent=None):
@@ -1678,7 +1725,7 @@ class NT_ACE(core.Frame):
         ace.access_mask = self.access_mask
         ace.sid = self.sid.clone()
         if self.raw_data:
-            ace.raw_data = array.array('B', self.raw_data)
+            ace.raw_data = array.array("B", self.raw_data)
         return ace
 
     def _decode(self, cur):
@@ -1691,7 +1738,7 @@ class NT_ACE(core.Frame):
         self.access_mask = Access(cur.decode_uint32le())
         self.sid = NT_SID()
         self.sid.decode(cur)
-        #check if we reach the end
+        # check if we reach the end
         ace_remain = self.start + self.ace_size - cur
         assert ace_remain >= 0
         if ace_remain:
@@ -1703,7 +1750,7 @@ class NT_ACE(core.Frame):
         """
         cur.encode_uint8le(self.ace_type)
         cur.encode_uint8le(self.ace_flags)
-        #hole for ace size
+        # hole for ace size
         ace_size_hole = cur.hole.encode_uint16le(0)
         cur.encode_uint32le(self.access_mask)
         self.sid.encode(cur)
@@ -1713,11 +1760,11 @@ class NT_ACE(core.Frame):
             self.ace_size = cur - self.start
         ace_size_hole(self.ace_size)
 
-class NT_SID(core.Frame):
 
+class NT_SID(core.Frame):
     def __init__(self):
         super(NT_SID, self).__init__(self, None)
-        self.raw_data = ''
+        self.raw_data = ""
         self.revision = 0
         self.sub_authority_count = -1
         self.identifier_authority = 0
@@ -1732,7 +1779,7 @@ class NT_SID(core.Frame):
         sid.identifier_authority = self.identifier_authority
         sid.sub_authority = self.sub_authority[:]
         if self.raw_data:
-            sid.raw_data = array.array('B', self.raw_data)
+            sid.raw_data = array.array("B", self.raw_data)
         return sid
 
     def _str(self, indent):
@@ -1740,9 +1787,12 @@ class NT_SID(core.Frame):
 
     @property
     def string(self):
-        sid_str = 'S-' + (str(self.revision) + '-' + \
-                str(self.identifier_authority)) + '-' + \
-                '-'.join(str(x) for x in self.sub_authority)
+        sid_str = (
+            "S-"
+            + (str(self.revision) + "-" + str(self.identifier_authority))
+            + "-"
+            + "-".join(str(x) for x in self.sub_authority)
+        )
         return sid_str
 
     def _decode(self, cur):
@@ -1763,9 +1813,9 @@ class NT_SID(core.Frame):
         """
         cur.encode_uint8le(self.revision)
         subauth_count_hole = cur.hole.encode_uint8le(0)
-        auth_bytes = '{:06x}'.format(self.identifier_authority)
-        cur.encode_uint16be((self.identifier_authority >> 32) & 0xffffffff)
-        cur.encode_uint32be(self.identifier_authority & 0xffffffff)
+        auth_bytes = "{:06x}".format(self.identifier_authority)
+        cur.encode_uint16be((self.identifier_authority >> 32) & 0xFFFFFFFF)
+        cur.encode_uint32be(self.identifier_authority & 0xFFFFFFFF)
         for i in range(len(self.sub_authority)):
             cur.encode_uint32le(self.sub_authority[i])
         if self.sub_authority_count == -1:
@@ -1774,14 +1824,14 @@ class NT_SID(core.Frame):
 
 
 class LeaseRequest(CreateRequestContext):
-    name = b'RqLs'
+    name = b"RqLs"
 
     # This class handles V2 requests as well.  Set
     # the lease_flags field to a non-None value
     # to enable the extended fields
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
-        self.lease_key = array.array('B', [0]*16)
+        self.lease_key = array.array("B", [0] * 16)
         self.lease_state = 0
         # V2 fields
         self.lease_flags = None
@@ -1791,7 +1841,7 @@ class LeaseRequest(CreateRequestContext):
     def _encode(self, cur):
         cur.encode_bytes(self.lease_key)
         cur.encode_uint32le(self.lease_state)
-        if (self.lease_flags is not None):
+        if self.lease_flags is not None:
             # V2 variant
             cur.encode_uint32le(self.lease_flags)
             # LeaseDuration is reserved
@@ -1807,8 +1857,9 @@ class LeaseRequest(CreateRequestContext):
             # LeaseDuration is reserved
             cur.encode_uint64le(0)
 
+
 class LeaseResponse(CreateResponseContext):
-    name = b'RqLs'
+    name = b"RqLs"
     v1_size = 32
     v2_size = 52
     # This class handles V2 responses as well.
@@ -1817,7 +1868,7 @@ class LeaseResponse(CreateResponseContext):
 
     def __init__(self, parent):
         CreateResponseContext.__init__(self, parent)
-        self.lease_key = array.array('B', [0]*16)
+        self.lease_key = array.array("B", [0] * 16)
         self.lease_state = 0
         self.lease_flags = 0
         self.parent_lease_key = None
@@ -1851,7 +1902,7 @@ DurableFlags.import_items(globals())
 
 
 class DurableHandleRequest(CreateRequestContext):
-    name = b'DHnQ'
+    name = b"DHnQ"
 
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
@@ -1861,8 +1912,9 @@ class DurableHandleRequest(CreateRequestContext):
         cur.encode_uint64le(0)
         cur.encode_uint64le(0)
 
+
 class DurableHandleResponse(CreateResponseContext):
-    name = b'DHnQ'
+    name = b"DHnQ"
 
     def __init__(self, parent):
         CreateResponseContext.__init__(self, parent)
@@ -1871,8 +1923,9 @@ class DurableHandleResponse(CreateResponseContext):
         # Ignore reserved
         cur.decode_uint64le()
 
+
 class DurableHandleReconnectRequest(CreateRequestContext):
-    name = b'DHnC'
+    name = b"DHnC"
 
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
@@ -1882,8 +1935,9 @@ class DurableHandleReconnectRequest(CreateRequestContext):
         cur.encode_uint64le(self.file_id[0])
         cur.encode_uint64le(self.file_id[1])
 
+
 class DurableHandleV2Request(CreateRequestContext):
-    name = b'DH2Q'
+    name = b"DH2Q"
 
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
@@ -1900,7 +1954,7 @@ class DurableHandleV2Request(CreateRequestContext):
 
 
 class DurableHandleV2Response(CreateResponseContext):
-    name = b'DH2Q'
+    name = b"DH2Q"
 
     def __init__(self, parent):
         CreateResponseContext.__init__(self, parent)
@@ -1913,7 +1967,7 @@ class DurableHandleV2Response(CreateResponseContext):
 
 
 class DurableHandleReconnectV2Request(CreateRequestContext):
-    name = b'DH2C'
+    name = b"DH2C"
 
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
@@ -1929,12 +1983,12 @@ class DurableHandleReconnectV2Request(CreateRequestContext):
 
 
 class AppInstanceIdRequest(CreateRequestContext):
-    name = b'\x45\xBC\xA6\x6A\xEF\xA7\xF7\x4A\x90\x08\xFA\x46\x2E\x14\x4D\x74'
+    name = b"\x45\xBC\xA6\x6A\xEF\xA7\xF7\x4A\x90\x08\xFA\x46\x2E\x14\x4D\x74"
 
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
         self.structure_size = 20
-        self.app_instance_id = array.array('B', [0]*16)
+        self.app_instance_id = array.array("B", [0] * 16)
 
     def _encode(self, cur):
         cur.encode_uint16le(self.structure_size)
@@ -1942,29 +1996,30 @@ class AppInstanceIdRequest(CreateRequestContext):
         cur.encode_uint16le(0)
         cur.encode_bytes(self.app_instance_id)
 
+
 class QueryOnDiskIDRequest(CreateRequestContext):
-    name = b'QFid'
+    name = b"QFid"
 
     def __init__(self, parent):
         CreateRequestContext.__init__(self, parent)
 
     def _encode(self, cur):
-        pass           # client sends no data to server
+        pass  # client sends no data to server
 
 
 class QueryOnDiskIDResponse(CreateResponseContext):
-    name = b'QFid'
+    name = b"QFid"
 
     def __init__(self, parent):
         CreateResponseContext.__init__(self, parent)
-        self.file_id = array.array('B', [0]*32)
+        self.file_id = array.array("B", [0] * 32)
 
     def _decode(self, cur):
         self.file_id = cur.decode_bytes(32)
 
 
 class TimewarpTokenRequest(CreateRequestContext):
-    name = b'TWrp'
+    name = b"TWrp"
 
     def __init__(self, parent):
         super(TimewarpTokenRequest, self).__init__(parent)
@@ -1972,6 +2027,7 @@ class TimewarpTokenRequest(CreateRequestContext):
 
     def _encode(self, cur):
         cur.encode_uint64le(self.timestamp)
+
 
 class CloseRequest(Request):
     command_id = SMB2_CLOSE
@@ -1984,9 +2040,9 @@ class CloseRequest(Request):
 
     def _log_str(self):
         components = [
-                super(CloseRequest, self)._log_str(),
-                "(0x{:x}, 0x{:x})".format(*self.file_id),
-                ]
+            super(CloseRequest, self)._log_str(),
+            "(0x{:x}, 0x{:x})".format(*self.file_id),
+        ]
         if self.flags:
             components.append("({})".format(self.flags))
         return " ".join(components)
@@ -2060,6 +2116,7 @@ class FileInformationClass(core.ValueEnum):
     FILE_ID_FULL_DIR_INFORMATION = 38
     FILE_VALID_DATA_LENGTH_INFORMATION = 39
 
+
 FileInformationClass.import_items(globals())
 
 
@@ -2068,10 +2125,11 @@ class FileSystemInformationClass(core.ValueEnum):
     FILE_FS_SIZE_INFORMATION = 3
     FILE_FS_DEVICE_INFORMATION = 4
     FILE_FS_ATTRIBUTE_INFORMATION = 5
-    FILE_FS_CONTROL_INFORMATION  = 6
+    FILE_FS_CONTROL_INFORMATION = 6
     FILE_FS_FULL_SIZE_INFORMATION = 7
     FILE_FS_OBJECTID_INFORMATION = 8
     FILE_FS_SECTOR_SIZE_INFORMATION = 11
+
 
 FileSystemInformationClass.import_items(globals())
 
@@ -2092,7 +2150,7 @@ class QueryDirectoryRequest(Request):
     def _log_str(self):
         components = [
             super(QueryDirectoryRequest, self)._log_str(),
-            ]
+        ]
         if self.file_information_class:
             components.append(str(self.file_information_class))
         if self.flags:
@@ -2122,7 +2180,7 @@ class QueryDirectoryResponse(Response):
     structure_size = 9
 
     _file_info_map = {}
-    file_information = core.Register(_file_info_map, 'file_information_class')
+    file_information = core.Register(_file_info_map, "file_information_class")
 
     def __init__(self, parent):
         Response.__init__(self, parent)
@@ -2144,7 +2202,7 @@ class QueryDirectoryResponse(Response):
     def _log_str(self):
         components = [
             super(QueryDirectoryResponse, self)._log_str(),
-            ]
+        ]
         if self._file_information_class:
             components.append(str(self._file_information_class))
         return " ".join(components)
@@ -2174,10 +2232,10 @@ class QueryDirectoryResponse(Response):
 
 
 class InfoType(core.ValueEnum):
-    SMB2_0_INFO_FILE       = 0x01
+    SMB2_0_INFO_FILE = 0x01
     SMB2_0_INFO_FILESYSTEM = 0x02
-    SMB2_0_INFO_SECURITY   = 0x03
-    SMB2_0_INFO_QUOTA      = 0x04
+    SMB2_0_INFO_SECURITY = 0x03
+    SMB2_0_INFO_QUOTA = 0x04
 
 
 InfoType.import_items(globals())
@@ -2195,9 +2253,9 @@ SecurityInformation.import_items(globals())
 
 
 class ScanFlags(core.FlagEnum):
-    SL_RESTART_SCAN        = 0x00000001
+    SL_RESTART_SCAN = 0x00000001
     SL_RETURN_SINGLE_ENTRY = 0x00000002
-    SL_INDEX_SPECIFIED     = 0x00000004
+    SL_INDEX_SPECIFIED = 0x00000004
 
 
 ScanFlags.import_items(globals())
@@ -2219,7 +2277,7 @@ class QueryInfoRequest(Request):
     def _log_str(self):
         components = [
             super(QueryInfoRequest, self)._log_str(),
-            ]
+        ]
         if self.info_type == SMB2_0_INFO_FILE:
             if self.file_information_class:
                 components.append(str(self.file_information_class))
@@ -2357,7 +2415,7 @@ class SetInfoResponse(Response):
         Response.__init__(self, parent)
 
     def _decode(self, cur):
-        #The response is only the structure size
+        # The response is only the structure size
         pass
 
 
@@ -2366,15 +2424,16 @@ class Information(core.Frame):
     Base class for all info frames. Holds the raw data if no specific decoder
     has been registered for the given info type
     """
+
     info_type = 0
     file_information_class = 0
 
-    def __init__(self, parent = None, end = None):
+    def __init__(self, parent=None, end=None):
         super(Information, self).__init__(parent)
         if parent is not None:
             parent.append(self)
         self.end = end
-        self.raw_data = ''
+        self.raw_data = ""
 
     def _decode(self, cur):
         """
@@ -2414,7 +2473,7 @@ class FileSecurityInformation(FileInformation):
         self.offset_group = -1
         self.offset_sacl = -1
         self.offset_dacl = -1
-        self.other = ''
+        self.other = ""
         self.end = end
         self.owner_sid = None
         self.group_sid = None
@@ -2436,7 +2495,7 @@ class FileSecurityInformation(FileInformation):
         o1.control = o2.control
         if copy_fields is None or "other" in copy_fields:
             if o2.other:
-                o1.other = array.array('B', o2.other)
+                o1.other = array.array("B", o2.other)
         if copy_fields is None or "owner_sid" in copy_fields:
             o1.owner_sid = o2.owner_sid.clone()
         if copy_fields is None or "group_sid" in copy_fields:
@@ -2490,7 +2549,11 @@ class FileSecurityInformation(FileInformation):
             self.group_sid = NT_SID()
             self.group_sid.decode(cur)
         if self.offset_sacl != 0:
-            sacl_len = (self.offset_dacl - self.offset_sacl) if self.offset_dacl > 0 else (self.end - self.start - self.offset_sacl)
+            sacl_len = (
+                (self.offset_dacl - self.offset_sacl)
+                if self.offset_dacl > 0
+                else (self.end - self.start - self.offset_sacl)
+            )
             self.sacl = cur.decode_bytes(sacl_len)
         if self.offset_dacl != 0:
             self.dacl = NT_ACL()
@@ -2532,7 +2595,7 @@ class FileSecurityInformation(FileInformation):
 class FileAccessInformation(FileInformation):
     file_information_class = FILE_ACCESS_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.access_flags = 0
 
@@ -2546,12 +2609,13 @@ class Alignment(core.ValueEnum):
     FILE_WORD_ALIGNMENT = 0x00000001
     FILE_LONG_ALIGNMENT = 0x00000003
     FILE_QUAD_ALIGNMENT = 0x00000007
-    FILE_OCTA_ALIGNMENT = 0x0000000f
-    FILE_32_BYTE_ALIGNMENT = 0x0000001f
-    FILE_64_BYTE_ALIGNMENT = 0x0000003f
-    FILE_128_BYTE_ALIGNMENT = 0x0000007f
-    FILE_256_BYTE_ALIGNMENT = 0x000000ff
-    FILE_512_BYTE_ALIGNMENT = 0x000001ff
+    FILE_OCTA_ALIGNMENT = 0x0000000F
+    FILE_32_BYTE_ALIGNMENT = 0x0000001F
+    FILE_64_BYTE_ALIGNMENT = 0x0000003F
+    FILE_128_BYTE_ALIGNMENT = 0x0000007F
+    FILE_256_BYTE_ALIGNMENT = 0x000000FF
+    FILE_512_BYTE_ALIGNMENT = 0x000001FF
+
 
 Alignment.import_items(globals())
 
@@ -2559,7 +2623,7 @@ Alignment.import_items(globals())
 class FileAlignmentInformation(FileInformation):
     file_information_class = FILE_ALIGNMENT_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.alignment_requirement = 0
 
@@ -2570,7 +2634,7 @@ class FileAlignmentInformation(FileInformation):
 class FileAllInformation(FileInformation):
     file_information_class = FILE_ALL_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
 
         self.basic_information = FileBasicInformation()
@@ -2593,7 +2657,7 @@ class FileAllInformation(FileInformation):
 class FileDirectoryInformation(FileInformation):
     file_information_class = FILE_DIRECTORY_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.file_index = 0
         self.creation_time = 0
@@ -2603,6 +2667,7 @@ class FileDirectoryInformation(FileInformation):
         self.end_of_file = 0
         self.allocation_size = 0
         self.file_attributes = 0
+        self.ea_size = 0
         self.file_name = None
 
     def _decode(self, cur):
@@ -2628,7 +2693,7 @@ class FileDirectoryInformation(FileInformation):
 class FileFullDirectoryInformation(FileInformation):
     file_information_class = FILE_FULL_DIRECTORY_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.file_index = 0
         self.creation_time = 0
@@ -2664,7 +2729,7 @@ class FileFullDirectoryInformation(FileInformation):
 class FileIdFullDirectoryInformation(FileInformation):
     file_information_class = FILE_ID_FULL_DIR_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.file_index = 0
         self.creation_time = 0
@@ -2704,7 +2769,7 @@ class FileIdFullDirectoryInformation(FileInformation):
 class FileIdBothDirectoryInformation(FileInformation):
     file_information_class = FILE_ID_BOTH_DIR_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.file_index = 0
         self.creation_time = 0
@@ -2748,7 +2813,7 @@ class FileIdBothDirectoryInformation(FileInformation):
 class FileBasicInformation(FileInformation):
     file_information_class = FILE_BASIC_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.creation_time = 0
         self.last_access_time = 0
@@ -2778,7 +2843,7 @@ class FileBasicInformation(FileInformation):
 class FileNetworkOpenInformation(FileInformation):
     file_information_class = FILE_NETWORK_OPEN_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.creation_time = 0
         self.last_access_time = 0
@@ -2803,7 +2868,7 @@ class FileNetworkOpenInformation(FileInformation):
 class FileAttributeTagInformation(FileInformation):
     file_information_class = FILE_ATTRIBUTE_TAG_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.file_attributes = 0
         self.reparse_tag = 0
@@ -2816,7 +2881,7 @@ class FileAttributeTagInformation(FileInformation):
 class FileStreamInformation(FileInformation):
     file_information_class = FILE_STREAM_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.next_entry_offset = 0
         self.stream_name_length = 0
@@ -2846,7 +2911,7 @@ CompressionFormat.import_items(globals())
 class FileCompressionInformation(FileInformation):
     file_information_class = FILE_COMPRESSION_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.compressed_file_size = 0
         self.compression_format = 0
@@ -2863,13 +2928,17 @@ class FileCompressionInformation(FileInformation):
         self.cluster_shift = cur.decode_uint8le()
 
         # This is a single reserved field of 3 bytes.
-        self.reserved = cur.decode_uint8le() | (cur.decode_uint8le() << 8) | (cur.decode_uint8le() << 16)
+        self.reserved = (
+            cur.decode_uint8le()
+            | (cur.decode_uint8le() << 8)
+            | (cur.decode_uint8le() << 16)
+        )
 
 
 class FileInternalInformation(FileInformation):
     file_information_class = FILE_INTERNAL_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.index_number = 0
 
@@ -2880,7 +2949,7 @@ class FileInternalInformation(FileInformation):
 class FileModeInformation(FileInformation):
     file_information_class = FILE_MODE_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         # See Create options (e.g. FILE_DELETE_ON_CLOSE) for available flags
         self.mode = 0
@@ -2895,7 +2964,7 @@ class FileModeInformation(FileInformation):
 class FileNameInformation(FileInformation):
     file_information_class = FILE_NAME_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.file_name = None
 
@@ -2907,17 +2976,17 @@ class FileNameInformation(FileInformation):
 class FileRenameInformation(FileInformation):
     file_information_class = FILE_RENAME_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.replace_if_exists = 0
-        self.root_directory = (0,0)
+        self.root_directory = (0, 0)
         self.file_name = None
 
     def _encode(self, cur):
         cur.encode_uint8le(self.replace_if_exists)
-        cur.encode_uint8le(0)       # reserved
-        cur.encode_uint16le(0)      # reserved
-        cur.encode_uint32le(0)      # reserved
+        cur.encode_uint8le(0)  # reserved
+        cur.encode_uint16le(0)  # reserved
+        cur.encode_uint32le(0)  # reserved
         cur.encode_uint32le(self.root_directory[0])
         cur.encode_uint32le(self.root_directory[1])
         file_name_length_hole = cur.hole.encode_uint32le(0)
@@ -2925,11 +2994,12 @@ class FileRenameInformation(FileInformation):
         cur.encode_utf16le(self.file_name)
         file_name_length_hole(cur - file_name_start)
 
+
 class FileAllocationInformation(FileInformation):
     file_information_class = FILE_ALLOCATION_INFORMATION
 
-    def __init__(self, parent = None):
-        FileInformation.__init__(self,parent)
+    def __init__(self, parent=None):
+        FileInformation.__init__(self, parent)
         self.allocation_size = 0
 
     def _encode(self, cur):
@@ -2937,42 +3007,42 @@ class FileAllocationInformation(FileInformation):
 
 
 class FileDispositionInformation(FileInformation):
-   file_information_class = FILE_DISPOSITION_INFORMATION
+    file_information_class = FILE_DISPOSITION_INFORMATION
 
-   def __init__(self, parent = None):
-        FileInformation.__init__(self,parent)
+    def __init__(self, parent=None):
+        FileInformation.__init__(self, parent)
         self.delete_pending = 0
 
-   def _encode(self, cur):
+    def _encode(self, cur):
         cur.encode_uint8le(self.delete_pending)
 
 
 class FileEndOfFileInformation(FileInformation):
-   file_information_class = FILE_END_OF_FILE_INFORMATION
+    file_information_class = FILE_END_OF_FILE_INFORMATION
 
-   def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.endoffile = 0
 
-   def _encode(self, cur):
-       cur.encode_int64le(self.endoffile)
+    def _encode(self, cur):
+        cur.encode_int64le(self.endoffile)
 
 
 class FileValidDataLengthInformation(FileInformation):
-   file_information_class = FILE_VALID_DATA_LENGTH_INFORMATION
+    file_information_class = FILE_VALID_DATA_LENGTH_INFORMATION
 
-   def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.valid_data_length = 0
 
-   def _encode(self, cur):
+    def _encode(self, cur):
         cur.encode_int64le(self.valid_data_length)
 
 
 class FileNamesInformation(FileInformation):
     file_information_class = FILE_NAMES_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.file_index = 0
         self.file_name = None
@@ -2989,10 +3059,11 @@ class FileNamesInformation(FileInformation):
         else:
             cur.advanceto(cur.upperbound)
 
+
 class FilePositionInformation(FileInformation):
     file_information_class = FILE_POSITION_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.current_byte_offset = 0
 
@@ -3002,10 +3073,11 @@ class FilePositionInformation(FileInformation):
     def _encode(self, cur):
         cur.encode_uint64le(self.current_byte_offset)
 
+
 class FileStandardInformation(FileInformation):
     file_information_class = FILE_STANDARD_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.allocation_size = 0
         self.end_of_file = 0
@@ -3035,7 +3107,7 @@ class FileStandardInformation(FileInformation):
 class FileEaInformation(FileInformation):
     file_information_class = FILE_EA_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileInformation.__init__(self, parent)
         self.ea_size = 0
 
@@ -3046,7 +3118,7 @@ class FileEaInformation(FileInformation):
 class FileFsSizeInformation(FileSystemInformation):
     file_information_class = FILE_FS_SIZE_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileSystemInformation.__init__(self, parent)
         self.total_allocation_units = 0
         self.available_allocation_units = 0
@@ -3063,7 +3135,7 @@ class FileFsSizeInformation(FileSystemInformation):
 class FileFsFullSizeInformation(FileSystemInformation):
     file_information_class = FILE_FS_FULL_SIZE_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileSystemInformation.__init__(self, parent)
         self.total_allocation_units = 0
         self.caller_available_allocation_units = 0
@@ -3081,25 +3153,27 @@ class FileFsFullSizeInformation(FileSystemInformation):
 
 # DeviceType
 class DeviceType(core.ValueEnum):
-    FILE_DEVICE_CD_ROM  = 0x00000002
-    FILE_DEVICE_DISK    = 0x00000007
+    FILE_DEVICE_CD_ROM = 0x00000002
+    FILE_DEVICE_DISK = 0x00000007
+
 
 DeviceType.import_items(globals())
 
 
 # Volume Characteristics
 class Characteristics(core.FlagEnum):
-    FILE_REMOVABLE_MEDIA                     = 0x00000001
-    FILE_READ_ONLY_DEVICE                    = 0x00000002
-    FILE_FLOPPY_DISKETTE                     = 0x00000004
-    FILE_WRITE_ONCE_MEDIA                    = 0x00000008
-    FILE_REMOTE_DEVICE                       = 0x00000010
-    FILE_DEVICE_IS_MOUNTED                   = 0x00000020
-    FILE_VIRTUAL_VOLUME                      = 0x00000040
-    FILE_DEVICE_SECURE_OPEN                  = 0x00000100
-    FILE_CHARACTERISTIC_TS_DEVICE            = 0x00001000
-    FILE_CHARACTERISTIC_WEBDAV_DEVICE        = 0x00002000
+    FILE_REMOVABLE_MEDIA = 0x00000001
+    FILE_READ_ONLY_DEVICE = 0x00000002
+    FILE_FLOPPY_DISKETTE = 0x00000004
+    FILE_WRITE_ONCE_MEDIA = 0x00000008
+    FILE_REMOTE_DEVICE = 0x00000010
+    FILE_DEVICE_IS_MOUNTED = 0x00000020
+    FILE_VIRTUAL_VOLUME = 0x00000040
+    FILE_DEVICE_SECURE_OPEN = 0x00000100
+    FILE_CHARACTERISTIC_TS_DEVICE = 0x00001000
+    FILE_CHARACTERISTIC_WEBDAV_DEVICE = 0x00002000
     FILE_DEVICE_ALLOW_APPCONTAINER_TRAVERSAL = 0x00020000
+
 
 Characteristics.import_items(globals())
 
@@ -3107,7 +3181,7 @@ Characteristics.import_items(globals())
 class FileFsDeviceInformation(FileSystemInformation):
     file_information_class = FILE_FS_DEVICE_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileSystemInformation.__init__(self, parent)
         self.device_type = 0
         self.characteristics = 0
@@ -3119,27 +3193,28 @@ class FileFsDeviceInformation(FileSystemInformation):
 
 # File System Attributes
 class FileSystemAtrribute(core.FlagEnum):
-    FILE_CASE_SENSITIVE_SEARCH        = 0x00000001
-    FILE_CASE_PRESERVED_NAMES         = 0x00000002
-    FILE_UNICODE_ON_DISK              = 0x00000004
-    FILE_PERSISTENT_ACLS              = 0x00000008
-    FILE_FILE_COMPRESSION             = 0x00000010
-    FILE_VOLUME_QUOTAS                = 0x00000020
-    FILE_SUPPORTS_SPARSE_FILES        = 0x00000040
-    FILE_SUPPORTS_REPARSE_POINTS      = 0x00000080
-    FILE_SUPPORTS_REMOTE_STORAGE      = 0x00000100
-    FILE_VOLUME_IS_COMPRESSED         = 0x00008000
-    FILE_SUPPORTS_OBJECT_IDS          = 0x00010000
-    FILE_SUPPORTS_ENCRYPTION          = 0x00020000
-    FILE_NAMED_STREAMS                = 0x00040000
-    FILE_READ_ONLY_VOLUME             = 0x00080000
-    FILE_SEQUENTIAL_WRITE_ONCE        = 0x00100000
-    FILE_SUPPORTS_TRANSACTIONS        = 0x00200000
-    FILE_SUPPORTS_HARD_LINKS          = 0x00400000
+    FILE_CASE_SENSITIVE_SEARCH = 0x00000001
+    FILE_CASE_PRESERVED_NAMES = 0x00000002
+    FILE_UNICODE_ON_DISK = 0x00000004
+    FILE_PERSISTENT_ACLS = 0x00000008
+    FILE_FILE_COMPRESSION = 0x00000010
+    FILE_VOLUME_QUOTAS = 0x00000020
+    FILE_SUPPORTS_SPARSE_FILES = 0x00000040
+    FILE_SUPPORTS_REPARSE_POINTS = 0x00000080
+    FILE_SUPPORTS_REMOTE_STORAGE = 0x00000100
+    FILE_VOLUME_IS_COMPRESSED = 0x00008000
+    FILE_SUPPORTS_OBJECT_IDS = 0x00010000
+    FILE_SUPPORTS_ENCRYPTION = 0x00020000
+    FILE_NAMED_STREAMS = 0x00040000
+    FILE_READ_ONLY_VOLUME = 0x00080000
+    FILE_SEQUENTIAL_WRITE_ONCE = 0x00100000
+    FILE_SUPPORTS_TRANSACTIONS = 0x00200000
+    FILE_SUPPORTS_HARD_LINKS = 0x00400000
     FILE_SUPPORTS_EXTENDED_ATTRIBUTES = 0x00800000
-    FILE_SUPPORTS_OPEN_BY_FILE_ID     = 0x01000000
-    FILE_SUPPORTS_USN_JOURNAL         = 0x02000000
-    FILE_SUPPORT_INTEGRITY_STREAMS    = 0x04000000
+    FILE_SUPPORTS_OPEN_BY_FILE_ID = 0x01000000
+    FILE_SUPPORTS_USN_JOURNAL = 0x02000000
+    FILE_SUPPORT_INTEGRITY_STREAMS = 0x04000000
+
 
 FileSystemAtrribute.import_items(globals())
 
@@ -3147,7 +3222,7 @@ FileSystemAtrribute.import_items(globals())
 class FileFsAttributeInformation(FileSystemInformation):
     file_information_class = FILE_FS_ATTRIBUTE_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileSystemInformation.__init__(self, parent)
         self.file_system_attibutes = 0
         self.maximum_component_name_length = 0
@@ -3158,13 +3233,13 @@ class FileFsAttributeInformation(FileSystemInformation):
         self.file_system_attibutes = cur.decode_uint32le()
         self.maximum_component_name_length = cur.decode_int32le()
         self.file_system_name_length = cur.decode_uint32le()
-        self.file_system_name  = cur.decode_utf16le(self.file_system_name_length)
+        self.file_system_name = cur.decode_utf16le(self.file_system_name_length)
 
 
 class FileFsVolumeInformation(FileSystemInformation):
     file_information_class = FILE_FS_VOLUME_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileSystemInformation.__init__(self, parent)
         self.volume_creation_time = 0
         self.volume_serial_number = 0
@@ -3174,25 +3249,26 @@ class FileFsVolumeInformation(FileSystemInformation):
         self.volume_label = None
 
     def _decode(self, cur):
-        self.volume_creation_time  = nttime.NtTime(cur.decode_uint64le())
+        self.volume_creation_time = nttime.NtTime(cur.decode_uint64le())
         self.volume_serial_number = cur.decode_uint32le()
         self.volume_label_length = cur.decode_uint32le()
         self.supports_objects = cur.decode_uint8le()
         cur.decode_uint8le()
-        self.volume_label  = cur.decode_utf16le(self.volume_label_length)
+        self.volume_label = cur.decode_utf16le(self.volume_label_length)
 
 
 # File System Control Flags
 class FileSystemControlFlags(core.FlagEnum):
-    FILE_VC_QUOTA_TRACK            = 0x00000001
-    FILE_VC_QUOTA_ENFORCE          = 0x00000002
+    FILE_VC_QUOTA_TRACK = 0x00000001
+    FILE_VC_QUOTA_ENFORCE = 0x00000002
     FILE_VC_CONTENT_INDEX_DISABLED = 0x00000008
-    FILE_VC_LOG_QUOTA_THRESHOLD    = 0x00000010
-    FILE_VC_LOG_QUOTA_LIMIT        = 0x00000020
-    FILE_VC_LOG_VOLUME_THRESHOLD   = 0x00000040
-    FILE_VC_LOG_VOLUME_LIMIT       = 0x00000080
-    FILE_VC_QUOTAS_INCOMPLETE      = 0x00000100
-    FILE_VC_QUOTAS_REBUILDING      = 0x00000200
+    FILE_VC_LOG_QUOTA_THRESHOLD = 0x00000010
+    FILE_VC_LOG_QUOTA_LIMIT = 0x00000020
+    FILE_VC_LOG_VOLUME_THRESHOLD = 0x00000040
+    FILE_VC_LOG_VOLUME_LIMIT = 0x00000080
+    FILE_VC_QUOTAS_INCOMPLETE = 0x00000100
+    FILE_VC_QUOTAS_REBUILDING = 0x00000200
+
 
 FileSystemControlFlags.import_items(globals())
 
@@ -3200,7 +3276,7 @@ FileSystemControlFlags.import_items(globals())
 class FileFsControlInformation(FileSystemInformation):
     file_information_class = FILE_FS_CONTROL_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileSystemInformation.__init__(self, parent)
         self.free_space_start_filtering = 0
         self.free_space_threshold = 0
@@ -3232,7 +3308,7 @@ class FileFsControlInformation(FileSystemInformation):
 class FileFsObjectIdInformation(FileSystemInformation):
     file_information_class = FILE_FS_OBJECTID_INFORMATION
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         FileSystemInformation.__init__(self, parent)
         self.objectid = ""
         self.extended_info = ""
@@ -3245,17 +3321,17 @@ class FileFsObjectIdInformation(FileSystemInformation):
 
 
 class CompletionFilter(core.FlagEnum):
-    SMB2_NOTIFY_CHANGE_FILE_NAME    = 0x001
-    SMB2_NOTIFY_CHANGE_DIR_NAME     = 0x002
-    SMB2_NOTIFY_CHANGE_ATTRIBUTES   = 0x004
-    SMB2_NOTIFY_CHANGE_SIZE         = 0x008
-    SMB2_NOTIFY_CHANGE_LAST_WRITE   = 0x010
-    SMB2_NOTIFY_CHANGE_LAST_ACCESS  = 0x020
-    SMB2_NOTIFY_CHANGE_CREATION     = 0x040
-    SMB2_NOTIFY_CHANGE_EA           = 0x080
-    SMB2_NOTIFY_CHANGE_SECURITY     = 0x100
-    SMB2_NOTIFY_CHANGE_STREAM_NAME  = 0x200
-    SMB2_NOTIFY_CHANGE_STREAM_SIZE  = 0x400
+    SMB2_NOTIFY_CHANGE_FILE_NAME = 0x001
+    SMB2_NOTIFY_CHANGE_DIR_NAME = 0x002
+    SMB2_NOTIFY_CHANGE_ATTRIBUTES = 0x004
+    SMB2_NOTIFY_CHANGE_SIZE = 0x008
+    SMB2_NOTIFY_CHANGE_LAST_WRITE = 0x010
+    SMB2_NOTIFY_CHANGE_LAST_ACCESS = 0x020
+    SMB2_NOTIFY_CHANGE_CREATION = 0x040
+    SMB2_NOTIFY_CHANGE_EA = 0x080
+    SMB2_NOTIFY_CHANGE_SECURITY = 0x100
+    SMB2_NOTIFY_CHANGE_STREAM_NAME = 0x200
+    SMB2_NOTIFY_CHANGE_STREAM_SIZE = 0x400
     SMB2_NOTIFY_CHANGE_STREAM_WRITE = 0x800
 
 
@@ -3263,29 +3339,29 @@ CompletionFilter.import_items(globals())
 
 
 class ChangeNotifyFlags(core.FlagEnum):
-    SMB2_WATCH_TREE     = 0x01
+    SMB2_WATCH_TREE = 0x01
 
 
 ChangeNotifyFlags.import_items(globals())
 
 
 class FileNotifyInfoAction(core.ValueEnum):
-    SMB2_ACTION_ADDED               = 0x001
-    SMB2_ACTION_REMOVED             = 0x002
-    SMB2_ACTION_MODIFIED            = 0x003
-    SMB2_ACTION_RENAMED_OLD_NAME    = 0x004
-    SMB2_ACTION_RENAMED_NEW_NAME    = 0x005
-    SMB2_ACTION_ADDED_STREAM        = 0x006
-    SMB2_ACTION_REMOVED_STREAM      = 0x007
-    SMB2_ACTION_MODIFIED_STREAM     = 0x008
-    SMB2_ACTION_REMOVED_BY_DELETE   = 0x009
+    SMB2_ACTION_ADDED = 0x001
+    SMB2_ACTION_REMOVED = 0x002
+    SMB2_ACTION_MODIFIED = 0x003
+    SMB2_ACTION_RENAMED_OLD_NAME = 0x004
+    SMB2_ACTION_RENAMED_NEW_NAME = 0x005
+    SMB2_ACTION_ADDED_STREAM = 0x006
+    SMB2_ACTION_REMOVED_STREAM = 0x007
+    SMB2_ACTION_MODIFIED_STREAM = 0x008
+    SMB2_ACTION_REMOVED_BY_DELETE = 0x009
 
 
 FileNotifyInfoAction.import_items(globals())
 
 
 class FileNotifyInformation(core.Frame):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         core.Frame.__init__(self, parent)
         self.action = 0
         self.filename = None
@@ -3302,9 +3378,9 @@ class FileNotifyInformation(core.Frame):
         return neo
 
     def __repr__(self):
-        return "<{0} {1} '{2}'>".format(self.__class__.__name__,
-                                        self.action,
-                                        self.filename)
+        return "<{0} {1} '{2}'>".format(
+            self.__class__.__name__, self.action, self.filename
+        )
 
 
 class ChangeNotifyResponse(Response):
@@ -3355,7 +3431,7 @@ class ChangeNotifyRequest(Request):
 
 
 class BreakLeaseFlags(core.FlagEnum):
-    SMB2_NOTIFY_BREAK_LEASE_FLAG_NONE         = 0x00
+    SMB2_NOTIFY_BREAK_LEASE_FLAG_NONE = 0x00
     SMB2_NOTIFY_BREAK_LEASE_FLAG_ACK_REQUIRED = 0x01
 
 
@@ -3494,10 +3570,12 @@ class ReadRequest(Request):
         self.buffer = 0
 
     def _log_str(self):
-        return " ".join([
+        return " ".join(
+            [
                 super(ReadRequest, self)._log_str(),
                 "({}@{})".format(self.length, self.offset),
-                ])
+            ]
+        )
 
     def _encode(self, cur):
         # Padding
@@ -3542,10 +3620,9 @@ class ReadResponse(Response):
         self.reserved2 = 0
 
     def _log_str(self):
-        return " ".join([
-                super(ReadResponse, self)._log_str(),
-                "({})".format(self.length),
-                ])
+        return " ".join(
+            [super(ReadResponse, self)._log_str(), "({})".format(self.length),]
+        )
 
     def _decode(self, cur):
         self.offset = cur.decode_uint8le()
@@ -3639,9 +3716,9 @@ class WriteResponse(Response):
 
     def _log_str(self):
         components = [
-                super(WriteResponse, self)._log_str(),
-                "({})".format(self.count),
-                ]
+            super(WriteResponse, self)._log_str(),
+            "({})".format(self.count),
+        ]
         if self.remaining:
             components.append("(remaining {})".format(self.remaining))
         return " ".join(components)
@@ -3655,9 +3732,9 @@ class WriteResponse(Response):
 
 
 class LockFlags(core.FlagEnum):
-    SMB2_LOCKFLAG_SHARED_LOCK      = 0x00000001
-    SMB2_LOCKFLAG_EXCLUSIVE_LOCK   = 0x00000002
-    SMB2_LOCKFLAG_UN_LOCK          = 0x00000004
+    SMB2_LOCKFLAG_SHARED_LOCK = 0x00000001
+    SMB2_LOCKFLAG_EXCLUSIVE_LOCK = 0x00000002
+    SMB2_LOCKFLAG_UN_LOCK = 0x00000004
     SMB2_LOCKFLAG_FAIL_IMMEDIATELY = 0x00000010
 
 
@@ -3668,6 +3745,7 @@ class LockRequest(Request):
     """
     @ivar locks: A list of lock tuples, each of which consists of (offset, length, flags).
     """
+
     command_id = SMB2_LOCK
     structure_size = 48
 
@@ -3709,24 +3787,24 @@ class LockResponse(Response):
 
 
 class IoctlCode(core.ValueEnum):
-    FSCTL_DFS_GET_REFERRALS            = 0x00060194
-    FSCTL_PIPE_PEEK                    = 0x0011400C
-    FSCTL_PIPE_WAIT                    = 0x00110018
-    FSCTL_PIPE_TRANSCEIVE              = 0x0011C017
-    FSCTL_SRV_COPYCHUNK                = 0x001440F2
-    FSCTL_SRV_ENUMERATE_SNAPSHOTS      = 0x00144064
-    FSCTL_SRV_REQUEST_RESUME_KEY       = 0x00140078
-    FSCTL_SRV_READ_HASH                = 0x001441bb
-    FSCTL_SRV_COPYCHUNK_WRITE          = 0x001480F2
-    FSCTL_LMR_REQUEST_RESILIENCY       = 0x001401D4
+    FSCTL_DFS_GET_REFERRALS = 0x00060194
+    FSCTL_PIPE_PEEK = 0x0011400C
+    FSCTL_PIPE_WAIT = 0x00110018
+    FSCTL_PIPE_TRANSCEIVE = 0x0011C017
+    FSCTL_SRV_COPYCHUNK = 0x001440F2
+    FSCTL_SRV_ENUMERATE_SNAPSHOTS = 0x00144064
+    FSCTL_SRV_REQUEST_RESUME_KEY = 0x00140078
+    FSCTL_SRV_READ_HASH = 0x001441BB
+    FSCTL_SRV_COPYCHUNK_WRITE = 0x001480F2
+    FSCTL_LMR_REQUEST_RESILIENCY = 0x001401D4
     FSCTL_QUERY_NETWORK_INTERFACE_INFO = 0x001401FC
-    FSCTL_SET_REPARSE_POINT            = 0x000900A4
-    FSCTL_GET_REPARSE_POINT            = 0x000900A8
-    FSCTL_DFS_GET_REFERRALS_EX         = 0x000601B0
-    FSCTL_FILE_LEVEL_TRIM              = 0x00098208
-    FSCTL_VALIDATE_NEGOTIATE_INFO      = 0x00140204
-    FSCTL_SET_ZERO_DATA                = 0x000980C8
-    FSCTL_SET_SPARSE                   = 0x000900C4
+    FSCTL_SET_REPARSE_POINT = 0x000900A4
+    FSCTL_GET_REPARSE_POINT = 0x000900A8
+    FSCTL_DFS_GET_REFERRALS_EX = 0x000601B0
+    FSCTL_FILE_LEVEL_TRIM = 0x00098208
+    FSCTL_VALIDATE_NEGOTIATE_INFO = 0x00140204
+    FSCTL_SET_ZERO_DATA = 0x000980C8
+    FSCTL_SET_SPARSE = 0x000900C4
 
 
 IoctlCode.import_items(globals())
@@ -3745,14 +3823,14 @@ class IoctlRequest(Request):
     LOG_CHILDREN_COUNT = False
     LOG_CHILDREN_EXPAND = True
 
-    field_blacklist = ['ioctl_input']
+    field_blacklist = ["ioctl_input"]
 
     def __init__(self, parent):
         Request.__init__(self, parent)
         self.ctl_code = None
         # MS-SMB2 says that the file ID should be set to 0xffffffffffffffff for
         # certain IOCTLs.  Assuming that means both persistent and volatile.
-        self.file_id = (0xffffffffffffffff, 0xffffffffffffffff)
+        self.file_id = (0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF)
         self.input_offset = None
         self.input_count = None
         self.max_input_response = 0
@@ -3779,7 +3857,7 @@ class IoctlRequest(Request):
         input_offset_hole = cur.hole.encode_uint32le(0)
         input_count_hole = cur.hole.encode_uint32le(0)
         cur.encode_uint32le(self.max_input_response)
-        #For requests, output offset and count should be 0
+        # For requests, output offset and count should be 0
         cur.encode_uint32le(self.output_offset)
         cur.encode_uint32le(self.output_count)
         cur.encode_uint32le(self.max_output_response)
@@ -3802,7 +3880,7 @@ class IoctlResponse(Response):
     LOG_CHILDREN_COUNT = False
     LOG_CHILDREN_EXPAND = True
 
-    field_blacklist = ['ioctl_output']
+    field_blacklist = ["ioctl_output"]
 
     # Set up a map so that the correct IoctlOutput frame decoder will be called,
     # based on the ioctl_ctl_code defined in the IoctlOutput
@@ -3853,7 +3931,7 @@ class ValidateNegotiateInfoRequest(IoctlInput):
         self.dialects_count = None
         self.dialects = None
 
-    def  _encode(self, cur):
+    def _encode(self, cur):
         cur.encode_uint32le(self.capabilities)
         cur.encode_bytes(self.client_guid)
         cur.encode_uint16le(self.security_mode)
@@ -3873,7 +3951,7 @@ class QueryNetworkInterfaceInfoRequest(IoctlInput):
     def __init__(self, parent):
         IoctlInput.__init__(self, parent)
 
-    def  _encode(self, cur):
+    def _encode(self, cur):
         pass
 
 
@@ -3884,7 +3962,7 @@ class RequestResumeKeyRequest(IoctlInput):
         IoctlInput.__init__(self, parent)
         parent.ioctl_input = self
 
-    def  _encode(self, cur):
+    def _encode(self, cur):
         pass
 
 
@@ -3896,7 +3974,7 @@ class NetworkResiliencyRequestRequest(IoctlInput):
         self.timeout = 0
         self.reserved = 0
 
-    def  _encode(self, cur):
+    def _encode(self, cur):
         cur.encode_uint32le(self.timeout)
         cur.encode_uint32le(self.reserved)
 
@@ -3913,11 +3991,11 @@ class CopyChunkCopyRequest(IoctlInput):
     def append(self, child):
         self._children.append(child)
 
-    def  _encode(self, cur):
+    def _encode(self, cur):
         cur.encode_bytes(self.source_key)
         cur.encode_uint32le(self.chunk_count)
-        cur.encode_uint32le(0)                          # reserved
-        #encode the chunks
+        cur.encode_uint32le(0)  # reserved
+        # encode the chunks
         for chunk in self._children:
             chunk.encode(cur)
 
@@ -3958,6 +4036,7 @@ class GetReparsePointRequest(IoctlInput):
 
     def _encode(self, *args, **kwds):
         pass
+
 
 class EnumerateSnapshotsRequest(IoctlInput):
     ioctl_ctl_code = FSCTL_SRV_ENUMERATE_SNAPSHOTS
@@ -4002,14 +4081,14 @@ class QueryNetworkInterfaceInfoResponse(IoctlOutput):
 
 
 class RequestResumeKeyResponse(IoctlOutput):
-   ioctl_ctl_code = FSCTL_SRV_REQUEST_RESUME_KEY
+    ioctl_ctl_code = FSCTL_SRV_REQUEST_RESUME_KEY
 
-   def __init__(self, parent):
+    def __init__(self, parent):
         IoctlOutput.__init__(self, parent)
-        self.resume_key = array.array('B',[0]*24)
+        self.resume_key = array.array("B", [0] * 24)
         self.context_length = 0
 
-   def _decode(self, cur):
+    def _decode(self, cur):
         self.resume_key = cur.decode_bytes(24)
         self.context_length = cur.decode_uint32le()
 
@@ -4023,15 +4102,15 @@ class NetworkResiliencyRequestResponse(IoctlOutput):
 
 
 class CopyChunkCopyResponse(IoctlOutput):
-   ioctl_ctl_code = FSCTL_SRV_COPYCHUNK
+    ioctl_ctl_code = FSCTL_SRV_COPYCHUNK
 
-   def __init__(self, parent):
+    def __init__(self, parent):
         IoctlOutput.__init__(self, parent)
         self.chunks_written = 0
         self.chunk_bytes_written = 0
         self.total_bytes_written = 0
 
-   def _decode(self, cur):
+    def _decode(self, cur):
         self.chunks_written = cur.decode_uint32le()
         self.chunk_bytes_written = cur.decode_uint32le()
         self.total_bytes_written = cur.decode_uint32le()
@@ -4043,6 +4122,7 @@ class CopyChunkCopyWriteResponse(CopyChunkCopyResponse):
 
 class SetReparsePointResponse(IoctlOutput):
     ioctl_ctl_code = FSCTL_SET_REPARSE_POINT
+
     def _decode(self, *args, **kwds):
         pass
 
@@ -4050,7 +4130,7 @@ class SetReparsePointResponse(IoctlOutput):
 class GetReparsePointResponse(IoctlOutput):
     ioctl_ctl_code = FSCTL_GET_REPARSE_POINT
 
-    field_blacklist = ['reparse_data']
+    field_blacklist = ["reparse_data"]
     _reparse_tag_map = {}
     reparse_tag = core.Register(_reparse_tag_map, "reparse_tag")
 
@@ -4088,7 +4168,7 @@ class SymbolicLinkReparseBuffer(ReparseDataBuffer):
 
     def __init__(self, parent):
         super(SymbolicLinkReparseBuffer, self).__init__(parent)
-        self.unparsed_path_length = 0   # for ErrorResponse only
+        self.unparsed_path_length = 0  # for ErrorResponse only
         self.substitute_name = None
         self.substitute_name_length = None
         self.substitute_name_offset = 0
@@ -4097,10 +4177,10 @@ class SymbolicLinkReparseBuffer(ReparseDataBuffer):
         self.print_name_offset = None
         self.flags = 0
 
-    def  _encode(self, cur):
+    def _encode(self, cur):
         cur.encode_uint32le(self.reparse_tag)
         reparse_data_length_hole = cur.hole.encode_uint16le(0)
-        cur.encode_uint16le(0)      # reserved
+        cur.encode_uint16le(0)  # reserved
         reparse_data_len_start = cur.copy()
         cur.encode_uint16le(self.substitute_name_offset)
         sname_len_hole = cur.hole.encode_uint16le(0)

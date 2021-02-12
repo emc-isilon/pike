@@ -15,9 +15,19 @@
 #
 
 from builtins import object
-from errno import errorcode, EBADF, ECONNRESET, ENOTCONN, ESHUTDOWN, \
-                  ECONNABORTED, EISCONN, EINPROGRESS, EALREADY, EWOULDBLOCK, \
-                  EAGAIN
+from errno import (
+    errorcode,
+    EBADF,
+    ECONNRESET,
+    ENOTCONN,
+    ESHUTDOWN,
+    ECONNABORTED,
+    EISCONN,
+    EINPROGRESS,
+    EALREADY,
+    EWOULDBLOCK,
+    EAGAIN,
+)
 import select
 import socket
 import time
@@ -35,6 +45,7 @@ class Transport(object):
     If the alternate_poller is specified on instantiation, then the connection
     will register for events on that poller as opposed to the global poller.
     """
+
     def __init__(self, alternate_poller=None):
         self.addr = None
         self.connected = False
@@ -43,7 +54,7 @@ class Transport(object):
         if alternate_poller is not None:
             self.poller = alternate_poller
         else:
-            self.poller = poller    # global poller
+            self.poller = poller  # global poller
 
     def create_socket(self, family, type):
         """
@@ -121,10 +132,10 @@ class Transport(object):
 
         returns a string representing the bytes received
         """
-        result = ''
+        result = ""
         try:
             result = self.socket.recv(bufsize)
-            if result == '':
+            if result == "":
                 raise EOFError("Remote host closed connection")
         except socket.error as err:
             # raise non-retryable errors
@@ -201,6 +212,7 @@ class BasePoller(object):
     to maintain proper accounting structures. The exception is when the poller
     handles accounting itself.
     """
+
     def __init__(self):
         """
         initialize the poller and register any kernel global structures
@@ -272,7 +284,13 @@ class BasePoller(object):
             try:
                 t.handle_read()
             except socket.error as e:
-                if e.args[0] not in (EBADF, ECONNRESET, ENOTCONN, ESHUTDOWN, ECONNABORTED):
+                if e.args[0] not in (
+                    EBADF,
+                    ECONNRESET,
+                    ENOTCONN,
+                    ESHUTDOWN,
+                    ECONNABORTED,
+                ):
                     t.handle_error()
                 else:
                     t.handle_close()
@@ -299,7 +317,13 @@ class BasePoller(object):
                         self.deferred_writers.remove(fileno)
                     t.handle_write()
             except socket.error as e:
-                if e.args[0] not in (EBADF, ECONNRESET, ENOTCONN, ESHUTDOWN, ECONNABORTED):
+                if e.args[0] not in (
+                    EBADF,
+                    ECONNRESET,
+                    ENOTCONN,
+                    ESHUTDOWN,
+                    ECONNABORTED,
+                ):
                     t.handle_error()
                 else:
                     t.handle_close()
@@ -313,6 +337,7 @@ class KQueuePoller(BasePoller):
     """
     Implementation of KQueue, available on Mac OS and BSD derivatives
     """
+
     def __init__(self):
         super(KQueuePoller, self).__init__()
         self.kq = select.kqueue()
@@ -320,23 +345,29 @@ class KQueuePoller(BasePoller):
 
     def add_channel(self, transport):
         super(KQueuePoller, self).add_channel(transport)
-        events = [select.kevent(transport._fileno,
-                                filter=select.KQ_FILTER_READ,
-                                flags=select.KQ_EV_ADD | select.KQ_EV_ENABLE),
-                  select.kevent(transport._fileno,
-                                filter=select.KQ_FILTER_WRITE,
-                                flags=(select.KQ_EV_ADD |
-                                       select.KQ_EV_ENABLE |
-                                       select.KQ_EV_ONESHOT))]
+        events = [
+            select.kevent(
+                transport._fileno,
+                filter=select.KQ_FILTER_READ,
+                flags=select.KQ_EV_ADD | select.KQ_EV_ENABLE,
+            ),
+            select.kevent(
+                transport._fileno,
+                filter=select.KQ_FILTER_WRITE,
+                flags=(select.KQ_EV_ADD | select.KQ_EV_ENABLE | select.KQ_EV_ONESHOT),
+            ),
+        ]
         self.kq.control(events, 0)
 
     def defer_write(self, transport):
         super(KQueuePoller, self).defer_write(transport)
-        events = [select.kevent(transport._fileno,
-                                filter=select.KQ_FILTER_WRITE,
-                                flags=(select.KQ_EV_ADD |
-                                       select.KQ_EV_ENABLE |
-                                       select.KQ_EV_ONESHOT))]
+        events = [
+            select.kevent(
+                transport._fileno,
+                filter=select.KQ_FILTER_WRITE,
+                flags=(select.KQ_EV_ADD | select.KQ_EV_ENABLE | select.KQ_EV_ONESHOT),
+            )
+        ]
         self.kq.control(events, 0)
 
     def poll(self):
@@ -358,13 +389,14 @@ class SelectPoller(BasePoller):
 
     Roughly equivalent performance to using asyncore
     """
+
     def poll(self):
-        non_connected = [t._fileno for t in self.connections.values() if not t.connected]
+        non_connected = [
+            t._fileno for t in self.connections.values() if not t.connected
+        ]
         readers = list(self.connections.keys())
         writers = non_connected + list(self.deferred_writers)
-        readables, writables, _ = select.select(readers,
-                                                writers,
-                                                [], 0)
+        readables, writables, _ = select.select(readers, writers, [], 0)
         self.process_readables(readables)
         self.process_writables(writables)
 
@@ -373,23 +405,23 @@ class PollPoller(BasePoller):
     """
     Implementation of poll, available on Linux
     """
+
     def __init__(self):
         super(PollPoller, self).__init__()
         self.p = select.poll()
         self.read_events = (
-                select.POLLIN |
-                select.POLLERR |
-                select.POLLHUP |
-                select.POLLNVAL |
-                select.POLLMSG |
-                select.POLLPRI)
+            select.POLLIN
+            | select.POLLERR
+            | select.POLLHUP
+            | select.POLLNVAL
+            | select.POLLMSG
+            | select.POLLPRI
+        )
         self.write_events = select.POLLOUT
 
     def add_channel(self, transport):
         super(PollPoller, self).add_channel(transport)
-        self.p.register(
-                transport._fileno,
-                self.read_events | self.write_events)
+        self.p.register(transport._fileno, self.read_events | self.write_events)
 
     def del_channel(self, transport):
         super(PollPoller, self).del_channel(transport)
@@ -397,9 +429,7 @@ class PollPoller(BasePoller):
 
     def defer_write(self, transport):
         super(PollPoller, self).defer_write(transport)
-        self.p.modify(
-                transport._fileno,
-                self.read_events | self.write_events)
+        self.p.modify(transport._fileno, self.read_events | self.write_events)
 
     def poll(self):
         events = self.p.poll(0)

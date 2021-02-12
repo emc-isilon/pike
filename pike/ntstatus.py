@@ -10,7 +10,7 @@ from . import core
 
 class Status(core.ValueEnum):
     STATUS_SUCCESS = 0x00000000
-    #STATUS_WAIT_0 = 0x00000000
+    # STATUS_WAIT_0 = 0x00000000
     STATUS_WAIT_1 = 0x00000001
     STATUS_WAIT_2 = 0x00000002
     STATUS_WAIT_3 = 0x00000003

@@ -65,9 +65,9 @@ class Netbios(core.Frame):
         end = cur + self.len
 
         with cur.bounded(cur, end):
-            while (cur < end):
+            while cur < end:
                 signature = cur.copy().decode_bytes(4)
-                if (signature.tobytes() == b'\xfdSMB'):
+                if signature.tobytes() == b"\xfdSMB":
                     crypto.TransformHeader(self).decode(cur)
                 else:
                     smb2.Smb2(self).decode(cur)

@@ -74,14 +74,15 @@ class CapPersistent(CapTest):
     @test.RequireDialect(smb2.DIALECT_SMB3_0)
     @test.RequireShareCapabilities(smb2.SMB2_SHARE_CAP_CONTINUOUS_AVAILABILITY)
     def test_smb3_many_capabilities(self):
-        advertise_caps = \
-                smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL | \
-                smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES | \
-                smb2.SMB2_GLOBAL_CAP_DIRECTORY_LEASING | \
-                smb2.SMB2_GLOBAL_CAP_ENCRYPTION
-        self.positive_cap(smb2.DIALECT_SMB3_0,
-                          advertise_caps,
-                          smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES)
+        advertise_caps = (
+            smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL
+            | smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES
+            | smb2.SMB2_GLOBAL_CAP_DIRECTORY_LEASING
+            | smb2.SMB2_GLOBAL_CAP_ENCRYPTION
+        )
+        self.positive_cap(
+            smb2.DIALECT_SMB3_0, advertise_caps, smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES
+        )
 
     # persistent cap is not advertised if we don't advertise it
     def test_smb3_no_advert(self):
@@ -105,14 +106,15 @@ class CapMultichannel(CapTest):
     # multichannel cap is advertised if we ask for lots of caps
     @test.RequireDialect(smb2.DIALECT_SMB3_0)
     def test_smb3_many_capabilities(self):
-        advertise_caps = \
-                smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL | \
-                smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES | \
-                smb2.SMB2_GLOBAL_CAP_DIRECTORY_LEASING | \
-                smb2.SMB2_GLOBAL_CAP_ENCRYPTION
-        self.positive_cap(smb2.DIALECT_SMB3_0,
-                          advertise_caps,
-                          smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL)
+        advertise_caps = (
+            smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL
+            | smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES
+            | smb2.SMB2_GLOBAL_CAP_DIRECTORY_LEASING
+            | smb2.SMB2_GLOBAL_CAP_ENCRYPTION
+        )
+        self.positive_cap(
+            smb2.DIALECT_SMB3_0, advertise_caps, smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL
+        )
 
     # multichannel cap is not advertised if we don't advertise it
     def test_smb3_no_advert(self):
@@ -136,14 +138,15 @@ class CapMulticredit(CapTest):
     # largemtu cap is advertised if we ask for lots of caps
     @test.RequireDialect(smb2.DIALECT_SMB3_0)
     def test_smb3_many_capabilities(self):
-        advertise_caps = \
-                smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL | \
-                smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES | \
-                smb2.SMB2_GLOBAL_CAP_LARGE_MTU | \
-                smb2.SMB2_GLOBAL_CAP_ENCRYPTION
-        self.positive_cap(smb2.DIALECT_SMB3_0,
-                          advertise_caps,
-                          smb2.SMB2_GLOBAL_CAP_LARGE_MTU)
+        advertise_caps = (
+            smb2.SMB2_GLOBAL_CAP_MULTI_CHANNEL
+            | smb2.SMB2_GLOBAL_CAP_PERSISTENT_HANDLES
+            | smb2.SMB2_GLOBAL_CAP_LARGE_MTU
+            | smb2.SMB2_GLOBAL_CAP_ENCRYPTION
+        )
+        self.positive_cap(
+            smb2.DIALECT_SMB3_0, advertise_caps, smb2.SMB2_GLOBAL_CAP_LARGE_MTU
+        )
 
     # largemtu cap is advertised if we ask for it
     def test_smb21(self):
@@ -170,7 +173,9 @@ class NegotiateContext(test.PikeTest):
                     self.assertGreater(len(ctx.salt), 0)
 
     def test_encryption_capabilities_both_prefer_ccm(self):
-        resp = self.negotiate(ciphers=[crypto.SMB2_AES_128_CCM, crypto.SMB2_AES_128_GCM])
+        resp = self.negotiate(
+            ciphers=[crypto.SMB2_AES_128_CCM, crypto.SMB2_AES_128_GCM]
+        )
         if resp.dialect_revision >= smb2.DIALECT_SMB3_1_1:
             for ctx in resp:
                 if isinstance(ctx, crypto.EncryptionCapabilitiesResponse):
@@ -178,7 +183,9 @@ class NegotiateContext(test.PikeTest):
                     self.assertIn(crypto.SMB2_AES_128_CCM, ctx.ciphers)
 
     def test_encryption_capabilities_both_prefer_gcm(self):
-        resp = self.negotiate(ciphers=[crypto.SMB2_AES_128_GCM, crypto.SMB2_AES_128_CCM])
+        resp = self.negotiate(
+            ciphers=[crypto.SMB2_AES_128_GCM, crypto.SMB2_AES_128_CCM]
+        )
         if resp.dialect_revision >= smb2.DIALECT_SMB3_1_1:
             for ctx in resp:
                 if isinstance(ctx, crypto.EncryptionCapabilitiesResponse):

@@ -33,7 +33,7 @@ def _unix_time_to_nt_time(t):
 
 
 def _datetime_to_unix_time(t):
-    td = (t - _unix_epoch)
+    td = t - _unix_epoch
     return td.seconds + (td.days * 24 * 3600)
 
 
@@ -56,16 +56,14 @@ def _nt_time_to_unix_time(t):
     # calculation below makes use of Python's bigint capabilities.
     py_time = (t << 32) // _intervals_per_second
     py_time -= _unix_time_offset << 32
-    py_time_parts = divmod(py_time, 2**32)
+    py_time_parts = divmod(py_time, 2 ** 32)
     py_time = float(py_time_parts[0])
     py_time += math.copysign(py_time_parts[1], py_time) // (2 ** 32)
     return py_time
 
 
 def GMT_to_datetime(gmt_token):
-    dt_obj = datetime.strptime(
-            gmt_token,
-            "@GMT-%Y.%m.%d-%H.%M.%S")
+    dt_obj = datetime.strptime(gmt_token, "@GMT-%Y.%m.%d-%H.%M.%S")
     # apply timezone conversion
     dt_obj -= timedelta(seconds=time.timezone)
     return dt_obj
@@ -78,6 +76,7 @@ class NtTime(int):
       * datetime
       * int/long indicating number of 100-nanosecond intervals since 1601-01-01
     """
+
     def __new__(cls, value):
         if isinstance(value, basestring):
             if value.startswith("@GMT-"):
