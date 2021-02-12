@@ -317,6 +317,7 @@ class PikePath(PureWindowsPath):
         options = smb2.FILE_DIRECTORY_FILE if target_is_directory else 0
         with self._create_follow(
             access=smb2.GENERIC_WRITE,
+            attributes=smb2.FILE_ATTRIBUTE_REPARSE_POINT,
             disposition=smb2.FILE_SUPERSEDE,
             options=options | smb2.FILE_OPEN_REPARSE_POINT,
         ) as handle:
