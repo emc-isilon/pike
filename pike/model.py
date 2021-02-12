@@ -2193,8 +2193,9 @@ class Tree(object):
     def pathlike(self):
         from . import path
         return path.PikePath(
-            channel=self.session.first_channel(),
-            tree=self,
+            self.session.first_channel(),
+            self,
+            "/",
         )
 
 

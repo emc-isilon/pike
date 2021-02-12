@@ -34,6 +34,10 @@ class PikePath(PureWindowsPath):
         new_path._tree = self._tree
         return new_path
 
+    @property
+    def _path(self):
+        return str(self).lstrip("\\")
+
     @classmethod
     def cwd(cls):
         raise NotImplementedError("No concept of cwd for {!r}".format(cls))
@@ -50,7 +54,7 @@ class PikePath(PureWindowsPath):
     ):
         with self._channel.create(
             self._tree,
-            str(self),
+            self._path,
             access=smb2.FILE_READ_ATTRIBUTES,
             disposition=smb2.FILE_OPEN,
             options=options,
@@ -81,7 +85,7 @@ class PikePath(PureWindowsPath):
         try:
             with self._channel.create(
                 self._tree,
-                str(self),
+                self._path,
                 access=0,
                 disposition=smb2.FILE_OPEN,
                 options=options,
@@ -131,7 +135,7 @@ class PikePath(PureWindowsPath):
     def iterdir(self):
         with self._channel.create(
             self._tree,
-            str(self),
+            self._path,
             access=smb2.GENERIC_READ,
             disposition=smb2.FILE_OPEN,
             options=smb2.FILE_DIRECTORY_FILE,
@@ -149,7 +153,7 @@ class PikePath(PureWindowsPath):
         try:
             with self._channel.create(
                 self._tree,
-                str(self),
+                self._path,
                 access=smb2.GENERIC_WRITE,
                 disposition=smb2.FILE_CREATE,
                 options=smb2.FILE_DIRECTORY_FILE,
