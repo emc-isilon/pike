@@ -166,3 +166,102 @@ class PikePath(PureWindowsPath):
                 raise
             self.parent.mkdir(parents=True, exist_ok=True)
             self.mkdir(mode, parents=False, exist_ok=exist_ok)
+
+    def open(self, mode="r", buffering=-1, encoding=None, errors=None, newline=None):
+        """
+        Open a file-like with immediate IO via pike
+        """
+        buffer_class = io.BufferedReader
+        access = 0
+        disposition = smb2.FILE_OPEN
+        mode = mode.lower()
+        if "r" in mode or "+" in mode:
+            access |= smb2.GENERIC_READ
+        if "a" in mode or "w" in mode or "+" in mode:
+            access |= smb2.GENERIC_WRITE
+            buffer_class = io.BufferedWriter
+        if "+" in mode:
+            buffer_class = io.BufferedRandom
+        if "x" in mode:
+            disposition = smb2.FILE_CREATE
+        elif "a" in mode:
+            disposition = smb2.FILE_OPEN_IF
+        elif "w" in mode or "+" in mode:
+            disposition = smb2.FILE_SUPERSEDE
+        handle = self._channel.create(
+            self._tree,
+            self._path,
+            access=access,
+            disposition=disposition,
+            options=smb2.FILE_NON_DIRECTORY_FILE,
+        ).result()
+        if "a" in mode:
+            handle.seek(0, SEEK_END)
+        if "b" in mode and buffering == 0:
+            return handle
+        if buffering == -1:
+            buffer_size = smb2.BYTES_PER_CREDIT
+        buffered_io = buffer_class(handle, buffer_size=buffer_size)
+        if "b" in mode:
+            return buffered_io
+        return io.TextIOWrapper(
+            buffered_io, encoding=encoding, errors=errors, newline=newline
+        )
+
+    def read_bytes(self):
+        """
+        Return the binary contents of the pointed-to file as a bytes object.
+        """
+        with self.open("rb") as f:
+            return f.read()
+
+    def read_text(self, encoding=None, errors=None):
+        """
+        Return the decoded contents of the pointed-to file as a string.
+        """
+        with self.open("r") as f:
+            return f.read()
+
+    def rmdir(self, missing_ok=False):
+        self.unlink(missing_ok=missing_ok, options=smb2.FILE_DIRECTORY_FILE)
+
+    def unlink(self, missing_ok=False, options=smb2.FILE_NON_DIRECTORY_FILE):
+        try:
+            with self._channel.create(
+                self._tree,
+                self._path,
+                access=smb2.DELETE,
+                disposition=smb2.FILE_OPEN,
+                options=options | smb2.FILE_DELETE_ON_CLOSE,
+            ).result() as handle:
+                pass
+        except model.ResponseError as re:
+            if (
+                re.response.status
+                in (
+                    ntstatus.STATUS_OBJECT_NAME_NOT_FOUND,
+                    ntstatus.STATUS_OBJECT_PATH_NOT_FOUND,
+                )
+                and missing_ok
+            ):
+                return
+            elif re.response.status == ntstatus.STATUS_STOPPED_ON_SYMLINK:
+                return self.unlink(
+                    missing_ok=missing_ok,
+                    options=options | smb2.FILE_OPEN_REPARSE_POINT,
+                )
+            raise
+
+    def write_bytes(self, data):
+        """
+        Open the file pointed to in bytes mode, write data to it, and close the file.
+        """
+        with self.open("wb") as f:
+            return f.write(data)
+
+    def write_text(self, data, encoding=None, errors=None):
+        """
+        Open the file pointed to in text mode, write data to it, and close the file
+        """
+        with self.open("w") as f:
+            return f.write(data)
