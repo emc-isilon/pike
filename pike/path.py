@@ -72,6 +72,8 @@ class PikePath(PureWindowsPath):
         """
         if isinstance(path, type(self)) and (path.is_absolute()):
             return self.joinpath(*path._parts[1:])
+        else:
+            path = type(self)("\\", path)
         return self / path
 
     @classmethod
@@ -92,7 +94,7 @@ class PikePath(PureWindowsPath):
             if re.response.status != ntstatus.STATUS_STOPPED_ON_SYMLINK:
                 raise
             kwargs["__RC_DEPTH"] = depth + 1
-            return self.join_from_root(re.response.error_data.substitute_name)._create_follow(*args, **kwargs)
+            return self.join_from_root(re.response[0][0].error_data.substitute_name)._create_follow(*args, **kwargs)
 
     def stat(
         self,
@@ -100,13 +102,11 @@ class PikePath(PureWindowsPath):
         info_type=smb2.SMB2_0_INFO_FILE,
         options=0,
     ):
-        with self._channel.create(
-            self._tree,
-            self._path,
+        with self._create_follow(
             access=smb2.FILE_READ_ATTRIBUTES,
             disposition=smb2.FILE_OPEN,
             options=options,
-        ).result() as handle:
+        ) as handle:
             return self._channel.query_file_info(
                 handle, file_information_class, info_type, first_result_only=True
             )
@@ -131,13 +131,11 @@ class PikePath(PureWindowsPath):
 
     def exists(self, options=0):
         try:
-            with self._channel.create(
-                self._tree,
-                self._path,
+            with self._create_follow(
                 access=0,
                 disposition=smb2.FILE_OPEN,
                 options=options,
-            ).result() as handle:
+            ) as handle:
                 return True
         except model.ResponseError as re:
             if re.response.status not in (
@@ -181,13 +179,11 @@ class PikePath(PureWindowsPath):
         return False
 
     def glob(self, pattern):
-        with self._channel.create(
-            self._tree,
-            self._path,
+        with self._create_follow(
             access=smb2.GENERIC_READ,
             disposition=smb2.FILE_OPEN,
             options=smb2.FILE_DIRECTORY_FILE,
-        ).result() as handle:
+        ) as handle:
             for item in handle.enum_directory(file_information_class=smb2.FILE_NAMES_INFORMATION, file_name=pattern):
                 if item.file_name in (".", ".."):
                     continue
@@ -204,13 +200,11 @@ class PikePath(PureWindowsPath):
         if mode is not None:
             warnings.warn("`mode` argument is not handled at this time", stacklevel=2)
         try:
-            with self._channel.create(
-                self._tree,
-                self._path,
+            with self._create_follow(
                 access=smb2.GENERIC_WRITE,
                 disposition=smb2.FILE_CREATE,
                 options=smb2.FILE_DIRECTORY_FILE,
-            ).result() as handle:
+            ) as handle:
                 return
         except model.ResponseError as re:
             if re.response.status == ntstatus.STATUS_OBJECT_NAME_COLLISION and exist_ok:
@@ -241,13 +235,11 @@ class PikePath(PureWindowsPath):
             disposition = smb2.FILE_OPEN_IF
         elif "w" in mode or "+" in mode:
             disposition = smb2.FILE_SUPERSEDE
-        handle = self._channel.create(
-            self._tree,
-            self._path,
+        handle = self._create_follow(
             access=access,
             disposition=disposition,
             options=smb2.FILE_NON_DIRECTORY_FILE,
-        ).result()
+        )
         if "a" in mode:
             handle.seek(0, SEEK_END)
         if "b" in mode and buffering == 0:
@@ -276,13 +268,11 @@ class PikePath(PureWindowsPath):
             return f.read()
 
     def readlink(self):
-        with self._channel.create(
-            self._tree,
-            self._path,
+        with self._create_follow(
             access=smb2.READ_ATTRIBUTES,
             disposition=smb2.FILE_OPEN,
             options=smb2.FILE_NON_DIRECTORY_FILE | smb2.FILE_OPEN_REPARSE_POINT,
-        ).result() as handle:
+        ) as handle:
             # XXX: not making additional tree connects here, so absolute links
             # will only work across the same share
             return self.join_from_root(handle.get_symlink()[0].substitute_name)
@@ -290,12 +280,10 @@ class PikePath(PureWindowsPath):
     def rename(self, target, replace=True):
         if not isinstance(target, type(self)):
             target = self.join_from_root(target)
-        with self._channel.create(
-            self._tree,
-            self._path,
+        with self._create_follow(
             access=smb2.DELETE,
             disposition=smb2.FILE_OPEN,
-        ).result() as handle:
+        ) as handle:
             with self.set_file_info(smb2.FileRenameInformation) as file_info:
                 file_info.replace_if_exists = replace
                 file_info.file_name = target._path
@@ -306,7 +294,7 @@ class PikePath(PureWindowsPath):
 
     def resolve(self, strict=True):
         with self._create_follow(access=0, disposition=smb2.FILE_OPEN) as handle:
-            return self.join_from_root(handle.create_request.file_name)
+            return self.join_from_root(handle.create_request.name)
 
     def rglob(self, pattern):
         raise NotImplementedError("rglob is not supported by {!r}".format(type(self)))
@@ -327,36 +315,30 @@ class PikePath(PureWindowsPath):
         if not isinstance(target, type(self)):
             target = self.join_from_root(target)
         options = smb2.FILE_DIRECTORY_FILE if target_is_directory else 0
-        with self._channel.create(
-            self._tree,
-            self._path,
+        with self._create_follow(
             access=smb2.GENERIC_WRITE,
             disposition=smb2.FILE_SUPERSEDE,
             options=options | smb2.FILE_OPEN_REPARSE_POINT,
-        ).result() as handle:
-            handle.set_symlink(target._path)
+        ) as handle:
+            handle.set_symlink(target._path, flags=smb2.SYMLINK_FLAG_RELATIVE)
 
     def touch(self, mode, exist_ok=True):
         disposition = smb2.FILE_OPEN_IF if exist_ok else smb2.FILE_CREATE
-        with self._channel.create(
-            self._tree,
-            self._path,
+        with self._create_follow(
             access=smb2.GENERIC_WRITE,
             disposition=disposition,
             options=smb2.FILE_NON_DIRECTORY_FILE,
-        ).result() as handle:
+        ) as handle:
             with self.set_file_info(smb2.FileBasicInformation) as file_info:
                 file_info.change_time = nttime.NtTime(datetime.datetime.now())
 
     def unlink(self, missing_ok=False, options=smb2.FILE_NON_DIRECTORY_FILE):
         try:
-            with self._channel.create(
-                self._tree,
-                self._path,
+            with self._create_follow(
                 access=smb2.DELETE,
                 disposition=smb2.FILE_OPEN,
                 options=options | smb2.FILE_DELETE_ON_CLOSE,
-            ).result() as handle:
+            ) as handle:
                 pass
         except model.ResponseError as re:
             if (
