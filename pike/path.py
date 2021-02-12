@@ -2,12 +2,18 @@
 pike.path - Path-like interface for working with a Tree object
 """
 
+import datetime
+import io
 import os
 from pathlib import PureWindowsPath, _WindowsFlavour
 
 from . import model
 from . import ntstatus
+from . import nttime
 from . import smb2
+
+
+MAX_SYMLINK_RECURSE = 10
 
 
 class _PikeFlavour(_WindowsFlavour):
@@ -64,7 +70,7 @@ class PikePath(PureWindowsPath):
 
         Used to rehome an existing absolute path for use by this PikePath's Tree.
         """
-        if path._drv or path._root:
+        if isinstance(path, type(self)) and (path.is_absolute()):
             return self.joinpath(*path._parts[1:])
         return self / path
 
@@ -75,6 +81,18 @@ class PikePath(PureWindowsPath):
     @classmethod
     def home(cls):
         raise NotImplementedError("No concept of home for {!r}".format(cls))
+
+    def _create_follow(self, *args, **kwargs):
+        depth = kwargs.pop("__RC_DEPTH", 0)
+        if depth > MAX_SYMLINK_RECURSE:
+            raise OSError("Maximum level of symbolic links exceeded")
+        try:
+            return self._channel.create(self._tree, self._path, *args, **kwargs).result()
+        except model.ResponseError as re:
+            if re.response.status != ntstatus.STATUS_STOPPED_ON_SYMLINK:
+                raise
+            kwargs["__RC_DEPTH"] = depth + 1
+            return self.join_from_root(re.response.error_data.substitute_name)._create_follow(*args, **kwargs)
 
     def stat(
         self,
@@ -162,7 +180,7 @@ class PikePath(PureWindowsPath):
     def is_char_device(self):
         return False
 
-    def iterdir(self):
+    def glob(self, pattern):
         with self._channel.create(
             self._tree,
             self._path,
@@ -170,10 +188,17 @@ class PikePath(PureWindowsPath):
             disposition=smb2.FILE_OPEN,
             options=smb2.FILE_DIRECTORY_FILE,
         ).result() as handle:
-            for item in handle.enum_directory(file_information_class=smb2.FILE_NAMES_INFORMATION):
+            for item in handle.enum_directory(file_information_class=smb2.FILE_NAMES_INFORMATION, file_name=pattern):
                 if item.file_name in (".", ".."):
                     continue
                 yield self / item.file_name
+
+    def iterdir(self):
+        for item in self.glob("*"):
+            yield item
+
+    def link_to(self, target):
+        raise NotImplementedError("hardlinks are not supported over SMB")
 
     def mkdir(self, mode=None, parents=False, exist_ok=False):
         if mode is not None:
@@ -250,8 +275,78 @@ class PikePath(PureWindowsPath):
         with self.open("r") as f:
             return f.read()
 
+    def readlink(self):
+        with self._channel.create(
+            self._tree,
+            self._path,
+            access=smb2.READ_ATTRIBUTES,
+            disposition=smb2.FILE_OPEN,
+            options=smb2.FILE_NON_DIRECTORY_FILE | smb2.FILE_OPEN_REPARSE_POINT,
+        ).result() as handle:
+            # XXX: not making additional tree connects here, so absolute links
+            # will only work across the same share
+            return self.join_from_root(handle.get_symlink()[0].substitute_name)
+
+    def rename(self, target, replace=True):
+        if not isinstance(target, type(self)):
+            target = self.join_from_root(target)
+        with self._channel.create(
+            self._tree,
+            self._path,
+            access=smb2.DELETE,
+            disposition=smb2.FILE_OPEN,
+        ).result() as handle:
+            with self.set_file_info(smb2.FileRenameInformation) as file_info:
+                file_info.replace_if_exists = replace
+                file_info.file_name = target._path
+            return target
+
+    def rename(self, target):
+        return self.rename(target, replace=True)
+
+    def resolve(self, strict=True):
+        with self._create_follow(access=0, disposition=smb2.FILE_OPEN) as handle:
+            return self.join_from_root(handle.create_request.file_name)
+
+    def rglob(self, pattern):
+        raise NotImplementedError("rglob is not supported by {!r}".format(type(self)))
+
     def rmdir(self, missing_ok=False):
         self.unlink(missing_ok=missing_ok, options=smb2.FILE_DIRECTORY_FILE)
+
+    def samefile(self, otherpath):
+        my_id = self.stat(file_information_class=smb2.FILE_INTERNAL_INFORMATION)
+        if my_id == 0:
+            raise NotImplementedError("remote filesystem does not return unique file index")
+        if not isinstance(otherpath, type(self)):
+            otherpath = self.join_from_root(otherpath)
+        other_id = otherpath.stat(file_information_class=smb2.FILE_INTERNAL_INFORMATION)
+        return my_id == other_id
+
+    def symlink_to(self, target, target_is_directory=False):
+        if not isinstance(target, type(self)):
+            target = self.join_from_root(target)
+        options = smb2.FILE_DIRECTORY_FILE if target_is_directory else 0
+        with self._channel.create(
+            self._tree,
+            self._path,
+            access=smb2.GENERIC_WRITE,
+            disposition=smb2.FILE_SUPERSEDE,
+            options=options | smb2.FILE_OPEN_REPARSE_POINT,
+        ).result() as handle:
+            handle.set_symlink(target._path)
+
+    def touch(self, mode, exist_ok=True):
+        disposition = smb2.FILE_OPEN_IF if exist_ok else smb2.FILE_CREATE
+        with self._channel.create(
+            self._tree,
+            self._path,
+            access=smb2.GENERIC_WRITE,
+            disposition=disposition,
+            options=smb2.FILE_NON_DIRECTORY_FILE,
+        ).result() as handle:
+            with self.set_file_info(smb2.FileBasicInformation) as file_info:
+                file_info.change_time = nttime.NtTime(datetime.datetime.now())
 
     def unlink(self, missing_ok=False, options=smb2.FILE_NON_DIRECTORY_FILE):
         try:
