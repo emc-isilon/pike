@@ -170,9 +170,7 @@ class PikePath(PureWindowsPath):
             disposition=smb2.FILE_OPEN,
             options=smb2.FILE_DIRECTORY_FILE,
         ).result() as handle:
-            for item in self._channel.enum_directory(
-                handle, file_information_class=smb2.FILE_NAMES_INFORMATION
-            ):
+            for item in handle.enum_directory(file_information_class=smb2.FILE_NAMES_INFORMATION):
                 if item.file_name in (".", ".."):
                     continue
                 yield self / item.file_name
