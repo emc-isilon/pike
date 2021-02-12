@@ -1,6 +1,7 @@
 """
 pike.io: file-like wrapper for an open file
 """
+import functools
 import io
 
 import attr
@@ -174,6 +175,79 @@ class _Open(object):
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
+    # Helper operations call through to self.channel
+    @property
+    def query_directory_request(self):
+        return functools.partial(self.channel.query_directory_request, self)
+
+    @property
+    def query_directory(self):
+        return functools.partial(self.channel.query_directory, self)
+
+    @property
+    def enum_directory(self):
+        return functools.partial(self.channel.enum_directory, self)
+
+    @property
+    def query_file_info_request(self):
+        return functools.partial(self.channel.query_file_info_request, self)
+
+    @property
+    def query_file_info(self):
+        return functools.partial(self.channel.query_file_info, self)
+
+    @property
+    def set_file_info_request(self):
+        return functools.partial(self.channel.set_file_info_request, self)
+
+    @property
+    def set_file_info(self):
+        return functools.partial(self.channel.set_file_info, self)
+
+    @property
+    def change_notify_request(self):
+        return functools.partial(self.channel.change_notify_request, self)
+
+    @property
+    def change_notify(self):
+        return functools.partial(self.channel.change_notify, self)
+
+    @property
+    def flush_request(self):
+        return functools.partial(self.channel.flush_request, self)
+
+    @property
+    def flush(self):
+        return functools.partial(self.channel.flush, self)
+
+    @property
+    def lock_request(self):
+        return functools.partial(self.channel.lock_request, self)
+
+    @property
+    def lock(self):
+        return functools.partial(self.channel.lock, self)
+
+    @property
+    def set_symlink_request(self):
+        return functools.partial(self.channel.set_symlink_request, self)
+
+    @property
+    def set_symlink(self):
+        return functools.partial(self.channel.set_symlink, self)
+
+    @property
+    def get_symlink_request(self):
+        return functools.partial(self.channel.get_symlink_request, self)
+
+    @property
+    def get_symlink(self):
+        return functools.partial(self.channel.get_symlink, self)
+
+    @property
+    def request(self):
+        return functools.partial(self.channel.request, obj=self)
+
 
 class CompatOpen(_Open):
     def __init__(self, tree, smb_res, create_guid=None, prev=None):
@@ -269,3 +343,10 @@ class Open(_Open, io.RawIOBase):
         bytes_written = self._write_at(b, self._offset)
         self._offset += bytes_written
         return bytes_written
+
+    @property
+    def flush(self):
+        if not self.writable():
+            # don't flush non-writable streams
+            return lambda *a, **kw: None
+        return super(Open, self).flush
