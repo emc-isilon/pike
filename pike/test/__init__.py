@@ -369,6 +369,23 @@ class TreeConnect(object):
         """
         return tuple(self)[item]
 
+    # proxy Path-like interface onto the tree
+    @property
+    def __fspath__(self):
+        """
+        proxy to Tree.__fspath__, establishing the session and tree if needed.
+        """
+        tree = self.tree or self().tree
+        return tree.__fspath__
+
+    @property
+    def __truediv__(self):
+        """
+        proxy to Tree.__truediv__, establishing the session and tree if needed.
+        """
+        tree = self.tree or self().tree
+        return tree.__truediv__
+
 
 class PikeTest(unittest.TestCase):
     init_done = False
