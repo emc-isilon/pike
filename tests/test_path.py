@@ -99,6 +99,7 @@ def test_join_from_root(test_path, pike_TreeConnect):
                 from_root = PikePath(tc2.tree).join_from_root(pth)
                 print(from_root.read_text())
 
+@pytest.mark.skip("Doesn't work against samba")
 def test_symlink(test_path):
     buf = "this is my content\n"
     subdir = test_path / "subdir"
