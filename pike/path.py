@@ -289,7 +289,7 @@ class PikePath(PureWindowsPath):
                 file_info.file_name = target._path
             return target
 
-    def rename(self, target):
+    def replace(self, target):
         return self.rename(target, replace=True)
 
     def resolve(self, strict=True):
