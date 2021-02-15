@@ -36,7 +36,7 @@ class _Open(object):
                 self.arm_oplock_future()
 
     @is_durable.default
-    def is_durable(self):
+    def _init_is_durable(self):
         if self._previous_open is not None:
             return self._previous_open.is_durable
         return (
@@ -45,7 +45,7 @@ class _Open(object):
         )
 
     @is_resilient.default
-    def is_resilient(self):
+    def _init_is_resilient(self):
         if self._previous_open is not None:
             return self._previous_open.is_resilient
         return False
