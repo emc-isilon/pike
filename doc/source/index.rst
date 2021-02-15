@@ -102,6 +102,11 @@ Pytest Integration
 A `pytest <https://docs.pytest.org/en/stable/>`_ fixture, ``pike_TreeConnect`` provides
 access to the ``TreeConnect`` object with dialect and capability marks applied.
 
+Additionally, the ``pike_tmp_path`` fixture provides a Pathlike object pointing
+to the default SMB server / share, similar to pytest's built in
+`tmp_path <https://docs.pytest.org/en/stable/tmpdir.html#the-tmp-path-fixture>`_
+fixture
+
 SMB2 Mapped Operations
 ======================
 
