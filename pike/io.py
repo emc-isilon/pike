@@ -1,5 +1,5 @@
 """
-pike.io: file-like wrapper for an open file
+file-like wrapper for an open file
 """
 import functools
 import io
@@ -251,7 +251,7 @@ class _Open(object):
 
 class CompatOpen(_Open):
     def __init__(self, tree, smb_res, create_guid=None, prev=None):
-        super(CompatOpen, self).__init__(tree, smb_res[0], create_guid, prev)
+        super(CompatOpen, self).__init__(tree=tree, create_response=smb_res[0], create_guid=create_guid, previous_open=prev)
 
 
 @attr.s
@@ -277,7 +277,9 @@ class Open(_Open, io.RawIOBase):
         raise NotImplementedError("truncate() not supported")
 
     def _has_access(self, access):
-        return self.create_request.desired_access & access
+        if self.create_request is not None:
+            return self.create_request.desired_access & access
+        return None
 
     def readable(self):
         return any(
