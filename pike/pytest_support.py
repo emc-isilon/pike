@@ -5,6 +5,8 @@
 #
 
 """Pike/pytest integration."""
+import uuid
+import time
 
 import pytest
 
@@ -75,3 +77,11 @@ def pike_TreeConnect(request):
         return pike.test.TreeConnect(*args, **kwargs)
 
     return TreeConnect
+
+
+@pytest.fixture
+def pike_tmp_path(pike_TreeConnect):
+    with pike_TreeConnect() as tc:
+        test_root = tc / "pike_{}_{}".format(time.strftime("%Y-%m-%d_%H%M%S"), str(uuid.uuid4())[:5])
+        test_root.mkdir()
+        yield test_root
