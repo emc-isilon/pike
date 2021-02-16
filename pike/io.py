@@ -346,9 +346,8 @@ class Open(_Open, io.RawIOBase):
         self._offset += bytes_written
         return bytes_written
 
-    @property
     def flush(self):
         if not self.writable():
             # don't flush non-writable streams
-            return lambda *a, **kw: None
-        return super(Open, self).flush
+            return
+        return super(Open, self).flush()
