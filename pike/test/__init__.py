@@ -112,7 +112,7 @@ class Options(enum.Enum):
 
     @classmethod
     def port(cls):
-        return int(cls.option(cls.PIKE_PORT, default="445"))
+        return int(cls.option(cls.PIKE_PORT, default=model.default_port))
 
     @classmethod
     def creds(cls):
