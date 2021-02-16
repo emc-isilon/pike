@@ -106,12 +106,14 @@ class PikePath(PureWindowsPath):
         return self._drv.session.first_channel()
 
     @property
-    def _tree(self):
+    def drive(self):
         """
         :rtype: pike.model.Tree
         :return: Tree forming the root of the share / path
         """
-        return self._drv
+        return super(PikePath, self).drive
+
+    _tree = drive
 
     @property
     def _path(self):
