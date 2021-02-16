@@ -156,7 +156,36 @@ def default_client(signing=None):
 @attr.s
 class TreeConnect(object):
     """
-    Combines a Client, Connection, Channel, and Tree for simple access to an SMB share.
+    Combines a :py:class:`~pike.model.Client`,
+    :py:class:`~pike.model.Connection`, :py:class:`~pike.model.Channel`, and
+    :py:class:`~pike.model.Tree` for simple access to an SMB share.
+
+    May be used as a contextmanager: entering the context will establish the
+    connection, session, and tree, and exiting the context will cleanly
+    disconnect (if possible). Errors on disconnect are ignored.
+
+    Any values not specified in the constructor will be drawn from the
+    associated environment variables. At minimum the following should be
+    specified explicitly or in the environment:
+
+      * ``server`` (``PIKE_SERVER``) - server or hostname to connect to
+      * ``creds`` (``PIKE_CREDS``) - percent-delimited credential string
+      * ``share`` (``PIKE_SHARE``) - share name to connect to
+
+    All other arguments are optional.
+
+    The ``TreeConnect`` object can be used with the division operator, ``/``,
+    which returns a :py:class:`~pike.path.PikePath` instance representing the
+    path extended from the share root. The tree connection will be established
+    before returning the :py:class:`~pike.path.PikePath` if is is not already
+    connected.
+
+    :vartype conn: pike.model.Connection
+    :ivar conn: the Connection object, or None if not connected
+    :vartype chan: pike.model.Channel
+    :ivar chan: the Channel object, or None if no session is established
+    :vartype tree: pike.model.Tree
+    :ivar tree: the Tree object, or None if no tree is connected
     """
 
     _client = attr.ib(default=None)
