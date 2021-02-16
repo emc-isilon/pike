@@ -73,10 +73,10 @@ Subsequent examples will not pass these variables explicitly
 Using the ``Pathlike`` interface
 ================================
 
-the ``TreeConnect`` object can be used with the division operator
-to construct a ``Pathlike`` object, ``PikePath``. The returned
-instance is bound to the particular tree connect and session
-and can perform most common `Path <https://docs.python.org/3/library/pathlib.html#methods>`_
+the :py:class:`~pike.TreeConnect` object can be used with the division operator
+to construct a ``Pathlike`` object, :py:class:`~pike.path.PikePath`. The
+returned instance is bound to the particular tree connect and session and can
+perform most common `Path <https://docs.python.org/3/library/pathlib.html#methods>`_
 operations.
 
 .. code-block:: python
@@ -99,23 +99,26 @@ operations.
 Pytest Integration
 ==================
 
-A `pytest <https://docs.pytest.org/en/stable/>`_ fixture, ``pike_TreeConnect`` provides
-access to the ``TreeConnect`` object with dialect and capability marks applied.
+A `pytest <https://docs.pytest.org/en/stable/>`_ fixture,
+:py:func:`~pike.pytest_support.pike_TreeConnect` provides access to the
+:py:class:`~pike.TreeConnect` object with dialect and capability requirement
+marks applied.
 
-Additionally, the ``pike_tmp_path`` fixture provides a Pathlike object pointing
-to the default SMB server / share, similar to pytest's built in
-`tmp_path <https://docs.pytest.org/en/stable/tmpdir.html#the-tmp-path-fixture>`_
-fixture
+Additionally, the :py:func:`~pike.pytest_support.pike_tmp_path` fixture
+provides a ``Pathlike`` object pointing to the default SMB server / share,
+similar to pytest's built in `tmp_path
+<https://docs.pytest.org/en/stable/tmpdir.html#the-tmp-path-fixture>`_ fixture
 
 SMB2 Mapped Operations
 ======================
 
-``pike.model`` provides access to the SMB2 protocol operations.
+:py:mod:`pike.model` provides access to the SMB2 protocol operations.
 
-Of particular interest is ``pike.model.Channel.create`` which is used to open a
-file, returning a ``Future`` for a ``pike.io.Open`` which provides the file-like
-API as well as convenience wrappers into all other ``pike.model.Channel`` calls
-that take an ``Open`` as a parameter.
+Of particular interest is :py:func:`pike.model.Channel.create` which is used to
+open a file, returning a :py:class:`~pike.model.Future` for a
+:py:class:`pike.io.Open` which provides the file-like API as well as convenience
+wrappers into all other :py:class:`pike.model.Channel` calls that take an
+:py:class:`~pike.io.Open` as a parameter.
 
 *********
 Contents:
