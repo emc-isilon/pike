@@ -2029,9 +2029,8 @@ class Channel(object):
         def update_handle(resp_future):
             if resp_future.result().status == ntstatus.STATUS_SUCCESS:
                 # 3.3.5.15.9 Handling a Resiliency Request
-                file.is_durable = False
-                file.is_resilient = True
-
+                file._is_durable = False
+                file._is_resilient = True
         nrr_future = self.connection.submit(
             self.network_resiliency_request_request(file, timeout).parent.parent
         )[0]
