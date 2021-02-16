@@ -13,6 +13,18 @@ from . import smb2
 
 @attr.s
 class _Open(object):
+    """private
+
+    Base class for ``Open``.
+
+    Handle the SMB2-specific protocol interaction for leases, oplocks, and
+    durable handles.
+
+    Wrap :py:class:`~pike.model.Channel` operations which accept an ``Open`` as an
+    argument.
+
+    This class shouldn't be instantiated directly. See :py:class:`~pike.io.Open`
+    """
     tree = attr.ib()
     create_request = attr.ib()
     create_response = attr.ib()
@@ -54,28 +66,49 @@ class _Open(object):
 
     @property
     def channel(self):
+        """
+        :rtype: pike.model.Channel
+        :return: The first Channel associated with this handle.
+
+        (The session may have multiple bound channels).
+        """
         if not self.closed:
             return self.tree.session.first_channel()
         raise ValueError("I/O operation on closed file")
 
     @property
     def file_id(self):
+        """
+        :rtype: 2-tuple of (int, int)
+        :return: the server-opaque file handle returned in the CREATE response
+        """
         return self.create_response.file_id
 
     @property
     def durable_handle_ctx(self):
+        """
+        :rtype: smb2.DurableHandleResponse or None
+        """
+
         for ctx in self.create_response:
             if isinstance(ctx, smb2.DurableHandleResponse):
                 return ctx
 
     @property
     def durable_handle_v2_ctx(self):
+        """
+        :rtype: smb2.DurableHandleV2Response or None
+        """
         for ctx in self.create_response:
             if isinstance(ctx, smb2.DurableHandleV2Response):
                 return ctx
 
     @property
     def durable_timeout(self):
+        """
+        :rtype: int or None
+        :return: the durable handle timeout in seconds (or None if not durable)
+        """
         ctx = self.durable_handle_v2_ctx
         if ctx:
             return ctx.durable_timeout
@@ -84,6 +117,10 @@ class _Open(object):
 
     @property
     def durable_flags(self):
+        """
+        :rtype: int or None
+        :return: the durable handle flags (or None if not durable)
+        """
         ctx = self.durable_handle_v2_ctx
         if ctx:
             return ctx.durable_flags
@@ -93,14 +130,25 @@ class _Open(object):
 
     @property
     def is_persistent(self):
+        """
+        :return: True if the handle is persistent
+        """
         return self.durable_flags & smb2.SMB2_DHANDLE_FLAG_PERSISTENT != 0
 
     @property
     def closed(self):
+        """
+        :return: True if the handle is closed
+        """
         return self.tree is None
 
     @property
     def end_of_file(self):
+        """
+        :return: Byte offset of the end of file as reported by the CREATE response
+
+        Note: this value is not updated as the file is modified!
+        """
         return self.create_response.end_of_file
 
     def arm_oplock_future(self):
@@ -155,12 +203,22 @@ class _Open(object):
         self.oplock_future.then(handle_break)
 
     def dispose(self):
+        """
+        Clear resources held by this object.
+
+        Called implicitly when the object is closed.
+        """
         self.tree = None
         if self.lease is not None:
             self.lease.dispose()
             self.lease = None
 
     def close(self):
+        """
+        Close the handle on the server.
+
+        If the channel or connection is unavailable, this is a no-op.
+        """
         if self.closed:
             return
         try:
@@ -252,15 +310,52 @@ class _Open(object):
 
 
 class CompatOpen(_Open):
+    """
+    pike.model.Open compatible __init__ signature.
+
+    Please refactor code to use the new _Open constructor
+    """
     def __init__(self, tree, smb_res, create_guid=None, prev=None):
         super(CompatOpen, self).__init__(tree=tree, create_response=smb_res[0], create_guid=create_guid, previous_open=prev)
 
 
 @attr.s
 class Open(_Open, io.RawIOBase):
+    """
+    Represents an open file handle on a remote SMB2 server.
+
+    Can be used as a contextmanager, which will automatically close and dispose
+    the file when the context block exits.
+
+    This class should not be instantiated directly. Use one of the following
+    methods to get an instance:
+
+        * :py:func:`pike.model.Channel.create`
+        * :py:func:`pike.path.PikePath.open`
+
+    This class provides a file-like interface with support for ``read``,
+    ``write``, ``seek``, ``flush``, and derivatives provided by ``RawIOBase``.
+    """
     _offset = attr.ib(default=0, init=False)
 
     def seek(self, offset, whence=io.SEEK_SET):
+        """
+        Change the stream position to the given byte offset.
+
+        offset is interpreted relative to the position indicated by whence.
+
+        The default value for whence is SEEK_SET. Values for whence are:
+
+            * ``io.SEEK_SET`` or ``0`` – start of the stream (the default);
+                offset should be zero or positive
+            * ``io.SEEK_CUR`` or ``1`` – current stream position; offset may be negative
+            * ``io.SEEK_END`` or ``2`` – end of the stream; offset is usually negative
+
+        :type offset: int
+        :type whence: int (see above)
+        :rtype: int
+        :return: the new absolute position
+        """
         if whence == io.SEEK_SET:
             self._offset = offset
         elif whence == io.SEEK_CUR:
@@ -270,12 +365,24 @@ class Open(_Open, io.RawIOBase):
         return self._offset
 
     def seekable(self):
+        """
+        :return: True if the stream supports random access.
+
+        All ``Open`` instances support random access.
+        """
         return True
 
     def tell(self):
+        """
+        :rtype: int
+        :return: the absolute byte position within the file
+        """
         return self._offset
 
     def truncate(self, size=None):
+        """
+        Resize the stream to the given size. NOT SUPPORTED.
+        """
         raise NotImplementedError("truncate() not supported")
 
     def _has_access(self, access):
@@ -284,12 +391,28 @@ class Open(_Open, io.RawIOBase):
         return None
 
     def readable(self):
+        """
+        :return: True if the stream can be read from
+        """
         return any(
             self._has_access(a)
             for a in (smb2.FILE_READ_DATA, smb2.GENERIC_READ, smb2.GENERIC_ALL)
         )
 
     def _read_range(self, start=0, end=None):
+        """
+        Read a range of bytes from the file.
+
+        Multiple requests will be made if necessary.
+
+        :type start: int
+        :param start: the beginning offset to read from
+        :type end: int or None
+        :param end: the end offset to read from. If None, read until
+            STATUS_END_OF_FILE is returned.
+        :rtype: bytes
+        :return: bytes read from the file
+        """
         offset = start
         response_buffers = []
         while end is None or offset < end:
@@ -308,9 +431,17 @@ class Open(_Open, io.RawIOBase):
         return b"".join(rb.tobytes() for rb in response_buffers)
 
     def readall(self):
+        """
+        Read all bytes from the current offset to EOF.
+        """
         return self._read_range(self._offset)
 
     def readinto(self, b):
+        """
+        Read bytes into the preallocated buffer, b.
+
+        Note: this function performs extra copying and is inefficient.
+        """
         read_resp = self._read_range(self._offset, len(b))
         bytes_read = len(read_resp)
         self._offset += bytes_read
@@ -318,6 +449,16 @@ class Open(_Open, io.RawIOBase):
         return bytes_read
 
     def _write_at(self, data, offset):
+        """
+        Write bytes to the file at the given offset.
+
+        Multiple requests will be made if necessary.
+
+        :type offset: int
+        :param offset: the beginning offset to read from
+        :rtype: int
+        :return: count of bytes written
+        """
         n_data = len(data)
         bytes_written = 0
         while bytes_written < n_data:
@@ -331,6 +472,9 @@ class Open(_Open, io.RawIOBase):
         return bytes_written
 
     def writable(self):
+        """
+        :return: True if the stream can be written to
+        """
         return any(
             self._has_access(a)
             for a in (
@@ -342,11 +486,25 @@ class Open(_Open, io.RawIOBase):
         )
 
     def write(self, b):
+        """
+        Write bytes from the buffer, b.
+
+        Note: this function may perform extra copying and could be inefficient.
+        """
         bytes_written = self._write_at(b, self._offset)
         self._offset += bytes_written
         return bytes_written
 
     def flush(self):
+        """
+        Issue an SMB2 FLUSH request to the server.
+
+        This instructs the server to flush any intermediate buffers to disk.
+
+        The server may return a response before the data has been flushed.
+
+        For non-writable streams, this call is a no-op.
+        """
         if not self.writable():
             # don't flush non-writable streams
             return
