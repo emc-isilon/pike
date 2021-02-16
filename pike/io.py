@@ -175,6 +175,7 @@ class _Open(object):
     def on_oplock_break(self, cb):
         """
         Simple oplock break callback handler.
+
         @param cb: callable taking 1 parameter: the break request oplock level
                    should return the desired oplock level to break to
         """
@@ -338,7 +339,7 @@ class Open(_Open, io.RawIOBase):
     """
     Represents an open file handle on a remote SMB2 server.
 
-    Can be used as a contextmanager, which will automatically close and dispose
+    Can be used as a contextmanager, which will automatically close
     the file when the context block exits.
 
     This class should not be instantiated directly. Use one of the following
@@ -349,6 +350,19 @@ class Open(_Open, io.RawIOBase):
 
     This class provides a file-like interface with support for ``read``,
     ``write``, ``seek``, ``flush``, and derivatives provided by ``RawIOBase``.
+
+    :vartype tree: pike.model.Tree
+    :ivar tree: the :py:class:`~pike.model.Tree` associated with this handle
+    :vartype create_request: pike.smb2.CreateRequest
+    :ivar create_request: the raw request sent to open this handle
+    :vartype create_response: pike.smb2.CreateResponse
+    :ivar create_response: the raw response returned by the server
+    :vartype create_guid: str
+    :ivar create_guid: the create_guid associated with the durable handle
+    :vartype oplock_level: pike.smb2.OplockLevel
+    :ivar oplock_level: the current Oplock level of the handle
+    :vartype lease: pike.model.Lease
+    :ivar lease: the current Lease state of the handle
     """
     _offset = attr.ib(default=0, init=False)
 
@@ -361,7 +375,7 @@ class Open(_Open, io.RawIOBase):
         The default value for whence is SEEK_SET. Values for whence are:
 
             * ``io.SEEK_SET`` or ``0`` – start of the stream (the default);
-                offset should be zero or positive
+              offset should be zero or positive
             * ``io.SEEK_CUR`` or ``1`` – current stream position; offset may be negative
             * ``io.SEEK_END`` or ``2`` – end of the stream; offset is usually negative
 
