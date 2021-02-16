@@ -19,7 +19,7 @@ Why pike
 ********
 
 ``pike`` provides access to windows, macOS, or samba (linux) shares
-in a platform-indepent way.
+in a platform-independent way.
 
 ``pike`` can be used to reproduce strange protocol interactions and
 develop regression tests. It provides deep access to view and manipulate
