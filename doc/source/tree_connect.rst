@@ -3,4 +3,5 @@
 ###############
 
 .. autoclass:: pike.TreeConnect
-    :members:
+   :members:
+   :member-order: bysource
