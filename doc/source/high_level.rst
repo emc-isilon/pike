@@ -8,4 +8,5 @@ High-Level API
    TreeConnect <tree_connect>
    PikePath <path>
    Open <open>
+   Pytest Integration <pytest>
 
