@@ -32,8 +32,8 @@ class _Open(object):
     _previous_open = attr.ib()
     oplock_level = attr.ib(init=False)
     lease = attr.ib(init=False)
-    is_resilient = attr.ib(init=False)
-    is_durable = attr.ib(init=False)
+    _is_resilient = attr.ib(init=False)
+    _is_durable = attr.ib(init=False)
 
     @oplock_level.default
     def _init_oplock_level(self):
@@ -49,7 +49,7 @@ class _Open(object):
             else:
                 self.arm_oplock_future()
 
-    @is_durable.default
+    @_is_durable.default
     def _init_is_durable(self):
         if self._previous_open is not None:
             return self._previous_open.is_durable
@@ -58,7 +58,7 @@ class _Open(object):
             or self.durable_handle_v2_ctx is not None
         )
 
-    @is_resilient.default
+    @_is_resilient.default
     def _init_is_resilient(self):
         if self._previous_open is not None:
             return self._previous_open.is_resilient
@@ -127,6 +127,20 @@ class _Open(object):
         elif self._previous_open is not None:
             return self._previous_open.durable_flags
         return 0
+
+    @property
+    def is_durable(self):
+        """
+        :return: True if the handle is durable
+        """
+        return self._is_durable
+
+    @property
+    def is_resilient(self):
+        """
+        :return: True if the handle is resilient
+        """
+        return self._is_resilient
 
     @property
     def is_persistent(self):
