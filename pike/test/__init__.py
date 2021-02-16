@@ -64,16 +64,46 @@ class ShareCapabilityMissing(TestRequirementNotMet):
 
 
 class Options(enum.Enum):
+    """
+    Provide default Client and Test options sourced from the following
+    Environment Variables.
+    """
+
     PIKE_LOGLEVEL = "PIKE_LOGLEVEL"
+    """Set the console log level by name (``DEBUG``, ``INFO``, etc)"""
     PIKE_TRACE = "PIKE_TRACE"
+    """If 'yes' log full request/response payloads at DEBUG level"""
     PIKE_SERVER = "PIKE_SERVER"
+    """SMB host name or IP address"""
     PIKE_PORT = "PIKE_PORT"
+    """SMB port (default: {})""".format(model.default_port)
     PIKE_CREDS = "PIKE_CREDS"
+    """
+    Percent-delimited server credentials for NTLM authentication:
+    ``DOMAIN\\User%Passwd``.
+
+    If credentials are not specified and kerberos is available, attempt to use
+    kerberos authentication.
+    """
     PIKE_SHARE = "PIKE_SHARE"
+    """Share name to connect to"""
     PIKE_SIGN = "PIKE_SIGN"
+    """If 'yes' require packets to be signed"""
     PIKE_ENCRYPT = "PIKE_ENCRYPT"
+    """If 'yes' require packets to be encrypted (SMB3-only)"""
     PIKE_MIN_DIALECT = "PIKE_MIN_DIALECT"
+    """
+    Minimum dialect to negotiate (``DIALECT_SMB2_1``, ``DIALECT_SMB3_0``, etc).
+
+    See :py:class:`pike.smb2.Dialect`
+    """
     PIKE_MAX_DIALECT = "PIKE_MAX_DIALECT"
+    """
+    Maximum dialect to negotiate (``DIALECT_SMB3_0``, ``DIALECT_SMB3_1_1``,
+    etc).
+
+    See :py:class:`pike.smb2.Dialect`
+    """
 
     @classmethod
     def option(cls, name, default=None):
