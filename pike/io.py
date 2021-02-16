@@ -6,6 +6,8 @@ import io
 
 import attr
 
+from . import ntstatus
+from . import model
 from . import smb2
 
 
@@ -289,10 +291,8 @@ class Open(_Open, io.RawIOBase):
 
     def _read_range(self, start=0, end=None):
         offset = start
-        if end is None:
-            end = self.end_of_file
         response_buffers = []
-        while offset < end:
+        while end is None or offset < end:
             available = min(
                 self.channel.connection.credits * smb2.BYTES_PER_CREDIT,
                 self.channel.connection.negotiate_response.max_read_size,
@@ -303,7 +303,7 @@ class Open(_Open, io.RawIOBase):
                 offset += len(read_resp)
             except model.ResponseError as re:
                 if re.response.status == ntstatus.STATUS_END_OF_FILE:
-                    return ""
+                    break
                 raise
         return b"".join(rb.tobytes() for rb in response_buffers)
 
