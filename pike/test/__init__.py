@@ -91,7 +91,7 @@ class Options(enum.Enum):
 
     @classmethod
     def booloption(cls, name, default="no"):
-        table = {"yes": True, "true": True, "no": False, "false": False, "": False}
+        table = {"yes": True, "true": True, "1": True, "no": False, "false": False, "": False, "0": False}
         return table[cls.option(name, default=default).lower()]
 
     @classmethod
