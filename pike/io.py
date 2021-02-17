@@ -27,6 +27,7 @@ class _Open(object):
 
     This class shouldn't be instantiated directly. See :py:class:`~pike.io.Open`
     """
+
     tree = attr.ib()
     create_request = attr.ib()
     create_response = attr.ib()
@@ -337,8 +338,14 @@ class CompatOpen(_Open):
 
     Please refactor code to use the new _Open constructor
     """
+
     def __init__(self, tree, smb_res, create_guid=None, prev=None):
-        super(CompatOpen, self).__init__(tree=tree, create_response=smb_res[0], create_guid=create_guid, previous_open=prev)
+        super(CompatOpen, self).__init__(
+            tree=tree,
+            create_response=smb_res[0],
+            create_guid=create_guid,
+            previous_open=prev,
+        )
 
 
 @attr.s
@@ -371,6 +378,7 @@ class Open(_Open, io.RawIOBase):
     :vartype lease: pike.model.Lease
     :ivar lease: the current Lease state of the handle
     """
+
     _offset = attr.ib(default=0, init=False)
 
     def seek(self, offset, whence=io.SEEK_SET):
