@@ -523,6 +523,10 @@ class Open(_Open, io.RawIOBase):
             chunk = data[offset + bytes_written : offset + bytes_written + available]
             count = self.channel.write(self, offset + bytes_written, chunk)
             bytes_written += count
+        if bytes_written:
+            self._offset += bytes_written
+            # update the EOF marker if we write past it
+            self._end_of_file = max(self.end_of_file, self._offset)
         return bytes_written
 
     def writable(self):
@@ -545,9 +549,7 @@ class Open(_Open, io.RawIOBase):
 
         Note: this function may perform extra copying and could be inefficient.
         """
-        bytes_written = self._write_at(b, self._offset)
-        self._offset += bytes_written
-        return bytes_written
+        return self._write_at(b, self._offset)
 
     def flush(self):
         """
