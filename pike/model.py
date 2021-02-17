@@ -2222,6 +2222,9 @@ class Tree(object):
         from . import path
         return path.PikePath(self, key)
 
+    if sys.version_info < (3,):
+        __div__ = __truediv__
+
 
 class RelatedOpen(object):
     """
