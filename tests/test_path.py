@@ -1,6 +1,9 @@
 """
 Tests for pike path-like interface
 """
+from __future__ import unicode_literals
+from builtins import str
+
 import os
 import uuid
 
