@@ -1864,6 +1864,9 @@ class Channel(object):
                 UnicodeWarning,
             )
             buffer = buffer.encode("ascii")
+        if sys.version_info < (3,) and isinstance(buffer, memoryview):
+            # explicit bytes-cast required on py2
+            buffer = buffer.tobytes()
         if buffer is not None and not isinstance(
             buffer, (array.array, bytes, memoryview, bytearray)
         ):
