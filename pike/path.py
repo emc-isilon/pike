@@ -498,7 +498,7 @@ class PikePath(PureWindowsPath):
             access=smb2.DELETE,
             disposition=smb2.FILE_OPEN,
         ) as handle:
-            with self.set_file_info(smb2.FileRenameInformation) as file_info:
+            with handle.set_file_info(smb2.FileRenameInformation) as file_info:
                 file_info.replace_if_exists = replace
                 file_info.file_name = target._path
             return target
@@ -603,7 +603,7 @@ class PikePath(PureWindowsPath):
             disposition=disposition,
             options=smb2.FILE_NON_DIRECTORY_FILE,
         ) as handle:
-            with self.set_file_info(smb2.FileBasicInformation) as file_info:
+            with handle.set_file_info(smb2.FileBasicInformation) as file_info:
                 file_info.change_time = nttime.NtTime(datetime.datetime.now())
 
     def unlink(self, missing_ok=False, options=smb2.FILE_NON_DIRECTORY_FILE):
