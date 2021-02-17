@@ -227,6 +227,7 @@ class BasePoller(object):
 
         the underlying poller should not monitor Transports for writability
         except when:
+
             * the Transport's connection has not yet been established
             * the Transport has been passed as an argument to defer_write
         """
