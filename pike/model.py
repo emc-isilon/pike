@@ -82,7 +82,6 @@ def loop(timeout=None, count=None):
     transport.loop(timeout=timeout, count=count)
 
 
-
 class AssertNtstatusContext(object):
     response = None
     exception = None
@@ -1977,6 +1976,7 @@ class Channel(object):
                 # 3.3.5.15.9 Handling a Resiliency Request
                 file._is_durable = False
                 file._is_resilient = True
+
         nrr_future = self.connection.submit(
             self.network_resiliency_request_request(file, timeout).parent.parent
         )[0]
