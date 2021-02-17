@@ -463,12 +463,15 @@ class Open(_Open, io.RawIOBase):
         :rtype: bytes
         :return: bytes read from the file
         """
+        max_read_size = self.channel.connection.negotiate_response.max_read_size
         offset = start
         response_buffers = []
         while end is None or offset < end:
+            if end is not None:
+                max_read_size = min(end - offset, max_read_size)
             available = min(
                 self.channel.connection.credits * smb2.BYTES_PER_CREDIT,
-                self.channel.connection.negotiate_response.max_read_size,
+                max_read_size,
             )
             try:
                 read_resp = self.channel.read(self, available, offset)
@@ -517,6 +520,7 @@ class Open(_Open, io.RawIOBase):
         bytes_written = 0
         while bytes_written < n_data:
             available = min(
+                n_data - bytes_written,
                 self.channel.connection.credits * smb2.BYTES_PER_CREDIT,
                 self.channel.connection.negotiate_response.max_write_size,
             )
