@@ -176,8 +176,10 @@ class _Open(object):
         """
         Simple oplock break callback handler.
 
-        @param cb: callable taking 1 parameter: the break request oplock level
-                   should return the desired oplock level to break to
+        :type cb: Callable[[pike.smb2.OplockLevel], pike.smb2.OplockLevel])
+        :param cb: callback function is passed the
+            ``pike.smb2.OplockBreakNotification.oplock_level`` and must return
+            the desired :py:class:`pike.smb2.OplockLevel` to break to.
         """
 
         def simple_handle_break(op, smb_res, cb_ctx):
@@ -202,13 +204,16 @@ class _Open(object):
     def on_oplock_break_request(self, cb, cb_ctx=None):
         """
         Complex oplock break callback handler.
-        @param cb: callable taking 3 parameters:
-                        L{Open}
-                        L{Smb2} containing the break request
-                        L{object} arbitrary context
-                   should handle breaking the oplock in some way
-                   callback is also responsible for re-arming the future
-                   and updating the oplock_level (if changed)
+
+        :type cb: Callable[[Open, pike.smb2.Smb2, Optional[Any]], Any])
+        :param cb: callback function is passed the file handle, the Smb2
+            :py:func:`~pike.smb2.OplockBreakNotification`, and an arbitrary
+            context and should handle breaking the oplock in some way. The
+            callback is also responsible for calling
+            :py:func:`arm_oplock_future` and and updating the ``.oplock_level``
+            (if changed)
+        :type cb_ctx: Optional[Any]
+        :param cb_ctx: arbitrary context passed to the callback
         """
 
         def handle_break(f):
