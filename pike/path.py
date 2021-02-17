@@ -1,11 +1,17 @@
 """
 Path-like interface for working with a Tree object
 """
+from __future__ import absolute_import
 
 import datetime
 import io
 import os
-from pathlib import PureWindowsPath, _WindowsFlavour
+import sys
+
+try:
+    from pathlib import PureWindowsPath, _WindowsFlavour
+except ImportError:
+    from pathlib2 import PureWindowsPath, _WindowsFlavour
 
 from . import model
 from . import ntstatus
@@ -89,6 +95,15 @@ class PikePath(PureWindowsPath):
         """
         Override _parse_args to ensure a Tree is returned as drv
         """
+        if sys.version_info < (3,):
+            # On python 2, explicitly convert future.types.newstr to native unicode type.
+            from future.types import newstr
+
+            # ensure that `newstr` instances are passed as real `unicode`
+            # to avoid TypeError: can't intern subclass of string
+            args = tuple(
+                unicode(pc) if isinstance(pc, newstr) else pc for pc in args
+            )
         drv, root, parts = super(PikePath, cls)._parse_args(args)
         if args:
             if isinstance(args[0], model.Tree):
