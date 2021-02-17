@@ -98,6 +98,8 @@ def test_open_not_readable_writable(pike_TreeConnect, filename):
             options=pike.smb2.FILE_DELETE_ON_CLOSE,
         ).result() as rfh:
             assert not rfh.writable()
+            # can't flush non-writable streams
+            assert rfh.flush() is None
 
         with tc.chan.create(
             tc.tree,
