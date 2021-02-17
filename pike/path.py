@@ -34,10 +34,14 @@ class _PikeFlavour(_WindowsFlavour):
         return s.lower()
 
     def casefold_parts(self, parts):
+        if sys.version_info < (3,):
+            fspath = lambda p: p.__fspath__()
+        else:
+            fspath = os.fspath
         return [
             p.lower()
             for p in [
-                os.fspath(rp) if isinstance(rp, model.Tree) else rp for rp in parts
+                fspath(rp) if isinstance(rp, model.Tree) else rp for rp in parts
             ]
         ]
 
