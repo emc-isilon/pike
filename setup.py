@@ -118,6 +118,7 @@ def run_setup(with_extensions):
         install_requires=[
             'enum34~=1.1.6;  python_version ~= "2.7"',
             "attrs >= 19.3",
+            'pathlib2~=2.3.5;  python_version ~= "2.7"',
             "pycryptodome",
             "future",
             "six",
