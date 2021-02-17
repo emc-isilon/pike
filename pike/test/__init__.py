@@ -445,6 +445,9 @@ class TreeConnect(object):
         tree = self.tree or self().tree
         return tree.__truediv__
 
+    if sys.version_info < (3,):
+        __div__ = __truediv__
+
 
 class PikeTest(unittest.TestCase):
     init_done = False
