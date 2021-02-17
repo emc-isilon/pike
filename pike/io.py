@@ -1,13 +1,15 @@
 """
 file-like wrapper for an open file
 """
+from __future__ import absolute_import
+
 import functools
 import io
 
 import attr
 
+from .exceptions import ResponseError
 from . import ntstatus
-from . import model
 from . import smb2
 
 
@@ -379,10 +381,10 @@ class Open(_Open, io.RawIOBase):
 
         The default value for whence is SEEK_SET. Values for whence are:
 
-            * ``io.SEEK_SET`` or ``0`` – start of the stream (the default);
+            * ``io.SEEK_SET`` or ``0`` - start of the stream (the default);
               offset should be zero or positive
-            * ``io.SEEK_CUR`` or ``1`` – current stream position; offset may be negative
-            * ``io.SEEK_END`` or ``2`` – end of the stream; offset is usually negative
+            * ``io.SEEK_CUR`` or ``1`` - current stream position; offset may be negative
+            * ``io.SEEK_END`` or ``2`` - end of the stream; offset is usually negative
 
         :type offset: int
         :type whence: int (see above)
@@ -457,7 +459,7 @@ class Open(_Open, io.RawIOBase):
                 read_resp = self.channel.read(self, available, offset)
                 response_buffers.append(read_resp)
                 offset += len(read_resp)
-            except model.ResponseError as re:
+            except ResponseError as re:
                 if re.response.status == ntstatus.STATUS_END_OF_FILE:
                     break
                 raise
