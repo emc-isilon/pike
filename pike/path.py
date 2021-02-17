@@ -266,9 +266,9 @@ class PikePath(PureWindowsPath):
             ) as handle:
                 return True
         except model.ResponseError as re:
-            if re.response.status not in (
-                ntstatus.STATUS_OBJECT_NAME_NOT_FOUND,
-                ntstatus.STATUS_OBJECT_PATH_NOT_FOUND,
+            if re.response.status not in NOT_FOUND_STATUSES + (
+                ntstatus.STATUS_FILE_IS_A_DIRECTORY,
+                ntstatus.STATUS_NOT_A_DIRECTORY,
             ):
                 raise
         return False
