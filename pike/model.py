@@ -2259,8 +2259,11 @@ class Lease(object):
     def on_break(self, cb):
         """
         Simple lease break callback handler.
-        @param cb: callable taking 1 parameter: the break request lease state
-                   should return the desired lease state to break to
+
+        :type cb: Callable[[pike.smb2.LeaseState], pike.smb2.LeaseState])
+        :param cb: callback function is passed the
+            ``pike.smb2.LeaseBreakNotification.new_lease_state`` and must
+            return the desired :py:class:`pike.smb2.LeaseState` to break to.
         """
 
         def simple_handle_break(lease, smb_res, cb_ctx):
@@ -2287,13 +2290,15 @@ class Lease(object):
     def on_break_request(self, cb, cb_ctx=None):
         """
         Complex lease break callback handler.
-        @param cb: callable taking 3 parameters:
-                        L{Lease}
-                        L{Smb2} containing the break request
-                        L{object} arbitrary context
-                   should handle breaking the lease in some way
-                   callback is also responsible for re-arming the future
-                   and updating the lease_state (if changed)
+
+        :type cb: Callable[[Lease, pike.smb2.Smb2, Optional[Any]], Any])
+        :param cb: callback function is passed the lease object, the Smb2
+            :py:class:`pike.smb2.LeaseBreakNotification`, and an arbitrary
+            context and should handle breaking the lease in some way. The
+            callback is also responsible for calling :py:func:`arm_future` and
+            and updating the ``.lease_state`` (if changed)
+        :type cb_ctx: Optional[Any]
+        :param cb_ctx: arbitrary context passed to the callback
         """
 
         def handle_break(f):
