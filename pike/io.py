@@ -40,17 +40,20 @@ class _Open(object):
 
     @oplock_level.default
     def _init_oplock_level(self):
-        return self.create_response.oplock_level
+        oplock_level = self.create_response.oplock_level
+        if oplock_level not in (
+            smb2.SMB2_OPLOCK_LEVEL_NONE,
+            smb2.SMB2_OPLOCK_LEVEL_LEASE,
+        ):
+            self.arm_oplock_future()
+        return oplock_level
 
     @lease.default
     def _init_lease(self):
-        if self.oplock_level != smb2.SMB2_OPLOCK_LEVEL_NONE:
-            if self.oplock_level == smb2.SMB2_OPLOCK_LEVEL_LEASE:
-                for ctx in self.create_response:
-                    if isinstance(ctx, smb2.LeaseResponse):
-                        return self.tree.session.client.lease(self.tree, ctx)
-            else:
-                self.arm_oplock_future()
+        if self.oplock_level == smb2.SMB2_OPLOCK_LEVEL_LEASE:
+            for ctx in self.create_response:
+                if isinstance(ctx, smb2.LeaseResponse):
+                    return self.tree.session.client.lease(self.tree, ctx)
 
     @_is_durable.default
     def _init_is_durable(self):
