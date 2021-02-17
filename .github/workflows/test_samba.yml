@@ -15,7 +15,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [2.7, 3.6, 3.7, 3.8, 3.9, 3.10-dev]
+        python-version: [2.7, 3.6, 3.7, 3.8, 3.9]
 
     services:
       samba:
@@ -38,14 +38,12 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - run: python --version --version && which python
-    - name: Install Pike
-      run: python setup.py install
-    - name: Install pytest
-      run: pip install pytest
+    - name: Install dependencies
+      run: pip install tox tox-gh-actions
     - name: Test Pike
       env:
         PIKE_SERVER: 127.0.0.1
         PIKE_PORT: ${{ job.services.samba.ports[445] }}
         PIKE_SHARE: pike
         PIKE_CREDS: pike%GiThubCI123
-      run: python -m unittest -v pike.test.samba_suite
+      run: tox
