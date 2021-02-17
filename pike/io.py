@@ -478,7 +478,12 @@ class Open(_Open, io.RawIOBase):
                 if re.response.status == ntstatus.STATUS_END_OF_FILE:
                     break
                 raise
-        return b"".join(rb.tobytes() for rb in response_buffers)
+        read_buffer = b"".join(rb.tobytes() for rb in response_buffers)
+        if read_buffer:
+            self._offset = start + len(read_buffer)
+            # update the EOF marker if we read past it
+            self._end_of_file = max(self.end_of_file, self._offset)
+        return read_buffer
 
     def readall(self):
         """
@@ -492,9 +497,8 @@ class Open(_Open, io.RawIOBase):
 
         Note: this function performs extra copying and is inefficient.
         """
-        read_resp = self._read_range(self._offset, len(b))
+        read_resp = self._read_range(self._offset, self._offset + len(b))
         bytes_read = len(read_resp)
-        self._offset += bytes_read
         b[:bytes_read] = read_resp
         return bytes_read
 
