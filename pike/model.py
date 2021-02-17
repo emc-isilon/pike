@@ -1832,7 +1832,7 @@ class Channel(object):
         return flush_req
 
     def flush(self, file):
-        self.connection.transceive(self.flush_request(file).parent.parent)
+        return self.connection.transceive(self.flush_request(file).parent.parent)[0]
 
     def read_request(self, file, length, offset, minimum_count=0, remaining_bytes=0):
         smb_req = self.request(obj=file)
