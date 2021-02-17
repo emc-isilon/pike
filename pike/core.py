@@ -774,27 +774,30 @@ class Let(object):
     A Let allows for temporarily storing passed arguments in the _settings
     member of a target object for the duration of the contextmanager's scope
 
-    Implementation on a factory class
+    .. code-block:: python
+        :caption: Implementation on a factory class
 
-    class MyThingFactory(object):
-        def __init__(self):
-            self._settings = {}
-        def generate_thing(self):
-            # do something here
-            new_obj = Thing()
-            for k,v in self._settings.iteritems():
-                setattr(new_obj, k, v)
-            return new_obj
-        def let(self, **kwds):
-            return Let(self, kwds)
+        class MyThingFactory(object):
+            def __init__(self):
+                self._settings = {}
+            def generate_thing(self):
+                # do something here
+                new_obj = Thing()
+                for k,v in self._settings.iteritems():
+                    setattr(new_obj, k, v)
+                return new_obj
+            def let(self, **kwds):
+                return Let(self, kwds)
 
-    Calling code that wants to temporarily customize the Thing objects that are
-    returned by the factory:
+    Calling code that wants to temporarily customize the ``Thing`` objects that
+    are returned by the factory:
 
-    fac = MyThingFactory()
-    with fac.let(this="that", foo="bar"):
-        a_thing = fac.generate_thing()
-        self.assertEqual(a_thing.this, "that")
+    .. code-block:: python
+
+        fac = MyThingFactory()
+        with fac.let(this="that", foo="bar"):
+            a_thing = fac.generate_thing()
+            self.assertEqual(a_thing.this, "that")
     """
 
     def __init__(self, target, settings_dict):
