@@ -159,15 +159,6 @@ class _Open(object):
         """
         return self.tree is None
 
-    @property
-    def end_of_file(self):
-        """
-        :return: Byte offset of the end of file as reported by the CREATE response
-
-        Note: this value is not updated as the file is modified!
-        """
-        return self.create_response.end_of_file
-
     def arm_oplock_future(self):
         """
         (Re)arm the oplock future for this open. This function should be called
@@ -380,6 +371,22 @@ class Open(_Open, io.RawIOBase):
     """
 
     _offset = attr.ib(default=0, init=False)
+    _end_of_file = attr.ib(init=False)
+
+    @_end_of_file.default
+    def _init_end_of_file(self):
+        return self.create_response.end_of_file
+
+    @property
+    def end_of_file(self):
+        """
+        :return: Byte offset of the end of file as reported by the CREATE response
+
+        Note: this value is only updated by ``write`` and ``read``!
+              if other operations are performed directly or via other sessions
+              this value may get out of sync.
+        """
+        return self._end_of_file
 
     def seek(self, offset, whence=io.SEEK_SET):
         """
