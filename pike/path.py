@@ -21,6 +21,10 @@ from . import smb2
 
 MAX_SYMLINK_RECURSE = 10
 
+NOT_FOUND_STATUSES = (
+    ntstatus.STATUS_OBJECT_NAME_NOT_FOUND,
+    ntstatus.STATUS_OBJECT_PATH_NOT_FOUND,
+)
 
 class _PikeFlavour(_WindowsFlavour):
     """
@@ -537,16 +541,28 @@ class PikePath(PureWindowsPath):
         This uses ``FILE_INTERNAL_INFORMATION`` to perform the check. If the
         server doesn't support this info class, NotImplementedError is raised.
 
+        If either path doesn't exist, return False
+
         :type otherpath: PikePath
         :param otherpath: the other path to compare to
         :return: True if otherpath points to the same file
         """
-        my_id = self.stat(file_information_class=smb2.FILE_INTERNAL_INFORMATION)
+        try:
+            my_id = self.stat(file_information_class=smb2.FILE_INTERNAL_INFORMATION)
+        except model.ResponseError as re:
+            if re.response.status in NOT_FOUND_STATUSES:
+                return False
+            raise
         if my_id == 0:
             raise NotImplementedError("remote filesystem does not return unique file index")
         if not isinstance(otherpath, type(self)):
             otherpath = self.join_from_root(otherpath)
-        other_id = otherpath.stat(file_information_class=smb2.FILE_INTERNAL_INFORMATION)
+        try:
+            other_id = otherpath.stat(file_information_class=smb2.FILE_INTERNAL_INFORMATION)
+        except model.ResponseError as re:
+            if re.response.status in NOT_FOUND_STATUSES:
+                return False
+            raise
         return my_id == other_id
 
     def symlink_to(self, target, target_is_directory=False):
@@ -605,14 +621,7 @@ class PikePath(PureWindowsPath):
             ) as handle:
                 pass
         except model.ResponseError as re:
-            if (
-                re.response.status
-                in (
-                    ntstatus.STATUS_OBJECT_NAME_NOT_FOUND,
-                    ntstatus.STATUS_OBJECT_PATH_NOT_FOUND,
-                )
-                and missing_ok
-            ):
+            if re.response.status in NOT_FOUND_STATUSES and missing_ok:
                 return
             elif re.response.status == ntstatus.STATUS_STOPPED_ON_SYMLINK:
                 return self.unlink(
