@@ -88,6 +88,14 @@ def test_glob(pike_tmp_path):
         assert f.name in ("a2", "b2")
 
 
+def test_glob_invalid(pike_tmp_path):
+    with pytest.raises(ValueError):
+        list(pike_tmp_path.glob("**/foo"))
+
+    with pytest.raises(NotImplementedError):
+        pike_tmp_path.rglob("foo")
+
+
 def test_iterdir(pike_tmp_path):
     filedata = {name: str(uuid.uuid4()) for name in ["f1", "f2", "f3", "f4"]}
     for f, data in filedata.items():
