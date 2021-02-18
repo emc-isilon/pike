@@ -7,6 +7,7 @@ import datetime
 import io
 import os
 import sys
+import warnings
 
 try:
     from pathlib import PureWindowsPath, _WindowsFlavour
@@ -417,32 +418,42 @@ class PikePath(PureWindowsPath):
         """
         buffer_class = io.BufferedReader
         access = 0
-        disposition = smb2.FILE_OPEN
+        disposition = 0
         mode = mode.lower()
+        if ("r" in mode, "w" in mode, "x" in mode, "a" in mode).count(True) > 1:
+            raise ValueError("must have exactly one of create/read/write/append mode")
+
+        # File Access bits
         if "r" in mode or "+" in mode:
             access |= smb2.GENERIC_READ
-        if "a" in mode or "w" in mode or "+" in mode:
+        if "a" in mode or "x" in mode or "w" in mode or "+" in mode:
             access |= smb2.GENERIC_WRITE
             buffer_class = io.BufferedWriter
         if "+" in mode:
             buffer_class = io.BufferedRandom
-        if "x" in mode:
+
+        # Create disposition bits
+        if "r" in mode:
+            disposition = smb2.FILE_OPEN
+        elif "x" in mode:
             disposition = smb2.FILE_CREATE
         elif "a" in mode:
             disposition = smb2.FILE_OPEN_IF
-        elif "w" in mode or "+" in mode:
+        elif "w" in mode:
             disposition = smb2.FILE_SUPERSEDE
+
         handle = self._create_follow(
             access=access,
             disposition=disposition,
             options=smb2.FILE_NON_DIRECTORY_FILE,
         )
         if "a" in mode:
-            handle.seek(0, SEEK_END)
+            handle.seek(0, io.SEEK_END)
         if "b" in mode and buffering == 0:
             return handle
-        if buffering == -1:
-            buffer_size = smb2.BYTES_PER_CREDIT
+        if buffering == 0:
+            warnings.warn("Buffering cannot be disabled for text-mode streams")
+        buffer_size = buffering if buffering > 0 else smb2.BYTES_PER_CREDIT
         buffered_io = buffer_class(handle, buffer_size=buffer_size)
         if "b" in mode:
             return buffered_io
