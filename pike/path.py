@@ -35,20 +35,18 @@ class _PikeFlavour(_WindowsFlavour):
     Handle the fact that ``_drv`` may be a :py:class:`pike.model.Tree` instance.
     """
 
+    def _fspath(self, p):
+        if sys.version_info < (3,):
+            return p.__fspath__()
+        return os.fspath(p)
+
     def casefold(self, s):
         if isinstance(s, model.Tree):
-            s = os.fspath(s)
+            s = self._fspath(s)
         return s.lower()
 
     def casefold_parts(self, parts):
-        if sys.version_info < (3,):
-            fspath = lambda p: p.__fspath__()
-        else:
-            fspath = os.fspath
-        return [
-            p.lower()
-            for p in [fspath(rp) if isinstance(rp, model.Tree) else rp for rp in parts]
-        ]
+        return [self.casefold(rp) for rp in parts]
 
 
 _pike_flavour = _PikeFlavour()
