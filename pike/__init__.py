@@ -27,19 +27,26 @@ if six.PY2:
 
     array.array = newarray
 
+# main entry point
+from pike.test import TreeConnect as TreeConnect
+
 __all__ = [
     "auth",
     "core",
     "crypto",
     "digest",
+    "io",
     "kerberos",
     "model",
     "netbios",
-    "ntlm" "nttime",
+    "ntlm",
+    "nttime",
     "ntstatus",
+    "path",
     "smb2",
     "test",
     "transport",
+    "TreeConnect",
 ]
 # __version__ is defined by setuptools_scm using git tag
 # https://github.com/pypa/setuptools_scm/
