@@ -140,3 +140,22 @@ def test_update_eof(pike_TreeConnect, filename, test_buffer):
                 # reading to end should update the eof, now they're in sync again
                 assert rfh.read() == buf[128:]
                 assert rfh.end_of_file == wfh.end_of_file
+
+
+def test_open_write_multiple(pike_TreeConnect, filename, test_buffer):
+    with pike_TreeConnect() as tc:
+        with tc.chan.create(
+            tc.tree,
+            filename,
+            access=pike.smb2.GENERIC_READ | pike.smb2.GENERIC_WRITE | pike.smb2.DELETE,
+            options=pike.smb2.FILE_DELETE_ON_CLOSE,
+        ).result() as fh:
+            # write a buffer greater than the transact size
+            max_write = tc.conn.negotiate_response.max_write_size
+            buf = test_buffer(256)
+            n_ops = 5
+            for i in range(n_ops):
+                fh.write(buf)
+            fh.seek(0)
+            for i in range(n_ops):
+                assert fh.read(256) == buf
