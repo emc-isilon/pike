@@ -299,7 +299,20 @@ class PikePath(PureWindowsPath):
         """
         :return: True if this path is a reparse point
         """
-        return self.exists(options=smb2.FILE_OPEN_REPARSE_POINT)
+        try:
+            with self._channel.create(
+                self._tree,
+                self._path,
+                access=0,
+                disposition=smb2.FILE_OPEN,
+            ).result() as handle:
+                pass
+        except model.ResponseError as re:
+            if re.response.status == ntstatus.STATUS_STOPPED_ON_SYMLINK:
+                return True
+            if re.response.status not in NOT_FOUND_STATUSES:
+                raise
+        return False
 
     def is_mount(self):
         """
