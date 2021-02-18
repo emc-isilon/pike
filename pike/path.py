@@ -27,12 +27,14 @@ NOT_FOUND_STATUSES = (
     ntstatus.STATUS_OBJECT_PATH_NOT_FOUND,
 )
 
+
 class _PikeFlavour(_WindowsFlavour):
     """
     Implement pike-specific overrides of WindowsFlavour semantics.
 
     Handle the fact that ``_drv`` may be a :py:class:`pike.model.Tree` instance.
     """
+
     def casefold(self, s):
         if isinstance(s, model.Tree):
             s = os.fspath(s)
@@ -45,9 +47,7 @@ class _PikeFlavour(_WindowsFlavour):
             fspath = os.fspath
         return [
             p.lower()
-            for p in [
-                fspath(rp) if isinstance(rp, model.Tree) else rp for rp in parts
-            ]
+            for p in [fspath(rp) if isinstance(rp, model.Tree) else rp for rp in parts]
         ]
 
 
@@ -97,6 +97,7 @@ class PikePath(PureWindowsPath):
     Unlike ``WindowsPath``, ``PikePath`` will prefer to raise
     :py:class:`pike.model.ResponseError` exceptions instead of ``OSError``.
     """
+
     _flavour = _pike_flavour
 
     @classmethod
@@ -110,9 +111,7 @@ class PikePath(PureWindowsPath):
 
             # ensure that `newstr` instances are passed as real `unicode`
             # to avoid TypeError: can't intern subclass of string
-            args = tuple(
-                unicode(pc) if isinstance(pc, newstr) else pc for pc in args
-            )
+            args = tuple(unicode(pc) if isinstance(pc, newstr) else pc for pc in args)
         drv, root, parts = super(PikePath, cls)._parse_args(args)
         if args:
             if isinstance(args[0], model.Tree):
@@ -184,12 +183,16 @@ class PikePath(PureWindowsPath):
         if depth > MAX_SYMLINK_RECURSE:
             raise OSError("Maximum level of symbolic links exceeded")
         try:
-            return self._channel.create(self._tree, self._path, *args, **kwargs).result()
+            return self._channel.create(
+                self._tree, self._path, *args, **kwargs
+            ).result()
         except model.ResponseError as re:
             if re.response.status != ntstatus.STATUS_STOPPED_ON_SYMLINK:
                 raise
             kwargs["__RC_DEPTH"] = depth + 1
-            return self.join_from_root(re.response[0][0].error_data.substitute_name)._create_follow(*args, **kwargs)
+            return self.join_from_root(
+                re.response[0][0].error_data.substitute_name
+            )._create_follow(*args, **kwargs)
 
     def stat(
         self,
@@ -355,13 +358,17 @@ class PikePath(PureWindowsPath):
         :rtype: Iterator[:py:class:`~pike.path.PikePath`]
         """
         if "**" in pattern:
-            raise ValueError("recursive glob, '**', is not supported by {!r}".format(type(self)))
+            raise ValueError(
+                "recursive glob, '**', is not supported by {!r}".format(type(self))
+            )
         with self._create_follow(
             access=smb2.GENERIC_READ,
             disposition=smb2.FILE_OPEN,
             options=smb2.FILE_DIRECTORY_FILE,
         ) as handle:
-            for item in handle.enum_directory(file_information_class=smb2.FILE_NAMES_INFORMATION, file_name=pattern):
+            for item in handle.enum_directory(
+                file_information_class=smb2.FILE_NAMES_INFORMATION, file_name=pattern
+            ):
                 if item.file_name in (".", ".."):
                     continue
                 yield self / item.file_name
