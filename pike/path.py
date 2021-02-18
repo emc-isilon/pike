@@ -565,16 +565,20 @@ class PikePath(PureWindowsPath):
                 return False
             raise
         if my_id == 0:
-            raise NotImplementedError("remote filesystem does not return unique file index")
+            raise NotImplementedError(
+                "remote filesystem does not return unique file index"
+            )
         if not isinstance(otherpath, type(self)):
             otherpath = self.join_from_root(otherpath)
         try:
-            other_id = otherpath.stat(file_information_class=smb2.FILE_INTERNAL_INFORMATION)
+            other_id = otherpath.stat(
+                file_information_class=smb2.FILE_INTERNAL_INFORMATION
+            )
         except model.ResponseError as re:
             if re.response.status in NOT_FOUND_STATUSES:
                 return False
             raise
-        return my_id == other_id
+        return my_id.index_number == other_id.index_number
 
     def symlink_to(self, target, target_is_directory=False):
         """
