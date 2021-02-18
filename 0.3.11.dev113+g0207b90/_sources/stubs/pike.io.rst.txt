@@ -1,0 +1,31 @@
+﻿pike.io
+=======
+
+.. automodule:: pike.io
+   :noindex:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      CompatOpen
+      Open
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,777 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>PikePath &mdash; pike-smb2 0.3.11.dev113+g0207b90 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Open" href="open.html" />
+    <link rel="prev" title="TreeConnect" href="tree_connect.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pike-smb2
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="high_level.html">High-Level API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tree_connect.html">TreeConnect</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">PikePath</a></li>
+<li class="toctree-l2"><a class="reference internal" href="open.html">Open</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytest.html">Pytest Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="autosummary.html">API Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">Implementation Details</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pike-smb2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="high_level.html">High-Level API</a> &raquo;</li>
+        
+      <li><code class="docutils literal notranslate"><span class="pre">PikePath</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/path.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pikepath">
+<h1><code class="docutils literal notranslate"><span class="pre">PikePath</span></code><a class="headerlink" href="#pikepath" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="pike.path.PikePath">
+<em class="property">class </em><code class="sig-prename descclassname">pike.path.</code><code class="sig-name descname">PikePath</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pathlib.PureWindowsPath</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">Path</span></code> subclass for <a class="reference internal" href="model.html#pike.model.Tree" title="pike.model.Tree"><code class="xref py py-class docutils literal notranslate"><span class="pre">pike.model.Tree</span></code></a> instances.</p>
+<p><code class="docutils literal notranslate"><span class="pre">PikePath</span></code> should be either directly instantiated by passing a
+<a class="reference internal" href="model.html#pike.model.Tree" title="pike.model.Tree"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tree</span></code></a> or by performing typical <code class="docutils literal notranslate"><span class="pre">Path</span></code> extension
+(truediv) on a <a class="reference internal" href="model.html#pike.model.Tree" title="pike.model.Tree"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tree</span></code></a> or
+<a class="reference internal" href="tree_connect.html#pike.TreeConnect" title="pike.TreeConnect"><code class="xref py py-class docutils literal notranslate"><span class="pre">pike.TreeConnect</span></code></a> instance.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">example.py</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pike.path</span>
+<span class="kn">import</span> <span class="nn">pike.test</span>
+
+<span class="k">with</span> <span class="n">pike</span><span class="o">.</span><span class="n">TreeConnect</span><span class="p">()</span> <span class="k">as</span> <span class="n">tc</span><span class="p">:</span>
+    <span class="n">pth</span> <span class="o">=</span> <span class="n">pike</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">PikePath</span><span class="p">(</span><span class="n">tc</span><span class="o">.</span><span class="n">tree</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">tc</span> <span class="o">/</span> <span class="s2">&quot;subdir&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">pth</span> <span class="o">/</span> <span class="s2">&quot;subdir&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">tc</span><span class="o">.</span><span class="n">tree</span> <span class="o">/</span> <span class="s2">&quot;subdir&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">pth</span> <span class="o">/</span> <span class="s2">&quot;subdir&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>A <code class="docutils literal notranslate"><span class="pre">PikePath</span></code> is bound to a specific connection, session, and tree. If the
+underlying transport is no longer valid, then the path operations will not
+work.</p>
+<p>An existing path, valid or invalid, and be “rehomed” to a different
+<code class="docutils literal notranslate"><span class="pre">PikePath</span></code> by calling <a class="reference internal" href="#pike.path.PikePath.join_from_root" title="pike.path.PikePath.join_from_root"><code class="xref py py-func docutils literal notranslate"><span class="pre">join_from_root()</span></code></a>,
+returning a new instance with the path part replaced by that of the passed
+argument.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">example.py</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pike</span>
+<span class="kn">import</span> <span class="nn">pike.path</span>
+
+<span class="k">with</span> <span class="n">pike</span><span class="o">.</span><span class="n">TreeConnect</span><span class="p">(),</span> <span class="n">pike</span><span class="o">.</span><span class="n">TreeConnect</span><span class="p">()</span> <span class="k">as</span> <span class="n">tc1</span><span class="p">,</span> <span class="n">tc2</span><span class="p">:</span>
+    <span class="n">tc1_subdir</span> <span class="o">=</span> <span class="n">tc1</span> <span class="o">/</span> <span class="s2">&quot;subdir&quot;</span>
+    <span class="n">tc2_subdir</span> <span class="o">=</span> <span class="n">pike</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">PikePath</span><span class="p">(</span><span class="n">tc2</span><span class="o">.</span><span class="n">tree</span><span class="p">)</span><span class="o">.</span><span class="n">join_from_root</span><span class="p">(</span><span class="n">tc1_subdir</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">tc1_subdir</span> <span class="o">!=</span> <span class="n">tc2_subdir</span>
+</pre></div>
+</div>
+</div>
+<p>Unlike <code class="docutils literal notranslate"><span class="pre">WindowsPath</span></code>, <code class="docutils literal notranslate"><span class="pre">PikePath</span></code> will prefer to raise
+<code class="xref py py-class docutils literal notranslate"><span class="pre">pike.model.ResponseError</span></code> exceptions instead of <code class="docutils literal notranslate"><span class="pre">OSError</span></code>.</p>
+<dl class="py method">
+<dt id="pike.path.PikePath.anchor">
+<em class="property">property </em><code class="sig-name descname">anchor</code><a class="headerlink" href="#pike.path.PikePath.anchor" title="Permalink to this definition">¶</a></dt>
+<dd><p>The concatenation of the drive and root, or ‘’.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.as_posix">
+<code class="sig-name descname">as_posix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pike.path.PikePath.as_posix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the string representation of the path with forward (/)
+slashes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.as_uri">
+<code class="sig-name descname">as_uri</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pike.path.PikePath.as_uri" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the path as a ‘file’ URI.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.drive">
+<em class="property">property </em><code class="sig-name descname">drive</code><a class="headerlink" href="#pike.path.PikePath.drive" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="model.html#pike.model.Tree" title="pike.model.Tree">pike.model.Tree</a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tree forming the root of the share / path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.exists">
+<code class="sig-name descname">exists</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.exists" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>options</strong> (<a class="reference internal" href="model.html#pike.smb2.CreateOptions" title="pike.smb2.CreateOptions"><em>smb2.CreateOptions</em></a>) – options passed to CREATE when opening the file</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if this path exists</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.glob">
+<code class="sig-name descname">glob</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pattern</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.glob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.glob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over this subtree and yield all existing files matching pattern.</p>
+<p>Files of any kind, including directories, that match the given relative
+pattern will be yielded with the exception of special entries “.” and “..”</p>
+<p>The globbing is handled on the server side, so all <code class="docutils literal notranslate"><span class="pre">pattern</span></code> values
+must be valid according to [MS-CIFS] 2.2.1.1.3 Wildcards:
+<a class="reference external" href="https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-cifs/dc92d939-ec45-40c8-96e5-4c4091e4ab43">https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-cifs/dc92d939-ec45-40c8-96e5-4c4091e4ab43</a></p>
+<p>The recursive glob “**” is not supported.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>pattern</strong> – file search pattern</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Iterator[<a class="reference internal" href="#pike.path.PikePath" title="pike.path.PikePath"><code class="xref py py-class docutils literal notranslate"><span class="pre">PikePath</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.is_absolute">
+<code class="sig-name descname">is_absolute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pike.path.PikePath.is_absolute" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if the path is absolute (has both a root and, if applicable,
+a drive).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.is_block_device">
+<code class="sig-name descname">is_block_device</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.is_block_device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.is_block_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note: no PikePath instances are considered to be block devices</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if this path is a block device</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.is_char_device">
+<code class="sig-name descname">is_char_device</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.is_char_device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.is_char_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note: no PikePath instances are considered to be char devices</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if this path is a char device</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.is_dir">
+<code class="sig-name descname">is_dir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.is_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.is_dir" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if this path is a directory</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.is_fifo">
+<code class="sig-name descname">is_fifo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.is_fifo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.is_fifo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note: no PikePath instances are considered to be fifo</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if this path is a pipe</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.is_file">
+<code class="sig-name descname">is_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.is_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.is_file" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if this path is a normal file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.is_mount">
+<code class="sig-name descname">is_mount</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.is_mount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.is_mount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note: all PikePath instances are considered to be mounts</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if this path is a mount point</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.is_reserved">
+<code class="sig-name descname">is_reserved</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pike.path.PikePath.is_reserved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the path contains one of the special names reserved
+by the system, if any.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.is_socket">
+<code class="sig-name descname">is_socket</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.is_socket"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.is_socket" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note: no PikePath instances are considered to be sockets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if this path is a socket</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.is_symlink">
+<code class="sig-name descname">is_symlink</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.is_symlink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.is_symlink" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if this path is a reparse point</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.iterdir">
+<code class="sig-name descname">iterdir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.iterdir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.iterdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over this subtree and yield all existing files.</p>
+<p>The special entries “.” and “..” will not be yielded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Iterator[<a class="reference internal" href="#pike.path.PikePath" title="pike.path.PikePath"><code class="xref py py-class docutils literal notranslate"><span class="pre">PikePath</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.join_from_root">
+<code class="sig-name descname">join_from_root</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.join_from_root"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.join_from_root" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rehome an existing absolute path for use by this PikePath’s Tree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pike.path.PikePath" title="pike.path.PikePath">PikePath</a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a new <a class="reference internal" href="#pike.path.PikePath" title="pike.path.PikePath"><code class="xref py py-class docutils literal notranslate"><span class="pre">PikePath</span></code></a> by joining <code class="docutils literal notranslate"><span class="pre">path</span></code> to
+the root of this instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.joinpath">
+<code class="sig-name descname">joinpath</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pike.path.PikePath.joinpath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine this path with one or several arguments, and return a
+new path representing either a subpath (if all arguments are relative
+paths) or a totally different path (if one of the arguments is
+anchored).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.lstat">
+<code class="sig-name descname">lstat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_information_class</span><span class="o">=</span><span class="default_value">FILE_BASIC_INFORMATION</span></em>, <em class="sig-param"><span class="n">info_type</span><span class="o">=</span><span class="default_value">SMB2_0_INFO_FILE</span></em>, <em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.lstat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.lstat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform SMB2 QUERY_INFO request for the given <code class="docutils literal notranslate"><span class="pre">file_information_class</span></code>.</p>
+<p>If this path represents a symlink, open the link itself, rather than the
+target. (Intermediate links will not be followed first.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_information_class</strong> (<a class="reference internal" href="model.html#pike.smb2.FileInformationClass" title="pike.smb2.FileInformationClass"><em>smb2.FileInformationClass</em></a>) – the file information class constant
+describing the type of information to retrieve</p></li>
+<li><p><strong>info_type</strong> (<a class="reference internal" href="model.html#pike.smb2.InfoType" title="pike.smb2.InfoType"><em>smb2.InfoType</em></a>) – the SMB2 query info type</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="model.html#pike.smb2.CreateOptions" title="pike.smb2.CreateOptions"><em>smb2.CreateOptions</em></a>) – options passed to CREATE when opening the file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>single file info object corresponding to the
+file_information_class requested</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.match">
+<code class="sig-name descname">match</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_pattern</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pike.path.PikePath.match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if this path matches the given pattern.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.mkdir">
+<code class="sig-name descname">mkdir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">parents</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">exist_ok</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.mkdir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.mkdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new directory at this given path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode</strong> – The mode of the created file. NOT SUPPORTED</p></li>
+<li><p><strong>parents</strong> – if True, create all parent directories if they do not exist</p></li>
+<li><p><strong>exist_ok</strong> – if True, don’t raise if the directory exists</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.name">
+<em class="property">property </em><code class="sig-name descname">name</code><a class="headerlink" href="#pike.path.PikePath.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The final path component, if any.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.open">
+<code class="sig-name descname">open</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'r'</span></em>, <em class="sig-param"><span class="n">buffering</span><span class="o">=</span><span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">errors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">newline</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open the file pointed by this path and return a file object, as
+the built-in open() function does.</p>
+<p>Where possible, the semantics are designed to match a local open file.</p>
+<p>Lease/oplock based buffering is not supported at this time. To avoid
+reading stale data, or locally buffering writes, pass <code class="docutils literal notranslate"><span class="pre">buffering=0</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.parent">
+<em class="property">property </em><code class="sig-name descname">parent</code><a class="headerlink" href="#pike.path.PikePath.parent" title="Permalink to this definition">¶</a></dt>
+<dd><p>The logical parent of the path.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.parents">
+<em class="property">property </em><code class="sig-name descname">parents</code><a class="headerlink" href="#pike.path.PikePath.parents" title="Permalink to this definition">¶</a></dt>
+<dd><p>A sequence of this path’s logical parents.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.parts">
+<em class="property">property </em><code class="sig-name descname">parts</code><a class="headerlink" href="#pike.path.PikePath.parts" title="Permalink to this definition">¶</a></dt>
+<dd><p>An object providing sequence-like access to the
+components in the filesystem path.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.read_bytes">
+<code class="sig-name descname">read_bytes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.read_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.read_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the binary contents of the pointed-to file as a bytes object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bytes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.read_text">
+<code class="sig-name descname">read_text</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">errors</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.read_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.read_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the decoded contents of the pointed-to file as a string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.readlink">
+<code class="sig-name descname">readlink</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.readlink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.readlink" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the <a class="reference internal" href="#pike.path.PikePath" title="pike.path.PikePath"><code class="xref py py-class docutils literal notranslate"><span class="pre">PikePath</span></code></a> to which the symbolic link points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pike.path.PikePath" title="pike.path.PikePath">PikePath</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.relative_to">
+<code class="sig-name descname">relative_to</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pike.path.PikePath.relative_to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the relative path to another path identified by the passed
+arguments.  If the operation is not possible (because this is not
+a subpath of the other path), raise ValueError.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.rename">
+<code class="sig-name descname">rename</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">target</span></em>, <em class="sig-param"><span class="n">replace</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.rename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rename the object at this path to <code class="docutils literal notranslate"><span class="pre">target</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> – new name</p></li>
+<li><p><strong>replace</strong> – if True, pass <code class="docutils literal notranslate"><span class="pre">replace_if_exists</span></code> in <code class="docutils literal notranslate"><span class="pre">FileRenameInformation</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#pike.path.PikePath" title="pike.path.PikePath">PikePath</a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>path pointing to target</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.replace">
+<code class="sig-name descname">replace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">target</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.replace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.replace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as rename, but with replace=True</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.resolve">
+<code class="sig-name descname">resolve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">strict</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.resolve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.resolve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Follow all symbolic links in the path and return the
+<a class="reference internal" href="#pike.path.PikePath" title="pike.path.PikePath"><code class="xref py py-class docutils literal notranslate"><span class="pre">PikePath</span></code></a> at the end of the chain.</p>
+<p>Similar to <code class="docutils literal notranslate"><span class="pre">readlink</span></code>, however this calls relies on handling the
+SymbolicLinkErrorResponse during create, rather than explicitly
+reading the link target via IOCTL_GET_REPARSE_POINT.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.rmdir">
+<code class="sig-name descname">rmdir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">missing_ok</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.rmdir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.rmdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the directory at this path.</p>
+<p>The directory must be empty.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>missing_ok</strong> – if True, don’t raise if the directory doesn’t exist</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.root">
+<em class="property">property </em><code class="sig-name descname">root</code><a class="headerlink" href="#pike.path.PikePath.root" title="Permalink to this definition">¶</a></dt>
+<dd><p>The root of the path, if any.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.samefile">
+<code class="sig-name descname">samefile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">otherpath</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.samefile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.samefile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if this path points to the same file as another path.</p>
+<p>This uses <code class="docutils literal notranslate"><span class="pre">FILE_INTERNAL_INFORMATION</span></code> to perform the check. If the
+server doesn’t support this info class, NotImplementedError is raised.</p>
+<p>If either path doesn’t exist, return False</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>otherpath</strong> (<a class="reference internal" href="#pike.path.PikePath" title="pike.path.PikePath"><em>PikePath</em></a>) – the other path to compare to</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if otherpath points to the same file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.stat">
+<code class="sig-name descname">stat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_information_class</span><span class="o">=</span><span class="default_value">FILE_BASIC_INFORMATION</span></em>, <em class="sig-param"><span class="n">info_type</span><span class="o">=</span><span class="default_value">SMB2_0_INFO_FILE</span></em>, <em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.stat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.stat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform SMB2 QUERY_INFO request for the given <code class="docutils literal notranslate"><span class="pre">file_information_class</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_information_class</strong> (<a class="reference internal" href="model.html#pike.smb2.FileInformationClass" title="pike.smb2.FileInformationClass"><em>smb2.FileInformationClass</em></a>) – the file information class constant
+describing the type of information to retrieve</p></li>
+<li><p><strong>info_type</strong> (<a class="reference internal" href="model.html#pike.smb2.InfoType" title="pike.smb2.InfoType"><em>smb2.InfoType</em></a>) – the SMB2 query info type</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="model.html#pike.smb2.CreateOptions" title="pike.smb2.CreateOptions"><em>smb2.CreateOptions</em></a>) – options passed to CREATE when opening the file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>single file info object corresponding to the
+file_information_class requested</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.stem">
+<em class="property">property </em><code class="sig-name descname">stem</code><a class="headerlink" href="#pike.path.PikePath.stem" title="Permalink to this definition">¶</a></dt>
+<dd><p>The final path component, minus its last suffix.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.suffix">
+<em class="property">property </em><code class="sig-name descname">suffix</code><a class="headerlink" href="#pike.path.PikePath.suffix" title="Permalink to this definition">¶</a></dt>
+<dd><p>The final component’s last suffix, if any.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.suffixes">
+<em class="property">property </em><code class="sig-name descname">suffixes</code><a class="headerlink" href="#pike.path.PikePath.suffixes" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of the final component’s suffixes, if any.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.symlink_to">
+<code class="sig-name descname">symlink_to</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">target</span></em>, <em class="sig-param"><span class="n">target_is_directory</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.symlink_to"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.symlink_to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make this path a symlink pointing to the given path.</p>
+<p>Note the order of arguments (self, target) is the reverse of os.symlink’s.</p>
+<p>Does not work for absolute links.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> (<a class="reference internal" href="#pike.path.PikePath" title="pike.path.PikePath"><em>PikePath</em></a>) – The link’s target</p></li>
+<li><p><strong>target_is_directory</strong> – must be True if the target is a directory</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.touch">
+<code class="sig-name descname">touch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exist_ok</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.touch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.touch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new file or update modification time at this given path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode</strong> – The mode of the created file. NOT SUPPORTED</p></li>
+<li><p><strong>exist_ok</strong> – if True, don’t raise if the file exists</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.unlink">
+<code class="sig-name descname">unlink</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">missing_ok</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">FILE_NON_DIRECTORY_FILE</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.unlink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.unlink" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the file at this path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>missing_ok</strong> – if True, don’t raise if the file doesn’t exist</p></li>
+<li><p><strong>options</strong> – options passed to CREATE when opening the file</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.with_name">
+<code class="sig-name descname">with_name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pike.path.PikePath.with_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new path with the file name changed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.with_suffix">
+<code class="sig-name descname">with_suffix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">suffix</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pike.path.PikePath.with_suffix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new path with the file suffix changed.  If the path
+has no suffix, add given suffix.  If the given suffix is an empty
+string, remove the suffix from the path.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.write_bytes">
+<code class="sig-name descname">write_bytes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.write_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.write_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open the file pointed to in bytes mode, write data to it, and close the file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>bytes</em>) – bytes to write to the file</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>number of bytes written</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.path.PikePath.write_text">
+<code class="sig-name descname">write_text</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">errors</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/path.html#PikePath.write_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.path.PikePath.write_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open the file pointed to in text mode, write data to it, and close the file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>str</em>) – unicode string to write to the file</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>number of bytes written</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="open.html" class="btn btn-neutral float-right" title="Open" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tree_connect.html" class="btn btn-neutral float-left" title="TreeConnect" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

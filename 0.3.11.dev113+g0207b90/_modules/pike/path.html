@@ -1,0 +1,885 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pike.path &mdash; pike-smb2 0.3.11.dev113+g0207b90 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pike-smb2
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../high_level.html">High-Level API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autosummary.html">API Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model.html">Implementation Details</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pike-smb2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pike.path</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pike.path</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Path-like interface for working with a Tree object</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">PureWindowsPath</span><span class="p">,</span> <span class="n">_WindowsFlavour</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pathlib2</span> <span class="kn">import</span> <span class="n">PureWindowsPath</span><span class="p">,</span> <span class="n">_WindowsFlavour</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">model</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">ntstatus</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">nttime</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">smb2</span>
+
+
+<span class="n">MAX_SYMLINK_RECURSE</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="n">NOT_FOUND_STATUSES</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">ntstatus</span><span class="o">.</span><span class="n">STATUS_OBJECT_NAME_NOT_FOUND</span><span class="p">,</span>
+    <span class="n">ntstatus</span><span class="o">.</span><span class="n">STATUS_OBJECT_PATH_NOT_FOUND</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_PikeFlavour</span><span class="p">(</span><span class="n">_WindowsFlavour</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implement pike-specific overrides of WindowsFlavour semantics.</span>
+
+<span class="sd">    Handle the fact that ``_drv`` may be a :py:class:`pike.model.Tree` instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">casefold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">fspath</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">casefold_parts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parts</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,):</span>
+            <span class="n">fspath</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">__fspath__</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fspath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">fspath</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="n">fspath</span><span class="p">(</span><span class="n">rp</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rp</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">Tree</span><span class="p">)</span> <span class="k">else</span> <span class="n">rp</span> <span class="k">for</span> <span class="n">rp</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">]</span>
+        <span class="p">]</span>
+
+
+<span class="n">_pike_flavour</span> <span class="o">=</span> <span class="n">_PikeFlavour</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="PikePath"><a class="viewcode-back" href="../../path.html#pike.path.PikePath">[docs]</a><span class="k">class</span> <span class="nc">PikePath</span><span class="p">(</span><span class="n">PureWindowsPath</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ``Path`` subclass for :py:class:`pike.model.Tree` instances.</span>
+
+<span class="sd">    ``PikePath`` should be either directly instantiated by passing a</span>
+<span class="sd">    :py:class:`~pike.model.Tree` or by performing typical ``Path`` extension</span>
+<span class="sd">    (truediv) on a :py:class:`~pike.model.Tree` or</span>
+<span class="sd">    :py:class:`pike.TreeConnect` instance.</span>
+
+<span class="sd">    .. code-block:: python</span>
+<span class="sd">        :caption: example.py</span>
+
+<span class="sd">        import pike.path</span>
+<span class="sd">        import pike.test</span>
+
+<span class="sd">        with pike.TreeConnect() as tc:</span>
+<span class="sd">            pth = pike.path.PikePath(tc.tree)</span>
+<span class="sd">            assert (tc / &quot;subdir&quot;) == (pth / &quot;subdir&quot;)</span>
+<span class="sd">            assert (tc.tree / &quot;subdir&quot;) == (pth / &quot;subdir&quot;)</span>
+
+<span class="sd">    A ``PikePath`` is bound to a specific connection, session, and tree. If the</span>
+<span class="sd">    underlying transport is no longer valid, then the path operations will not</span>
+<span class="sd">    work.</span>
+
+<span class="sd">    An existing path, valid or invalid, and be &quot;rehomed&quot; to a different</span>
+<span class="sd">    ``PikePath`` by calling :py:func:`~pike.path.PikePath.join_from_root`,</span>
+<span class="sd">    returning a new instance with the path part replaced by that of the passed</span>
+<span class="sd">    argument.</span>
+
+<span class="sd">    .. code-block:: python</span>
+<span class="sd">        :caption: example.py</span>
+
+<span class="sd">        import pike</span>
+<span class="sd">        import pike.path</span>
+
+<span class="sd">        with pike.TreeConnect(), pike.TreeConnect() as tc1, tc2:</span>
+<span class="sd">            tc1_subdir = tc1 / &quot;subdir&quot;</span>
+<span class="sd">            tc2_subdir = pike.path.PikePath(tc2.tree).join_from_root(tc1_subdir)</span>
+<span class="sd">            assert tc1_subdir != tc2_subdir</span>
+
+<span class="sd">    Unlike ``WindowsPath``, ``PikePath`` will prefer to raise</span>
+<span class="sd">    :py:class:`pike.model.ResponseError` exceptions instead of ``OSError``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_flavour</span> <span class="o">=</span> <span class="n">_pike_flavour</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_parse_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Override _parse_args to ensure a Tree is returned as drv</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,):</span>
+            <span class="c1"># On python 2, explicitly convert future.types.newstr to native unicode type.</span>
+            <span class="kn">from</span> <span class="nn">future.types</span> <span class="kn">import</span> <span class="n">newstr</span>
+
+            <span class="c1"># ensure that `newstr` instances are passed as real `unicode`</span>
+            <span class="c1"># to avoid TypeError: can&#39;t intern subclass of string</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">unicode</span><span class="p">(</span><span class="n">pc</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pc</span><span class="p">,</span> <span class="n">newstr</span><span class="p">)</span> <span class="k">else</span> <span class="n">pc</span> <span class="k">for</span> <span class="n">pc</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span>
+        <span class="n">drv</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">parts</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">PikePath</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">_parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">model</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
+                <span class="n">drv</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">cls</span><span class="p">):</span>
+                <span class="n">drv</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_drv</span>
+        <span class="k">return</span> <span class="n">drv</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">parts</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :rtype: pike.model.Channel</span>
+<span class="sd">        :return: Channel bound to the associated tree</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_drv</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">first_channel</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">drive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :rtype: pike.model.Tree</span>
+<span class="sd">        :return: Tree forming the root of the share / path</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">PikePath</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">drive</span>
+
+    <span class="n">_tree</span> <span class="o">=</span> <span class="n">drive</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        :return: SMB path relative to the root</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_drv</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flavour</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parts</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PikePath.join_from_root"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.join_from_root">[docs]</a>    <span class="k">def</span> <span class="nf">join_from_root</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Rehome an existing absolute path for use by this PikePath&#39;s Tree.</span>
+
+<span class="sd">        :rtype: PikePath</span>
+<span class="sd">        :return: a new :py:class:`~pike.path.PikePath` by joining ``path`` to</span>
+<span class="sd">            the root of this instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">()):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="o">*</span><span class="n">path</span><span class="o">.</span><span class="n">_parts</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="o">/</span> <span class="n">path</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">cwd</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;No concept of cwd for </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">home</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;No concept of home for </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_create_follow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Call Channel.create with this Tree and path following symlinks.</span>
+
+<span class="sd">        Special kwarg, __RC_DEPTH, is used to track the recursion depth and</span>
+<span class="sd">        will raise OSError if called more than MAX_SYMLINK_RECURSE times.</span>
+
+<span class="sd">        Remaining args and kwargs are passed to create directly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">depth</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;__RC_DEPTH&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="n">MAX_SYMLINK_RECURSE</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="s2">&quot;Maximum level of symbolic links exceeded&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">model</span><span class="o">.</span><span class="n">ResponseError</span> <span class="k">as</span> <span class="n">re</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="n">ntstatus</span><span class="o">.</span><span class="n">STATUS_STOPPED_ON_SYMLINK</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;__RC_DEPTH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">join_from_root</span><span class="p">(</span>
+                <span class="n">re</span><span class="o">.</span><span class="n">response</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">error_data</span><span class="o">.</span><span class="n">substitute_name</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">_create_follow</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PikePath.stat"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.stat">[docs]</a>    <span class="k">def</span> <span class="nf">stat</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">file_information_class</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_BASIC_INFORMATION</span><span class="p">,</span>
+        <span class="n">info_type</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">SMB2_0_INFO_FILE</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform SMB2 QUERY_INFO request for the given ``file_information_class``.</span>
+
+<span class="sd">        :type file_information_class: smb2.FileInformationClass</span>
+<span class="sd">        :param file_information_class: the file information class constant</span>
+<span class="sd">            describing the type of information to retrieve</span>
+<span class="sd">        :type info_type: smb2.InfoType</span>
+<span class="sd">        :param info_type: the SMB2 query info type</span>
+<span class="sd">        :type options: smb2.CreateOptions</span>
+<span class="sd">        :param options: options passed to CREATE when opening the file</span>
+<span class="sd">        :return: single file info object corresponding to the</span>
+<span class="sd">            file_information_class requested</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_follow</span><span class="p">(</span>
+            <span class="n">access</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_READ_ATTRIBUTES</span><span class="p">,</span>
+            <span class="n">disposition</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_OPEN</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel</span><span class="o">.</span><span class="n">query_file_info</span><span class="p">(</span>
+                <span class="n">handle</span><span class="p">,</span> <span class="n">file_information_class</span><span class="p">,</span> <span class="n">info_type</span><span class="p">,</span> <span class="n">first_result_only</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="PikePath.lstat"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.lstat">[docs]</a>    <span class="k">def</span> <span class="nf">lstat</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">file_information_class</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_BASIC_INFORMATION</span><span class="p">,</span>
+        <span class="n">info_type</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">SMB2_0_INFO_FILE</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform SMB2 QUERY_INFO request for the given ``file_information_class``.</span>
+
+<span class="sd">        If this path represents a symlink, open the link itself, rather than the</span>
+<span class="sd">        target. (Intermediate links will not be followed first.)</span>
+
+<span class="sd">        :type file_information_class: smb2.FileInformationClass</span>
+<span class="sd">        :param file_information_class: the file information class constant</span>
+<span class="sd">            describing the type of information to retrieve</span>
+<span class="sd">        :type info_type: smb2.InfoType</span>
+<span class="sd">        :param info_type: the SMB2 query info type</span>
+<span class="sd">        :type options: smb2.CreateOptions</span>
+<span class="sd">        :param options: options passed to CREATE when opening the file</span>
+<span class="sd">        :return: single file info object corresponding to the</span>
+<span class="sd">            file_information_class requested</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="o">|</span> <span class="n">smb2</span><span class="o">.</span><span class="n">FILE_OPEN_REPARSE_POINT</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span>
+            <span class="n">file_information_class</span><span class="o">=</span><span class="n">file_information_class</span><span class="p">,</span>
+            <span class="n">info_type</span><span class="o">=</span><span class="n">info_type</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">chmod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;ACL modification is not supported&quot;</span><span class="p">)</span>
+
+    <span class="n">lchmod</span> <span class="o">=</span> <span class="n">chmod</span>
+
+<div class="viewcode-block" id="PikePath.exists"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.exists">[docs]</a>    <span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :type options: smb2.CreateOptions</span>
+<span class="sd">        :param options: options passed to CREATE when opening the file</span>
+<span class="sd">        :return: True if this path exists</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_follow</span><span class="p">(</span>
+                <span class="n">access</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">disposition</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_OPEN</span><span class="p">,</span>
+                <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="n">model</span><span class="o">.</span><span class="n">ResponseError</span> <span class="k">as</span> <span class="n">re</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">NOT_FOUND_STATUSES</span> <span class="o">+</span> <span class="p">(</span>
+                <span class="n">ntstatus</span><span class="o">.</span><span class="n">STATUS_FILE_IS_A_DIRECTORY</span><span class="p">,</span>
+                <span class="n">ntstatus</span><span class="o">.</span><span class="n">STATUS_NOT_A_DIRECTORY</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="k">raise</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+    <span class="k">def</span> <span class="nf">expanduser</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;expanduser() is not supported&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;group() is not supported&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PikePath.is_dir"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.is_dir">[docs]</a>    <span class="k">def</span> <span class="nf">is_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: True if this path is a directory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_DIRECTORY_FILE</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PikePath.is_file"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.is_file">[docs]</a>    <span class="k">def</span> <span class="nf">is_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: True if this path is a normal file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_NON_DIRECTORY_FILE</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PikePath.is_symlink"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.is_symlink">[docs]</a>    <span class="k">def</span> <span class="nf">is_symlink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: True if this path is a reparse point</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tree</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span>
+                <span class="n">access</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">disposition</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_OPEN</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">except</span> <span class="n">model</span><span class="o">.</span><span class="n">ResponseError</span> <span class="k">as</span> <span class="n">re</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">ntstatus</span><span class="o">.</span><span class="n">STATUS_STOPPED_ON_SYMLINK</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">NOT_FOUND_STATUSES</span><span class="p">:</span>
+                <span class="k">raise</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="PikePath.is_mount"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.is_mount">[docs]</a>    <span class="k">def</span> <span class="nf">is_mount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Note: all PikePath instances are considered to be mounts</span>
+
+<span class="sd">        :return: True if this path is a mount point</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># all paths are on SMB mount</span></div>
+
+<div class="viewcode-block" id="PikePath.is_socket"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.is_socket">[docs]</a>    <span class="k">def</span> <span class="nf">is_socket</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Note: no PikePath instances are considered to be sockets</span>
+
+<span class="sd">        :return: True if this path is a socket</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="PikePath.is_fifo"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.is_fifo">[docs]</a>    <span class="k">def</span> <span class="nf">is_fifo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Note: no PikePath instances are considered to be fifo</span>
+
+<span class="sd">        :return: True if this path is a pipe</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># might be supported some day</span></div>
+
+<div class="viewcode-block" id="PikePath.is_block_device"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.is_block_device">[docs]</a>    <span class="k">def</span> <span class="nf">is_block_device</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Note: no PikePath instances are considered to be block devices</span>
+
+<span class="sd">        :return: True if this path is a block device</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="PikePath.is_char_device"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.is_char_device">[docs]</a>    <span class="k">def</span> <span class="nf">is_char_device</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Note: no PikePath instances are considered to be char devices</span>
+
+<span class="sd">        :return: True if this path is a char device</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="PikePath.glob"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.glob">[docs]</a>    <span class="k">def</span> <span class="nf">glob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iterate over this subtree and yield all existing files matching pattern.</span>
+
+<span class="sd">        Files of any kind, including directories, that match the given relative</span>
+<span class="sd">        pattern will be yielded with the exception of special entries &quot;.&quot; and &quot;..&quot;</span>
+
+<span class="sd">        The globbing is handled on the server side, so all ``pattern`` values</span>
+<span class="sd">        must be valid according to [MS-CIFS] 2.2.1.1.3 Wildcards:</span>
+<span class="sd">        https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-cifs/dc92d939-ec45-40c8-96e5-4c4091e4ab43</span>
+
+<span class="sd">        The recursive glob &quot;**&quot; is not supported.</span>
+
+<span class="sd">        :param pattern: file search pattern</span>
+<span class="sd">        :rtype: Iterator[:py:class:`~pike.path.PikePath`]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;**&quot;</span> <span class="ow">in</span> <span class="n">pattern</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;recursive glob, &#39;**&#39;, is not supported by </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_follow</span><span class="p">(</span>
+            <span class="n">access</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">GENERIC_READ</span><span class="p">,</span>
+            <span class="n">disposition</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_OPEN</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_DIRECTORY_FILE</span><span class="p">,</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">handle</span><span class="o">.</span><span class="n">enum_directory</span><span class="p">(</span>
+                <span class="n">file_information_class</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_NAMES_INFORMATION</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="n">pattern</span>
+            <span class="p">):</span>
+                <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">file_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;..&quot;</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="k">yield</span> <span class="bp">self</span> <span class="o">/</span> <span class="n">item</span><span class="o">.</span><span class="n">file_name</span></div>
+
+<div class="viewcode-block" id="PikePath.iterdir"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.iterdir">[docs]</a>    <span class="k">def</span> <span class="nf">iterdir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iterate over this subtree and yield all existing files.</span>
+
+<span class="sd">        The special entries &quot;.&quot; and &quot;..&quot; will not be yielded.</span>
+
+<span class="sd">        :rtype: Iterator[:py:class:`~pike.path.PikePath`]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">item</span></div>
+
+    <span class="k">def</span> <span class="nf">link_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;hardlinks are not supported over SMB&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PikePath.mkdir"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.mkdir">[docs]</a>    <span class="k">def</span> <span class="nf">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new directory at this given path.</span>
+
+<span class="sd">        :param mode: The mode of the created file. NOT SUPPORTED</span>
+<span class="sd">        :param parents: if True, create all parent directories if they do not exist</span>
+<span class="sd">        :param exist_ok: if True, don&#39;t raise if the directory exists</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;`mode` argument is not handled at this time&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_follow</span><span class="p">(</span>
+                <span class="n">access</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">GENERIC_WRITE</span><span class="p">,</span>
+                <span class="n">disposition</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_CREATE</span><span class="p">,</span>
+                <span class="n">options</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_DIRECTORY_FILE</span><span class="p">,</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+                <span class="k">return</span>
+        <span class="k">except</span> <span class="n">model</span><span class="o">.</span><span class="n">ResponseError</span> <span class="k">as</span> <span class="n">re</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">ntstatus</span><span class="o">.</span><span class="n">STATUS_OBJECT_NAME_COLLISION</span> <span class="ow">and</span> <span class="n">exist_ok</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">parents</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="n">exist_ok</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PikePath.open"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.open">[docs]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">buffering</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Open the file pointed by this path and return a file object, as</span>
+<span class="sd">        the built-in open() function does.</span>
+
+<span class="sd">        Where possible, the semantics are designed to match a local open file.</span>
+
+<span class="sd">        Lease/oplock based buffering is not supported at this time. To avoid</span>
+<span class="sd">        reading stale data, or locally buffering writes, pass ``buffering=0``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">buffer_class</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BufferedReader</span>
+        <span class="n">access</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">disposition</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;r&quot;</span> <span class="ow">in</span> <span class="n">mode</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span> <span class="ow">in</span> <span class="n">mode</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span> <span class="ow">in</span> <span class="n">mode</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span> <span class="ow">in</span> <span class="n">mode</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;must have exactly one of create/read/write/append mode&quot;</span><span class="p">)</span>
+
+        <span class="c1"># File Access bits</span>
+        <span class="k">if</span> <span class="s2">&quot;r&quot;</span> <span class="ow">in</span> <span class="n">mode</span> <span class="ow">or</span> <span class="s2">&quot;+&quot;</span> <span class="ow">in</span> <span class="n">mode</span><span class="p">:</span>
+            <span class="n">access</span> <span class="o">|=</span> <span class="n">smb2</span><span class="o">.</span><span class="n">GENERIC_READ</span>
+        <span class="k">if</span> <span class="s2">&quot;a&quot;</span> <span class="ow">in</span> <span class="n">mode</span> <span class="ow">or</span> <span class="s2">&quot;x&quot;</span> <span class="ow">in</span> <span class="n">mode</span> <span class="ow">or</span> <span class="s2">&quot;w&quot;</span> <span class="ow">in</span> <span class="n">mode</span> <span class="ow">or</span> <span class="s2">&quot;+&quot;</span> <span class="ow">in</span> <span class="n">mode</span><span class="p">:</span>
+            <span class="n">access</span> <span class="o">|=</span> <span class="n">smb2</span><span class="o">.</span><span class="n">GENERIC_WRITE</span>
+            <span class="n">buffer_class</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BufferedWriter</span>
+        <span class="k">if</span> <span class="s2">&quot;+&quot;</span> <span class="ow">in</span> <span class="n">mode</span><span class="p">:</span>
+            <span class="n">buffer_class</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BufferedRandom</span>
+
+        <span class="c1"># Create disposition bits</span>
+        <span class="k">if</span> <span class="s2">&quot;r&quot;</span> <span class="ow">in</span> <span class="n">mode</span><span class="p">:</span>
+            <span class="n">disposition</span> <span class="o">=</span> <span class="n">smb2</span><span class="o">.</span><span class="n">FILE_OPEN</span>
+        <span class="k">elif</span> <span class="s2">&quot;x&quot;</span> <span class="ow">in</span> <span class="n">mode</span><span class="p">:</span>
+            <span class="n">disposition</span> <span class="o">=</span> <span class="n">smb2</span><span class="o">.</span><span class="n">FILE_CREATE</span>
+        <span class="k">elif</span> <span class="s2">&quot;a&quot;</span> <span class="ow">in</span> <span class="n">mode</span><span class="p">:</span>
+            <span class="n">disposition</span> <span class="o">=</span> <span class="n">smb2</span><span class="o">.</span><span class="n">FILE_OPEN_IF</span>
+        <span class="k">elif</span> <span class="s2">&quot;w&quot;</span> <span class="ow">in</span> <span class="n">mode</span><span class="p">:</span>
+            <span class="n">disposition</span> <span class="o">=</span> <span class="n">smb2</span><span class="o">.</span><span class="n">FILE_SUPERSEDE</span>
+
+        <span class="n">handle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_follow</span><span class="p">(</span>
+            <span class="n">access</span><span class="o">=</span><span class="n">access</span><span class="p">,</span>
+            <span class="n">disposition</span><span class="o">=</span><span class="n">disposition</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_NON_DIRECTORY_FILE</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;a&quot;</span> <span class="ow">in</span> <span class="n">mode</span><span class="p">:</span>
+            <span class="n">handle</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;b&quot;</span> <span class="ow">in</span> <span class="n">mode</span> <span class="ow">and</span> <span class="n">buffering</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">handle</span>
+        <span class="k">if</span> <span class="n">buffering</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Buffering cannot be disabled for text-mode streams&quot;</span><span class="p">)</span>
+        <span class="n">buffer_size</span> <span class="o">=</span> <span class="n">buffering</span> <span class="k">if</span> <span class="n">buffering</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">smb2</span><span class="o">.</span><span class="n">BYTES_PER_CREDIT</span>
+        <span class="n">buffered_io</span> <span class="o">=</span> <span class="n">buffer_class</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="n">buffer_size</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;b&quot;</span> <span class="ow">in</span> <span class="n">mode</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">buffered_io</span>
+        <span class="k">return</span> <span class="n">io</span><span class="o">.</span><span class="n">TextIOWrapper</span><span class="p">(</span>
+            <span class="n">buffered_io</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="n">errors</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="n">newline</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="PikePath.read_bytes"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.read_bytes">[docs]</a>    <span class="k">def</span> <span class="nf">read_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the binary contents of the pointed-to file as a bytes object.</span>
+
+<span class="sd">        :rtype: bytes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PikePath.read_text"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.read_text">[docs]</a>    <span class="k">def</span> <span class="nf">read_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the decoded contents of the pointed-to file as a string.</span>
+
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PikePath.readlink"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.readlink">[docs]</a>    <span class="k">def</span> <span class="nf">readlink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the :py:class:`~pike.path.PikePath` to which the symbolic link points.</span>
+
+<span class="sd">        :rtype: PikePath</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_follow</span><span class="p">(</span>
+            <span class="n">access</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">READ_ATTRIBUTES</span><span class="p">,</span>
+            <span class="n">disposition</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_OPEN</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_NON_DIRECTORY_FILE</span> <span class="o">|</span> <span class="n">smb2</span><span class="o">.</span><span class="n">FILE_OPEN_REPARSE_POINT</span><span class="p">,</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+            <span class="c1"># XXX: not making additional tree connects here, so absolute links</span>
+            <span class="c1"># will only work across the same share</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">join_from_root</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">get_symlink</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">substitute_name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PikePath.rename"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.rename">[docs]</a>    <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Rename the object at this path to ``target``.</span>
+
+<span class="sd">        :param target: new name</span>
+<span class="sd">        :param replace: if True, pass ``replace_if_exists`` in ``FileRenameInformation``</span>
+<span class="sd">        :rtype: PikePath</span>
+<span class="sd">        :return: path pointing to target</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">join_from_root</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_follow</span><span class="p">(</span>
+            <span class="n">access</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">DELETE</span><span class="p">,</span>
+            <span class="n">disposition</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_OPEN</span><span class="p">,</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">handle</span><span class="o">.</span><span class="n">set_file_info</span><span class="p">(</span><span class="n">smb2</span><span class="o">.</span><span class="n">FileRenameInformation</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_info</span><span class="p">:</span>
+                <span class="n">file_info</span><span class="o">.</span><span class="n">replace_if_exists</span> <span class="o">=</span> <span class="n">replace</span>
+                <span class="n">file_info</span><span class="o">.</span><span class="n">file_name</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">_path</span>
+            <span class="k">return</span> <span class="n">target</span></div>
+
+<div class="viewcode-block" id="PikePath.replace"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Same as rename, but with replace=True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PikePath.resolve"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.resolve">[docs]</a>    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Follow all symbolic links in the path and return the</span>
+<span class="sd">        :py:class:`~pike.path.PikePath` at the end of the chain.</span>
+
+<span class="sd">        Similar to ``readlink``, however this calls relies on handling the</span>
+<span class="sd">        SymbolicLinkErrorResponse during create, rather than explicitly</span>
+<span class="sd">        reading the link target via IOCTL_GET_REPARSE_POINT.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_follow</span><span class="p">(</span><span class="n">access</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">disposition</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_OPEN</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">join_from_root</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">create_request</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">rglob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;rglob is not supported by </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="PikePath.rmdir"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.rmdir">[docs]</a>    <span class="k">def</span> <span class="nf">rmdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">missing_ok</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove the directory at this path.</span>
+
+<span class="sd">        The directory must be empty.</span>
+
+<span class="sd">        :param missing_ok: if True, don&#39;t raise if the directory doesn&#39;t exist</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="n">missing_ok</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_DIRECTORY_FILE</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PikePath.samefile"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.samefile">[docs]</a>    <span class="k">def</span> <span class="nf">samefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">otherpath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determine if this path points to the same file as another path.</span>
+
+<span class="sd">        This uses ``FILE_INTERNAL_INFORMATION`` to perform the check. If the</span>
+<span class="sd">        server doesn&#39;t support this info class, NotImplementedError is raised.</span>
+
+<span class="sd">        If either path doesn&#39;t exist, return False</span>
+
+<span class="sd">        :type otherpath: PikePath</span>
+<span class="sd">        :param otherpath: the other path to compare to</span>
+<span class="sd">        :return: True if otherpath points to the same file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">my_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">file_information_class</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_INTERNAL_INFORMATION</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">model</span><span class="o">.</span><span class="n">ResponseError</span> <span class="k">as</span> <span class="n">re</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="ow">in</span> <span class="n">NOT_FOUND_STATUSES</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">raise</span>
+        <span class="k">if</span> <span class="n">my_id</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;remote filesystem does not return unique file index&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">otherpath</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+            <span class="n">otherpath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">join_from_root</span><span class="p">(</span><span class="n">otherpath</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">other_id</span> <span class="o">=</span> <span class="n">otherpath</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span>
+                <span class="n">file_information_class</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_INTERNAL_INFORMATION</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">model</span><span class="o">.</span><span class="n">ResponseError</span> <span class="k">as</span> <span class="n">re</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="ow">in</span> <span class="n">NOT_FOUND_STATUSES</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">raise</span>
+        <span class="k">return</span> <span class="n">my_id</span><span class="o">.</span><span class="n">index_number</span> <span class="o">==</span> <span class="n">other_id</span><span class="o">.</span><span class="n">index_number</span></div>
+
+<div class="viewcode-block" id="PikePath.symlink_to"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.symlink_to">[docs]</a>    <span class="k">def</span> <span class="nf">symlink_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">target_is_directory</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make this path a symlink pointing to the given path.</span>
+
+<span class="sd">        Note the order of arguments (self, target) is the reverse of os.symlink&#39;s.</span>
+
+<span class="sd">        Does not work for absolute links.</span>
+
+<span class="sd">        :type target: PikePath</span>
+<span class="sd">        :param target: The link&#39;s target</span>
+<span class="sd">        :param target_is_directory: must be True if the target is a directory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">join_from_root</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="n">smb2</span><span class="o">.</span><span class="n">FILE_DIRECTORY_FILE</span> <span class="k">if</span> <span class="n">target_is_directory</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_follow</span><span class="p">(</span>
+            <span class="n">access</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">GENERIC_WRITE</span><span class="p">,</span>
+            <span class="n">attributes</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_ATTRIBUTE_REPARSE_POINT</span><span class="p">,</span>
+            <span class="n">disposition</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_SUPERSEDE</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="n">options</span> <span class="o">|</span> <span class="n">smb2</span><span class="o">.</span><span class="n">FILE_OPEN_REPARSE_POINT</span><span class="p">,</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+            <span class="n">handle</span><span class="o">.</span><span class="n">set_symlink</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">SYMLINK_FLAG_RELATIVE</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PikePath.touch"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.touch">[docs]</a>    <span class="k">def</span> <span class="nf">touch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new file or update modification time at this given path.</span>
+
+<span class="sd">        :param mode: The mode of the created file. NOT SUPPORTED</span>
+<span class="sd">        :param exist_ok: if True, don&#39;t raise if the file exists</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;`mode` argument is not handled at this time&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">disposition</span> <span class="o">=</span> <span class="n">smb2</span><span class="o">.</span><span class="n">FILE_OPEN_IF</span> <span class="k">if</span> <span class="n">exist_ok</span> <span class="k">else</span> <span class="n">smb2</span><span class="o">.</span><span class="n">FILE_CREATE</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_follow</span><span class="p">(</span>
+            <span class="n">access</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">GENERIC_WRITE</span><span class="p">,</span>
+            <span class="n">disposition</span><span class="o">=</span><span class="n">disposition</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_NON_DIRECTORY_FILE</span><span class="p">,</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">handle</span><span class="o">.</span><span class="n">set_file_info</span><span class="p">(</span><span class="n">smb2</span><span class="o">.</span><span class="n">FileBasicInformation</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_info</span><span class="p">:</span>
+                <span class="n">file_info</span><span class="o">.</span><span class="n">change_time</span> <span class="o">=</span> <span class="n">nttime</span><span class="o">.</span><span class="n">NtTime</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="PikePath.unlink"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.unlink">[docs]</a>    <span class="k">def</span> <span class="nf">unlink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">missing_ok</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_NON_DIRECTORY_FILE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove the file at this path.</span>
+
+<span class="sd">        :param missing_ok: if True, don&#39;t raise if the file doesn&#39;t exist</span>
+<span class="sd">        :param options: options passed to CREATE when opening the file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_follow</span><span class="p">(</span>
+                <span class="n">access</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">DELETE</span><span class="p">,</span>
+                <span class="n">disposition</span><span class="o">=</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_OPEN</span><span class="p">,</span>
+                <span class="n">options</span><span class="o">=</span><span class="n">options</span> <span class="o">|</span> <span class="n">smb2</span><span class="o">.</span><span class="n">FILE_DELETE_ON_CLOSE</span><span class="p">,</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">except</span> <span class="n">model</span><span class="o">.</span><span class="n">ResponseError</span> <span class="k">as</span> <span class="n">re</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="ow">in</span> <span class="n">NOT_FOUND_STATUSES</span> <span class="ow">and</span> <span class="n">missing_ok</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">ntstatus</span><span class="o">.</span><span class="n">STATUS_STOPPED_ON_SYMLINK</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span>
+                    <span class="n">missing_ok</span><span class="o">=</span><span class="n">missing_ok</span><span class="p">,</span>
+                    <span class="n">options</span><span class="o">=</span><span class="n">options</span> <span class="o">|</span> <span class="n">smb2</span><span class="o">.</span><span class="n">FILE_OPEN_REPARSE_POINT</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">raise</span></div>
+
+<div class="viewcode-block" id="PikePath.write_bytes"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.write_bytes">[docs]</a>    <span class="k">def</span> <span class="nf">write_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Open the file pointed to in bytes mode, write data to it, and close the file.</span>
+
+<span class="sd">        :type data: bytes</span>
+<span class="sd">        :param data: bytes to write to the file</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        :return: number of bytes written</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PikePath.write_text"><a class="viewcode-back" href="../../path.html#pike.path.PikePath.write_text">[docs]</a>    <span class="k">def</span> <span class="nf">write_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Open the file pointed to in text mode, write data to it, and close the file.</span>
+
+<span class="sd">        :type data: str</span>
+<span class="sd">        :param data: unicode string to write to the file</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        :return: number of bytes written</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

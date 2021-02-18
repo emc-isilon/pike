@@ -1,0 +1,277 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Pytest Integration &mdash; pike-smb2 0.3.11.dev113+g0207b90 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Summary" href="autosummary.html" />
+    <link rel="prev" title="Open" href="open.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pike-smb2
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="high_level.html">High-Level API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tree_connect.html">TreeConnect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="path.html">PikePath</a></li>
+<li class="toctree-l2"><a class="reference internal" href="open.html">Open</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Pytest Integration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pike-treeconnect"><code class="docutils literal notranslate"><span class="pre">pike_TreeConnect</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pike-tmp-path"><code class="docutils literal notranslate"><span class="pre">pike_tmp_path</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="autosummary.html">API Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">Implementation Details</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pike-smb2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="high_level.html">High-Level API</a> &raquo;</li>
+        
+      <li>Pytest Integration</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/pytest.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pytest-integration">
+<h1>Pytest Integration<a class="headerlink" href="#pytest-integration" title="Permalink to this headline">¶</a></h1>
+<p>Pike provides pytest marks and fixtures to assist in writing SMB2 protocol
+tests using the <a class="reference external" href="https://docs.pytest.org/en/stable/">pytest</a> framework.</p>
+<p>Typically, tests using these fixtures will leverage the <code class="docutils literal notranslate"><span class="pre">PIKE_*</span></code> environment
+variables to determine where to connect and other protocol features.</p>
+<span class="target" id="module-pike.pytest_support"></span><p>Pike/pytest integration</p>
+<p>Available markers:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">require_dialect(min_dialect,</span> <span class="pre">max_dialect)</span></code>: raise a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">DialectMissing</span></code> exception if the target server does
+not support a dialect in the given range. This exception will be raised
+after Negotiate.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">require_capability(global_capabilities)</span></code>: raise a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">CapabilityMissing</span></code> exception if the target server
+does not support all of the OR’d global capability flags.  This exception
+will be raised after Negotiate.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">require_share_capability(share_capabilities)</span></code>: raise a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ShareCapabilityMissing</span></code> exception if the target
+share does not support all of the OR’d share capability flags.  This
+exception will be raised after Tree Connect.</p></li>
+</ul>
+</div></blockquote>
+<div class="section" id="pike-treeconnect">
+<h2><code class="docutils literal notranslate"><span class="pre">pike_TreeConnect</span></code><a class="headerlink" href="#pike-treeconnect" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pike.pytest_support.pike_TreeConnect">
+<code class="sig-prename descclassname">pike.pytest_support.</code><code class="sig-name descname">pike_TreeConnect</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">request</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/pytest_support.html#pike_TreeConnect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.pytest_support.pike_TreeConnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function-scope fixture returns a wrapper function around
+<a class="reference internal" href="tree_connect.html#pike.TreeConnect" title="pike.TreeConnect"><code class="xref py py-class docutils literal notranslate"><span class="pre">pike.TreeConnect</span></code></a>.</p>
+<p>The wrapper-function must be called to establish the connection and the
+returned object may be used as a contextmanager.</p>
+<p>The wrapper-function will pass through any <code class="docutils literal notranslate"><span class="pre">require_dialect</span></code>,
+<code class="docutils literal notranslate"><span class="pre">require_capabilities</span></code>, and <code class="docutils literal notranslate"><span class="pre">require_share_capabilities</span></code> marks on the
+test item and raise an exception if the target server doesn’t support the
+required values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Callable[…, pike.TreeConnect]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="pike-tmp-path">
+<h2><code class="docutils literal notranslate"><span class="pre">pike_tmp_path</span></code><a class="headerlink" href="#pike-tmp-path" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pike.pytest_support.pike_tmp_path">
+<code class="sig-prename descclassname">pike.pytest_support.</code><code class="sig-name descname">pike_tmp_path</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pike_TreeConnect</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/pytest_support.html#pike_tmp_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.pytest_support.pike_tmp_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function-scope fixture reaturns a <a class="reference internal" href="path.html#pike.path.PikePath" title="pike.path.PikePath"><code class="xref py py-class docutils literal notranslate"><span class="pre">PikePath</span></code></a> rooted at
+a timestamped subdirectory of the share.</p>
+<p>The temporary directory is not deleted during tearDown and should be
+removed by the test case itself.</p>
+<p>A function’s <a class="reference internal" href="#pike.pytest_support.pike_TreeConnect" title="pike.pytest_support.pike_TreeConnect"><code class="xref py py-func docutils literal notranslate"><span class="pre">pike_TreeConnect()</span></code></a> fixture will access the same
+share, however, via a separate SMB2 session.</p>
+</dd></dl>
+
+<p>This fixture is similar to pytest’s built in
+<a class="reference external" href="https://docs.pytest.org/en/stable/tmpdir.html#the-tmp-path-fixture">tmp_path</a>
+fixture.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="autosummary.html" class="btn btn-neutral float-right" title="API Summary" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="open.html" class="btn btn-neutral float-left" title="Open" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

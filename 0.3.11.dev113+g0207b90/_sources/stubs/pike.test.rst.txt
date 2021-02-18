@@ -1,0 +1,56 @@
+﻿pike.test
+=========
+
+.. automodule:: pike.test
+   :noindex:
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      default_client
+      samba_suite
+      suite
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Options
+      PikeTest
+      PikeTestSuite
+      RequireCapabilities
+      RequireDialect
+      RequireShareCapabilities
+      SambaPikeTestSuite
+      TreeConnect
+   
+   
+
+   
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+   
+      CapabilityMissing
+      DialectMissing
+      MissingArgument
+      SequenceError
+      ShareCapabilityMissing
+      TestRequirementNotMet
+   
+   
+
+
+

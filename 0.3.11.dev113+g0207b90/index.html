@@ -1,0 +1,353 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pike-smb2 &mdash; pike-smb2 0.3.11.dev113+g0207b90 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="High-Level API" href="high_level.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> pike-smb2
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="high_level.html">High-Level API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autosummary.html">API Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">Implementation Details</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">pike-smb2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>pike-smb2</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pike-smb2">
+<h1>pike-smb2<a class="headerlink" href="#pike-smb2" title="Permalink to this headline">¶</a></h1>
+<p>Release 0.3.11.dev113+g0207b90 (<a class="reference internal" href="#install"><span class="std std-ref">Installation</span></a>)</p>
+<div class="section" id="what-is-pike">
+<h2>What is pike<a class="headerlink" href="#what-is-pike" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">pike</span></code> is an <a class="reference external" href="https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-smb2/5606ad47-5ee0-437a-817e-70c366052962">SMB2</a>
+client implemented in Python, with a focus on <em>testability</em> and <em>extensibility</em>.</p>
+<p>It is not <strong>NOT</strong> fast.</p>
+</div>
+<div class="section" id="why-pike">
+<h2>Why pike<a class="headerlink" href="#why-pike" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">pike</span></code> provides access to windows, macOS, or samba (linux) shares
+in a platform-independent way.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pike</span></code> can be used to reproduce strange protocol interactions and
+develop regression tests. It provides deep access to view and manipulate
+protocol internals.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pike</span></code> is asynchronous, allowing many operations to be in flight at once.</p>
+</div>
+<div class="section" id="install">
+<span id="id1"></span><h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python -m pip install pike-smb2
+</pre></div>
+</div>
+<p><a class="reference external" href="https://pypi.org/project/pike-smb2/">pike-smb2 on pypi.org</a></p>
+</div>
+<div class="section" id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="connect-to-a-share-and-write-to-a-file">
+<h3>Connect to a share and write to a file<a class="headerlink" href="#connect-to-a-share-and-write-to-a-file" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pike</span> <span class="kn">import</span> <span class="n">TreeConnect</span>
+
+<span class="k">with</span> <span class="n">TreeConnect</span><span class="p">(</span><span class="n">server</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="n">creds</span><span class="o">=</span><span class="s2">&quot;myuser%S3cUrePassw0rd&quot;</span><span class="p">,</span> <span class="n">share</span><span class="o">=</span><span class="s2">&quot;stuff&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tc</span><span class="p">:</span>
+   <span class="n">subdir</span> <span class="o">=</span> <span class="n">tc</span> <span class="o">/</span> <span class="s2">&quot;fun_and_games&quot;</span>
+   <span class="n">subdir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+   <span class="p">(</span><span class="n">subdir</span> <span class="o">/</span> <span class="s2">&quot;pike1.txt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;Pike makes SMB2 look easy&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="passing-treeconnect-environment-variables">
+<h3>Passing <code class="docutils literal notranslate"><span class="pre">TreeConnect</span></code> Environment Variables<a class="headerlink" href="#passing-treeconnect-environment-variables" title="Permalink to this headline">¶</a></h3>
+<p>Hard coding addresses and credentials is fine at the REPL, but a script
+should prefer to not specify these values and fall back to the default
+environment variables:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">PIKE_SERVER</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PIKE_PORT</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PIKE_CREDS</span></code> (percent delimited)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PIKE_SHARE</span></code></p></li>
+</ul>
+</div></blockquote>
+<p>Refer to <a class="reference internal" href="tree_connect.html#pike.test.Options" title="pike.test.Options"><code class="xref py py-class docutils literal notranslate"><span class="pre">pike.test.Options</span></code></a> for a complete list of variables.</p>
+<p>Subsequent examples will not pass arguments explicitly.</p>
+</div>
+<div class="section" id="using-the-pathlike-interface">
+<h3>Using the <code class="docutils literal notranslate"><span class="pre">Pathlike</span></code> interface<a class="headerlink" href="#using-the-pathlike-interface" title="Permalink to this headline">¶</a></h3>
+<p>the <a class="reference internal" href="tree_connect.html#pike.TreeConnect" title="pike.TreeConnect"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeConnect</span></code></a> object can be used with the division operator
+to construct a <code class="docutils literal notranslate"><span class="pre">Pathlike</span></code> object, <a class="reference internal" href="path.html#pike.path.PikePath" title="pike.path.PikePath"><code class="xref py py-class docutils literal notranslate"><span class="pre">PikePath</span></code></a>. The
+returned instance is bound to the particular tree connect and session and can
+perform most common <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#methods">Path</a>
+operations.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pike</span> <span class="kn">import</span> <span class="n">TreeConnect</span>
+<span class="kn">from</span> <span class="nn">pike.smb2</span> <span class="kn">import</span> <span class="n">FILE_STANDARD_INFORMATION</span>
+
+<span class="k">with</span> <span class="n">TreeConnect</span><span class="p">()</span> <span class="k">as</span> <span class="n">tc</span><span class="p">:</span>
+   <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="p">(</span><span class="n">tc</span> <span class="o">/</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.txt&quot;</span><span class="p">):</span>
+      <span class="n">eof</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">file_information_class</span><span class="o">=</span><span class="n">FILE_STANDARD_INFORMATION</span><span class="p">)</span><span class="o">.</span><span class="n">end_of_file</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> EOF is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">eof</span><span class="p">)</span>
+
+   <span class="n">smb_file</span> <span class="o">=</span> <span class="p">(</span><span class="n">tc</span> <span class="o">/</span> <span class="s2">&quot;filelike.txt&quot;</span><span class="p">)</span>
+   <span class="k">with</span> <span class="n">smb_file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;w+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+      <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Treat is like a local file</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+      <span class="n">fh</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+   <span class="n">smb_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pytest-integration">
+<h3>Pytest Integration<a class="headerlink" href="#pytest-integration" title="Permalink to this headline">¶</a></h3>
+<p>A <a class="reference external" href="https://docs.pytest.org/en/stable/">pytest</a> fixture,
+<a class="reference internal" href="pytest.html#pike.pytest_support.pike_TreeConnect" title="pike.pytest_support.pike_TreeConnect"><code class="xref py py-func docutils literal notranslate"><span class="pre">pike_TreeConnect()</span></code></a> provides access to the
+<a class="reference internal" href="tree_connect.html#pike.TreeConnect" title="pike.TreeConnect"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeConnect</span></code></a> object with dialect and capability requirement
+marks applied.</p>
+<p>Additionally, the <a class="reference internal" href="pytest.html#pike.pytest_support.pike_tmp_path" title="pike.pytest_support.pike_tmp_path"><code class="xref py py-func docutils literal notranslate"><span class="pre">pike_tmp_path()</span></code></a> fixture
+provides a <code class="docutils literal notranslate"><span class="pre">Pathlike</span></code> object pointing to the default SMB server / share,
+similar to pytest’s built in <a class="reference external" href="https://docs.pytest.org/en/stable/tmpdir.html#the-tmp-path-fixture">tmp_path</a> fixture</p>
+</div>
+<div class="section" id="smb2-mapped-operations">
+<h3>SMB2 Mapped Operations<a class="headerlink" href="#smb2-mapped-operations" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference internal" href="model.html#module-pike.model" title="pike.model"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pike.model</span></code></a> provides access to the SMB2 protocol operations.</p>
+<p>Of particular interest is <code class="xref py py-func docutils literal notranslate"><span class="pre">pike.model.Channel.create()</span></code> which is used to
+open a file, returning a <a class="reference internal" href="model.html#pike.model.Future" title="pike.model.Future"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a> for a
+<a class="reference internal" href="open.html#pike.io.Open" title="pike.io.Open"><code class="xref py py-class docutils literal notranslate"><span class="pre">pike.io.Open</span></code></a> which provides the file-like API as well as convenience
+wrappers into all other <a class="reference internal" href="model.html#pike.model.Channel" title="pike.model.Channel"><code class="xref py py-class docutils literal notranslate"><span class="pre">pike.model.Channel</span></code></a> calls that take an
+<a class="reference internal" href="open.html#pike.io.Open" title="pike.io.Open"><code class="xref py py-class docutils literal notranslate"><span class="pre">Open</span></code></a> as a parameter.</p>
+</div>
+</div>
+<div class="section" id="contents">
+<h2>Contents:<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="high_level.html">High-Level API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tree_connect.html">TreeConnect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="path.html">PikePath</a></li>
+<li class="toctree-l2"><a class="reference internal" href="open.html">Open</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytest.html">Pytest Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="autosummary.html">API Summary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stubs/pike.auth.html">pike.auth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/pike.core.html">pike.core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/pike.crypto.html">pike.crypto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/pike.digest.html">pike.digest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/pike.io.html">pike.io</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/pike.model.html">pike.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/pike.netbios.html">pike.netbios</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/pike.ntlm.html">pike.ntlm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/pike.ntstatus.html">pike.ntstatus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/pike.nttime.html">pike.nttime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/pike.path.html">pike.path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/pike.pytest_support.html">pike.pytest_support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/pike.smb2.html">pike.smb2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/pike.test.html">pike.test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/pike.transport.html">pike.transport</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">Implementation Details</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model.html#module-pike.model"><code class="docutils literal notranslate"><span class="pre">pike.model</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#module-pike.smb2"><code class="docutils literal notranslate"><span class="pre">pike.smb2</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#module-pike.ntstatus"><code class="docutils literal notranslate"><span class="pre">pike.ntstatus</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#module-pike.nttime"><code class="docutils literal notranslate"><span class="pre">pike.nttime</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#module-pike.transport"><code class="docutils literal notranslate"><span class="pre">pike.transport</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#module-pike.auth"><code class="docutils literal notranslate"><span class="pre">pike.auth</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#module-pike.ntlm"><code class="docutils literal notranslate"><span class="pre">pike.ntlm</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#module-pike.core"><code class="docutils literal notranslate"><span class="pre">pike.core</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#module-pike.netbios"><code class="docutils literal notranslate"><span class="pre">pike.netbios</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#module-pike.digest"><code class="docutils literal notranslate"><span class="pre">pike.digest</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html#module-pike.crypto"><code class="docutils literal notranslate"><span class="pre">pike.crypto</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="high_level.html" class="btn btn-neutral float-right" title="High-Level API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

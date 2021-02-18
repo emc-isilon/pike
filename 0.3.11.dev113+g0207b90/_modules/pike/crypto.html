@@ -1,0 +1,519 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pike.crypto &mdash; pike-smb2 0.3.11.dev113+g0207b90 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pike-smb2
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../high_level.html">High-Level API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autosummary.html">API Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model.html">Implementation Details</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pike-smb2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pike.crypto</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pike.crypto</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) 2016-2020, Dell Inc. or its subsidiaries.</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1"># See file LICENSE for licensing information.</span>
+<span class="c1">#</span>
+<span class="c1"># Module Name:</span>
+<span class="c1">#</span>
+<span class="c1">#        crypto.py</span>
+<span class="c1">#</span>
+<span class="c1"># Abstract:</span>
+<span class="c1">#</span>
+<span class="c1">#        SMB3 Encryption</span>
+<span class="c1">#</span>
+<span class="c1"># Authors: Masen Furer (masen.furer@dell.com)</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="kn">import</span> <span class="nb">map</span>
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="kn">import</span> <span class="nb">range</span>
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="kn">import</span> <span class="nb">object</span>
+
+<span class="kn">import</span> <span class="nn">array</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="kn">from</span> <span class="nn">Cryptodome.Cipher</span> <span class="kn">import</span> <span class="n">AES</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">digest</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">smb2</span>
+
+
+<div class="viewcode-block" id="random_bytes"><a class="viewcode-back" href="../../model.html#pike.crypto.random_bytes">[docs]</a><span class="k">def</span> <span class="nf">random_bytes</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate an array of random bytes.</span>
+
+<span class="sd">    :param length: How many bytes to return</span>
+<span class="sd">    :return: array.array(&#39;B&#39;) of length random bytes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">)))</span></div>
+
+
+<span class="k">def</span> <span class="nf">pad_right</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">byte</span><span class="o">=</span><span class="sa">b</span><span class="s2">&quot;</span><span class="se">\0</span><span class="s2">&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">length</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[:</span><span class="n">length</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">+=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">byte</span> <span class="o">*</span> <span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<div class="viewcode-block" id="CipherMismatch"><a class="viewcode-back" href="../../model.html#pike.crypto.CipherMismatch">[docs]</a><span class="k">class</span> <span class="nc">CipherMismatch</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Ciphers"><a class="viewcode-back" href="../../model.html#pike.crypto.Ciphers">[docs]</a><span class="k">class</span> <span class="nc">Ciphers</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">ValueEnum</span><span class="p">):</span>
+    <span class="n">SMB2_NONE_CIPHER</span> <span class="o">=</span> <span class="mh">0x0000</span>
+    <span class="n">SMB2_AES_128_CCM</span> <span class="o">=</span> <span class="mh">0x0001</span>
+    <span class="n">SMB2_AES_128_GCM</span> <span class="o">=</span> <span class="mh">0x0002</span></div>
+
+
+<span class="n">Ciphers</span><span class="o">.</span><span class="n">import_items</span><span class="p">(</span><span class="nb">globals</span><span class="p">())</span>
+
+<span class="n">cipher_map</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">SMB2_AES_128_CCM</span><span class="p">:</span> <span class="p">(</span><span class="n">AES</span><span class="o">.</span><span class="n">MODE_CCM</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span>
+    <span class="n">SMB2_AES_128_GCM</span><span class="p">:</span> <span class="p">(</span><span class="n">AES</span><span class="o">.</span><span class="n">MODE_GCM</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
+<span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">EncryptionCapabilities</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="n">context_type</span> <span class="o">=</span> <span class="n">smb2</span><span class="o">.</span><span class="n">SMB2_ENCRYPTION_CAPABILITIES</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ciphers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ciphers_count</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ciphers_count</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ciphers_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ciphers</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ciphers_count</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ciphers</span><span class="p">:</span>
+            <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ciphers_count</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint16le</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ciphers_count</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ciphers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Ciphers</span><span class="p">(</span><span class="n">cur</span><span class="o">.</span><span class="n">decode_uint16le</span><span class="p">()))</span>
+
+
+<span class="k">class</span> <span class="nc">EncryptionCapabilitiesRequest</span><span class="p">(</span>
+    <span class="n">smb2</span><span class="o">.</span><span class="n">NegotiateRequestContext</span><span class="p">,</span> <span class="n">EncryptionCapabilities</span>
+<span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="n">smb2</span><span class="o">.</span><span class="n">NegotiateRequestContext</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="n">EncryptionCapabilities</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">EncryptionCapabilitiesResponse</span><span class="p">(</span>
+    <span class="n">smb2</span><span class="o">.</span><span class="n">NegotiateResponseContext</span><span class="p">,</span> <span class="n">EncryptionCapabilities</span>
+<span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="n">smb2</span><span class="o">.</span><span class="n">NegotiateResponseContext</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="n">EncryptionCapabilities</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TransformHeader"><a class="viewcode-back" href="../../model.html#pike.crypto.TransformHeader">[docs]</a><span class="k">class</span> <span class="nc">TransformHeader</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    TransformHeader is designed to be a transparent slip attached to a Netbios</span>
+<span class="sd">    frame object (specified as parent). During serialization, if a Netbios frame</span>
+<span class="sd">    contains an attribute &quot;transform&quot;, then that object&#39;s encode method will be</span>
+<span class="sd">    called instead of each child frames&#39; encode method. This frame is responsible</span>
+<span class="sd">    for both encrypting and decrypting Smb2 frames according to an attached</span>
+<span class="sd">    encryption context.</span>
+
+<span class="sd">    If the encryption_context is not explicitly specified, then it will be looked</span>
+<span class="sd">    up based on session_id from the parent Netbios frame&#39;s connection reference</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">LOG_CHILDREN_COUNT</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">LOG_CHILDREN_EXPAND</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">protocol_id</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\xfd</span><span class="s2">SMB&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signature</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># the value of nonce is always used in the encryption routine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nonce</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span><span class="p">,</span> <span class="p">[</span><span class="mi">255</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span><span class="p">))</span>
+        <span class="c1"># if wire_nonce is set, it will be sent on the wire instead of nonce</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wire_nonce</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_message_size</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reserved</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags</span> <span class="o">=</span> <span class="mh">0x1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encryption_context</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_authenticated_data_buf</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_smb2_frames</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">_log_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">components</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_str_children</span><span class="p">())</span>
+        <span class="k">return</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_children</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">_children</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_smb2_frames</span>
+
+    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smb2_frame</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">smb2_frame</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_smb2_frames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">smb2_frame</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_encode_header</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_encode_smb2</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_encode_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="c1"># look up the encryption context if not specified</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">encryption_context</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">encryption_context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">encryption_context</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session_id</span>
+            <span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol_id</span><span class="p">)</span>
+
+        <span class="c1"># the signature will be written in _encode_smb2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signature_offset</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">offset</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">advanceto</span><span class="p">(</span><span class="n">cur</span> <span class="o">+</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="c1"># the crypto header will be written in _encode_smb2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crypto_header_offset</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">offset</span>
+        <span class="c1"># save a space for the wire nonce</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wire_nonce_hole</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">hole</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;</span><span class="se">\0</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">advanceto</span><span class="p">(</span><span class="n">cur</span> <span class="o">+</span> <span class="mi">16</span><span class="p">)</span>
+
+        <span class="c1"># the following fields are part of AdditionalAuthenticatedData and are</span>
+        <span class="c1"># used as inputs to the AES cipher</span>
+        <span class="n">aad_cur</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">Cursor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">additional_authenticated_data_buf</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># nonce field size is 16 bytes right padded with zeros</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nonce</span> <span class="o">=</span> <span class="n">pad_right</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nonce</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="n">aad_cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nonce</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_message_size_hole</span> <span class="o">=</span> <span class="n">aad_cur</span><span class="o">.</span><span class="n">hole</span><span class="o">.</span><span class="n">encode_uint32le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reserved</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reserved</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">aad_cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reserved</span><span class="p">)</span>  <span class="c1"># reserved</span>
+        <span class="n">aad_cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">)</span>
+        <span class="n">aad_cur</span><span class="o">.</span><span class="n">encode_uint64le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session_id</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_encode_smb2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="c1"># serialize all chained Smb2 commands into one buffer</span>
+        <span class="n">original_message_buf</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">)</span>
+        <span class="n">original_message_cur</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">Cursor</span><span class="p">(</span><span class="n">original_message_buf</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">smb_frame</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">:</span>
+            <span class="n">smb_frame</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">original_message_cur</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_message_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">original_message_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">original_message_buf</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_message_size_hole</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_message_size</span><span class="p">)</span>
+        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ciphertext</span><span class="p">,</span> <span class="n">crypto_hmac</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encryption_context</span><span class="o">.</span><span class="n">encrypt</span><span class="p">(</span>
+            <span class="n">original_message_buf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_authenticated_data_buf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonce</span>
+        <span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ciphertext</span><span class="p">)</span>
+
+        <span class="c1"># fill in the signature hole</span>
+        <span class="n">sig_cur</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">Cursor</span><span class="p">(</span><span class="n">cur</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">signature_offset</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">signature</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signature</span> <span class="o">=</span> <span class="n">crypto_hmac</span>
+        <span class="n">sig_cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signature</span><span class="p">)</span>
+
+        <span class="c1"># fill in the header</span>
+        <span class="n">aad_cur</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">Cursor</span><span class="p">(</span><span class="n">cur</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crypto_header_offset</span><span class="p">)</span>
+        <span class="n">aad_cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">additional_authenticated_data_buf</span><span class="p">)</span>
+
+        <span class="c1"># fill in the wire nonce</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wire_nonce</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wire_nonce</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonce</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wire_nonce_hole</span><span class="p">(</span><span class="n">pad_right</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wire_nonce</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_decode_header</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_decode_smb2</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_decode_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">protocol_id</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signature</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_bytes</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+        <span class="c1"># the following fields are part of AdditionalAuthenticatedData and are</span>
+        <span class="c1"># used as inputs to the AES cipher</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crypto_header_start</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nonce</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_bytes</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_message_size</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint32le</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reserved</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint16le</span><span class="p">()</span>  <span class="c1"># reserved</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint16le</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint64le</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crypto_header_end</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">offset</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">encryption_context</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">encryption_context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">encryption_context</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session_id</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_decode_smb2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encrypted_data</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_message_size</span><span class="p">)</span>
+        <span class="n">crypto_header</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">crypto_header_start</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">crypto_header_end</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plaintext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encryption_context</span><span class="o">.</span><span class="n">decrypt</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">encrypted_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">signature</span><span class="p">,</span> <span class="n">crypto_header</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonce</span>
+        <span class="p">)</span>
+        <span class="c1"># scan through the plaintext for chained messages</span>
+        <span class="n">pt_cur</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">Cursor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plaintext</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">pt_cur</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plaintext</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">pt_cur</span><span class="o">.</span><span class="n">bounded</span><span class="p">(</span><span class="n">pt_cur</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+            <span class="k">while</span> <span class="n">pt_cur</span> <span class="o">&lt;</span> <span class="n">end</span><span class="p">:</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="n">pt_cur</span><span class="o">.</span><span class="n">offset</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="n">smb2</span><span class="o">.</span><span class="n">Smb2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+                <span class="n">message</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">pt_cur</span><span class="p">)</span>
+                <span class="n">message</span><span class="o">.</span><span class="n">buf</span> <span class="o">=</span> <span class="n">pt_cur</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">start</span> <span class="p">:</span> <span class="n">pt_cur</span><span class="o">.</span><span class="n">offset</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">pass</span>  <span class="c1"># verification occurs at the point of decryption</span></div>
+
+
+<div class="viewcode-block" id="CryptoKeys300"><a class="viewcode-back" href="../../model.html#pike.crypto.CryptoKeys300">[docs]</a><span class="k">class</span> <span class="nc">CryptoKeys300</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Key generation for SMB 0x300 and 0x302 &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session_key</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encryption</span> <span class="o">=</span> <span class="n">digest</span><span class="o">.</span><span class="n">derive_key</span><span class="p">(</span><span class="n">session_key</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;SMB2AESCCM&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;ServerIn </span><span class="se">\0</span><span class="s2">&quot;</span><span class="p">)[</span>
+            <span class="p">:</span><span class="mi">16</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decryption</span> <span class="o">=</span> <span class="n">digest</span><span class="o">.</span><span class="n">derive_key</span><span class="p">(</span><span class="n">session_key</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;SMB2AESCCM&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;ServerOut</span><span class="se">\0</span><span class="s2">&quot;</span><span class="p">)[</span>
+            <span class="p">:</span><span class="mi">16</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="CryptoKeys311"><a class="viewcode-back" href="../../model.html#pike.crypto.CryptoKeys311">[docs]</a><span class="k">class</span> <span class="nc">CryptoKeys311</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Key generation for SMB 0x311 + &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session_key</span><span class="p">,</span> <span class="n">pre_auth_integrity_hash</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encryption</span> <span class="o">=</span> <span class="n">digest</span><span class="o">.</span><span class="n">derive_key</span><span class="p">(</span>
+            <span class="n">session_key</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;SMBC2SCipherKey&quot;</span><span class="p">,</span> <span class="n">pre_auth_integrity_hash</span>
+        <span class="p">)[:</span><span class="mi">16</span><span class="p">]</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decryption</span> <span class="o">=</span> <span class="n">digest</span><span class="o">.</span><span class="n">derive_key</span><span class="p">(</span>
+            <span class="n">session_key</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;SMBS2CCipherKey&quot;</span><span class="p">,</span> <span class="n">pre_auth_integrity_hash</span>
+        <span class="p">)[:</span><span class="mi">16</span><span class="p">]</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="EncryptionContext"><a class="viewcode-back" href="../../model.html#pike.crypto.EncryptionContext">[docs]</a><span class="k">class</span> <span class="nc">EncryptionContext</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Encapsulates all information needed to encrypt and decrypt messages.</span>
+<span class="sd">    This context is attached to an SMB Session object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">ciphers</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keys</span> <span class="o">=</span> <span class="n">keys</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ciphers</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cipher_map</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">aes_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonce_length</span> <span class="o">=</span> <span class="n">cipher_map</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cipher</span> <span class="o">=</span> <span class="n">c</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">CipherMismatch</span><span class="p">(</span>
+                <span class="s2">&quot;Client did not recognize any ciphers returned by the &quot;</span>
+                <span class="s2">&quot;server: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ciphers</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">encrypt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plaintext</span><span class="p">,</span> <span class="n">authenticated_data</span><span class="p">,</span> <span class="n">nonce</span><span class="p">):</span>
+        <span class="n">enc_cipher</span> <span class="o">=</span> <span class="n">AES</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="o">.</span><span class="n">encryption</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">aes_mode</span><span class="p">,</span>
+            <span class="n">nonce</span><span class="o">=</span><span class="n">nonce</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonce_length</span><span class="p">]</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="n">enc_cipher</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">authenticated_data</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+        <span class="n">ciphertext</span><span class="p">,</span> <span class="n">signature</span> <span class="o">=</span> <span class="n">enc_cipher</span><span class="o">.</span><span class="n">encrypt_and_digest</span><span class="p">(</span><span class="n">plaintext</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">ciphertext</span><span class="p">),</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">signature</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">decrypt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ciphertext</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">authenticated_data</span><span class="p">,</span> <span class="n">nonce</span><span class="p">):</span>
+        <span class="n">dec_cipher</span> <span class="o">=</span> <span class="n">AES</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="o">.</span><span class="n">decryption</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">aes_mode</span><span class="p">,</span>
+            <span class="n">nonce</span><span class="o">=</span><span class="n">nonce</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonce_length</span><span class="p">]</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="n">dec_cipher</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">authenticated_data</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="s2">&quot;B&quot;</span><span class="p">,</span>
+            <span class="n">dec_cipher</span><span class="o">.</span><span class="n">decrypt_and_verify</span><span class="p">(</span><span class="n">ciphertext</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span> <span class="n">signature</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()),</span>
+        <span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

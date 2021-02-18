@@ -1,0 +1,325 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pike.pytest_support &mdash; pike-smb2 0.3.11.dev113+g0207b90 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pike-smb2
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../high_level.html">High-Level API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autosummary.html">API Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model.html">Implementation Details</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pike-smb2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pike.pytest_support</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pike.pytest_support</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) 2020, Dell Inc. or its subsidiaries.</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1"># See file LICENSE for licensing information.</span>
+<span class="c1">#</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Pike/pytest integration</span>
+
+<span class="sd">Available markers:</span>
+
+<span class="sd">    - ``require_dialect(min_dialect, max_dialect)``: raise a</span>
+<span class="sd">      :py:class:`~pike.test.DialectMissing` exception if the target server does</span>
+<span class="sd">      not support a dialect in the given range. This exception will be raised</span>
+<span class="sd">      after Negotiate.</span>
+<span class="sd">    - ``require_capability(global_capabilities)``: raise a</span>
+<span class="sd">      :py:class:`~pike.test.CapabilityMissing` exception if the target server</span>
+<span class="sd">      does not support all of the OR&#39;d global capability flags.  This exception</span>
+<span class="sd">      will be raised after Negotiate.</span>
+<span class="sd">    - ``require_share_capability(share_capabilities)``: raise a</span>
+<span class="sd">      :py:class:`~pike.test.ShareCapabilityMissing` exception if the target</span>
+<span class="sd">      share does not support all of the OR&#39;d share capability flags.  This</span>
+<span class="sd">      exception will be raised after Tree Connect.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">pytest</span>
+
+<span class="kn">import</span> <span class="nn">pike.test</span>
+
+
+<span class="c1"># pytest API</span>
+<span class="k">def</span> <span class="nf">pytest_configure</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    register the marks so that they show up in `pytest --markers` as well as</span>
+<span class="sd">    not raising errors in strict marker mode</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">addinivalue_line</span><span class="p">(</span>
+        <span class="s2">&quot;markers&quot;</span><span class="p">,</span>
+        <span class="p">(</span>
+            <span class="s2">&quot;require_dialect(min_dialect, max_dialect): &quot;</span>
+            <span class="s2">&quot;when using the TreeConnect fixture, if the remote server &quot;</span>
+            <span class="s2">&quot;does not advertise a dialect within the given range &quot;</span>
+            <span class="s2">&quot;then skip the test.&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">addinivalue_line</span><span class="p">(</span>
+        <span class="s2">&quot;markers&quot;</span><span class="p">,</span>
+        <span class="p">(</span>
+            <span class="s2">&quot;require_capabilities(global_capabilities): &quot;</span>
+            <span class="s2">&quot;when using the TreeConnect fixture, if the remote server &quot;</span>
+            <span class="s2">&quot;does not advertise support for all capabilities &quot;</span>
+            <span class="s2">&quot;then skip the test.&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">addinivalue_line</span><span class="p">(</span>
+        <span class="s2">&quot;markers&quot;</span><span class="p">,</span>
+        <span class="p">(</span>
+            <span class="s2">&quot;require_share_capabilities(share_capabilities): &quot;</span>
+            <span class="s2">&quot;when using the TreeConnect fixture, if the remote share &quot;</span>
+            <span class="s2">&quot;does not advertise support for all share capabilities &quot;</span>
+            <span class="s2">&quot;then skip the test.&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">get_mark_value</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">mark_name</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">mark</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">iter_markers</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">mark_name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mark</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">mark</span><span class="o">.</span><span class="n">args</span>
+        <span class="k">return</span> <span class="n">mark</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">default</span>
+
+
+<div class="viewcode-block" id="pike_TreeConnect"><a class="viewcode-back" href="../../pytest.html#pike.pytest_support.pike_TreeConnect">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">pike_TreeConnect</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function-scope fixture returns a wrapper function around</span>
+<span class="sd">    :py:class:`pike.TreeConnect`.</span>
+
+<span class="sd">    The wrapper-function must be called to establish the connection and the</span>
+<span class="sd">    returned object may be used as a contextmanager.</span>
+
+<span class="sd">    The wrapper-function will pass through any ``require_dialect``,</span>
+<span class="sd">    ``require_capabilities``, and ``require_share_capabilities`` marks on the</span>
+<span class="sd">    test item and raise an exception if the target server doesn&#39;t support the</span>
+<span class="sd">    required values.</span>
+
+<span class="sd">    :return: Callable[..., pike.TreeConnect]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">marks</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;require_dialect&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">))),</span>
+        <span class="p">(</span><span class="s2">&quot;require_capabilities&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;require_share_capabilities&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">TreeConnect</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># update requirements from markers</span>
+        <span class="k">for</span> <span class="n">mark_name</span><span class="p">,</span> <span class="n">default_value</span> <span class="ow">in</span> <span class="n">marks</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="n">mark_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">mark_name</span><span class="p">,</span> <span class="n">get_mark_value</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">node</span><span class="p">,</span> <span class="n">mark_name</span><span class="p">,</span> <span class="n">default_value</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="c1"># special case dialect range (must be a 2-tuple)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;require_dialect&quot;</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;require_dialect&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;require_dialect&quot;</span><span class="p">],</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">pike</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">TreeConnect</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># carry the docstring to the wrapper function</span>
+    <span class="n">TreeConnect</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">pike</span><span class="o">.</span><span class="n">TreeConnect</span><span class="o">.</span><span class="vm">__doc__</span>
+
+    <span class="k">return</span> <span class="n">TreeConnect</span></div>
+
+
+<div class="viewcode-block" id="pike_tmp_path"><a class="viewcode-back" href="../../pytest.html#pike.pytest_support.pike_tmp_path">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">pike_tmp_path</span><span class="p">(</span><span class="n">pike_TreeConnect</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function-scope fixture reaturns a :py:class:`~pike.path.PikePath` rooted at</span>
+<span class="sd">    a timestamped subdirectory of the share.</span>
+
+<span class="sd">    The temporary directory is not deleted during tearDown and should be</span>
+<span class="sd">    removed by the test case itself.</span>
+
+<span class="sd">    A function&#39;s :py:func:`pike_TreeConnect` fixture will access the same</span>
+<span class="sd">    share, however, via a separate SMB2 session.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">pike_TreeConnect</span><span class="p">()</span> <span class="k">as</span> <span class="n">tc</span><span class="p">:</span>
+        <span class="n">test_root</span> <span class="o">=</span> <span class="n">tc</span> <span class="o">/</span> <span class="s2">&quot;pike_</span><span class="si">{}</span><span class="s2">_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">_%H%M%S&quot;</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())[:</span><span class="mi">5</span><span class="p">])</span>
+        <span class="n">test_root</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+        <span class="k">yield</span> <span class="n">test_root</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

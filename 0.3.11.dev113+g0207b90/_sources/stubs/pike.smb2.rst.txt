@@ -1,0 +1,215 @@
+﻿pike.smb2
+=========
+
+.. automodule:: pike.smb2
+   :noindex:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Access
+      AceFlags
+      AceType
+      AclRevision
+      Alignment
+      AllocationSizeRequest
+      AppInstanceIdRequest
+      BreakLeaseFlags
+      Cancel
+      ChangeNotifyFlags
+      ChangeNotifyRequest
+      ChangeNotifyResponse
+      Characteristics
+      CloseFlags
+      CloseRequest
+      CloseResponse
+      Command
+      CommandId
+      CompletionFilter
+      CompressionFormat
+      CopyChunk
+      CopyChunkCopyRequest
+      CopyChunkCopyResponse
+      CopyChunkCopyWriteRequest
+      CopyChunkCopyWriteResponse
+      CreateDisposition
+      CreateOptions
+      CreateRequest
+      CreateRequestContext
+      CreateResponse
+      CreateResponseContext
+      DeviceType
+      Dialect
+      DurableFlags
+      DurableHandleReconnectRequest
+      DurableHandleReconnectV2Request
+      DurableHandleRequest
+      DurableHandleResponse
+      DurableHandleV2Request
+      DurableHandleV2Response
+      EchoRequest
+      EchoResponse
+      EnumerateSnapshotsRequest
+      EnumerateSnapshotsResponse
+      ErrorId
+      ErrorResponse
+      ErrorResponseContext
+      ErrorResponseDefault
+      ErrorResponseDefaultBufferSize
+      ExtendedAttributeRequest
+      FileAccessInformation
+      FileAlignmentInformation
+      FileAllInformation
+      FileAllocationInformation
+      FileAttributeTagInformation
+      FileAttributes
+      FileBasicInformation
+      FileCompressionInformation
+      FileDirectoryInformation
+      FileDispositionInformation
+      FileEaInformation
+      FileEndOfFileInformation
+      FileFsAttributeInformation
+      FileFsControlInformation
+      FileFsDeviceInformation
+      FileFsFullSizeInformation
+      FileFsObjectIdInformation
+      FileFsSizeInformation
+      FileFsVolumeInformation
+      FileFullDirectoryInformation
+      FileIdBothDirectoryInformation
+      FileIdFullDirectoryInformation
+      FileInformation
+      FileInformationClass
+      FileInternalInformation
+      FileModeInformation
+      FileNameInformation
+      FileNamesInformation
+      FileNetworkOpenInformation
+      FileNotifyInfoAction
+      FileNotifyInformation
+      FilePositionInformation
+      FileRenameInformation
+      FileSecurityInformation
+      FileStandardInformation
+      FileStreamInformation
+      FileSystemAtrribute
+      FileSystemControlFlags
+      FileSystemInformation
+      FileSystemInformationClass
+      FileValidDataLengthInformation
+      Flags
+      FlushRequest
+      FlushResponse
+      GetReparsePointRequest
+      GetReparsePointResponse
+      GlobalCaps
+      HashAlgorithms
+      InfoType
+      Information
+      IoctlCode
+      IoctlFlags
+      IoctlInput
+      IoctlOutput
+      IoctlRequest
+      IoctlResponse
+      LeaseBreakAcknowledgement
+      LeaseBreakNotification
+      LeaseBreakResponse
+      LeaseFlags
+      LeaseRequest
+      LeaseResponse
+      LeaseState
+      LockFlags
+      LockRequest
+      LockResponse
+      LogoffRequest
+      LogoffResponse
+      MaximalAccessRequest
+      MaximalAccessResponse
+      NT_ACE
+      NT_ACL
+      NT_SID
+      NegotiateContextType
+      NegotiateRequest
+      NegotiateRequestContext
+      NegotiateResponse
+      NegotiateResponseContext
+      NetworkResiliencyRequestRequest
+      NetworkResiliencyRequestResponse
+      Notification
+      OplockBreakAcknowledgement
+      OplockBreakNotification
+      OplockBreakResponse
+      OplockLevel
+      PreauthIntegrityCapabilities
+      PreauthIntegrityCapabilitiesRequest
+      PreauthIntegrityCapabilitiesResponse
+      QueryDirectoryRequest
+      QueryDirectoryResponse
+      QueryInfoRequest
+      QueryInfoResponse
+      QueryNetworkInterfaceInfoRequest
+      QueryNetworkInterfaceInfoResponse
+      QueryOnDiskIDRequest
+      QueryOnDiskIDResponse
+      ReadRequest
+      ReadResponse
+      ReparseDataBuffer
+      Request
+      RequestResumeKeyRequest
+      RequestResumeKeyResponse
+      Response
+      ScanFlags
+      SecDescControl
+      SecurityDescriptorRequest
+      SecurityInformation
+      SecurityMode
+      SessionFlags
+      SessionSetupRequest
+      SessionSetupResponse
+      SetInfoRequest
+      SetInfoResponse
+      SetReparsePointRequest
+      SetReparsePointResponse
+      SetSparseRequest
+      SetSparseResponse
+      SetZeroDataRequest
+      SetZeroDataResponse
+      ShareAccess
+      ShareCaps
+      ShareFlags
+      Smb2
+      SymbolicLinkErrorResponse
+      SymbolicLinkFlags
+      SymbolicLinkReparseBuffer
+      TimewarpTokenRequest
+      TreeConnectRequest
+      TreeConnectResponse
+      TreeDisconnectRequest
+      TreeDisconnectResponse
+      ValidateNegotiateInfoRequest
+      ValidateNegotiateInfoResponse
+      WriteFlags
+      WriteRequest
+      WriteResponse
+   
+   
+
+   
+   
+   
+
+
+

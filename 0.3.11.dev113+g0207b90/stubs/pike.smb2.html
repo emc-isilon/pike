@@ -1,0 +1,798 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pike.smb2 &mdash; pike-smb2 0.3.11.dev113+g0207b90 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pike.test" href="pike.test.html" />
+    <link rel="prev" title="pike.pytest_support" href="pike.pytest_support.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pike-smb2
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../high_level.html">High-Level API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../autosummary.html">API Summary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pike.auth.html">pike.auth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.core.html">pike.core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.crypto.html">pike.crypto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.digest.html">pike.digest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.io.html">pike.io</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.model.html">pike.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.netbios.html">pike.netbios</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.ntlm.html">pike.ntlm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.ntstatus.html">pike.ntstatus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.nttime.html">pike.nttime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.path.html">pike.path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.pytest_support.html">pike.pytest_support</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pike.smb2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.test.html">pike.test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.transport.html">pike.transport</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../model.html">Implementation Details</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pike-smb2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../autosummary.html">API Summary</a> &raquo;</li>
+        
+      <li>pike.smb2</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/stubs/pike.smb2.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pike-smb2">
+<h1>pike.smb2<a class="headerlink" href="#pike-smb2" title="Permalink to this headline">¶</a></h1>
+<p>SMB2 packet definitions</p>
+<p>This module contains definitions of SMB2 packet frames and
+associated constants and data types.</p>
+<p>Packet field names are derived by taking the name from MS-SMB2 and
+making it PEP-8 compliant. For example, FooBarBaz becomes foo_bar_baz.
+This makes it simple to correlate the code with the spec while
+maintaining a clear visual distinction between values and types.</p>
+<p class="rubric">Classes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.Access" title="pike.smb2.Access"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Access</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.AceFlags" title="pike.smb2.AceFlags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AceFlags</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.AceType" title="pike.smb2.AceType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AceType</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.AclRevision" title="pike.smb2.AclRevision"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AclRevision</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.Alignment" title="pike.smb2.Alignment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Alignment</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">AllocationSizeRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">AppInstanceIdRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.BreakLeaseFlags" title="pike.smb2.BreakLeaseFlags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BreakLeaseFlags</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cancel</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.ChangeNotifyFlags" title="pike.smb2.ChangeNotifyFlags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ChangeNotifyFlags</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ChangeNotifyRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ChangeNotifyResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.Characteristics" title="pike.smb2.Characteristics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Characteristics</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.CloseFlags" title="pike.smb2.CloseFlags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CloseFlags</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CloseRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CloseResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Command</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.CommandId" title="pike.smb2.CommandId"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CommandId</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.CompletionFilter" title="pike.smb2.CompletionFilter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CompletionFilter</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.CompressionFormat" title="pike.smb2.CompressionFormat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CompressionFormat</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CopyChunk</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CopyChunkCopyRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CopyChunkCopyResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CopyChunkCopyWriteRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CopyChunkCopyWriteResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.CreateDisposition" title="pike.smb2.CreateDisposition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CreateDisposition</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.CreateOptions" title="pike.smb2.CreateOptions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CreateOptions</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CreateRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CreateRequestContext</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CreateResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CreateResponseContext</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.DeviceType" title="pike.smb2.DeviceType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DeviceType</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.Dialect" title="pike.smb2.Dialect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dialect</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.DurableFlags" title="pike.smb2.DurableFlags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DurableFlags</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DurableHandleReconnectRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DurableHandleReconnectV2Request</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DurableHandleRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DurableHandleResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DurableHandleV2Request</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DurableHandleV2Response</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">EchoRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">EchoResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">EnumerateSnapshotsRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">EnumerateSnapshotsResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.ErrorId" title="pike.smb2.ErrorId"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ErrorId</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ErrorResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ErrorResponseContext</span></code>(parent, data_length)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ErrorResponseDefault</span></code>(parent, data_length)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ErrorResponseDefaultBufferSize</span></code>(parent, …)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ExtendedAttributeRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileAccessInformation" title="pike.smb2.FileAccessInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileAccessInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileAlignmentInformation" title="pike.smb2.FileAlignmentInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileAlignmentInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileAllInformation" title="pike.smb2.FileAllInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileAllInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileAllocationInformation" title="pike.smb2.FileAllocationInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileAllocationInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileAttributeTagInformation" title="pike.smb2.FileAttributeTagInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileAttributeTagInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileAttributes" title="pike.smb2.FileAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileAttributes</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileBasicInformation" title="pike.smb2.FileBasicInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileBasicInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileCompressionInformation" title="pike.smb2.FileCompressionInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileCompressionInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileDirectoryInformation" title="pike.smb2.FileDirectoryInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileDirectoryInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileDispositionInformation" title="pike.smb2.FileDispositionInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileDispositionInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileEaInformation" title="pike.smb2.FileEaInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileEaInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileEndOfFileInformation" title="pike.smb2.FileEndOfFileInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileEndOfFileInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileFsAttributeInformation" title="pike.smb2.FileFsAttributeInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileFsAttributeInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileFsControlInformation" title="pike.smb2.FileFsControlInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileFsControlInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileFsDeviceInformation" title="pike.smb2.FileFsDeviceInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileFsDeviceInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileFsFullSizeInformation" title="pike.smb2.FileFsFullSizeInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileFsFullSizeInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileFsObjectIdInformation" title="pike.smb2.FileFsObjectIdInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileFsObjectIdInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileFsSizeInformation" title="pike.smb2.FileFsSizeInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileFsSizeInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileFsVolumeInformation" title="pike.smb2.FileFsVolumeInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileFsVolumeInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileFullDirectoryInformation" title="pike.smb2.FileFullDirectoryInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileFullDirectoryInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileIdBothDirectoryInformation" title="pike.smb2.FileIdBothDirectoryInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileIdBothDirectoryInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileIdFullDirectoryInformation" title="pike.smb2.FileIdFullDirectoryInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileIdFullDirectoryInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileInformation" title="pike.smb2.FileInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileInformation</span></code></a>([parent, end])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileInformationClass" title="pike.smb2.FileInformationClass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileInformationClass</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileInternalInformation" title="pike.smb2.FileInternalInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileInternalInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileModeInformation" title="pike.smb2.FileModeInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileModeInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileNameInformation" title="pike.smb2.FileNameInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileNameInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileNamesInformation" title="pike.smb2.FileNamesInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileNamesInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileNetworkOpenInformation" title="pike.smb2.FileNetworkOpenInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileNetworkOpenInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileNotifyInfoAction" title="pike.smb2.FileNotifyInfoAction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileNotifyInfoAction</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileNotifyInformation</span></code>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FilePositionInformation" title="pike.smb2.FilePositionInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FilePositionInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileRenameInformation" title="pike.smb2.FileRenameInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileRenameInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileSecurityInformation" title="pike.smb2.FileSecurityInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileSecurityInformation</span></code></a>([parent, end])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileStandardInformation" title="pike.smb2.FileStandardInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileStandardInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileStreamInformation" title="pike.smb2.FileStreamInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileStreamInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileSystemAtrribute" title="pike.smb2.FileSystemAtrribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileSystemAtrribute</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileSystemControlFlags" title="pike.smb2.FileSystemControlFlags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileSystemControlFlags</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileSystemInformation" title="pike.smb2.FileSystemInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileSystemInformation</span></code></a>([parent, end])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileSystemInformationClass" title="pike.smb2.FileSystemInformationClass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileSystemInformationClass</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.FileValidDataLengthInformation" title="pike.smb2.FileValidDataLengthInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileValidDataLengthInformation</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.Flags" title="pike.smb2.Flags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Flags</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FlushRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FlushResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GetReparsePointRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GetReparsePointResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.GlobalCaps" title="pike.smb2.GlobalCaps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GlobalCaps</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.HashAlgorithms" title="pike.smb2.HashAlgorithms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HashAlgorithms</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.InfoType" title="pike.smb2.InfoType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InfoType</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.Information" title="pike.smb2.Information"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Information</span></code></a>([parent, end])</p></td>
+<td><p>Base class for all info frames.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.IoctlCode" title="pike.smb2.IoctlCode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IoctlCode</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.IoctlFlags" title="pike.smb2.IoctlFlags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IoctlFlags</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">IoctlInput</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">IoctlOutput</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">IoctlRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">IoctlResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LeaseBreakAcknowledgement</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LeaseBreakNotification</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LeaseBreakResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.LeaseFlags" title="pike.smb2.LeaseFlags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LeaseFlags</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LeaseRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LeaseResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.LeaseState" title="pike.smb2.LeaseState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LeaseState</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.LockFlags" title="pike.smb2.LockFlags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LockFlags</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.LockRequest" title="pike.smb2.LockRequest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LockRequest</span></code></a>(parent)</p></td>
+<td><p>&#64;ivar locks: A list of lock tuples, each of which consists of (offset, length, flags).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LockResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LogoffRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LogoffResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">MaximalAccessRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">MaximalAccessResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">NT_ACE</span></code>([parent, end])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">NT_ACL</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">NT_SID</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.NegotiateContextType" title="pike.smb2.NegotiateContextType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NegotiateContextType</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">NegotiateRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">NegotiateRequestContext</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">NegotiateResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">NegotiateResponseContext</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">NetworkResiliencyRequestRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">NetworkResiliencyRequestResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Notification</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">OplockBreakAcknowledgement</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">OplockBreakNotification</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">OplockBreakResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.OplockLevel" title="pike.smb2.OplockLevel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OplockLevel</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">PreauthIntegrityCapabilities</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">PreauthIntegrityCapabilitiesRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">PreauthIntegrityCapabilitiesResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QueryDirectoryRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QueryDirectoryResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QueryInfoRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QueryInfoResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QueryNetworkInterfaceInfoRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QueryNetworkInterfaceInfoResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QueryOnDiskIDRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QueryOnDiskIDResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ReadRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ReadResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ReparseDataBuffer</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Request</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">RequestResumeKeyRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">RequestResumeKeyResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Response</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.ScanFlags" title="pike.smb2.ScanFlags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ScanFlags</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.SecDescControl" title="pike.smb2.SecDescControl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SecDescControl</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SecurityDescriptorRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.SecurityInformation" title="pike.smb2.SecurityInformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SecurityInformation</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.SecurityMode" title="pike.smb2.SecurityMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SecurityMode</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.SessionFlags" title="pike.smb2.SessionFlags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SessionFlags</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SessionSetupRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SessionSetupResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SetInfoRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SetInfoResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SetReparsePointRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SetReparsePointResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SetSparseRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SetSparseResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SetZeroDataRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SetZeroDataResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.ShareAccess" title="pike.smb2.ShareAccess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ShareAccess</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.ShareCaps" title="pike.smb2.ShareCaps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ShareCaps</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.ShareFlags" title="pike.smb2.ShareFlags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ShareFlags</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Smb2</span></code>(parent[, context])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SymbolicLinkErrorResponse</span></code>(parent, data_length)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../model.html#pike.smb2.SymbolicLinkFlags" title="pike.smb2.SymbolicLinkFlags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SymbolicLinkFlags</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SymbolicLinkReparseBuffer</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimewarpTokenRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">TreeConnectRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">TreeConnectResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">TreeDisconnectRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">TreeDisconnectResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValidateNegotiateInfoRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValidateNegotiateInfoResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../model.html#pike.smb2.WriteFlags" title="pike.smb2.WriteFlags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WriteFlags</span></code></a>([value])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">WriteRequest</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">WriteResponse</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="pike.test.html" class="btn btn-neutral float-right" title="pike.test" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pike.pytest_support.html" class="btn btn-neutral float-left" title="pike.pytest_support" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,658 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pike.transport &mdash; pike-smb2 0.3.11.dev113+g0207b90 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pike-smb2
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../high_level.html">High-Level API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autosummary.html">API Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model.html">Implementation Details</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pike-smb2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pike.transport</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pike.transport</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) 2016-2020, Dell Inc. or its subsidiaries.</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1"># See file LICENSE for licensing information.</span>
+<span class="c1">#</span>
+<span class="c1"># Module Name:</span>
+<span class="c1">#</span>
+<span class="c1">#        transport.py</span>
+<span class="c1">#</span>
+<span class="c1"># Abstract:</span>
+<span class="c1">#</span>
+<span class="c1">#        Async event loop, socket handling, and polling mechanisms</span>
+<span class="c1">#</span>
+<span class="c1"># Authors: Masen Furer (masen.furer@dell.com)</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="kn">import</span> <span class="nb">object</span>
+<span class="kn">from</span> <span class="nn">errno</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">errorcode</span><span class="p">,</span>
+    <span class="n">EBADF</span><span class="p">,</span>
+    <span class="n">ECONNRESET</span><span class="p">,</span>
+    <span class="n">ENOTCONN</span><span class="p">,</span>
+    <span class="n">ESHUTDOWN</span><span class="p">,</span>
+    <span class="n">ECONNABORTED</span><span class="p">,</span>
+    <span class="n">EISCONN</span><span class="p">,</span>
+    <span class="n">EINPROGRESS</span><span class="p">,</span>
+    <span class="n">EALREADY</span><span class="p">,</span>
+    <span class="n">EWOULDBLOCK</span><span class="p">,</span>
+    <span class="n">EAGAIN</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">import</span> <span class="nn">select</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">_reraised_exceptions</span> <span class="o">=</span> <span class="p">(</span><span class="ne">KeyboardInterrupt</span><span class="p">,</span> <span class="ne">SystemExit</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Transport"><a class="viewcode-back" href="../../model.html#pike.transport.Transport">[docs]</a><span class="k">class</span> <span class="nc">Transport</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transport is responsible for managing the underlying socket, registering</span>
+<span class="sd">    for socket events, dispatching read, write, and errors to higher layers.</span>
+<span class="sd">    It is analogous to asyncore.dispatcher and is a drop in replacement for</span>
+<span class="sd">    most purposes.</span>
+
+<span class="sd">    If the alternate_poller is specified on instantiation, then the connection</span>
+<span class="sd">    will register for events on that poller as opposed to the global poller.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alternate_poller</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addr</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">socket</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fileno</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">alternate_poller</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">poller</span> <span class="o">=</span> <span class="n">alternate_poller</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">poller</span> <span class="o">=</span> <span class="n">poller</span>  <span class="c1"># global poller</span>
+
+<div class="viewcode-block" id="Transport.create_socket"><a class="viewcode-back" href="../../model.html#pike.transport.Transport.create_socket">[docs]</a>    <span class="k">def</span> <span class="nf">create_socket</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">family</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates the underlying non-blocking socket and associates it with this</span>
+<span class="sd">        Transport&#39;s underlying poller</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">family_and_type</span> <span class="o">=</span> <span class="n">family</span><span class="p">,</span> <span class="nb">type</span>
+        <span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">family</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
+        <span class="n">sock</span><span class="o">.</span><span class="n">setblocking</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_socket</span><span class="p">(</span><span class="n">sock</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Transport.set_socket"><a class="viewcode-back" href="../../model.html#pike.transport.Transport.set_socket">[docs]</a>    <span class="k">def</span> <span class="nf">set_socket</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sock</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        mirror the given Socket sock&#39;s file descriptor on the Transport and</span>
+<span class="sd">        register this Transport with the underlying poller</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">socket</span> <span class="o">=</span> <span class="n">sock</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fileno</span> <span class="o">=</span> <span class="n">sock</span><span class="o">.</span><span class="n">fileno</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">poller</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Transport.connect"><a class="viewcode-back" href="../../model.html#pike.transport.Transport.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        begin establishing a connection to the (host, port) address tuple.</span>
+
+<span class="sd">        must call create_socket first. if the underlying socket is non-blocking</span>
+<span class="sd">        then this command may return before the connection is established.</span>
+
+<span class="sd">        higher level code should wait for the handle_connect event to signal</span>
+<span class="sd">        that the endpoint is successfully connected</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">connect_ex</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">err</span> <span class="ow">in</span> <span class="p">(</span><span class="n">EINPROGRESS</span><span class="p">,</span> <span class="n">EALREADY</span><span class="p">,</span> <span class="n">EWOULDBLOCK</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">err</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">EISCONN</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addr</span> <span class="o">=</span> <span class="n">address</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handle_connect_event</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="n">errorcode</span><span class="p">[</span><span class="n">err</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Transport.close"><a class="viewcode-back" href="../../model.html#pike.transport.Transport.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        close the underlying socket connection and unregister this Transport</span>
+<span class="sd">        from the underlying poller</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">poller</span><span class="o">.</span><span class="n">del_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Transport.send"><a class="viewcode-back" href="../../model.html#pike.transport.Transport.send">[docs]</a>    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        send data bytes over the connection. if the socket would block,</span>
+<span class="sd">        schedule this Transport to be notified when the socket is available</span>
+<span class="sd">        for writing. handle_write will be called in this case.</span>
+
+<span class="sd">        returns the number of bytes sent or zero if the write would block</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">err</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">EAGAIN</span><span class="p">:</span>
+                <span class="c1"># reschedule the send when the socket is ready</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">poller</span><span class="o">.</span><span class="n">defer_write</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># raise non-retryable errors</span>
+                <span class="k">raise</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="Transport.recv"><a class="viewcode-back" href="../../model.html#pike.transport.Transport.recv">[docs]</a>    <span class="k">def</span> <span class="nf">recv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bufsize</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        recv bufsize bytes over the connection. if the socket would block,</span>
+<span class="sd">        then return an empty buffer. When the socket is available for reading</span>
+<span class="sd">        handle_read will be called.</span>
+
+<span class="sd">        returns a string representing the bytes received</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">bufsize</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">EOFError</span><span class="p">(</span><span class="s2">&quot;Remote host closed connection&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="c1"># raise non-retryable errors</span>
+            <span class="k">if</span> <span class="n">err</span><span class="o">.</span><span class="n">errno</span> <span class="o">!=</span> <span class="n">EAGAIN</span><span class="p">:</span>
+                <span class="k">raise</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="Transport.handle_connect_event"><a class="viewcode-back" href="../../model.html#pike.transport.Transport.handle_connect_event">[docs]</a>    <span class="k">def</span> <span class="nf">handle_connect_event</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        called internally when the socket becomes connected</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handle_connect</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Transport.handle_connect"><a class="viewcode-back" href="../../model.html#pike.transport.Transport.handle_connect">[docs]</a>    <span class="k">def</span> <span class="nf">handle_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        callback fired when connection is established</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Transport.handle_read"><a class="viewcode-back" href="../../model.html#pike.transport.Transport.handle_read">[docs]</a>    <span class="k">def</span> <span class="nf">handle_read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        callback fired when the socket has data available</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Transport.handle_write"><a class="viewcode-back" href="../../model.html#pike.transport.Transport.handle_write">[docs]</a>    <span class="k">def</span> <span class="nf">handle_write</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        callback fired when the socket is available for writing</span>
+
+<span class="sd">        note: unlike asyncore, write notifications are not provided by default.</span>
+<span class="sd">        this is a performance optimization because the socket is usually</span>
+<span class="sd">        available for writing, and the application usually knows when it wants</span>
+<span class="sd">        to write. There is no point in filling the event queues with</span>
+<span class="sd">        write ready messages that will be ignored if the client has no data to</span>
+<span class="sd">        send.</span>
+
+<span class="sd">        Instead, applications are expected to implement handle_write, but to</span>
+<span class="sd">        call it directly when data is to be sent. IF the socket would block,</span>
+<span class="sd">        EALREADY will be handled by the Transport. The Transport requests a</span>
+<span class="sd">        single write notification from the pollwer; when received, handle_write</span>
+<span class="sd">        will be called once signalling that the socket may now be ready to retry</span>
+
+<span class="sd">        If the application would prefer to be notified when the socket is ready</span>
+<span class="sd">        to write, transport.poller.defer_write(transport) may be called to</span>
+<span class="sd">        schedule a single handle_write callback.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Transport.handle_close"><a class="viewcode-back" href="../../model.html#pike.transport.Transport.handle_close">[docs]</a>    <span class="k">def</span> <span class="nf">handle_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        callback fired when the socket is closed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Transport.handle_error"><a class="viewcode-back" href="../../model.html#pike.transport.Transport.handle_error">[docs]</a>    <span class="k">def</span> <span class="nf">handle_error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        callback fired if a non-recoverable exception is raised</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="BasePoller"><a class="viewcode-back" href="../../model.html#pike.transport.BasePoller">[docs]</a><span class="k">class</span> <span class="nc">BasePoller</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A poller is an underlying event monitoring system. This generic class</span>
+<span class="sd">    can be built upon to implement efficient file descriptor polling methods</span>
+<span class="sd">    which are available on various platforms.</span>
+
+<span class="sd">    A minimal subclass must implement the poll() function which performs a</span>
+<span class="sd">    single iteration of the event loop across all monitored Transports and</span>
+<span class="sd">    calls process_readables and process_writables with the correct values.</span>
+
+<span class="sd">    Subclasses should, in most cases call, into BasePoller methods in order</span>
+<span class="sd">    to maintain proper accounting structures. The exception is when the poller</span>
+<span class="sd">    handles accounting itself.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        initialize the poller and register any kernel global structures</span>
+<span class="sd">        necessary to monitor the file descriptors</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connections</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deferred_writers</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+<div class="viewcode-block" id="BasePoller.add_channel"><a class="viewcode-back" href="../../model.html#pike.transport.BasePoller.add_channel">[docs]</a>    <span class="k">def</span> <span class="nf">add_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transport</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        begin monitoring the transport socket for read/connect events</span>
+
+<span class="sd">        the underlying poller should not monitor Transports for writability</span>
+<span class="sd">        except when:</span>
+
+<span class="sd">            * the Transport&#39;s connection has not yet been established</span>
+<span class="sd">            * the Transport has been passed as an argument to defer_write</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">[</span><span class="n">transport</span><span class="o">.</span><span class="n">_fileno</span><span class="p">]</span> <span class="o">=</span> <span class="n">transport</span>
+        <span class="n">transport</span><span class="o">.</span><span class="n">poller</span> <span class="o">=</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="BasePoller.del_channel"><a class="viewcode-back" href="../../model.html#pike.transport.BasePoller.del_channel">[docs]</a>    <span class="k">def</span> <span class="nf">del_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transport</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        stop monitoring the transport socket</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">[</span><span class="n">transport</span><span class="o">.</span><span class="n">_fileno</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="BasePoller.defer_write"><a class="viewcode-back" href="../../model.html#pike.transport.BasePoller.defer_write">[docs]</a>    <span class="k">def</span> <span class="nf">defer_write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transport</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        defers a write on the given transport. once the async poller determines</span>
+<span class="sd">        that the transport can be written to, handle_write will be called</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deferred_writers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">transport</span><span class="o">.</span><span class="n">_fileno</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BasePoller.loop"><a class="viewcode-back" href="../../model.html#pike.transport.BasePoller.loop">[docs]</a>    <span class="k">def</span> <span class="nf">loop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        enter the async event loop for the given timeout or number of iterations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">complete_iterations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">complete_iterations</span> <span class="o">&gt;=</span> <span class="n">count</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">start</span> <span class="o">+</span> <span class="n">timeout</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">complete_iterations</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="BasePoller.poll"><a class="viewcode-back" href="../../model.html#pike.transport.BasePoller.poll">[docs]</a>    <span class="k">def</span> <span class="nf">poll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Must be implemented by subclasses to execute a single iteration of the</span>
+<span class="sd">        event loop. Based on the outcome of the events, the following actions</span>
+<span class="sd">        MUST be performed</span>
+
+<span class="sd">            * process_readables is called with a list of file descriptors which</span>
+<span class="sd">              have data available for reading</span>
+<span class="sd">            * process_writables is called with a list of file descriptors which</span>
+<span class="sd">              have data available for writing</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;BasePoller does not have a polling mechanism&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BasePoller.process_readables"><a class="viewcode-back" href="../../model.html#pike.transport.BasePoller.process_readables">[docs]</a>    <span class="k">def</span> <span class="nf">process_readables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">readables</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        call handle_read on each applicable fd in the readables sequence and</span>
+<span class="sd">        subsequently handle_error if any exception is raised or handle_close</span>
+<span class="sd">        if the underlying socket is no longer connected</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">fileno</span> <span class="ow">in</span> <span class="n">readables</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">[</span><span class="n">fileno</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">handle_read</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
+                    <span class="n">EBADF</span><span class="p">,</span>
+                    <span class="n">ECONNRESET</span><span class="p">,</span>
+                    <span class="n">ENOTCONN</span><span class="p">,</span>
+                    <span class="n">ESHUTDOWN</span><span class="p">,</span>
+                    <span class="n">ECONNABORTED</span><span class="p">,</span>
+                <span class="p">):</span>
+                    <span class="n">t</span><span class="o">.</span><span class="n">handle_error</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">t</span><span class="o">.</span><span class="n">handle_close</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">_reraised_exceptions</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">handle_error</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BasePoller.process_writables"><a class="viewcode-back" href="../../model.html#pike.transport.BasePoller.process_writables">[docs]</a>    <span class="k">def</span> <span class="nf">process_writables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">writables</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        for each Transport t corresponding to an fd in the writables sequence,</span>
+<span class="sd">            if t is not marked as connected, call handle_connect_event</span>
+<span class="sd">            otherwise call handle_write and remove the Transport from the set</span>
+<span class="sd">            of deferred writers</span>
+<span class="sd">            process close and error events if exception is encountered</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">fileno</span> <span class="ow">in</span> <span class="n">writables</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">[</span><span class="n">fileno</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">t</span><span class="o">.</span><span class="n">connected</span><span class="p">:</span>
+                    <span class="n">t</span><span class="o">.</span><span class="n">handle_connect_event</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">fileno</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deferred_writers</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">deferred_writers</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">fileno</span><span class="p">)</span>
+                    <span class="n">t</span><span class="o">.</span><span class="n">handle_write</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
+                    <span class="n">EBADF</span><span class="p">,</span>
+                    <span class="n">ECONNRESET</span><span class="p">,</span>
+                    <span class="n">ENOTCONN</span><span class="p">,</span>
+                    <span class="n">ESHUTDOWN</span><span class="p">,</span>
+                    <span class="n">ECONNABORTED</span><span class="p">,</span>
+                <span class="p">):</span>
+                    <span class="n">t</span><span class="o">.</span><span class="n">handle_error</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">t</span><span class="o">.</span><span class="n">handle_close</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">_reraised_exceptions</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">handle_error</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="KQueuePoller"><a class="viewcode-back" href="../../model.html#pike.transport.KQueuePoller">[docs]</a><span class="k">class</span> <span class="nc">KQueuePoller</span><span class="p">(</span><span class="n">BasePoller</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implementation of KQueue, available on Mac OS and BSD derivatives</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">KQueuePoller</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kq</span> <span class="o">=</span> <span class="n">select</span><span class="o">.</span><span class="n">kqueue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="mi">10</span>
+
+<div class="viewcode-block" id="KQueuePoller.add_channel"><a class="viewcode-back" href="../../model.html#pike.transport.KQueuePoller.add_channel">[docs]</a>    <span class="k">def</span> <span class="nf">add_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transport</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">KQueuePoller</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="n">transport</span><span class="p">)</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">select</span><span class="o">.</span><span class="n">kevent</span><span class="p">(</span>
+                <span class="n">transport</span><span class="o">.</span><span class="n">_fileno</span><span class="p">,</span>
+                <span class="nb">filter</span><span class="o">=</span><span class="n">select</span><span class="o">.</span><span class="n">KQ_FILTER_READ</span><span class="p">,</span>
+                <span class="n">flags</span><span class="o">=</span><span class="n">select</span><span class="o">.</span><span class="n">KQ_EV_ADD</span> <span class="o">|</span> <span class="n">select</span><span class="o">.</span><span class="n">KQ_EV_ENABLE</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">select</span><span class="o">.</span><span class="n">kevent</span><span class="p">(</span>
+                <span class="n">transport</span><span class="o">.</span><span class="n">_fileno</span><span class="p">,</span>
+                <span class="nb">filter</span><span class="o">=</span><span class="n">select</span><span class="o">.</span><span class="n">KQ_FILTER_WRITE</span><span class="p">,</span>
+                <span class="n">flags</span><span class="o">=</span><span class="p">(</span><span class="n">select</span><span class="o">.</span><span class="n">KQ_EV_ADD</span> <span class="o">|</span> <span class="n">select</span><span class="o">.</span><span class="n">KQ_EV_ENABLE</span> <span class="o">|</span> <span class="n">select</span><span class="o">.</span><span class="n">KQ_EV_ONESHOT</span><span class="p">),</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kq</span><span class="o">.</span><span class="n">control</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="KQueuePoller.defer_write"><a class="viewcode-back" href="../../model.html#pike.transport.KQueuePoller.defer_write">[docs]</a>    <span class="k">def</span> <span class="nf">defer_write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transport</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">KQueuePoller</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">defer_write</span><span class="p">(</span><span class="n">transport</span><span class="p">)</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">select</span><span class="o">.</span><span class="n">kevent</span><span class="p">(</span>
+                <span class="n">transport</span><span class="o">.</span><span class="n">_fileno</span><span class="p">,</span>
+                <span class="nb">filter</span><span class="o">=</span><span class="n">select</span><span class="o">.</span><span class="n">KQ_FILTER_WRITE</span><span class="p">,</span>
+                <span class="n">flags</span><span class="o">=</span><span class="p">(</span><span class="n">select</span><span class="o">.</span><span class="n">KQ_EV_ADD</span> <span class="o">|</span> <span class="n">select</span><span class="o">.</span><span class="n">KQ_EV_ENABLE</span> <span class="o">|</span> <span class="n">select</span><span class="o">.</span><span class="n">KQ_EV_ONESHOT</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kq</span><span class="o">.</span><span class="n">control</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="KQueuePoller.poll"><a class="viewcode-back" href="../../model.html#pike.transport.KQueuePoller.poll">[docs]</a>    <span class="k">def</span> <span class="nf">poll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kq</span><span class="o">.</span><span class="n">control</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">readables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">writables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">filter</span> <span class="o">==</span> <span class="n">select</span><span class="o">.</span><span class="n">KQ_FILTER_READ</span><span class="p">:</span>
+                <span class="n">readables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">ident</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">ev</span><span class="o">.</span><span class="n">filter</span> <span class="o">==</span> <span class="n">select</span><span class="o">.</span><span class="n">KQ_FILTER_WRITE</span><span class="p">:</span>
+                <span class="n">writables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">ident</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_readables</span><span class="p">(</span><span class="n">readables</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_writables</span><span class="p">(</span><span class="n">writables</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="SelectPoller"><a class="viewcode-back" href="../../model.html#pike.transport.SelectPoller">[docs]</a><span class="k">class</span> <span class="nc">SelectPoller</span><span class="p">(</span><span class="n">BasePoller</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implementation of select, available on most platforms as a fallback.</span>
+
+<span class="sd">    Roughly equivalent performance to using asyncore</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SelectPoller.poll"><a class="viewcode-back" href="../../model.html#pike.transport.SelectPoller.poll">[docs]</a>    <span class="k">def</span> <span class="nf">poll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">non_connected</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">_fileno</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">t</span><span class="o">.</span><span class="n">connected</span>
+        <span class="p">]</span>
+        <span class="n">readers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">writers</span> <span class="o">=</span> <span class="n">non_connected</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deferred_writers</span><span class="p">)</span>
+        <span class="n">readables</span><span class="p">,</span> <span class="n">writables</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">select</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">readers</span><span class="p">,</span> <span class="n">writers</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_readables</span><span class="p">(</span><span class="n">readables</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_writables</span><span class="p">(</span><span class="n">writables</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="PollPoller"><a class="viewcode-back" href="../../model.html#pike.transport.PollPoller">[docs]</a><span class="k">class</span> <span class="nc">PollPoller</span><span class="p">(</span><span class="n">BasePoller</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implementation of poll, available on Linux</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PollPoller</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">select</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_events</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">select</span><span class="o">.</span><span class="n">POLLIN</span>
+            <span class="o">|</span> <span class="n">select</span><span class="o">.</span><span class="n">POLLERR</span>
+            <span class="o">|</span> <span class="n">select</span><span class="o">.</span><span class="n">POLLHUP</span>
+            <span class="o">|</span> <span class="n">select</span><span class="o">.</span><span class="n">POLLNVAL</span>
+            <span class="o">|</span> <span class="n">select</span><span class="o">.</span><span class="n">POLLMSG</span>
+            <span class="o">|</span> <span class="n">select</span><span class="o">.</span><span class="n">POLLPRI</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_events</span> <span class="o">=</span> <span class="n">select</span><span class="o">.</span><span class="n">POLLOUT</span>
+
+<div class="viewcode-block" id="PollPoller.add_channel"><a class="viewcode-back" href="../../model.html#pike.transport.PollPoller.add_channel">[docs]</a>    <span class="k">def</span> <span class="nf">add_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transport</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PollPoller</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="n">transport</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">transport</span><span class="o">.</span><span class="n">_fileno</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_events</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_events</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PollPoller.del_channel"><a class="viewcode-back" href="../../model.html#pike.transport.PollPoller.del_channel">[docs]</a>    <span class="k">def</span> <span class="nf">del_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transport</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PollPoller</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">del_channel</span><span class="p">(</span><span class="n">transport</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">unregister</span><span class="p">(</span><span class="n">transport</span><span class="o">.</span><span class="n">_fileno</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PollPoller.defer_write"><a class="viewcode-back" href="../../model.html#pike.transport.PollPoller.defer_write">[docs]</a>    <span class="k">def</span> <span class="nf">defer_write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transport</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PollPoller</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">defer_write</span><span class="p">(</span><span class="n">transport</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">transport</span><span class="o">.</span><span class="n">_fileno</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_events</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_events</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PollPoller.poll"><a class="viewcode-back" href="../../model.html#pike.transport.PollPoller.poll">[docs]</a>    <span class="k">def</span> <span class="nf">poll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">poll</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">readables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">writables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">fd</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">event</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_events</span><span class="p">:</span>
+                <span class="n">readables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">event</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_events</span><span class="p">:</span>
+                <span class="n">writables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_events</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_readables</span><span class="p">(</span><span class="n">readables</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_writables</span><span class="p">(</span><span class="n">writables</span><span class="p">)</span></div></div>
+
+
+<span class="c1"># Global poller / loop function for simple use cases</span>
+<span class="c1"># more advanced tests or frameworks may use a custom</span>
+<span class="c1"># poller implementation by setting a poller object onto</span>
+<span class="c1"># a group of transports.</span>
+<span class="c1"># The global poller will use the best polling mechanism available on the system</span>
+<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">select</span><span class="p">,</span> <span class="s2">&quot;kqueue&quot;</span><span class="p">):</span>
+    <span class="n">poller</span> <span class="o">=</span> <span class="n">KQueuePoller</span><span class="p">()</span>
+<span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">select</span><span class="p">,</span> <span class="s2">&quot;poll&quot;</span><span class="p">):</span>
+    <span class="n">poller</span> <span class="o">=</span> <span class="n">PollPoller</span><span class="p">()</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">poller</span> <span class="o">=</span> <span class="n">SelectPoller</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">loop</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">poller</span><span class="o">.</span><span class="n">loop</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

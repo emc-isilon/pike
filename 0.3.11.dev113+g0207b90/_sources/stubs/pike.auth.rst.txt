@@ -1,0 +1,37 @@
+﻿pike.auth
+=========
+
+.. automodule:: pike.auth
+   :noindex:
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      split_credentials
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      KerberosProvider
+      NtlmProvider
+   
+   
+
+   
+   
+   
+
+
+

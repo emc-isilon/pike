@@ -1,0 +1,1922 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Full API &mdash; pike-smb2 0.3.11.dev113+g0207b90 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="pike.transport" href="stubs/pike.transport.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pike-smb2
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="high_level.html">High-Level API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autosummary.html">API Summary</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Implementation Details</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-pike.model"><code class="docutils literal notranslate"><span class="pre">pike.model</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pike.smb2"><code class="docutils literal notranslate"><span class="pre">pike.smb2</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pike.ntstatus"><code class="docutils literal notranslate"><span class="pre">pike.ntstatus</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pike.nttime"><code class="docutils literal notranslate"><span class="pre">pike.nttime</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pike.transport"><code class="docutils literal notranslate"><span class="pre">pike.transport</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pike.auth"><code class="docutils literal notranslate"><span class="pre">pike.auth</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pike.ntlm"><code class="docutils literal notranslate"><span class="pre">pike.ntlm</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pike.core"><code class="docutils literal notranslate"><span class="pre">pike.core</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pike.netbios"><code class="docutils literal notranslate"><span class="pre">pike.netbios</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pike.digest"><code class="docutils literal notranslate"><span class="pre">pike.digest</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pike.crypto"><code class="docutils literal notranslate"><span class="pre">pike.crypto</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pike-smb2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Full API</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/model.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="full-api">
+<h1>Full API<a class="headerlink" href="#full-api" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pike.model">
+<span id="pike-model"></span><h2><code class="docutils literal notranslate"><span class="pre">pike.model</span></code><a class="headerlink" href="#module-pike.model" title="Permalink to this headline">¶</a></h2>
+<p>SMB2 Object Model.</p>
+<p>This module contains an implementation of the SMB2 client object model,
+allowing channels, sessions, tree connections, opens, and leases
+to be established and tracked.  It provides convenience functions
+for exercising common elements of the protocol without manually
+constructing packets.</p>
+<dl class="py class">
+<dt id="pike.model.Channel">
+<em class="property">class </em><code class="sig-prename descclassname">pike.model.</code><code class="sig-name descname">Channel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">connection</span></em>, <em class="sig-param"><span class="n">session</span></em>, <em class="sig-param"><span class="n">signing_key</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Channel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>SMB2 communication channel associated with an underlying
+<a class="reference internal" href="#pike.model.Connection" title="pike.model.Connection"><code class="xref py py-class docutils literal notranslate"><span class="pre">Connection</span></code></a> and <a class="reference internal" href="#pike.model.Session" title="pike.model.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a>.</p>
+<p>All post-authentication protocol commands have blocking and non-blocking
+helper methods defined in this class.</p>
+<dl class="py method">
+<dt id="pike.model.Channel.copychunk">
+<code class="sig-name descname">copychunk</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">source_file</span></em>, <em class="sig-param"><span class="n">target_file</span></em>, <em class="sig-param"><span class="n">chunks</span></em>, <em class="sig-param"><span class="n">resume_key</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">write_flag</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Channel.copychunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Channel.copychunk" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_file</strong> – <code class="xref py py-obj docutils literal notranslate"><span class="pre">Open</span></code></p></li>
+<li><p><strong>target_file</strong> – <code class="xref py py-obj docutils literal notranslate"><span class="pre">Open</span></code></p></li>
+<li><p><strong>chunks</strong> – sequence of tuples (source_offset, target_offset, length)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Channel.copychunk_request">
+<code class="sig-name descname">copychunk_request</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">source_file</span></em>, <em class="sig-param"><span class="n">target_file</span></em>, <em class="sig-param"><span class="n">chunks</span></em>, <em class="sig-param"><span class="n">resume_key</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">write_flag</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Channel.copychunk_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Channel.copychunk_request" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_file</strong> – <code class="xref py py-obj docutils literal notranslate"><span class="pre">Open</span></code></p></li>
+<li><p><strong>target_file</strong> – <code class="xref py py-obj docutils literal notranslate"><span class="pre">Open</span></code></p></li>
+<li><p><strong>chunks</strong> – sequence of tuples (source_offset, target_offset, length)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Channel.lease_break_acknowledgement">
+<code class="sig-name descname">lease_break_acknowledgement</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree</span></em>, <em class="sig-param"><span class="n">notify</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Channel.lease_break_acknowledgement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Channel.lease_break_acknowledgement" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tree</strong> – <a class="reference internal" href="#pike.model.Tree" title="pike.model.Tree"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Tree</span></code></a> which the lease is taken against</p></li>
+<li><p><strong>notify</strong> – <code class="xref py py-obj docutils literal notranslate"><span class="pre">Smb2</span></code> frame containing a <code class="xref py py-obj docutils literal notranslate"><span class="pre">LeaseBreakRequest</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a <code class="xref py py-obj docutils literal notranslate"><span class="pre">LeaseBreakAcknowledgement</span></code> with some fields pre-populated</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Channel.lock">
+<code class="sig-name descname">lock</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">handle</span></em>, <em class="sig-param"><span class="n">locks</span></em>, <em class="sig-param"><span class="n">sequence</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Channel.lock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Channel.lock" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>locks</strong> – A list of lock tuples, each of which consists of (offset, length, flags).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Channel.lock_request">
+<code class="sig-name descname">lock_request</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">handle</span></em>, <em class="sig-param"><span class="n">locks</span></em>, <em class="sig-param"><span class="n">sequence</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Channel.lock_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Channel.lock_request" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>locks</strong> – A list of lock tuples, each of which consists of (offset, length, flags).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Channel.oplock_break_acknowledgement">
+<code class="sig-name descname">oplock_break_acknowledgement</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fh</span></em>, <em class="sig-param"><span class="n">notify</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Channel.oplock_break_acknowledgement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Channel.oplock_break_acknowledgement" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fh</strong> – Acknowledge break on this <code class="xref py py-obj docutils literal notranslate"><span class="pre">Open</span></code></p></li>
+<li><p><strong>notify</strong> – <code class="xref py py-obj docutils literal notranslate"><span class="pre">Smb2</span></code> frame containing a <code class="xref py py-obj docutils literal notranslate"><span class="pre">OplockBreakRequest</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>an <code class="xref py py-obj docutils literal notranslate"><span class="pre">OplockBreakAcknowledgement</span></code> with some fields pre-populated</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Channel.write_request">
+<code class="sig-name descname">write_request</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">offset</span></em>, <em class="sig-param"><span class="n">buffer</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">remaining_bytes</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">flags</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Channel.write_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Channel.write_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a pike.smb2.WriteRequest from the given parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> – <code class="xref py py-obj docutils literal notranslate"><span class="pre">Open</span></code></p></li>
+<li><p><strong>offset</strong> – int offset into the file</p></li>
+<li><p><strong>buffer</strong> – bytes or array.array(‘B’). If a unicode str is passed, it
+can only contain ascii characters and a warning will be raised.</p></li>
+<li><p><strong>remaining_bytes</strong> – </p></li>
+<li><p><strong>flags</strong> – <a class="reference internal" href="#pike.smb2.WriteFlags" title="pike.smb2.WriteFlags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pike.smb2.WriteFlags</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Channel.zero_data">
+<code class="sig-name descname">zero_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree</span></em>, <em class="sig-param"><span class="n">src_offsets</span></em>, <em class="sig-param"><span class="n">dst_offsets</span></em>, <em class="sig-param"><span class="n">src_filename</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Channel.zero_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Channel.zero_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a FSCTL_SET_ZERO_DATA ioctl request</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.model.Client">
+<em class="property">class </em><code class="sig-prename descclassname">pike.model.</code><code class="sig-name descname">Client</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dialects</span><span class="o">=</span><span class="default_value">[DIALECT_SMB2_002, DIALECT_SMB2_1, DIALECT_SMB3_0, DIALECT_SMB3_0_2, DIALECT_SMB3_1_1]</span></em>, <em class="sig-param"><span class="n">capabilities</span><span class="o">=</span><span class="default_value">SMB2_GLOBAL_CAP_DFS | SMB2_GLOBAL_CAP_LEASING | SMB2_GLOBAL_CAP_LARGE_MTU | SMB2_GLOBAL_CAP_MULTI_CHANNEL | SMB2_GLOBAL_CAP_PERSISTENT_HANDLES | SMB2_GLOBAL_CAP_DIRECTORY_LEASING | SMB2_GLOBAL_CAP_ENCRYPTION</span></em>, <em class="sig-param"><span class="n">security_mode</span><span class="o">=</span><span class="default_value">SMB2_NEGOTIATE_SIGNING_ENABLED</span></em>, <em class="sig-param"><span class="n">client_guid</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Client" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maintains all state associated with an SMB2/3 client.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dialects</strong> – A list of supported dialects</p></li>
+<li><p><strong>capabilities</strong> – Capabilities flags</p></li>
+<li><p><strong>security_mode</strong> – Security mode flags</p></li>
+<li><p><strong>client_guid</strong> – Client GUID</p></li>
+<li><p><strong>channel_sequence</strong> – Current channel sequence number</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="pike.model.Client.callback">
+<code class="sig-name descname">callback</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em>, <em class="sig-param"><span class="n">cb</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Client.callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Client.callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a callback function for the context block, then unregister it</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Client.connect">
+<code class="sig-name descname">connect</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">server</span></em>, <em class="sig-param"><span class="n">port</span><span class="o">=</span><span class="default_value">445</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Client.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Client.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a connection.</p>
+<p>Returns a new <a class="reference internal" href="#pike.model.Connection" title="pike.model.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> object connected to the given server and port.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – The server to connect to.</p></li>
+<li><p><strong>port</strong> – The port to connect to.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Client.connect_submit">
+<code class="sig-name descname">connect_submit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">server</span></em>, <em class="sig-param"><span class="n">port</span><span class="o">=</span><span class="default_value">445</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Client.connect_submit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Client.connect_submit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a connection.</p>
+<p>Returns a new <a class="reference internal" href="#pike.model.Future" title="pike.model.Future"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Future</span></code></a> object for the <a class="reference internal" href="#pike.model.Connection" title="pike.model.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> being established
+asynchronously to the given server and port.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – The server to connect to.</p></li>
+<li><p><strong>port</strong> – The port to connect to.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Client.lease">
+<code class="sig-name descname">lease</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree</span></em>, <em class="sig-param"><span class="n">lease_res</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Client.lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Client.lease" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create or look up lease object.</p>
+<p>Returns a lease object based on a <a class="reference internal" href="#pike.model.Tree" title="pike.model.Tree"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Tree</span></code></a> and a
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">smb2.LeaseResponse</span></code>.  The lease object is created
+if it does not already exist.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tree</strong> – The tree on which the lease request was issued.</p></li>
+<li><p><strong>lease_res</strong> – The lease create context response.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Client.lease_break">
+<code class="sig-name descname">lease_break</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lease_key</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Client.lease_break"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Client.lease_break" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for and return lease break notification.</p>
+<p>Equivalent to <code class="docutils literal notranslate"><span class="pre">lease_break_future(file_id).result()</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Client.lease_break_future">
+<code class="sig-name descname">lease_break_future</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lease_key</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Client.lease_break_future"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Client.lease_break_future" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create future for lease break.</p>
+<p>Returns a <a class="reference internal" href="#pike.model.Future" title="pike.model.Future"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Future</span></code></a> object which will be completed when
+a lease break occurs.  The result will be the <code class="xref py py-obj docutils literal notranslate"><span class="pre">smb2.Smb2</span></code> frame
+of the break notification packet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>lease_key</strong> – The lease key for the lease.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Client.oplock_break">
+<code class="sig-name descname">oplock_break</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Client.oplock_break"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Client.oplock_break" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for and return oplock break notification.</p>
+<p>Equivalent to <code class="docutils literal notranslate"><span class="pre">oplock_break_future(file_id).result()</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Client.oplock_break_future">
+<code class="sig-name descname">oplock_break_future</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Client.oplock_break_future"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Client.oplock_break_future" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create future for oplock break.</p>
+<p>Returns a <a class="reference internal" href="#pike.model.Future" title="pike.model.Future"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Future</span></code></a> object which will be completed when
+an oplock break occurs.  The result will be the <code class="xref py py-obj docutils literal notranslate"><span class="pre">smb2.Smb2</span></code> frame
+of the break notification packet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_id</strong> (<em>(</em><em>number</em><em>, </em><em>number</em><em>)</em>) – The file ID of the oplocked file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Client.register_callback">
+<code class="sig-name descname">register_callback</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em>, <em class="sig-param"><span class="n">cb</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Client.register_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Client.register_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers a callback function, cb for the given event.
+When the event fires, cb will be called with the relevant top-level
+Netbios frame as the single paramter.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Client.restrict_dialects">
+<code class="sig-name descname">restrict_dialects</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">min_dialect</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_dialect</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Client.restrict_dialects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Client.restrict_dialects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the list of SMB2 dialects this Client will advertise support for.</p>
+<p>This call will only remove dialects from the list.</p>
+<p>Dialects should be from pike.smb2.Dialect enum, but technically may be any
+int or float.</p>
+<p>If either of min_dialect or max_dialect is None, the minimum or maximum dialect
+supported will be used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min_dialect</strong> – The minimum dialect to support (inclusive)</p></li>
+<li><p><strong>max_dialect</strong> – The maximum dialect to support (inclusive)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Client.unregister_callback">
+<code class="sig-name descname">unregister_callback</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em>, <em class="sig-param"><span class="n">cb</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Client.unregister_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Client.unregister_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unregisters a callback function, cb for the given event.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.model.Connection">
+<em class="property">class </em><code class="sig-prename descclassname">pike.model.</code><code class="sig-name descname">Connection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">client</span></em>, <em class="sig-param"><span class="n">server</span></em>, <em class="sig-param"><span class="n">port</span><span class="o">=</span><span class="default_value">445</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connection to server.</p>
+<p>Represents a connection to a server and handles all socket operations
+and request/response dispatch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – The Client object associated with this connection.</p></li>
+<li><p><strong>server</strong> – The server name or address</p></li>
+<li><p><strong>port</strong> – The server port</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="pike.model.Connection.callback">
+<code class="sig-name descname">callback</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em>, <em class="sig-param"><span class="n">cb</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Connection.callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Connection.callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a callback function for the context block, then unregister it</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Connection.close">
+<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Connection.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Connection.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close connection.</p>
+<p>This unceremoniously terminates the connection and fails all
+outstanding requests with EOFError.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Connection.handle_close">
+<code class="sig-name descname">handle_close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Connection.handle_close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Connection.handle_close" title="Permalink to this definition">¶</a></dt>
+<dd><p>callback fired when the socket is closed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Connection.handle_connect">
+<code class="sig-name descname">handle_connect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Connection.handle_connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Connection.handle_connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>callback fired when connection is established</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Connection.handle_error">
+<code class="sig-name descname">handle_error</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Connection.handle_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Connection.handle_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>callback fired if a non-recoverable exception is raised</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Connection.handle_read">
+<code class="sig-name descname">handle_read</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Connection.handle_read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Connection.handle_read" title="Permalink to this definition">¶</a></dt>
+<dd><p>callback fired when the socket has data available</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Connection.handle_write">
+<code class="sig-name descname">handle_write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Connection.handle_write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Connection.handle_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>callback fired when the socket is available for writing</p>
+<p>note: unlike asyncore, write notifications are not provided by default.
+this is a performance optimization because the socket is usually
+available for writing, and the application usually knows when it wants
+to write. There is no point in filling the event queues with
+write ready messages that will be ignored if the client has no data to
+send.</p>
+<p>Instead, applications are expected to implement handle_write, but to
+call it directly when data is to be sent. IF the socket would block,
+EALREADY will be handled by the Transport. The Transport requests a
+single write notification from the pollwer; when received, handle_write
+will be called once signalling that the socket may now be ready to retry</p>
+<p>If the application would prefer to be notified when the socket is ready
+to write, transport.poller.defer_write(transport) may be called to
+schedule a single handle_write callback.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Connection.negotiate">
+<code class="sig-name descname">negotiate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hash_algorithms</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">salt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ciphers</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Connection.negotiate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Connection.negotiate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform dialect negotiation.</p>
+<p>This must be performed before setting up a session with
+<a class="reference internal" href="#pike.model.Connection.session_setup" title="pike.model.Connection.session_setup"><code class="xref py py-func docutils literal notranslate"><span class="pre">Connection.session_setup()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Connection.next_mid_range">
+<code class="sig-name descname">next_mid_range</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">length</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Connection.next_mid_range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Connection.next_mid_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>multicredit requests must reserve 1 message id per credit charged.
+the message id of the request should be the first id of the range.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Connection.process_callbacks">
+<code class="sig-name descname">process_callbacks</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em>, <em class="sig-param"><span class="n">obj</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Connection.process_callbacks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Connection.process_callbacks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fire callbacks for the given event, passing obj as the parameter</p>
+<p>Connection-specific callbacks will be fired first, followed by client
+callbacks</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Connection.register_callback">
+<code class="sig-name descname">register_callback</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em>, <em class="sig-param"><span class="n">cb</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Connection.register_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Connection.register_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers a callback function, cb for the given event.
+When the event fires, cb will be called with the relevant top-level
+Netbios frame as the single paramter.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Connection.session_setup">
+<code class="sig-name descname">session_setup</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">creds</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">bind</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">resume</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Connection.session_setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Connection.session_setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Establish a session.</p>
+<p>Establishes a session, performing GSS rounds as necessary.  Returns
+a <a class="reference internal" href="#pike.model.Channel" title="pike.model.Channel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Channel</span></code></a> object which can be used for further requests on the given
+connection and session.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>creds</strong> (<em>str</em>) – A set of credentials of the form ‘&lt;domain&gt;&lt;user&gt;%&lt;password&gt;’.
+If specified, NTLM authentication will be used.  If None,
+Kerberos authentication will be attempted.</p></li>
+<li><p><strong>bind</strong> (<a class="reference internal" href="#pike.model.Session" title="pike.model.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a>) – An existing session to bind.</p></li>
+<li><p><strong>resume</strong> (<a class="reference internal" href="#pike.model.Session" title="pike.model.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a>) – An previous session to resume.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Connection.submit">
+<code class="sig-name descname">submit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">req</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Connection.submit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Connection.submit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Submit request.</p>
+<p>Submits a <code class="xref py py-obj docutils literal notranslate"><span class="pre">netbios.Netbios</span></code> frame for sending.  Returns
+a list of <a class="reference internal" href="#pike.model.Future" title="pike.model.Future"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Future</span></code></a> objects, one for each corresponding
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">smb2.Smb2</span></code> frame in the request.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Connection.transceive">
+<code class="sig-name descname">transceive</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">req</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Connection.transceive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Connection.transceive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Submit request and wait for responses.</p>
+<p>Submits a <code class="xref py py-obj docutils literal notranslate"><span class="pre">netbios.Netbios</span></code> frame for sending.  Waits for
+and returns a list of <code class="xref py py-obj docutils literal notranslate"><span class="pre">smb2.Smb2</span></code> response objects, one for each
+corresponding <code class="xref py py-obj docutils literal notranslate"><span class="pre">smb2.Smb2</span></code> frame in the request.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Connection.unregister_callback">
+<code class="sig-name descname">unregister_callback</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em>, <em class="sig-param"><span class="n">cb</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Connection.unregister_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Connection.unregister_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unregisters a callback function, cb for the given event.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.model.Events">
+<em class="property">class </em><code class="sig-prename descclassname">pike.model.</code><code class="sig-name descname">Events</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Events used for callback functions</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.model.Future">
+<em class="property">class </em><code class="sig-prename descclassname">pike.model.</code><code class="sig-name descname">Future</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">request</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Future"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Future" title="Permalink to this definition">¶</a></dt>
+<dd><p>Result of an asynchronous operation.</p>
+<p>Futures represent the result of an operation that has not yet completed.
+In Pike, they are most commonly used to track SMB2 request/response pairs,
+but they can be used for any asynchronous operation.</p>
+<p>The result of a future can be waited for synchronously by simply calling
+<a class="reference internal" href="#pike.model.Future.result" title="pike.model.Future.result"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Future.result</span></code></a>, or a notification callback can be set with <a class="reference internal" href="#pike.model.Future.then" title="pike.model.Future.then"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Future.then</span></code></a>.</p>
+<p>Futures implement the context manager interface so that they can be used
+as the context for a with block.  If an exception is raised from the block,
+it will automatically be set as the result of the future.</p>
+<p>&#64;ivar request: The request associated with the future, usually an SMB2 request frame.
+&#64;ivar response: The result of the future, usually an SMB2 response frame.
+&#64;ivar interim_response: The interim response, usually an SMB2 response frame.
+&#64;ivar traceback: The traceback of an exception result, if applicable.</p>
+<dl class="py method">
+<dt id="pike.model.Future.complete">
+<code class="sig-name descname">complete</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">response</span></em>, <em class="sig-param"><span class="n">traceback</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Future.complete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Future.complete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Completes the future with the given result.</p>
+<p>Calling a future as a function is equivalent to calling this method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>response</strong> – The result of the future.</p></li>
+<li><p><strong>traceback</strong> – If response is an exception, an optional traceback</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Future.interim">
+<code class="sig-name descname">interim</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">response</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Future.interim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Future.interim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set interim response.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>response</strong> – The interim response.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Future.result">
+<code class="sig-name descname">result</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Future.result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Future.result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return result of future.</p>
+<p>If the result is not yet available, this function will wait for it.
+If the result is an exception, this function will raise it instead of
+returning it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>timeout</strong> – The time in seconds before giving up and raising TimeoutError</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Future.then">
+<code class="sig-name descname">then</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">notify</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Future.then"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Future.then" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set notification function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>notify</strong> – A function which will be invoked with this future as a parameter
+when its result becomes available.  If it is already available,
+it will be called immediately.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Future.wait">
+<code class="sig-name descname">wait</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Future.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Future.wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for future result to become available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>timeout</strong> – The time in seconds before giving up and raising TimeoutError</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Future.wait_interim">
+<code class="sig-name descname">wait_interim</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Future.wait_interim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Future.wait_interim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for interim response or actual result to become available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>timeout</strong> – The time in seconds before giving up and raising TimeoutError</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.model.Lease">
+<em class="property">class </em><code class="sig-prename descclassname">pike.model.</code><code class="sig-name descname">Lease</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Lease" title="Permalink to this definition">¶</a></dt>
+<dd><p>SMB2 Lease state attached to a <a class="reference internal" href="open.html#pike.io.Open" title="pike.io.Open"><code class="xref py py-class docutils literal notranslate"><span class="pre">Open</span></code></a> with an active lease.</p>
+<dl class="py method">
+<dt id="pike.model.Lease.arm_future">
+<code class="sig-name descname">arm_future</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Lease.arm_future"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Lease.arm_future" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Re)arm the lease future for this Lease. This function should be called
+when a lease changes state to anything other than SMB2_LEASE_NONE</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Lease.on_break">
+<code class="sig-name descname">on_break</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cb</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Lease.on_break"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Lease.on_break" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple lease break callback handler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cb</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="#pike.smb2.LeaseState" title="pike.smb2.LeaseState"><em>pike.smb2.LeaseState</em></a><em>]</em><em>, </em><a class="reference internal" href="#pike.smb2.LeaseState" title="pike.smb2.LeaseState"><em>pike.smb2.LeaseState</em></a><em>]</em><em>)</em>) – callback function is passed the
+<code class="docutils literal notranslate"><span class="pre">pike.smb2.LeaseBreakNotification.new_lease_state</span></code> and must
+return the desired <a class="reference internal" href="#pike.smb2.LeaseState" title="pike.smb2.LeaseState"><code class="xref py py-class docutils literal notranslate"><span class="pre">pike.smb2.LeaseState</span></code></a> to break to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.model.Lease.on_break_request">
+<code class="sig-name descname">on_break_request</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cb</span></em>, <em class="sig-param"><span class="n">cb_ctx</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Lease.on_break_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Lease.on_break_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Complex lease break callback handler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cb</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="#pike.model.Lease" title="pike.model.Lease"><em>Lease</em></a><em>, </em><em>pike.smb2.Smb2</em><em>, </em><em>Optional</em><em>[</em><em>Any</em><em>]</em><em>]</em><em>, </em><em>Any</em><em>]</em><em>)</em>) – callback function is passed the lease object, the Smb2
+<code class="xref py py-class docutils literal notranslate"><span class="pre">pike.smb2.LeaseBreakNotification</span></code>, and an arbitrary
+context and should handle breaking the lease in some way. The
+callback is also responsible for calling <a class="reference internal" href="#pike.model.Lease.arm_future" title="pike.model.Lease.arm_future"><code class="xref py py-func docutils literal notranslate"><span class="pre">arm_future()</span></code></a> and
+and updating the <code class="docutils literal notranslate"><span class="pre">.lease_state</span></code> (if changed)</p></li>
+<li><p><strong>cb_ctx</strong> (<em>Optional</em><em>[</em><em>Any</em><em>]</em>) – arbitrary context passed to the callback</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.model.RelatedOpen">
+<em class="property">class </em><code class="sig-prename descclassname">pike.model.</code><code class="sig-name descname">RelatedOpen</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#RelatedOpen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.RelatedOpen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use in place of a real <cite>Open</cite> object in compound requests to use a handle
+from previous Create in the chain</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.model.Session">
+<em class="property">class </em><code class="sig-prename descclassname">pike.model.</code><code class="sig-name descname">Session</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">client</span></em>, <em class="sig-param"><span class="n">session_id</span></em>, <em class="sig-param"><span class="n">session_key</span></em>, <em class="sig-param"><span class="n">encryption_context</span></em>, <em class="sig-param"><span class="n">smb_res</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Session"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Session" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents an SMB2 session.</p>
+<p>May contain one or more active channels (connections) or trees</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.model.Tree">
+<em class="property">class </em><code class="sig-prename descclassname">pike.model.</code><code class="sig-name descname">Tree</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">session</span></em>, <em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">smb_res</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#Tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.Tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>An SMB2 Tree object is associated with a <a class="reference internal" href="#pike.model.Session" title="pike.model.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a>.</p>
+<p>A Tree can be used as a contextmanager to automatically call
+<code class="xref py py-func docutils literal notranslate"><span class="pre">tree_disconnect()</span></code> after exiting the context block.</p>
+<p>Using the division operator (<code class="docutils literal notranslate"><span class="pre">/</span></code>) against a <a class="reference internal" href="#pike.model.Tree" title="pike.model.Tree"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tree</span></code></a> returns a
+<a class="reference internal" href="path.html#pike.path.PikePath" title="pike.path.PikePath"><code class="xref py py-class docutils literal notranslate"><span class="pre">PikePath</span></code></a> that can be used to perform <code class="docutils literal notranslate"><span class="pre">Path</span></code>
+operations on the share</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pike.model.loop">
+<code class="sig-prename descclassname">pike.model.</code><code class="sig-name descname">loop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">count</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/model.html#loop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.model.loop" title="Permalink to this definition">¶</a></dt>
+<dd><p>wrapper for blocking on the underlying event loop for the given timeout
+or given count of iterations</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pike.smb2">
+<span id="pike-smb2"></span><h2><code class="docutils literal notranslate"><span class="pre">pike.smb2</span></code><a class="headerlink" href="#module-pike.smb2" title="Permalink to this headline">¶</a></h2>
+<p>SMB2 packet definitions</p>
+<p>This module contains definitions of SMB2 packet frames and
+associated constants and data types.</p>
+<p>Packet field names are derived by taking the name from MS-SMB2 and
+making it PEP-8 compliant. For example, FooBarBaz becomes foo_bar_baz.
+This makes it simple to correlate the code with the spec while
+maintaining a clear visual distinction between values and types.</p>
+<dl class="py class">
+<dt id="pike.smb2.Access">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">Access</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#Access"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.Access" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.AceFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">AceFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#AceFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.AceFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.AceType">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">AceType</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#AceType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.AceType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.AclRevision">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">AclRevision</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#AclRevision"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.AclRevision" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.Alignment">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">Alignment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#Alignment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.Alignment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.BreakLeaseFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">BreakLeaseFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#BreakLeaseFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.BreakLeaseFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.ChangeNotifyFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">ChangeNotifyFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#ChangeNotifyFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.ChangeNotifyFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.Characteristics">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">Characteristics</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#Characteristics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.Characteristics" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.CloseFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">CloseFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#CloseFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.CloseFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.CommandId">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">CommandId</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#CommandId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.CommandId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.CompletionFilter">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">CompletionFilter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#CompletionFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.CompletionFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.CompressionFormat">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">CompressionFormat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#CompressionFormat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.CompressionFormat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.CreateDisposition">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">CreateDisposition</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#CreateDisposition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.CreateDisposition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.CreateOptions">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">CreateOptions</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#CreateOptions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.CreateOptions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.DeviceType">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">DeviceType</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#DeviceType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.DeviceType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.Dialect">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">Dialect</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#Dialect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.Dialect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.DurableFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">DurableFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#DurableFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.DurableFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.ErrorId">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">ErrorId</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#ErrorId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.ErrorId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileAccessInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileAccessInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileAccessInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileAccessInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileAlignmentInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileAlignmentInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileAlignmentInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileAlignmentInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileAllInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileAllInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileAllInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileAllInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileAllocationInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileAllocationInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileAllocationInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileAllocationInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileAttributeTagInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileAttributeTagInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileAttributeTagInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileAttributeTagInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileAttributes">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileAttributes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileAttributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileAttributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileBasicInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileBasicInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileBasicInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileBasicInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileCompressionInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileCompressionInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileCompressionInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileCompressionInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileDirectoryInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileDirectoryInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileDirectoryInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileDirectoryInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileDispositionInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileDispositionInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileDispositionInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileDispositionInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileEaInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileEaInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileEaInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileEaInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileEndOfFileInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileEndOfFileInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileEndOfFileInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileEndOfFileInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileFsAttributeInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileFsAttributeInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileFsAttributeInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileFsAttributeInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileFsControlInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileFsControlInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileFsControlInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileFsControlInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileFsDeviceInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileFsDeviceInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileFsDeviceInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileFsDeviceInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileFsFullSizeInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileFsFullSizeInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileFsFullSizeInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileFsFullSizeInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileFsObjectIdInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileFsObjectIdInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileFsObjectIdInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileFsObjectIdInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileFsSizeInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileFsSizeInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileFsSizeInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileFsSizeInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileFsVolumeInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileFsVolumeInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileFsVolumeInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileFsVolumeInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileFullDirectoryInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileFullDirectoryInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileFullDirectoryInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileFullDirectoryInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileIdBothDirectoryInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileIdBothDirectoryInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileIdBothDirectoryInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileIdBothDirectoryInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileIdFullDirectoryInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileIdFullDirectoryInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileIdFullDirectoryInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileIdFullDirectoryInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileInformationClass">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileInformationClass</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileInformationClass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileInformationClass" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileInternalInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileInternalInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileInternalInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileInternalInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileModeInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileModeInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileModeInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileModeInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileNameInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileNameInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileNameInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileNameInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileNamesInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileNamesInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileNamesInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileNamesInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileNetworkOpenInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileNetworkOpenInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileNetworkOpenInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileNetworkOpenInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileNotifyInfoAction">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileNotifyInfoAction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileNotifyInfoAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileNotifyInfoAction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FilePositionInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FilePositionInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FilePositionInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FilePositionInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileRenameInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileRenameInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileRenameInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileRenameInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileSecurityInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileSecurityInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileSecurityInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileSecurityInformation" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="pike.smb2.FileSecurityInformation.clone">
+<code class="sig-name descname">clone</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_parent</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">copy_fields</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileSecurityInformation.clone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileSecurityInformation.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a copy of this FileSecurityInfo with calculated fields reset</p>
+<p>copy_fields is a list of field names that will be cloned.
+if copy_fields is None (default), all fields are copied</p>
+<p>header fields ‘revision’ and ‘control’ are always cloned</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.smb2.FileSecurityInformation.clone_from">
+<code class="sig-name descname">clone_from</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sec_info</span></em>, <em class="sig-param"><span class="n">copy_fields</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileSecurityInformation.clone_from"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileSecurityInformation.clone_from" title="Permalink to this definition">¶</a></dt>
+<dd><p>update the fields in this FileSecurityInformation based on the values
+of sec_info</p>
+<p>copy_fields is a list of field names that will be cloned.
+if copy_fields is None (default), all fields are copied</p>
+<p>header fields ‘revision’ and ‘control’ are always cloned</p>
+<p>all calculated fields will be reset and this FileSecurityInformation
+may be subsequently modified and used to set FileSecurityInformation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileStandardInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileStandardInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileStandardInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileStandardInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileStreamInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileStreamInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileStreamInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileStreamInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileSystemAtrribute">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileSystemAtrribute</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileSystemAtrribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileSystemAtrribute" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileSystemControlFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileSystemControlFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileSystemControlFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileSystemControlFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileSystemInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileSystemInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileSystemInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileSystemInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileSystemInformationClass">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileSystemInformationClass</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileSystemInformationClass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileSystemInformationClass" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.FileValidDataLengthInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">FileValidDataLengthInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#FileValidDataLengthInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.FileValidDataLengthInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.Flags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">Flags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#Flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.Flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.GlobalCaps">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">GlobalCaps</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#GlobalCaps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.GlobalCaps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.HashAlgorithms">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">HashAlgorithms</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#HashAlgorithms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.HashAlgorithms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.InfoType">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">InfoType</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#InfoType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.InfoType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.Information">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">Information</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#Information"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.Information" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for all info frames. Holds the raw data if no specific decoder
+has been registered for the given info type</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.IoctlCode">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">IoctlCode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#IoctlCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.IoctlCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.IoctlFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">IoctlFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#IoctlFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.IoctlFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.LeaseFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">LeaseFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#LeaseFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.LeaseFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.LeaseState">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">LeaseState</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#LeaseState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.LeaseState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.LockFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">LockFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#LockFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.LockFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.LockRequest">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">LockRequest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#LockRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.LockRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>&#64;ivar locks: A list of lock tuples, each of which consists of (offset, length, flags).</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.NegotiateContextType">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">NegotiateContextType</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#NegotiateContextType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.NegotiateContextType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.OplockLevel">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">OplockLevel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#OplockLevel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.OplockLevel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.ScanFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">ScanFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#ScanFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.ScanFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.SecDescControl">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">SecDescControl</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#SecDescControl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.SecDescControl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.SecurityInformation">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">SecurityInformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#SecurityInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.SecurityInformation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.SecurityMode">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">SecurityMode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#SecurityMode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.SecurityMode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.SessionFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">SessionFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#SessionFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.SessionFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.ShareAccess">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">ShareAccess</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#ShareAccess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.ShareAccess" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.ShareCaps">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">ShareCaps</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#ShareCaps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.ShareCaps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.ShareFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">ShareFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#ShareFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.ShareFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.SymbolicLinkFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">SymbolicLinkFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#SymbolicLinkFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.SymbolicLinkFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.smb2.WriteFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.smb2.</code><code class="sig-name descname">WriteFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/smb2.html#WriteFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.smb2.WriteFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pike.ntstatus">
+<span id="pike-ntstatus"></span><h2><code class="docutils literal notranslate"><span class="pre">pike.ntstatus</span></code><a class="headerlink" href="#module-pike.ntstatus" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pike.ntstatus.Status">
+<em class="property">class </em><code class="sig-prename descclassname">pike.ntstatus.</code><code class="sig-name descname">Status</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/ntstatus.html#Status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.ntstatus.Status" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pike.nttime">
+<span id="pike-nttime"></span><h2><code class="docutils literal notranslate"><span class="pre">pike.nttime</span></code><a class="headerlink" href="#module-pike.nttime" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pike.nttime.NtTime">
+<em class="property">class </em><code class="sig-prename descclassname">pike.nttime.</code><code class="sig-name descname">NtTime</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/nttime.html#NtTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.nttime.NtTime" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>NtTime may be initialized with any of the following values</dt><dd><ul class="simple">
+<li><p>string in ISO format or &#64;GMT- format (timewarp)</p></li>
+<li><p>datetime</p></li>
+<li><p>int/long indicating number of 100-nanosecond intervals since 1601-01-01</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pike.transport">
+<span id="pike-transport"></span><h2><code class="docutils literal notranslate"><span class="pre">pike.transport</span></code><a class="headerlink" href="#module-pike.transport" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pike.transport.BasePoller">
+<em class="property">class </em><code class="sig-prename descclassname">pike.transport.</code><code class="sig-name descname">BasePoller</code><a class="reference internal" href="_modules/pike/transport.html#BasePoller"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.BasePoller" title="Permalink to this definition">¶</a></dt>
+<dd><p>A poller is an underlying event monitoring system. This generic class
+can be built upon to implement efficient file descriptor polling methods
+which are available on various platforms.</p>
+<p>A minimal subclass must implement the poll() function which performs a
+single iteration of the event loop across all monitored Transports and
+calls process_readables and process_writables with the correct values.</p>
+<p>Subclasses should, in most cases call, into BasePoller methods in order
+to maintain proper accounting structures. The exception is when the poller
+handles accounting itself.</p>
+<dl class="py method">
+<dt id="pike.transport.BasePoller.add_channel">
+<code class="sig-name descname">add_channel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">transport</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#BasePoller.add_channel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.BasePoller.add_channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>begin monitoring the transport socket for read/connect events</p>
+<p>the underlying poller should not monitor Transports for writability
+except when:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>the Transport’s connection has not yet been established</p></li>
+<li><p>the Transport has been passed as an argument to defer_write</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.BasePoller.defer_write">
+<code class="sig-name descname">defer_write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">transport</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#BasePoller.defer_write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.BasePoller.defer_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>defers a write on the given transport. once the async poller determines
+that the transport can be written to, handle_write will be called</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.BasePoller.del_channel">
+<code class="sig-name descname">del_channel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">transport</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#BasePoller.del_channel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.BasePoller.del_channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>stop monitoring the transport socket</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.BasePoller.loop">
+<code class="sig-name descname">loop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">count</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#BasePoller.loop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.BasePoller.loop" title="Permalink to this definition">¶</a></dt>
+<dd><p>enter the async event loop for the given timeout or number of iterations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.BasePoller.poll">
+<code class="sig-name descname">poll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#BasePoller.poll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.BasePoller.poll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Must be implemented by subclasses to execute a single iteration of the
+event loop. Based on the outcome of the events, the following actions
+MUST be performed</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>process_readables is called with a list of file descriptors which
+have data available for reading</p></li>
+<li><p>process_writables is called with a list of file descriptors which
+have data available for writing</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.BasePoller.process_readables">
+<code class="sig-name descname">process_readables</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">readables</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#BasePoller.process_readables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.BasePoller.process_readables" title="Permalink to this definition">¶</a></dt>
+<dd><p>call handle_read on each applicable fd in the readables sequence and
+subsequently handle_error if any exception is raised or handle_close
+if the underlying socket is no longer connected</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.BasePoller.process_writables">
+<code class="sig-name descname">process_writables</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">writables</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#BasePoller.process_writables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.BasePoller.process_writables" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>for each Transport t corresponding to an fd in the writables sequence,</dt><dd><p>if t is not marked as connected, call handle_connect_event
+otherwise call handle_write and remove the Transport from the set
+of deferred writers
+process close and error events if exception is encountered</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.transport.KQueuePoller">
+<em class="property">class </em><code class="sig-prename descclassname">pike.transport.</code><code class="sig-name descname">KQueuePoller</code><a class="reference internal" href="_modules/pike/transport.html#KQueuePoller"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.KQueuePoller" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of KQueue, available on Mac OS and BSD derivatives</p>
+<dl class="py method">
+<dt id="pike.transport.KQueuePoller.add_channel">
+<code class="sig-name descname">add_channel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">transport</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#KQueuePoller.add_channel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.KQueuePoller.add_channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>begin monitoring the transport socket for read/connect events</p>
+<p>the underlying poller should not monitor Transports for writability
+except when:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>the Transport’s connection has not yet been established</p></li>
+<li><p>the Transport has been passed as an argument to defer_write</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.KQueuePoller.defer_write">
+<code class="sig-name descname">defer_write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">transport</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#KQueuePoller.defer_write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.KQueuePoller.defer_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>defers a write on the given transport. once the async poller determines
+that the transport can be written to, handle_write will be called</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.KQueuePoller.poll">
+<code class="sig-name descname">poll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#KQueuePoller.poll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.KQueuePoller.poll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Must be implemented by subclasses to execute a single iteration of the
+event loop. Based on the outcome of the events, the following actions
+MUST be performed</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>process_readables is called with a list of file descriptors which
+have data available for reading</p></li>
+<li><p>process_writables is called with a list of file descriptors which
+have data available for writing</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.transport.PollPoller">
+<em class="property">class </em><code class="sig-prename descclassname">pike.transport.</code><code class="sig-name descname">PollPoller</code><a class="reference internal" href="_modules/pike/transport.html#PollPoller"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.PollPoller" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of poll, available on Linux</p>
+<dl class="py method">
+<dt id="pike.transport.PollPoller.add_channel">
+<code class="sig-name descname">add_channel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">transport</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#PollPoller.add_channel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.PollPoller.add_channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>begin monitoring the transport socket for read/connect events</p>
+<p>the underlying poller should not monitor Transports for writability
+except when:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>the Transport’s connection has not yet been established</p></li>
+<li><p>the Transport has been passed as an argument to defer_write</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.PollPoller.defer_write">
+<code class="sig-name descname">defer_write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">transport</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#PollPoller.defer_write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.PollPoller.defer_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>defers a write on the given transport. once the async poller determines
+that the transport can be written to, handle_write will be called</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.PollPoller.del_channel">
+<code class="sig-name descname">del_channel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">transport</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#PollPoller.del_channel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.PollPoller.del_channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>stop monitoring the transport socket</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.PollPoller.poll">
+<code class="sig-name descname">poll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#PollPoller.poll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.PollPoller.poll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Must be implemented by subclasses to execute a single iteration of the
+event loop. Based on the outcome of the events, the following actions
+MUST be performed</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>process_readables is called with a list of file descriptors which
+have data available for reading</p></li>
+<li><p>process_writables is called with a list of file descriptors which
+have data available for writing</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.transport.SelectPoller">
+<em class="property">class </em><code class="sig-prename descclassname">pike.transport.</code><code class="sig-name descname">SelectPoller</code><a class="reference internal" href="_modules/pike/transport.html#SelectPoller"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.SelectPoller" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of select, available on most platforms as a fallback.</p>
+<p>Roughly equivalent performance to using asyncore</p>
+<dl class="py method">
+<dt id="pike.transport.SelectPoller.poll">
+<code class="sig-name descname">poll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#SelectPoller.poll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.SelectPoller.poll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Must be implemented by subclasses to execute a single iteration of the
+event loop. Based on the outcome of the events, the following actions
+MUST be performed</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>process_readables is called with a list of file descriptors which
+have data available for reading</p></li>
+<li><p>process_writables is called with a list of file descriptors which
+have data available for writing</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.transport.Transport">
+<em class="property">class </em><code class="sig-prename descclassname">pike.transport.</code><code class="sig-name descname">Transport</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alternate_poller</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#Transport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.Transport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transport is responsible for managing the underlying socket, registering
+for socket events, dispatching read, write, and errors to higher layers.
+It is analogous to asyncore.dispatcher and is a drop in replacement for
+most purposes.</p>
+<p>If the alternate_poller is specified on instantiation, then the connection
+will register for events on that poller as opposed to the global poller.</p>
+<dl class="py method">
+<dt id="pike.transport.Transport.close">
+<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#Transport.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.Transport.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>close the underlying socket connection and unregister this Transport
+from the underlying poller</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.Transport.connect">
+<code class="sig-name descname">connect</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">address</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#Transport.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.Transport.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>begin establishing a connection to the (host, port) address tuple.</p>
+<p>must call create_socket first. if the underlying socket is non-blocking
+then this command may return before the connection is established.</p>
+<p>higher level code should wait for the handle_connect event to signal
+that the endpoint is successfully connected</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.Transport.create_socket">
+<code class="sig-name descname">create_socket</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">family</span></em>, <em class="sig-param"><span class="n">type</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#Transport.create_socket"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.Transport.create_socket" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the underlying non-blocking socket and associates it with this
+Transport’s underlying poller</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.Transport.handle_close">
+<code class="sig-name descname">handle_close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#Transport.handle_close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.Transport.handle_close" title="Permalink to this definition">¶</a></dt>
+<dd><p>callback fired when the socket is closed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.Transport.handle_connect">
+<code class="sig-name descname">handle_connect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#Transport.handle_connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.Transport.handle_connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>callback fired when connection is established</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.Transport.handle_connect_event">
+<code class="sig-name descname">handle_connect_event</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#Transport.handle_connect_event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.Transport.handle_connect_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>called internally when the socket becomes connected</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.Transport.handle_error">
+<code class="sig-name descname">handle_error</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#Transport.handle_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.Transport.handle_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>callback fired if a non-recoverable exception is raised</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.Transport.handle_read">
+<code class="sig-name descname">handle_read</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#Transport.handle_read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.Transport.handle_read" title="Permalink to this definition">¶</a></dt>
+<dd><p>callback fired when the socket has data available</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.Transport.handle_write">
+<code class="sig-name descname">handle_write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#Transport.handle_write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.Transport.handle_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>callback fired when the socket is available for writing</p>
+<p>note: unlike asyncore, write notifications are not provided by default.
+this is a performance optimization because the socket is usually
+available for writing, and the application usually knows when it wants
+to write. There is no point in filling the event queues with
+write ready messages that will be ignored if the client has no data to
+send.</p>
+<p>Instead, applications are expected to implement handle_write, but to
+call it directly when data is to be sent. IF the socket would block,
+EALREADY will be handled by the Transport. The Transport requests a
+single write notification from the pollwer; when received, handle_write
+will be called once signalling that the socket may now be ready to retry</p>
+<p>If the application would prefer to be notified when the socket is ready
+to write, transport.poller.defer_write(transport) may be called to
+schedule a single handle_write callback.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.Transport.recv">
+<code class="sig-name descname">recv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bufsize</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#Transport.recv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.Transport.recv" title="Permalink to this definition">¶</a></dt>
+<dd><p>recv bufsize bytes over the connection. if the socket would block,
+then return an empty buffer. When the socket is available for reading
+handle_read will be called.</p>
+<p>returns a string representing the bytes received</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.Transport.send">
+<code class="sig-name descname">send</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#Transport.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.Transport.send" title="Permalink to this definition">¶</a></dt>
+<dd><p>send data bytes over the connection. if the socket would block,
+schedule this Transport to be notified when the socket is available
+for writing. handle_write will be called in this case.</p>
+<p>returns the number of bytes sent or zero if the write would block</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.transport.Transport.set_socket">
+<code class="sig-name descname">set_socket</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sock</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/transport.html#Transport.set_socket"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.transport.Transport.set_socket" title="Permalink to this definition">¶</a></dt>
+<dd><p>mirror the given Socket sock’s file descriptor on the Transport and
+register this Transport with the underlying poller</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pike.auth">
+<span id="pike-auth"></span><h2><code class="docutils literal notranslate"><span class="pre">pike.auth</span></code><a class="headerlink" href="#module-pike.auth" title="Permalink to this headline">¶</a></h2>
+<p>Authentication Plugins for Pike</p>
+<p>This module contains wrappers around external authentication mechanisms and APIs.</p>
+</div>
+<div class="section" id="module-pike.ntlm">
+<span id="pike-ntlm"></span><h2><code class="docutils literal notranslate"><span class="pre">pike.ntlm</span></code><a class="headerlink" href="#module-pike.ntlm" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pike.ntlm.AvId">
+<em class="property">class </em><code class="sig-prename descclassname">pike.ntlm.</code><code class="sig-name descname">AvId</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/ntlm.html#AvId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.ntlm.AvId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.ntlm.MessageType">
+<em class="property">class </em><code class="sig-prename descclassname">pike.ntlm.</code><code class="sig-name descname">MessageType</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/ntlm.html#MessageType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.ntlm.MessageType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.ntlm.NTLMRevisionCurrentFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.ntlm.</code><code class="sig-name descname">NTLMRevisionCurrentFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/ntlm.html#NTLMRevisionCurrentFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.ntlm.NTLMRevisionCurrentFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.ntlm.NegotiateFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.ntlm.</code><code class="sig-name descname">NegotiateFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/ntlm.html#NegotiateFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.ntlm.NegotiateFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.ntlm.NtlmAuthenticator">
+<em class="property">class </em><code class="sig-prename descclassname">pike.ntlm.</code><code class="sig-name descname">NtlmAuthenticator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">domain</span></em>, <em class="sig-param"><span class="n">username</span></em>, <em class="sig-param"><span class="n">password</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/ntlm.html#NtlmAuthenticator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.ntlm.NtlmAuthenticator" title="Permalink to this definition">¶</a></dt>
+<dd><p>State machine for conducting ntlm authentication</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.ntlm.NtlmVersion">
+<em class="property">class </em><code class="sig-prename descclassname">pike.ntlm.</code><code class="sig-name descname">NtlmVersion</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/ntlm.html#NtlmVersion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.ntlm.NtlmVersion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.ntlm.ProductMajorVersionFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.ntlm.</code><code class="sig-name descname">ProductMajorVersionFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/ntlm.html#ProductMajorVersionFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.ntlm.ProductMajorVersionFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.ntlm.ProductMinorVersionFlags">
+<em class="property">class </em><code class="sig-prename descclassname">pike.ntlm.</code><code class="sig-name descname">ProductMinorVersionFlags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/ntlm.html#ProductMinorVersionFlags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.ntlm.ProductMinorVersionFlags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pike.ntlm.des_key_64">
+<code class="sig-prename descclassname">pike.ntlm.</code><code class="sig-name descname">des_key_64</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">K</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/ntlm.html#des_key_64"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.ntlm.des_key_64" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an 64-bit des key by adding a zero to the least significant bit
+of each character.
+K should be a 7 char string</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pike.core">
+<span id="pike-core"></span><h2><code class="docutils literal notranslate"><span class="pre">pike.core</span></code><a class="headerlink" href="#module-pike.core" title="Permalink to this headline">¶</a></h2>
+<p>Core Pike infrastructure</p>
+<dl class="py exception">
+<dt id="pike.core.BadPacket">
+<em class="property">exception </em><code class="sig-prename descclassname">pike.core.</code><code class="sig-name descname">BadPacket</code><a class="reference internal" href="_modules/pike/core.html#BadPacket"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.core.BadPacket" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py exception">
+<dt id="pike.core.BufferOverrun">
+<em class="property">exception </em><code class="sig-prename descclassname">pike.core.</code><code class="sig-name descname">BufferOverrun</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cursor</span></em>, <em class="sig-param"><span class="n">request</span></em>, <em class="sig-param"><span class="n">boundary</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/core.html#BufferOverrun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.core.BufferOverrun" title="Permalink to this definition">¶</a></dt>
+<dd><p>Buffer overrun exception</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.core.Cursor">
+<em class="property">class </em><code class="sig-prename descclassname">pike.core.</code><code class="sig-name descname">Cursor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">arr</span></em>, <em class="sig-param"><span class="n">offset</span></em>, <em class="sig-param"><span class="n">bounds</span><span class="o">=</span><span class="default_value">(None, None)</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/core.html#Cursor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.core.Cursor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Byte array cursor</p>
+<p>Represents a position within a byte array.</p>
+<p>encode_* operations write data at the current position
+and advance it by the number of bytes written.</p>
+<p>decode_* operations read data at the current position,
+advance it by the number of bytes read, and return
+the result.</p>
+<p>Cursors support in-place addition and subtraction (+=,-=) of
+integer values to manually adjust position, as well
+as ordinary addition and subtraction, which return a new
+cursor without modifiying the original.</p>
+<p>Ordinary subtraction of two cursors will yield the
+difference between their positions as an integer.
+==, !=, &lt;, &lt;=, &gt;, and &gt;= operators will also work to
+compare positions.  The results will only be meaningful
+for cursors referencing the same underlying array.</p>
+<p>For a given cursor, cursor.hole.encode_* will perform
+the same operation as cursor.encode_*, but will return
+a hole object.  Calling this hole object with the same
+type of arguments as the original encode method will
+overwrite the original value.  This mechanism is useful
+for backpatching values into fields that aren’t known until
+later, such as internal packet lengths and offsets or
+checksum fields.  For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hole</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">hole</span><span class="o">.</span><span class="n">encode_uint32le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="c1"># Encode rest of packet</span>
+<span class="o">...</span>
+<span class="c1"># Overwrite value with calculated checksum</span>
+<span class="n">hole</span><span class="p">(</span><span class="nb">sum</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Cursors support slicing to extract sections
+of the underlying array.  For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Extract array slice between cur1 and cur2</span>
+<span class="n">subarray</span> <span class="o">=</span> <span class="n">cur1</span><span class="p">[:</span><span class="n">cur2</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Cursors also support establishing boundaries outside of which
+decoding will raise exceptions:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cur</span><span class="o">.</span><span class="n">bounded</span><span class="p">(</span><span class="n">startcur</span><span class="p">,</span> <span class="n">endcur</span><span class="p">):</span>
+    <span class="c1"># Within this block, attempts to decode data outside of</span>
+    <span class="c1"># the range starting with startcur (inclusive) and ending</span>
+    <span class="c1"># with endcur (exclusive) will raise BufferOverrun().</span>
+    <span class="c1"># If the start and end paremeters are numbers rather than</span>
+    <span class="c1"># other cursors, they will be taken to be relative to</span>
+    <span class="c1"># cur itself.</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>&#64;ivar array: Array referenced by cursor
+&#64;ivar offset: Offset within the array
+&#64;ivar bounds: Pair of lower and upper bound on offset</p>
+<dl class="py method">
+<dt id="pike.core.Cursor.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/core.html#Cursor.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.core.Cursor.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create copy of cursor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.core.Cursor.encode_bytes">
+<code class="sig-name descname">encode_bytes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">val</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/core.html#Cursor.encode_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.core.Cursor.encode_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encode bytes.  Accepts byte arrays, strings, and integer lists.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.core.Enum">
+<em class="property">class </em><code class="sig-prename descclassname">pike.core.</code><code class="sig-name descname">Enum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/core.html#Enum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.core.Enum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enumeration abstract base</p>
+<p>An Enum subclasses long in order to ensure that instances
+are a member of a well-defined enumeration of values,
+provide introspection into the allowed values and their names,
+and provide symbolic string forms of values.</p>
+<p>You should generally subclass one of <a class="reference internal" href="#pike.core.ValueEnum" title="pike.core.ValueEnum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueEnum</span></code></a> or <a class="reference internal" href="#pike.core.FlagEnum" title="pike.core.FlagEnum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FlagEnum</span></code></a>.</p>
+<dl class="py method">
+<dt id="pike.core.Enum.import_items">
+<em class="property">classmethod </em><code class="sig-name descname">import_items</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dictionary</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/core.html#Enum.import_items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.core.Enum.import_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import enumeration values into dictionary</p>
+<p>This method is intended to allow importing enumeration
+values from an <a class="reference internal" href="#pike.core.Enum" title="pike.core.Enum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Enum</span></code></a> subclass into the root of a module,
+and should be invoked as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SomeEnumClass</span><span class="o">.</span><span class="n">import_items</span><span class="p">(</span><span class="nb">globals</span><span class="p">())</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.core.Enum.items">
+<em class="property">classmethod </em><code class="sig-name descname">items</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/core.html#Enum.items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.core.Enum.items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of (name,value) pairs for allowed enumeration values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.core.Enum.names">
+<em class="property">classmethod </em><code class="sig-name descname">names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/core.html#Enum.names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.core.Enum.names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of names of allowed enumeration values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.core.Enum.validate">
+<em class="property">classmethod </em><code class="sig-name descname">validate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/core.html#Enum.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.core.Enum.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate value as valid for enumeration.</p>
+<p>This must be implemented in subclasses of <a class="reference internal" href="#pike.core.Enum" title="pike.core.Enum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Enum</span></code></a>
+(but not <a class="reference internal" href="#pike.core.ValueEnum" title="pike.core.ValueEnum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueEnum</span></code></a> or <a class="reference internal" href="#pike.core.FlagEnum" title="pike.core.FlagEnum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FlagEnum</span></code></a>, which provide it).
+It should raise a ValueError on failure.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.core.Enum.values">
+<em class="property">classmethod </em><code class="sig-name descname">values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/core.html#Enum.values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.core.Enum.values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of allowed enumeration values.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.core.FlagEnum">
+<em class="property">class </em><code class="sig-prename descclassname">pike.core.</code><code class="sig-name descname">FlagEnum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/core.html#FlagEnum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.core.FlagEnum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag Enumeration</p>
+<p>Subclass this class to define enumerations of flags.
+For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SomeFlagEnumClass</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">FOO</span> <span class="o">=</span> <span class="mh">0x1</span>
+    <span class="n">BAR</span> <span class="o">=</span> <span class="mh">0x2</span>
+    <span class="n">BAZ</span> <span class="o">=</span> <span class="mh">0x4</span>
+</pre></div>
+</div>
+<p>Accessing SomeFlagEnumClass.FOO will actually return a
+SomeFlagEnumClass instance.  Instances may be bitwise-ored
+together.  Instances will return the symbolic names of all
+set flags joined by ‘ | ‘ when str() is used.</p>
+<dl class="py method">
+<dt id="pike.core.FlagEnum.validate">
+<em class="property">classmethod </em><code class="sig-name descname">validate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/core.html#FlagEnum.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.core.FlagEnum.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate value as valid for enumeration.</p>
+<p>This must be implemented in subclasses of <a class="reference internal" href="#pike.core.Enum" title="pike.core.Enum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Enum</span></code></a>
+(but not <a class="reference internal" href="#pike.core.ValueEnum" title="pike.core.ValueEnum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueEnum</span></code></a> or <a class="reference internal" href="#pike.core.FlagEnum" title="pike.core.FlagEnum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FlagEnum</span></code></a>, which provide it).
+It should raise a ValueError on failure.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.core.Let">
+<em class="property">class </em><code class="sig-prename descclassname">pike.core.</code><code class="sig-name descname">Let</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">target</span></em>, <em class="sig-param"><span class="n">settings_dict</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/core.html#Let"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.core.Let" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Let allows for temporarily storing passed arguments in the _settings
+member of a target object for the duration of the contextmanager’s scope</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">Implementation on a factory class</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyThingFactory</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">def</span> <span class="nf">generate_thing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># do something here</span>
+        <span class="n">new_obj</span> <span class="o">=</span> <span class="n">Thing</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">new_obj</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_obj</span>
+    <span class="k">def</span> <span class="nf">let</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Let</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwds</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Calling code that wants to temporarily customize the <code class="docutils literal notranslate"><span class="pre">Thing</span></code> objects that
+are returned by the factory:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fac</span> <span class="o">=</span> <span class="n">MyThingFactory</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">fac</span><span class="o">.</span><span class="n">let</span><span class="p">(</span><span class="n">this</span><span class="o">=</span><span class="s2">&quot;that&quot;</span><span class="p">,</span> <span class="n">foo</span><span class="o">=</span><span class="s2">&quot;bar&quot;</span><span class="p">):</span>
+    <span class="n">a_thing</span> <span class="o">=</span> <span class="n">fac</span><span class="o">.</span><span class="n">generate_thing</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">a_thing</span><span class="o">.</span><span class="n">this</span><span class="p">,</span> <span class="s2">&quot;that&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.core.ValueEnum">
+<em class="property">class </em><code class="sig-prename descclassname">pike.core.</code><code class="sig-name descname">ValueEnum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/core.html#ValueEnum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.core.ValueEnum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value Enumeration</p>
+<p>Subclass this class to define enumerations of values.
+For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SomeEnumClass</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">FOO</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">BAR</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">BAZ</span> <span class="o">=</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<p>Accessing SomeEnumClass.FOO will actually return a SomeEnumClass instance.
+Instances will return their symbolic names when str() is used.</p>
+<dl class="py method">
+<dt id="pike.core.ValueEnum.validate">
+<em class="property">classmethod </em><code class="sig-name descname">validate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/core.html#ValueEnum.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.core.ValueEnum.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate value as valid for enumeration.</p>
+<p>This must be implemented in subclasses of <a class="reference internal" href="#pike.core.Enum" title="pike.core.Enum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Enum</span></code></a>
+(but not <a class="reference internal" href="#pike.core.ValueEnum" title="pike.core.ValueEnum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueEnum</span></code></a> or <a class="reference internal" href="#pike.core.FlagEnum" title="pike.core.FlagEnum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FlagEnum</span></code></a>, which provide it).
+It should raise a ValueError on failure.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pike.netbios">
+<span id="pike-netbios"></span><h2><code class="docutils literal notranslate"><span class="pre">pike.netbios</span></code><a class="headerlink" href="#module-pike.netbios" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pike.digest">
+<span id="pike-digest"></span><h2><code class="docutils literal notranslate"><span class="pre">pike.digest</span></code><a class="headerlink" href="#module-pike.digest" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pike.crypto">
+<span id="pike-crypto"></span><h2><code class="docutils literal notranslate"><span class="pre">pike.crypto</span></code><a class="headerlink" href="#module-pike.crypto" title="Permalink to this headline">¶</a></h2>
+<dl class="py exception">
+<dt id="pike.crypto.CipherMismatch">
+<em class="property">exception </em><code class="sig-prename descclassname">pike.crypto.</code><code class="sig-name descname">CipherMismatch</code><a class="reference internal" href="_modules/pike/crypto.html#CipherMismatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.crypto.CipherMismatch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.crypto.Ciphers">
+<em class="property">class </em><code class="sig-prename descclassname">pike.crypto.</code><code class="sig-name descname">Ciphers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/crypto.html#Ciphers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.crypto.Ciphers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt id="pike.crypto.CryptoKeys300">
+<em class="property">class </em><code class="sig-prename descclassname">pike.crypto.</code><code class="sig-name descname">CryptoKeys300</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">session_key</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/crypto.html#CryptoKeys300"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.crypto.CryptoKeys300" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key generation for SMB 0x300 and 0x302</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.crypto.CryptoKeys311">
+<em class="property">class </em><code class="sig-prename descclassname">pike.crypto.</code><code class="sig-name descname">CryptoKeys311</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">session_key</span></em>, <em class="sig-param"><span class="n">pre_auth_integrity_hash</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/crypto.html#CryptoKeys311"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.crypto.CryptoKeys311" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key generation for SMB 0x311 +</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.crypto.EncryptionContext">
+<em class="property">class </em><code class="sig-prename descclassname">pike.crypto.</code><code class="sig-name descname">EncryptionContext</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">keys</span></em>, <em class="sig-param"><span class="n">ciphers</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/crypto.html#EncryptionContext"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.crypto.EncryptionContext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encapsulates all information needed to encrypt and decrypt messages.
+This context is attached to an SMB Session object</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.crypto.TransformHeader">
+<em class="property">class </em><code class="sig-prename descclassname">pike.crypto.</code><code class="sig-name descname">TransformHeader</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/crypto.html#TransformHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.crypto.TransformHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>TransformHeader is designed to be a transparent slip attached to a Netbios
+frame object (specified as parent). During serialization, if a Netbios frame
+contains an attribute “transform”, then that object’s encode method will be
+called instead of each child frames’ encode method. This frame is responsible
+for both encrypting and decrypting Smb2 frames according to an attached
+encryption context.</p>
+<p>If the encryption_context is not explicitly specified, then it will be looked
+up based on session_id from the parent Netbios frame’s connection reference</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pike.crypto.random_bytes">
+<code class="sig-prename descclassname">pike.crypto.</code><code class="sig-name descname">random_bytes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">length</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/crypto.html#random_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.crypto.random_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate an array of random bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>length</strong> – How many bytes to return</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array.array(‘B’) of length random bytes</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="stubs/pike.transport.html" class="btn btn-neutral float-left" title="pike.transport" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

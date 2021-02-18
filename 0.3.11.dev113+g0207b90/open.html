@@ -1,0 +1,540 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Open &mdash; pike-smb2 0.3.11.dev113+g0207b90 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Pytest Integration" href="pytest.html" />
+    <link rel="prev" title="PikePath" href="path.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pike-smb2
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="high_level.html">High-Level API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tree_connect.html">TreeConnect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="path.html">PikePath</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Open</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytest.html">Pytest Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="autosummary.html">API Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">Implementation Details</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pike-smb2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="high_level.html">High-Level API</a> &raquo;</li>
+        
+      <li><code class="docutils literal notranslate"><span class="pre">Open</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/open.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="open">
+<h1><code class="docutils literal notranslate"><span class="pre">Open</span></code><a class="headerlink" href="#open" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="pike.io.Open">
+<em class="property">class </em><code class="sig-prename descclassname">pike.io.</code><code class="sig-name descname">Open</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree</span></em>, <em class="sig-param"><span class="n">create_request</span></em>, <em class="sig-param"><span class="n">create_response</span></em>, <em class="sig-param"><span class="n">create_guid</span></em>, <em class="sig-param"><span class="n">previous_open</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/io.html#Open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.io.Open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pike.io._Open</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">io.RawIOBase</span></code></p>
+<p>Represents an open file handle on a remote SMB2 server.</p>
+<p>Can be used as a contextmanager, which will automatically close
+the file when the context block exits.</p>
+<p>This class should not be instantiated directly. Use one of the following
+methods to get an instance:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">pike.model.Channel.create()</span></code></p></li>
+<li><p><a class="reference internal" href="path.html#pike.path.PikePath.open" title="pike.path.PikePath.open"><code class="xref py py-func docutils literal notranslate"><span class="pre">pike.path.PikePath.open()</span></code></a></p></li>
+</ul>
+</div></blockquote>
+<p>This class provides a file-like interface with support for <code class="docutils literal notranslate"><span class="pre">read</span></code>,
+<code class="docutils literal notranslate"><span class="pre">write</span></code>, <code class="docutils literal notranslate"><span class="pre">seek</span></code>, <code class="docutils literal notranslate"><span class="pre">flush</span></code>, and derivatives provided by <code class="docutils literal notranslate"><span class="pre">RawIOBase</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tree</strong> (<a class="reference internal" href="model.html#pike.model.Tree" title="pike.model.Tree"><em>pike.model.Tree</em></a>) – the <a class="reference internal" href="model.html#pike.model.Tree" title="pike.model.Tree"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tree</span></code></a> associated with this handle</p></li>
+<li><p><strong>create_request</strong> (<em>pike.smb2.CreateRequest</em>) – the raw request sent to open this handle</p></li>
+<li><p><strong>create_response</strong> (<em>pike.smb2.CreateResponse</em>) – the raw response returned by the server</p></li>
+<li><p><strong>create_guid</strong> (<em>str</em>) – the create_guid associated with the durable handle</p></li>
+<li><p><strong>oplock_level</strong> (<a class="reference internal" href="model.html#pike.smb2.OplockLevel" title="pike.smb2.OplockLevel"><em>pike.smb2.OplockLevel</em></a>) – the current Oplock level of the handle</p></li>
+<li><p><a class="reference internal" href="model.html#pike.model.Client.lease" title="pike.model.Client.lease"><strong>lease</strong></a> (<a class="reference internal" href="model.html#pike.model.Lease" title="pike.model.Lease"><em>pike.model.Lease</em></a>) – the current Lease state of the handle</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="pike.io.Open.channel">
+<em class="property">property </em><code class="sig-name descname">channel</code><a class="headerlink" href="#pike.io.Open.channel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="model.html#pike.model.Channel" title="pike.model.Channel">pike.model.Channel</a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The first Channel associated with this handle.</p>
+</dd>
+</dl>
+<p>(The session may have multiple bound channels).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.close">
+<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pike.io.Open.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close the handle on the server.</p>
+<p>If the channel or connection is unavailable, this is a no-op.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.closed">
+<em class="property">property </em><code class="sig-name descname">closed</code><a class="headerlink" href="#pike.io.Open.closed" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the handle is closed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.dispose">
+<code class="sig-name descname">dispose</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pike.io.Open.dispose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear resources held by this object.</p>
+<p>Called implicitly when the object is closed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.durable_flags">
+<em class="property">property </em><code class="sig-name descname">durable_flags</code><a class="headerlink" href="#pike.io.Open.durable_flags" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int or None</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the durable handle flags (or None if not durable)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.durable_handle_ctx">
+<em class="property">property </em><code class="sig-name descname">durable_handle_ctx</code><a class="headerlink" href="#pike.io.Open.durable_handle_ctx" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>smb2.DurableHandleResponse or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.durable_handle_v2_ctx">
+<em class="property">property </em><code class="sig-name descname">durable_handle_v2_ctx</code><a class="headerlink" href="#pike.io.Open.durable_handle_v2_ctx" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>smb2.DurableHandleV2Response or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.durable_timeout">
+<em class="property">property </em><code class="sig-name descname">durable_timeout</code><a class="headerlink" href="#pike.io.Open.durable_timeout" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int or None</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the durable handle timeout in seconds (or None if not durable)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.end_of_file">
+<em class="property">property </em><code class="sig-name descname">end_of_file</code><a class="headerlink" href="#pike.io.Open.end_of_file" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Byte offset of the end of file as reported by the CREATE response</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Note: this value is only updated by <code class="docutils literal notranslate"><span class="pre">write</span></code> and <code class="docutils literal notranslate"><span class="pre">read</span></code>!</dt><dd><p>if other operations are performed directly or via other sessions
+this value may get out of sync.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.file_id">
+<em class="property">property </em><code class="sig-name descname">file_id</code><a class="headerlink" href="#pike.io.Open.file_id" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>2-tuple of (int, int)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the server-opaque file handle returned in the CREATE response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.flush">
+<code class="sig-name descname">flush</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/io.html#Open.flush"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.io.Open.flush" title="Permalink to this definition">¶</a></dt>
+<dd><p>Issue an SMB2 FLUSH request to the server.</p>
+<p>This instructs the server to flush any intermediate buffers to disk.</p>
+<p>The server may return a response before the data has been flushed.</p>
+<p>For non-writable streams, this call is a no-op.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.is_durable">
+<em class="property">property </em><code class="sig-name descname">is_durable</code><a class="headerlink" href="#pike.io.Open.is_durable" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the handle is durable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.is_persistent">
+<em class="property">property </em><code class="sig-name descname">is_persistent</code><a class="headerlink" href="#pike.io.Open.is_persistent" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the handle is persistent</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.is_resilient">
+<em class="property">property </em><code class="sig-name descname">is_resilient</code><a class="headerlink" href="#pike.io.Open.is_resilient" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the handle is resilient</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.on_oplock_break">
+<code class="sig-name descname">on_oplock_break</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cb</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pike.io.Open.on_oplock_break" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple oplock break callback handler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cb</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="model.html#pike.smb2.OplockLevel" title="pike.smb2.OplockLevel"><em>pike.smb2.OplockLevel</em></a><em>]</em><em>, </em><a class="reference internal" href="model.html#pike.smb2.OplockLevel" title="pike.smb2.OplockLevel"><em>pike.smb2.OplockLevel</em></a><em>]</em><em>)</em>) – callback function is passed the
+<code class="docutils literal notranslate"><span class="pre">pike.smb2.OplockBreakNotification.oplock_level</span></code> and must return
+the desired <a class="reference internal" href="model.html#pike.smb2.OplockLevel" title="pike.smb2.OplockLevel"><code class="xref py py-class docutils literal notranslate"><span class="pre">pike.smb2.OplockLevel</span></code></a> to break to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.on_oplock_break_request">
+<code class="sig-name descname">on_oplock_break_request</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cb</span></em>, <em class="sig-param"><span class="n">cb_ctx</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pike.io.Open.on_oplock_break_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Complex oplock break callback handler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cb</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="#pike.io.Open" title="pike.io.Open"><em>Open</em></a><em>, </em><em>pike.smb2.Smb2</em><em>, </em><em>Optional</em><em>[</em><em>Any</em><em>]</em><em>]</em><em>, </em><em>Any</em><em>]</em><em>)</em>) – callback function is passed the file handle, the Smb2
+<code class="xref py py-func docutils literal notranslate"><span class="pre">OplockBreakNotification()</span></code>, and an arbitrary
+context and should handle breaking the oplock in some way. The
+callback is also responsible for calling
+<code class="xref py py-func docutils literal notranslate"><span class="pre">arm_oplock_future()</span></code> and and updating the <code class="docutils literal notranslate"><span class="pre">.oplock_level</span></code>
+(if changed)</p></li>
+<li><p><strong>cb_ctx</strong> (<em>Optional</em><em>[</em><em>Any</em><em>]</em>) – arbitrary context passed to the callback</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.readable">
+<code class="sig-name descname">readable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/io.html#Open.readable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.io.Open.readable" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the stream can be read from</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.readall">
+<code class="sig-name descname">readall</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/io.html#Open.readall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.io.Open.readall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read all bytes from the current offset to EOF.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.readinto">
+<code class="sig-name descname">readinto</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">b</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/io.html#Open.readinto"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.io.Open.readinto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read bytes into the preallocated buffer, b.</p>
+<p>Note: this function performs extra copying and is inefficient.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.readline">
+<code class="sig-name descname">readline</code><span class="sig-paren">(</span><em class="sig-param">size=-1</em>, <em class="sig-param">/</em><span class="sig-paren">)</span><a class="headerlink" href="#pike.io.Open.readline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read and return a line from the stream.</p>
+<p>If size is specified, at most size bytes will be read.</p>
+<p>The line terminator is always b’n’ for binary files; for text
+files, the newlines argument to open can be used to select the line
+terminator(s) recognized.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.readlines">
+<code class="sig-name descname">readlines</code><span class="sig-paren">(</span><em class="sig-param">hint=-1</em>, <em class="sig-param">/</em><span class="sig-paren">)</span><a class="headerlink" href="#pike.io.Open.readlines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of lines from the stream.</p>
+<p>hint can be specified to control the number of lines read: no more
+lines will be read if the total size (in bytes/characters) of all
+lines so far exceeds hint.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.seek">
+<code class="sig-name descname">seek</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">offset</span></em>, <em class="sig-param"><span class="n">whence</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/io.html#Open.seek"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.io.Open.seek" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the stream position to the given byte offset.</p>
+<p>offset is interpreted relative to the position indicated by whence.</p>
+<p>The default value for whence is SEEK_SET. Values for whence are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">io.SEEK_SET</span></code> or <code class="docutils literal notranslate"><span class="pre">0</span></code> - start of the stream (the default);
+offset should be zero or positive</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">io.SEEK_CUR</span></code> or <code class="docutils literal notranslate"><span class="pre">1</span></code> - current stream position; offset may be negative</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">io.SEEK_END</span></code> or <code class="docutils literal notranslate"><span class="pre">2</span></code> - end of the stream; offset is usually negative</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the new absolute position</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.seekable">
+<code class="sig-name descname">seekable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/io.html#Open.seekable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.io.Open.seekable" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the stream supports random access.</p>
+</dd>
+</dl>
+<p>All <code class="docutils literal notranslate"><span class="pre">Open</span></code> instances support random access.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.tell">
+<code class="sig-name descname">tell</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/io.html#Open.tell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.io.Open.tell" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the absolute byte position within the file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.truncate">
+<code class="sig-name descname">truncate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/io.html#Open.truncate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.io.Open.truncate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resize the stream to the given size. NOT SUPPORTED.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.writable">
+<code class="sig-name descname">writable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/io.html#Open.writable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.io.Open.writable" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the stream can be written to</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.io.Open.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">b</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/io.html#Open.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.io.Open.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write bytes from the buffer, b.</p>
+<p>Note: this function may perform extra copying and could be inefficient.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="pytest.html" class="btn btn-neutral float-right" title="Pytest Integration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="path.html" class="btn btn-neutral float-left" title="PikePath" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

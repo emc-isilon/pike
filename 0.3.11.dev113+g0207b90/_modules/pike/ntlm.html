@@ -1,0 +1,992 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pike.ntlm &mdash; pike-smb2 0.3.11.dev113+g0207b90 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pike-smb2
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../high_level.html">High-Level API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autosummary.html">API Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model.html">Implementation Details</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pike-smb2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pike.ntlm</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pike.ntlm</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) 2013-2020, Dell Inc. or its subsidiaries.</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1"># See file LICENSE for licensing information.</span>
+<span class="c1">#</span>
+<span class="c1"># Module Name:</span>
+<span class="c1">#</span>
+<span class="c1">#        ntlm.py</span>
+<span class="c1">#</span>
+<span class="c1"># Abstract:</span>
+<span class="c1">#</span>
+<span class="c1">#        Pure python NTLM authentication provider</span>
+<span class="c1">#</span>
+<span class="c1"># Authors: Masen Furer (masen.furer@emc.com)</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="kn">import</span> <span class="nb">object</span>
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="kn">import</span> <span class="nb">range</span>
+
+<span class="kn">import</span> <span class="nn">array</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">socket</span> <span class="kn">import</span> <span class="n">gethostname</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+
+<span class="kn">import</span> <span class="nn">Cryptodome.Cipher.DES</span>
+<span class="kn">import</span> <span class="nn">Cryptodome.Cipher.ARC4</span> <span class="k">as</span> <span class="nn">RC4</span>
+<span class="kn">import</span> <span class="nn">Cryptodome.Hash.HMAC</span> <span class="k">as</span> <span class="nn">HMAC</span>
+<span class="kn">import</span> <span class="nn">Cryptodome.Hash.MD4</span> <span class="k">as</span> <span class="nn">MD4</span>
+<span class="kn">import</span> <span class="nn">Cryptodome.Hash.MD5</span> <span class="k">as</span> <span class="nn">MD5</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">nttime</span>
+
+
+<div class="viewcode-block" id="des_key_64"><a class="viewcode-back" href="../../model.html#pike.ntlm.des_key_64">[docs]</a><span class="k">def</span> <span class="nf">des_key_64</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return an 64-bit des key by adding a zero to the least significant bit</span>
+<span class="sd">    of each character.</span>
+<span class="sd">    K should be a 7 char string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">in_key</span> <span class="o">=</span> <span class="n">K</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\0</span><span class="s2">&quot;</span>
+    <span class="n">out_key</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">K</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_key</span><span class="p">)):</span>
+        <span class="n">out_key</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">((</span><span class="nb">ord</span><span class="p">(</span><span class="n">in_key</span><span class="p">[</span><span class="n">ix</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">ix</span><span class="p">))</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">in_key</span><span class="p">[</span><span class="n">ix</span><span class="p">])</span> <span class="o">&gt;&gt;</span> <span class="n">ix</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_key</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span></div>
+
+
+<span class="k">def</span> <span class="nf">DES</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">D</span><span class="p">):</span>
+    <span class="n">d1</span> <span class="o">=</span> <span class="n">Cryptodome</span><span class="o">.</span><span class="n">Cipher</span><span class="o">.</span><span class="n">DES</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">des_key_64</span><span class="p">(</span><span class="n">K</span><span class="p">),</span> <span class="n">Cryptodome</span><span class="o">.</span><span class="n">Cipher</span><span class="o">.</span><span class="n">DES</span><span class="o">.</span><span class="n">MODE_ECB</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">d1</span><span class="o">.</span><span class="n">encrypt</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">DESL</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">D</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">DES</span><span class="p">(</span><span class="n">K</span><span class="p">[:</span><span class="mi">7</span><span class="p">],</span> <span class="n">D</span><span class="p">)</span> <span class="o">+</span> <span class="n">DES</span><span class="p">(</span><span class="n">K</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">14</span><span class="p">],</span> <span class="n">D</span><span class="p">)</span> <span class="o">+</span> <span class="n">DES</span><span class="p">(</span><span class="n">K</span><span class="p">[</span><span class="mi">14</span><span class="p">:</span><span class="mi">16</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\0</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">5</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">nonce</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">getrandbits</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">)])</span>
+
+
+<span class="k">def</span> <span class="nf">encode_frame</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">)</span>
+    <span class="n">frame</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Cursor</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">buffer</span>
+
+
+<span class="n">NTLM_SIGNATURE</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;NTLMSSP</span><span class="se">\x00</span><span class="s2">&quot;</span>
+
+
+<div class="viewcode-block" id="MessageType"><a class="viewcode-back" href="../../model.html#pike.ntlm.MessageType">[docs]</a><span class="k">class</span> <span class="nc">MessageType</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">ValueEnum</span><span class="p">):</span>
+    <span class="n">NtLmNegotiate</span> <span class="o">=</span> <span class="mh">0x1</span>
+    <span class="n">NtLmChallenge</span> <span class="o">=</span> <span class="mh">0x2</span>
+    <span class="n">NtLmAuthenticate</span> <span class="o">=</span> <span class="mh">0x3</span></div>
+
+
+<span class="n">MessageType</span><span class="o">.</span><span class="n">import_items</span><span class="p">(</span><span class="nb">globals</span><span class="p">())</span>
+
+
+<span class="k">class</span> <span class="nc">Ntlm</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="n">NTLM_SIGNATURE</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="n">signature</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_bytes</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">signature</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span> <span class="o">!=</span> <span class="n">NTLM_SIGNATURE</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">core</span><span class="o">.</span><span class="n">BadPacket</span><span class="p">(</span><span class="s2">&quot;Packet signature does not match&quot;</span><span class="p">)</span>
+        <span class="c1"># determine the message type to pass off decoding</span>
+        <span class="n">message_type</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint32le</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">message_type</span> <span class="o">==</span> <span class="n">NtLmChallenge</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">NtLmChallengeMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">core</span><span class="o">.</span><span class="n">BadPacket</span><span class="p">(</span>
+                <span class="s2">&quot;Unknown response message type: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">message_type</span><span class="p">)</span>
+            <span class="p">)</span>
+
+
+<div class="viewcode-block" id="NegotiateFlags"><a class="viewcode-back" href="../../model.html#pike.ntlm.NegotiateFlags">[docs]</a><span class="k">class</span> <span class="nc">NegotiateFlags</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">FlagEnum</span><span class="p">):</span>
+    <span class="n">NTLMSSP_NEGOTIATE_UNICODE</span> <span class="o">=</span> <span class="mh">0x00000001</span>
+    <span class="n">NTLM_NEGOTIATE_OEM</span> <span class="o">=</span> <span class="mh">0x00000002</span>
+    <span class="n">NTLMSSP_REQUEST_TARGET</span> <span class="o">=</span> <span class="mh">0x00000004</span>
+    <span class="n">NTLM_NEGOTIATE_SIGN</span> <span class="o">=</span> <span class="mh">0x00000010</span>
+    <span class="n">NTLM_NEGOTIATE_SEAL</span> <span class="o">=</span> <span class="mh">0x00000020</span>
+    <span class="n">NTLMSSP_NEGOTIATE_DATAGRAM</span> <span class="o">=</span> <span class="mh">0x00000040</span>
+    <span class="n">NTLMSSP_NEGOTIATE_LM_KEY</span> <span class="o">=</span> <span class="mh">0x00000080</span>
+    <span class="n">NTLMSSP_NEGOTIATE_NTLM</span> <span class="o">=</span> <span class="mh">0x00000200</span>
+    <span class="n">ANONYMOUS</span> <span class="o">=</span> <span class="mh">0x00000800</span>
+    <span class="n">NTLMSSP_NEGOTIATE_OEM_DOMAIN_SUPPLIED</span> <span class="o">=</span> <span class="mh">0x00001000</span>
+    <span class="n">NTLMSSP_NEGOTIATE_OEM_WORKSTATION_SUPPLIED</span> <span class="o">=</span> <span class="mh">0x00002000</span>
+    <span class="n">NTLMSSP_NEGOTIATE_ALWAYS_SIGN</span> <span class="o">=</span> <span class="mh">0x00008000</span>
+    <span class="n">NTLMSSP_TARGET_TYPE_DOMAIN</span> <span class="o">=</span> <span class="mh">0x00010000</span>
+    <span class="n">NTLMSSP_TARGET_TYPE_SERVER</span> <span class="o">=</span> <span class="mh">0x00020000</span>
+    <span class="n">NTLMSSP_NEGOTIATE_EXTENDED_SESSIONSECURITY</span> <span class="o">=</span> <span class="mh">0x00080000</span>
+    <span class="n">NTLMSSP_NEGOTIATE_IDENTIFY</span> <span class="o">=</span> <span class="mh">0x00100000</span>
+    <span class="n">NTLMSSP_REQUEST_NON_NT_SESSION_KEY</span> <span class="o">=</span> <span class="mh">0x00400000</span>
+    <span class="n">NTLMSSP_NEGOTIATE_TARGET_INFO</span> <span class="o">=</span> <span class="mh">0x00800000</span>
+    <span class="n">NTLMSSP_NEGOTIATE_VERSION</span> <span class="o">=</span> <span class="mh">0x02000000</span>
+    <span class="n">NTLMSSP_NEGOTIATE_128</span> <span class="o">=</span> <span class="mh">0x20000000</span>
+    <span class="n">NTLMSSP_NEGOTIATE_KEY_EXCH</span> <span class="o">=</span> <span class="mh">0x40000000</span>
+    <span class="n">NTLMSSP_NEGOTIATE_56</span> <span class="o">=</span> <span class="mh">0x80000000</span></div>
+
+
+<span class="n">NegotiateFlags</span><span class="o">.</span><span class="n">import_items</span><span class="p">(</span><span class="nb">globals</span><span class="p">())</span>
+
+
+<div class="viewcode-block" id="ProductMajorVersionFlags"><a class="viewcode-back" href="../../model.html#pike.ntlm.ProductMajorVersionFlags">[docs]</a><span class="k">class</span> <span class="nc">ProductMajorVersionFlags</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">ValueEnum</span><span class="p">):</span>
+    <span class="n">WINDOWS_MAJOR_VERSION_5</span> <span class="o">=</span> <span class="mh">0x5</span>
+    <span class="n">WINDOWS_MAJOR_VERSION_6</span> <span class="o">=</span> <span class="mh">0x6</span>
+    <span class="n">WINDOWS_MAJOR_VERSION_10</span> <span class="o">=</span> <span class="mh">0xA</span></div>
+
+
+<span class="n">ProductMajorVersionFlags</span><span class="o">.</span><span class="n">import_items</span><span class="p">(</span><span class="nb">globals</span><span class="p">())</span>
+
+
+<div class="viewcode-block" id="ProductMinorVersionFlags"><a class="viewcode-back" href="../../model.html#pike.ntlm.ProductMinorVersionFlags">[docs]</a><span class="k">class</span> <span class="nc">ProductMinorVersionFlags</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">ValueEnum</span><span class="p">):</span>
+    <span class="n">WINDOWS_MINOR_VERSION_0</span> <span class="o">=</span> <span class="mh">0x0</span>
+    <span class="n">WINDOWS_MINOR_VERSION_1</span> <span class="o">=</span> <span class="mh">0x1</span>
+    <span class="n">WINDOWS_MINOR_VERSION_2</span> <span class="o">=</span> <span class="mh">0x2</span>
+    <span class="n">WINDOWS_MINOR_VERSION_3</span> <span class="o">=</span> <span class="mh">0x3</span></div>
+
+
+<span class="n">ProductMinorVersionFlags</span><span class="o">.</span><span class="n">import_items</span><span class="p">(</span><span class="nb">globals</span><span class="p">())</span>
+
+
+<div class="viewcode-block" id="NTLMRevisionCurrentFlags"><a class="viewcode-back" href="../../model.html#pike.ntlm.NTLMRevisionCurrentFlags">[docs]</a><span class="k">class</span> <span class="nc">NTLMRevisionCurrentFlags</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">ValueEnum</span><span class="p">):</span>
+    <span class="n">UNKNOWN</span> <span class="o">=</span> <span class="mh">0x0</span>
+    <span class="n">NTLMSSP_REVISION_W2K3</span> <span class="o">=</span> <span class="mh">0x0F</span></div>
+
+
+<span class="n">NTLMRevisionCurrentFlags</span><span class="o">.</span><span class="n">import_items</span><span class="p">(</span><span class="nb">globals</span><span class="p">())</span>
+
+
+<span class="k">class</span> <span class="nc">Version</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">product_major_version</span> <span class="o">=</span> <span class="n">WINDOWS_MAJOR_VERSION_5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">product_minor_version</span> <span class="o">=</span> <span class="n">WINDOWS_MINOR_VERSION_0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">product_build</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ntlm_revision_current</span> <span class="o">=</span> <span class="n">NTLMSSP_REVISION_W2K3</span>
+
+    <span class="k">def</span> <span class="nf">_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint8le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">product_major_version</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint8le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">product_minor_version</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">product_build</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># reserved</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint8le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># reserved</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint8le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ntlm_revision_current</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">product_major_version</span> <span class="o">=</span> <span class="n">ProductMajorVersionFlags</span><span class="p">(</span><span class="n">cur</span><span class="o">.</span><span class="n">decode_uint8le</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">product_minor_version</span> <span class="o">=</span> <span class="n">ProductMinorVersionFlags</span><span class="p">(</span><span class="n">cur</span><span class="o">.</span><span class="n">decode_uint8le</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">product_build</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint16le</span><span class="p">()</span>
+        <span class="n">reserved</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint16le</span><span class="p">()</span>
+        <span class="n">reserved</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint8le</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ntlm_revision_current</span> <span class="o">=</span> <span class="n">NTLMRevisionCurrentFlags</span><span class="p">(</span><span class="n">cur</span><span class="o">.</span><span class="n">decode_uint8le</span><span class="p">())</span>
+
+
+<span class="k">class</span> <span class="nc">NtLmNegotiateMessage</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="n">message_type</span> <span class="o">=</span> <span class="n">NtLmNegotiate</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_flags</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workstation_name</span> <span class="o">=</span> <span class="n">gethostname</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="n">is_unicode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_flags</span> <span class="o">&amp;</span> <span class="n">NTLMSSP_NEGOTIATE_UNICODE</span>
+
+        <span class="n">message_start</span> <span class="o">=</span> <span class="n">cur</span> <span class="o">-</span> <span class="mi">8</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint32le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">message_type</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint32le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">negotiate_flags</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_flags</span> <span class="o">&amp;</span> <span class="n">NTLMSSP_NEGOTIATE_OEM_DOMAIN_SUPPLIED</span><span class="p">:</span>
+            <span class="n">domain_name_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domain_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">domain_name_len</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">is_unicode</span><span class="p">:</span>
+            <span class="n">domain_name_len</span> <span class="o">=</span> <span class="n">domain_name_len</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">domain_name_len</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">domain_name_len</span><span class="p">)</span>
+        <span class="n">domain_name_offset_hole</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">hole</span><span class="o">.</span><span class="n">encode_uint32le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_flags</span> <span class="o">&amp;</span> <span class="n">NTLMSSP_NEGOTIATE_OEM_WORKSTATION_SUPPLIED</span><span class="p">:</span>
+            <span class="n">workstation_name_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workstation_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">workstation_name_len</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">is_unicode</span><span class="p">:</span>
+            <span class="n">workstation_name_len</span> <span class="o">=</span> <span class="n">workstation_name_len</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">workstation_name_len</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">workstation_name_len</span><span class="p">)</span>
+        <span class="n">workstation_name_offset_hole</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">hole</span><span class="o">.</span><span class="n">encode_uint32le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_flags</span> <span class="o">&amp;</span> <span class="n">NTLMSSP_NEGOTIATE_VERSION</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint64le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">domain_name_offset_hole</span><span class="p">(</span><span class="n">cur</span> <span class="o">-</span> <span class="n">message_start</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">domain_name_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_unicode</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">encode_utf16le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domain_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domain_name</span><span class="p">)</span>
+
+        <span class="n">workstation_name_offset_hole</span><span class="p">(</span><span class="n">cur</span> <span class="o">-</span> <span class="n">message_start</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">workstation_name_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_unicode</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">encode_utf16le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workstation_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workstation_name</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="AvId"><a class="viewcode-back" href="../../model.html#pike.ntlm.AvId">[docs]</a><span class="k">class</span> <span class="nc">AvId</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">ValueEnum</span><span class="p">):</span>
+    <span class="n">MsvAvEOL</span> <span class="o">=</span> <span class="mh">0x0</span>
+    <span class="n">MsvAvNbComputerName</span> <span class="o">=</span> <span class="mh">0x1</span>
+    <span class="n">MsvAvNbDomainName</span> <span class="o">=</span> <span class="mh">0x2</span>
+    <span class="n">MsvAvDnsComputerName</span> <span class="o">=</span> <span class="mh">0x3</span>
+    <span class="n">MsvAvDnsDomainName</span> <span class="o">=</span> <span class="mh">0x4</span>
+    <span class="n">MsvAvDnsTreeName</span> <span class="o">=</span> <span class="mh">0x5</span>
+    <span class="n">MsvAvFlags</span> <span class="o">=</span> <span class="mh">0x6</span>
+    <span class="n">MsvAvTimestamp</span> <span class="o">=</span> <span class="mh">0x7</span>
+    <span class="n">MsvAvSingleHost</span> <span class="o">=</span> <span class="mh">0x8</span>
+    <span class="n">MsvAvTargetName</span> <span class="o">=</span> <span class="mh">0x9</span>
+    <span class="n">MsvChannelBindings</span> <span class="o">=</span> <span class="mh">0xA</span></div>
+
+
+<span class="n">AvId</span><span class="o">.</span><span class="n">import_items</span><span class="p">(</span><span class="nb">globals</span><span class="p">())</span>
+
+
+<span class="k">class</span> <span class="nc">AvPair</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="n">text_fields</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">MsvAvNbComputerName</span><span class="p">,</span>
+        <span class="n">MsvAvNbDomainName</span><span class="p">,</span>
+        <span class="n">MsvAvDnsComputerName</span><span class="p">,</span>
+        <span class="n">MsvAvDnsDomainName</span><span class="p">,</span>
+        <span class="n">MsvAvDnsTreeName</span><span class="p">,</span>
+        <span class="n">MsvAvTargetName</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">target_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">av_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">av_id</span><span class="p">)</span>
+        <span class="n">av_len_hole</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">hole</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">av_start</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">av_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_fields</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">encode_utf16le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">av_len_hole</span><span class="p">(</span><span class="n">cur</span> <span class="o">-</span> <span class="n">av_start</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">av_id</span> <span class="o">=</span> <span class="n">AvId</span><span class="p">(</span><span class="n">cur</span><span class="o">.</span><span class="n">decode_uint16le</span><span class="p">())</span>
+        <span class="n">av_len</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint16le</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">av_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">av_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_fields</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_utf16le</span><span class="p">(</span><span class="n">av_len</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_bytes</span><span class="p">(</span><span class="n">av_len</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">extract_pair</span><span class="p">(</span><span class="n">av_pairs</span><span class="p">,</span> <span class="n">av_id</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">av_pairs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">av_id</span> <span class="o">==</span> <span class="n">av_id</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">p</span>
+
+
+<span class="k">class</span> <span class="nc">NtLmChallengeMessage</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="n">message_type</span> <span class="o">=</span> <span class="n">NtLmChallenge</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_flags</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_challenge</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_info</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="n">message_start</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="o">-</span> <span class="mi">12</span>
+        <span class="n">target_name_len</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint16le</span><span class="p">()</span>
+        <span class="n">target_name_max_len</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint16le</span><span class="p">()</span>
+        <span class="n">target_name_offset</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint32le</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_flags</span> <span class="o">=</span> <span class="n">NegotiateFlags</span><span class="p">(</span><span class="n">cur</span><span class="o">.</span><span class="n">decode_uint32le</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_challenge</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_bytes</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">reserved</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_bytes</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">target_info_len</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint16le</span><span class="p">()</span>
+        <span class="n">target_info_max_len</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint16le</span><span class="p">()</span>
+        <span class="n">target_info_offset</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint32le</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_flags</span> <span class="o">&amp;</span> <span class="n">NTLMSSP_NEGOTIATE_VERSION</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">cur</span><span class="o">.</span><span class="n">bounded</span><span class="p">(</span><span class="n">cur</span><span class="p">,</span> <span class="n">cur</span> <span class="o">+</span> <span class="mi">8</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">Version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cur</span><span class="o">.</span><span class="n">decode_uint64le</span><span class="p">()</span>
+
+        <span class="n">is_unicode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_flags</span> <span class="o">&amp;</span> <span class="n">NTLMSSP_NEGOTIATE_UNICODE</span>
+
+        <span class="n">cur</span><span class="o">.</span><span class="n">seekto</span><span class="p">(</span><span class="n">message_start</span> <span class="o">+</span> <span class="n">target_name_offset</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">target_name_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_unicode</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_name</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_utf16le</span><span class="p">(</span><span class="n">target_name_len</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_name</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">decode_bytes</span><span class="p">(</span><span class="n">target_name_len</span><span class="p">)</span>
+
+        <span class="n">cur</span><span class="o">.</span><span class="n">seekto</span><span class="p">(</span><span class="n">message_start</span> <span class="o">+</span> <span class="n">target_info_offset</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">cur</span> <span class="o">+</span> <span class="n">target_info_len</span>
+        <span class="k">if</span> <span class="n">target_info_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">cur</span> <span class="o">&lt;</span> <span class="n">end</span><span class="p">:</span>
+                <span class="n">this_av</span> <span class="o">=</span> <span class="n">AvPair</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="k">with</span> <span class="n">cur</span><span class="o">.</span><span class="n">bounded</span><span class="p">(</span><span class="n">cur</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+                    <span class="n">this_av</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">this_av</span><span class="o">.</span><span class="n">av_id</span> <span class="o">==</span> <span class="n">MsvAvEOL</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+
+<span class="k">class</span> <span class="nc">NtLmAuthenticateMessage</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="n">message_type</span> <span class="o">=</span> <span class="n">NtLmAuthenticate</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lm_challenge_response</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nt_challenge_response</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workstation_name</span> <span class="o">=</span> <span class="n">gethostname</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encrypted_random_session_key</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_flags</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mic</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="n">is_unicode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_flags</span> <span class="o">&amp;</span> <span class="n">NTLMSSP_NEGOTIATE_UNICODE</span>
+
+        <span class="n">message_start</span> <span class="o">=</span> <span class="n">cur</span> <span class="o">-</span> <span class="mi">8</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint32le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">message_type</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lm_challenge_response</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lm_challenge_response_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lm_challenge_response</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lm_challenge_response_len</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">lm_challenge_response_len</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">lm_challenge_response_len</span><span class="p">)</span>
+        <span class="n">lm_challenge_response_offset_hole</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">hole</span><span class="o">.</span><span class="n">encode_uint32le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nt_challenge_response</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">nt_challenge_response_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nt_challenge_response</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nt_challenge_response_len</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">nt_challenge_response_len</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">nt_challenge_response_len</span><span class="p">)</span>
+        <span class="n">nt_challenge_response_offset_hole</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">hole</span><span class="o">.</span><span class="n">encode_uint32le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">domain_name_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domain_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">domain_name_len</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">is_unicode</span><span class="p">:</span>
+            <span class="n">domain_name_len</span> <span class="o">=</span> <span class="n">domain_name_len</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">domain_name_len</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">domain_name_len</span><span class="p">)</span>
+        <span class="n">domain_name_offset_hole</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">hole</span><span class="o">.</span><span class="n">encode_uint32le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">user_name_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">user_name_len</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">is_unicode</span><span class="p">:</span>
+            <span class="n">user_name_len</span> <span class="o">=</span> <span class="n">user_name_len</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">user_name_len</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">user_name_len</span><span class="p">)</span>
+        <span class="n">user_name_offset_hole</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">hole</span><span class="o">.</span><span class="n">encode_uint32le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workstation_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">workstation_name_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workstation_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">workstation_name_len</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">is_unicode</span><span class="p">:</span>
+            <span class="n">workstation_name_len</span> <span class="o">=</span> <span class="n">workstation_name_len</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">workstation_name_len</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">workstation_name_len</span><span class="p">)</span>
+        <span class="n">workstation_name_offset_hole</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">hole</span><span class="o">.</span><span class="n">encode_uint32le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_flags</span> <span class="o">&amp;</span> <span class="n">NTLMSSP_NEGOTIATE_KEY_EXCH</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">encrypted_random_session_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">):</span>
+            <span class="n">encrypted_random_session_key_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encrypted_random_session_key</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">encrypted_random_session_key_len</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">encrypted_random_session_key_len</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="n">encrypted_random_session_key_len</span><span class="p">)</span>
+        <span class="n">encrypted_random_session_key_offset_hole</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">hole</span><span class="o">.</span><span class="n">encode_uint32le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint32le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">negotiate_flags</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_flags</span> <span class="o">&amp;</span> <span class="n">NTLMSSP_NEGOTIATE_VERSION</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint64le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mic</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mic</span><span class="p">[:</span><span class="mi">16</span><span class="p">])</span>
+
+        <span class="n">lm_challenge_response_offset_hole</span><span class="p">(</span><span class="n">cur</span> <span class="o">-</span> <span class="n">message_start</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lm_challenge_response_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lm_challenge_response</span><span class="p">)</span>
+
+        <span class="n">nt_challenge_response_offset_hole</span><span class="p">(</span><span class="n">cur</span> <span class="o">-</span> <span class="n">message_start</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nt_challenge_response_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nt_challenge_response</span><span class="p">)</span>
+
+        <span class="n">domain_name_offset_hole</span><span class="p">(</span><span class="n">cur</span> <span class="o">-</span> <span class="n">message_start</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">domain_name_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_unicode</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">encode_utf16le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domain_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domain_name</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">))</span>
+
+        <span class="n">user_name_offset_hole</span><span class="p">(</span><span class="n">cur</span> <span class="o">-</span> <span class="n">message_start</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">user_name_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_unicode</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">encode_utf16le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user_name</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">))</span>
+
+        <span class="n">workstation_name_offset_hole</span><span class="p">(</span><span class="n">cur</span> <span class="o">-</span> <span class="n">message_start</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">workstation_name_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_unicode</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">encode_utf16le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workstation_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workstation_name</span><span class="p">)</span>
+
+        <span class="n">encrypted_random_session_key_offset_hole</span><span class="p">(</span><span class="n">cur</span> <span class="o">-</span> <span class="n">message_start</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">encrypted_random_session_key_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encrypted_random_session_key</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="NtlmVersion"><a class="viewcode-back" href="../../model.html#pike.ntlm.NtlmVersion">[docs]</a><span class="k">class</span> <span class="nc">NtlmVersion</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">ValueEnum</span><span class="p">):</span>
+    <span class="n">NTLMv1</span> <span class="o">=</span> <span class="mh">0x1</span>
+    <span class="n">NTLMv2</span> <span class="o">=</span> <span class="mh">0x2</span></div>
+
+
+<span class="n">NtlmVersion</span><span class="o">.</span><span class="n">import_items</span><span class="p">(</span><span class="nb">globals</span><span class="p">())</span>
+
+
+<span class="c1">########################</span>
+<span class="c1">## NTLMv1 Implementation</span>
+<span class="c1">########################</span>
+
+
+<span class="k">def</span> <span class="nf">LMOWFv1</span><span class="p">(</span><span class="n">password</span><span class="p">):</span>
+    <span class="n">lm_passwd</span> <span class="o">=</span> <span class="n">password</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\0</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">14</span>
+    <span class="n">magic</span> <span class="o">=</span> <span class="s2">&quot;KGS!@#$%&quot;</span>
+    <span class="k">return</span> <span class="n">DES</span><span class="p">(</span><span class="n">lm_passwd</span><span class="p">[:</span><span class="mi">7</span><span class="p">],</span> <span class="n">magic</span><span class="p">)</span> <span class="o">+</span> <span class="n">DES</span><span class="p">(</span><span class="n">lm_passwd</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">14</span><span class="p">],</span> <span class="n">magic</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">NTOWFv1</span><span class="p">(</span><span class="n">password</span><span class="p">):</span>
+    <span class="n">nt_passwd</span> <span class="o">=</span> <span class="n">password</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-16-le&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">MD4</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">nt_passwd</span><span class="p">)</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">ComputeResponsev1</span><span class="p">(</span>
+    <span class="n">NegFlg</span><span class="p">,</span>
+    <span class="n">ResponseKeyNT</span><span class="p">,</span>
+    <span class="n">ResponseKeyLM</span><span class="p">,</span>
+    <span class="n">ServerChallenge</span><span class="p">,</span>
+    <span class="n">ClientChallenge</span><span class="p">,</span>
+    <span class="n">Time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ServerName</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="k">if</span> <span class="n">NegFlg</span> <span class="o">&amp;</span> <span class="n">NTLMSSP_NEGOTIATE_EXTENDED_SESSIONSECURITY</span><span class="p">:</span>
+        <span class="n">NtChallengeResponse</span> <span class="o">=</span> <span class="n">DESL</span><span class="p">(</span>
+            <span class="n">ResponseKeyNT</span><span class="p">,</span> <span class="n">MD5</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">ServerChallenge</span> <span class="o">+</span> <span class="n">ClientChallenge</span><span class="p">)</span><span class="o">.</span><span class="n">digest</span><span class="p">()[:</span><span class="mi">8</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">LmChallengeResponse</span> <span class="o">=</span> <span class="n">ClientChallenge</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\0</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">16</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">NtChallengeResponse</span> <span class="o">=</span> <span class="n">DESL</span><span class="p">(</span><span class="n">ResponseKeyNT</span><span class="p">,</span> <span class="n">ServerChallenge</span><span class="p">)</span>
+        <span class="n">LmChallengeResponse</span> <span class="o">=</span> <span class="n">DESL</span><span class="p">(</span><span class="n">ResponseKeyLM</span><span class="p">,</span> <span class="n">ServerChallenge</span><span class="p">)</span>
+    <span class="n">SessionBaseKey</span> <span class="o">=</span> <span class="n">MD4</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">ResponseKeyNT</span><span class="p">)</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">NtChallengeResponse</span><span class="p">,</span> <span class="n">LmChallengeResponse</span><span class="p">,</span> <span class="n">SessionBaseKey</span>
+
+
+<span class="k">def</span> <span class="nf">KXKEY</span><span class="p">(</span><span class="n">NegFlg</span><span class="p">,</span> <span class="n">SessionBaseKey</span><span class="p">,</span> <span class="n">LmChallengeResponse</span><span class="p">,</span> <span class="n">ServerChallenge</span><span class="p">,</span> <span class="n">ResponseKeyLM</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">NegFlg</span> <span class="o">&amp;</span> <span class="n">NTLMSSP_NEGOTIATE_EXTENDED_SESSIONSECURITY</span><span class="p">:</span>
+        <span class="n">hm</span> <span class="o">=</span> <span class="n">HMAC</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">SessionBaseKey</span><span class="p">,</span> <span class="n">ServerChallenge</span> <span class="o">+</span> <span class="n">LmChallengeResponse</span><span class="p">[:</span><span class="mi">8</span><span class="p">],</span> <span class="n">MD5</span><span class="p">)</span>
+        <span class="n">KeyExchangeKey</span> <span class="o">=</span> <span class="n">hm</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">LMOWF</span> <span class="o">=</span> <span class="n">ResponseKeyLM</span>
+        <span class="k">if</span> <span class="n">NegFlg</span> <span class="o">&amp;</span> <span class="n">NTLMSSP_NEGOTIATE_LMKEY</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">LmChallengeResponse</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span>
+            <span class="n">KeyExchangeKey</span> <span class="o">=</span> <span class="n">DES</span><span class="p">(</span><span class="n">LMOWF</span><span class="p">[:</span><span class="mi">7</span><span class="p">],</span> <span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="n">DES</span><span class="p">(</span><span class="n">LMOWF</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\xbd</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">6</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">NegFlg</span> <span class="o">&amp;</span> <span class="n">NTLMSSP_REQUEST_NON_NT_SESSION_KEY</span><span class="p">:</span>
+                <span class="n">KeyExchangeKey</span> <span class="o">=</span> <span class="n">LMOWF</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\0</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">8</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">KeyExchangeKey</span> <span class="o">=</span> <span class="n">SessionBaseKey</span>
+    <span class="k">return</span> <span class="n">KeyExchangeKey</span>
+
+
+<span class="c1">########################</span>
+<span class="c1">## NTLMv2 Implementation</span>
+<span class="c1">########################</span>
+
+
+<span class="k">class</span> <span class="nc">NTLMv2Response</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">challenge</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">challenge</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">NTLMv2ClientChallenge</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">challenge</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_stamp</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\0</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">challenge_from_client</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\0</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">av_pairs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">):</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint8le</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># RespType</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint8le</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># HiRespType</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint16le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Reserved</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint32le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Reserved</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint64le</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_stamp</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">challenge_from_client</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint32le</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Reserved</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">av_pairs</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">NTOWFv2</span><span class="p">(</span><span class="n">password</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">userdom</span><span class="p">):</span>
+    <span class="n">nt_passwd</span> <span class="o">=</span> <span class="n">password</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-16-le&quot;</span><span class="p">)</span>
+    <span class="n">nt_hash_passwd</span> <span class="o">=</span> <span class="n">MD4</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">nt_passwd</span><span class="p">)</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+    <span class="n">nt_userdom</span> <span class="o">=</span> <span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="n">userdom</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-16-le&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">HMAC</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">nt_hash_passwd</span><span class="p">,</span> <span class="n">nt_userdom</span><span class="p">,</span> <span class="n">MD5</span><span class="p">)</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">ComputeResponsev2</span><span class="p">(</span>
+    <span class="n">NegFlg</span><span class="p">,</span>
+    <span class="n">ResponseKeyNT</span><span class="p">,</span>
+    <span class="n">ResponseKeyLM</span><span class="p">,</span>
+    <span class="n">ServerChallenge</span><span class="p">,</span>
+    <span class="n">ClientChallenge</span><span class="p">,</span>
+    <span class="n">Time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ServerName</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">av_pairs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="k">if</span> <span class="n">Time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">Time</span> <span class="o">=</span> <span class="n">nttime</span><span class="o">.</span><span class="n">NtTime</span><span class="p">(</span><span class="n">nttime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">ServerName</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ServerName</span> <span class="o">=</span> <span class="s2">&quot;SERVER&quot;</span>
+    <span class="n">ServerName</span> <span class="o">=</span> <span class="n">ServerName</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-16-le&quot;</span><span class="p">)</span>
+
+    <span class="n">TimeBuf</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">)</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">Cursor</span><span class="p">(</span><span class="n">TimeBuf</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">encode_uint64le</span><span class="p">(</span><span class="n">Time</span><span class="p">)</span>
+
+    <span class="n">Responseversion</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\x01</span><span class="s2">&quot;</span>
+    <span class="n">HiResponseversion</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\x01</span><span class="s2">&quot;</span>
+
+    <span class="n">ntlmv2_client_challenge</span> <span class="o">=</span> <span class="n">NTLMv2ClientChallenge</span><span class="p">()</span>
+    <span class="n">ntlmv2_client_challenge</span><span class="o">.</span><span class="n">time_stamp</span> <span class="o">=</span> <span class="n">Time</span>
+    <span class="n">ntlmv2_client_challenge</span><span class="o">.</span><span class="n">challenge_from_client</span> <span class="o">=</span> <span class="n">ClientChallenge</span>
+    <span class="k">if</span> <span class="n">av_pairs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ntlmv2_client_challenge</span><span class="o">.</span><span class="n">av_pairs</span> <span class="o">=</span> <span class="n">av_pairs</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">encode_frame</span><span class="p">(</span><span class="n">ntlmv2_client_challenge</span><span class="p">)</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
+    <span class="n">NTProofStr</span> <span class="o">=</span> <span class="n">HMAC</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">ResponseKeyNT</span><span class="p">,</span> <span class="n">ServerChallenge</span> <span class="o">+</span> <span class="n">temp</span><span class="p">,</span> <span class="n">MD5</span><span class="p">)</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+    <span class="n">NtChallengeResponse</span> <span class="o">=</span> <span class="n">NTProofStr</span> <span class="o">+</span> <span class="n">temp</span>
+    <span class="n">LmChallengeResponse</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">HMAC</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">ResponseKeyLM</span><span class="p">,</span> <span class="n">ServerChallenge</span> <span class="o">+</span> <span class="n">ClientChallenge</span><span class="p">,</span> <span class="n">MD5</span><span class="p">)</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+        <span class="o">+</span> <span class="n">ClientChallenge</span>
+    <span class="p">)</span>
+    <span class="n">SessionBaseKey</span> <span class="o">=</span> <span class="n">HMAC</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">ResponseKeyNT</span><span class="p">,</span> <span class="n">NTProofStr</span><span class="p">,</span> <span class="n">MD5</span><span class="p">)</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">NtChallengeResponse</span><span class="p">,</span> <span class="n">LmChallengeResponse</span><span class="p">,</span> <span class="n">SessionBaseKey</span>
+
+
+<div class="viewcode-block" id="NtlmAuthenticator"><a class="viewcode-back" href="../../model.html#pike.ntlm.NtlmAuthenticator">[docs]</a><span class="k">class</span> <span class="nc">NtlmAuthenticator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    State machine for conducting ntlm authentication</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">neg_flags</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">NTLMSSP_NEGOTIATE_UNICODE</span>
+        <span class="o">|</span> <span class="n">NTLM_NEGOTIATE_OEM</span>
+        <span class="o">|</span> <span class="n">NTLMSSP_REQUEST_TARGET</span>
+        <span class="o">|</span> <span class="n">NTLMSSP_NEGOTIATE_NTLM</span>
+        <span class="o">|</span> <span class="n">NTLMSSP_NEGOTIATE_OEM_DOMAIN_SUPPLIED</span>
+        <span class="o">|</span> <span class="n">NTLMSSP_NEGOTIATE_EXTENDED_SESSIONSECURITY</span>
+        <span class="o">|</span> <span class="n">NTLM_NEGOTIATE_SIGN</span>
+        <span class="o">|</span> <span class="n">NTLM_NEGOTIATE_SEAL</span>
+        <span class="o">|</span> <span class="n">NTLMSSP_NEGOTIATE_128</span>
+        <span class="o">|</span> <span class="n">NTLMSSP_NEGOTIATE_56</span>
+        <span class="o">|</span> <span class="n">NTLMSSP_NEGOTIATE_KEY_EXCH</span>
+    <span class="p">)</span>
+
+    <span class="n">auth_flags</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">NTLMSSP_NEGOTIATE_UNICODE</span>
+        <span class="o">|</span> <span class="n">NTLMSSP_REQUEST_TARGET</span>
+        <span class="o">|</span> <span class="n">NTLMSSP_NEGOTIATE_NTLM</span>
+        <span class="o">|</span> <span class="n">NTLMSSP_NEGOTIATE_EXTENDED_SESSIONSECURITY</span>
+        <span class="o">|</span> <span class="n">NTLM_NEGOTIATE_SIGN</span>
+        <span class="o">|</span> <span class="n">NTLM_NEGOTIATE_SEAL</span>
+        <span class="o">|</span> <span class="n">NTLMSSP_NEGOTIATE_TARGET_INFO</span>
+        <span class="o">|</span> <span class="n">NTLMSSP_NEGOTIATE_128</span>
+        <span class="o">|</span> <span class="n">NTLMSSP_NEGOTIATE_56</span>
+        <span class="o">|</span> <span class="n">NTLMSSP_TARGET_TYPE_DOMAIN</span>
+        <span class="o">|</span> <span class="n">NTLMSSP_NEGOTIATE_KEY_EXCH</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="n">domain</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">Version</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">product_build</span> <span class="o">=</span> <span class="mi">9999</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ntlm_version</span> <span class="o">=</span> <span class="n">NTLMv2</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">client_challenge</span> <span class="o">=</span> <span class="n">nonce</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_base_key</span> <span class="o">=</span> <span class="n">nonce</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_message</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_buffer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">challenge_message</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">challenge_buffer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">authenticate_message</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">authenticate_buffer</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">ntlmv1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lm_hash</span> <span class="o">=</span> <span class="n">LMOWFv1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nt_hash</span> <span class="o">=</span> <span class="n">NTOWFv1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">)</span>
+        <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nt_challenge_response</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lm_challenge_response</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_base_key</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">ComputeResponsev1</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auth_flags</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nt_hash</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lm_hash</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server_challenge</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client_challenge</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key_exchange_key</span> <span class="o">=</span> <span class="n">KXKEY</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auth_flags</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_base_key</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lm_challenge_response</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server_challenge</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lm_hash</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">ntlmv2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ctarget_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">challenge_message</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">target_info</span>
+        <span class="n">server_time</span> <span class="o">=</span> <span class="n">extract_pair</span><span class="p">(</span><span class="n">ctarget_info</span><span class="p">,</span> <span class="n">MsvAvTimestamp</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">server_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">nttime</span><span class="o">.</span><span class="n">NtTime</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;Q&quot;</span><span class="p">,</span> <span class="n">server_time</span><span class="o">.</span><span class="n">value</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">nttime</span><span class="o">.</span><span class="n">NtTime</span><span class="p">(</span><span class="n">nttime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+        <span class="n">server_name</span> <span class="o">=</span> <span class="n">extract_pair</span><span class="p">(</span><span class="n">ctarget_info</span><span class="p">,</span> <span class="n">MsvAvNbComputerName</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">server_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">server_name</span> <span class="o">=</span> <span class="n">server_name</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nt_hash</span> <span class="o">=</span> <span class="n">NTOWFv2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">)</span>
+        <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nt_challenge_response</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lm_challenge_response</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_base_key</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">ComputeResponsev2</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auth_flags</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nt_hash</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nt_hash</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server_challenge</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client_challenge</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span>
+            <span class="n">time</span><span class="p">,</span>
+            <span class="n">server_name</span><span class="p">,</span>
+            <span class="n">ctarget_info</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key_exchange_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session_base_key</span>
+
+        <span class="k">if</span> <span class="n">extract_pair</span><span class="p">(</span><span class="n">ctarget_info</span><span class="p">,</span> <span class="n">MsvAvTimestamp</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lm_challenge_response</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\0</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">24</span>
+
+    <span class="k">def</span> <span class="nf">session_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auth_flags</span> <span class="o">&amp;</span> <span class="n">NTLMSSP_NEGOTIATE_KEY_EXCH</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">RC4</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key_exchange_key</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exported_session_key</span> <span class="o">=</span> <span class="n">nonce</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">encrypt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exported_session_key</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exported_session_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_exchange_key</span>
+
+    <span class="k">def</span> <span class="nf">negotiate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ntlm</span> <span class="o">=</span> <span class="n">Ntlm</span><span class="p">()</span>
+        <span class="n">neg</span> <span class="o">=</span> <span class="n">NtLmNegotiateMessage</span><span class="p">(</span><span class="n">ntlm</span><span class="p">)</span>
+        <span class="n">neg</span><span class="o">.</span><span class="n">negotiate_flags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neg_flags</span>
+        <span class="n">neg</span><span class="o">.</span><span class="n">domain_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span>
+        <span class="n">neg</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_buffer</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">)</span>
+        <span class="n">ntlm</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Cursor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">negotiate_buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_message</span> <span class="o">=</span> <span class="n">ntlm</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">negotiate_buffer</span>
+
+    <span class="k">def</span> <span class="nf">authenticate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">challenge_buf</span><span class="p">):</span>
+        <span class="c1"># parse the challenge message</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">challenge_buffer</span> <span class="o">=</span> <span class="n">challenge_buf</span>
+        <span class="n">ntlm_challenge</span> <span class="o">=</span> <span class="n">Ntlm</span><span class="p">()</span>
+        <span class="n">ntlm_challenge</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Cursor</span><span class="p">(</span><span class="n">challenge_buf</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_challenge</span> <span class="o">=</span> <span class="n">ntlm_challenge</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">server_challenge</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">challenge_message</span> <span class="o">=</span> <span class="n">ntlm_challenge</span>
+
+        <span class="c1"># build the auth message</span>
+        <span class="n">ntlm</span> <span class="o">=</span> <span class="n">Ntlm</span><span class="p">()</span>
+        <span class="n">auth</span> <span class="o">=</span> <span class="n">NtLmAuthenticateMessage</span><span class="p">(</span><span class="n">ntlm</span><span class="p">)</span>
+        <span class="n">auth</span><span class="o">.</span><span class="n">negotiate_flags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auth_flags</span>
+        <span class="n">auth</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span>
+        <span class="n">auth</span><span class="o">.</span><span class="n">domain_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span>
+        <span class="n">auth</span><span class="o">.</span><span class="n">user_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span>
+
+        <span class="c1"># perform the NTLM</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntlm_version</span> <span class="o">==</span> <span class="n">NTLMv1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ntlmv1</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntlm_version</span> <span class="o">==</span> <span class="n">NTLMv2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ntlmv2</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Unknown NTLM version </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ntlm_version</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># fill in the challenge responses</span>
+        <span class="n">auth</span><span class="o">.</span><span class="n">nt_challenge_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nt_challenge_response</span>
+        <span class="n">auth</span><span class="o">.</span><span class="n">lm_challenge_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lm_challenge_response</span>
+
+        <span class="c1"># generate the session key if requested</span>
+        <span class="n">session_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session_key</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">session_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">auth</span><span class="o">.</span><span class="n">encrypted_random_session_key</span> <span class="o">=</span> <span class="n">session_key</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">authenticate_buffer</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">)</span>
+        <span class="n">ntlm</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Cursor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">authenticate_buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">authenticate_message</span> <span class="o">=</span> <span class="n">ntlm</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">authenticate_buffer</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

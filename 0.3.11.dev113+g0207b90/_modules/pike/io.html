@@ -1,0 +1,769 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pike.io &mdash; pike-smb2 0.3.11.dev113+g0207b90 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pike-smb2
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../high_level.html">High-Level API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autosummary.html">API Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model.html">Implementation Details</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pike-smb2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pike.io</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pike.io</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">file-like wrapper for an open file</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">io</span>
+
+<span class="kn">import</span> <span class="nn">attr</span>
+
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">ResponseError</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">ntstatus</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">smb2</span>
+
+
+<span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
+<span class="k">class</span> <span class="nc">_Open</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;private</span>
+
+<span class="sd">    Base class for ``Open``.</span>
+
+<span class="sd">    Handle the SMB2-specific protocol interaction for leases, oplocks, and</span>
+<span class="sd">    durable handles.</span>
+
+<span class="sd">    Wrap :py:class:`~pike.model.Channel` operations which accept an ``Open`` as an</span>
+<span class="sd">    argument.</span>
+
+<span class="sd">    This class shouldn&#39;t be instantiated directly. See :py:class:`~pike.io.Open`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">()</span>
+    <span class="n">create_request</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">()</span>
+    <span class="n">create_response</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">()</span>
+    <span class="n">create_guid</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">()</span>
+    <span class="n">_previous_open</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">()</span>
+    <span class="n">oplock_level</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">lease</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">_is_resilient</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">_is_durable</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="nd">@oplock_level</span><span class="o">.</span><span class="n">default</span>
+    <span class="k">def</span> <span class="nf">_init_oplock_level</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">oplock_level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_response</span><span class="o">.</span><span class="n">oplock_level</span>
+        <span class="k">if</span> <span class="n">oplock_level</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="n">smb2</span><span class="o">.</span><span class="n">SMB2_OPLOCK_LEVEL_NONE</span><span class="p">,</span>
+            <span class="n">smb2</span><span class="o">.</span><span class="n">SMB2_OPLOCK_LEVEL_LEASE</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">arm_oplock_future</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">oplock_level</span>
+
+    <span class="nd">@lease</span><span class="o">.</span><span class="n">default</span>
+    <span class="k">def</span> <span class="nf">_init_lease</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">oplock_level</span> <span class="o">==</span> <span class="n">smb2</span><span class="o">.</span><span class="n">SMB2_OPLOCK_LEVEL_LEASE</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ctx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_response</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">smb2</span><span class="o">.</span><span class="n">LeaseResponse</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">lease</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)</span>
+
+    <span class="nd">@_is_durable</span><span class="o">.</span><span class="n">default</span>
+    <span class="k">def</span> <span class="nf">_init_is_durable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_previous_open</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_previous_open</span><span class="o">.</span><span class="n">is_durable</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">durable_handle_ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">durable_handle_v2_ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">)</span>
+
+    <span class="nd">@_is_resilient</span><span class="o">.</span><span class="n">default</span>
+    <span class="k">def</span> <span class="nf">_init_is_resilient</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_previous_open</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_previous_open</span><span class="o">.</span><span class="n">is_resilient</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">channel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :rtype: pike.model.Channel</span>
+<span class="sd">        :return: The first Channel associated with this handle.</span>
+
+<span class="sd">        (The session may have multiple bound channels).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">first_channel</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;I/O operation on closed file&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">file_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :rtype: 2-tuple of (int, int)</span>
+<span class="sd">        :return: the server-opaque file handle returned in the CREATE response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_response</span><span class="o">.</span><span class="n">file_id</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">durable_handle_ctx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :rtype: smb2.DurableHandleResponse or None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">ctx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_response</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">smb2</span><span class="o">.</span><span class="n">DurableHandleResponse</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">ctx</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">durable_handle_v2_ctx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :rtype: smb2.DurableHandleV2Response or None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">ctx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_response</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">smb2</span><span class="o">.</span><span class="n">DurableHandleV2Response</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">ctx</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">durable_timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :rtype: int or None</span>
+<span class="sd">        :return: the durable handle timeout in seconds (or None if not durable)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ctx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">durable_handle_v2_ctx</span>
+        <span class="k">if</span> <span class="n">ctx</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ctx</span><span class="o">.</span><span class="n">durable_timeout</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_previous_open</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_previous_open</span><span class="o">.</span><span class="n">durable_timeout</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">durable_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :rtype: int or None</span>
+<span class="sd">        :return: the durable handle flags (or None if not durable)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ctx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">durable_handle_v2_ctx</span>
+        <span class="k">if</span> <span class="n">ctx</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ctx</span><span class="o">.</span><span class="n">durable_flags</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_previous_open</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_previous_open</span><span class="o">.</span><span class="n">durable_flags</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_durable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: True if the handle is durable</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_durable</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_resilient</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: True if the handle is resilient</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_resilient</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_persistent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: True if the handle is persistent</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">durable_flags</span> <span class="o">&amp;</span> <span class="n">smb2</span><span class="o">.</span><span class="n">SMB2_DHANDLE_FLAG_PERSISTENT</span> <span class="o">!=</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">closed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: True if the handle is closed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="ow">is</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">arm_oplock_future</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        (Re)arm the oplock future for this open. This function should be called</span>
+<span class="sd">        when an oplock changes level to anything except SMB2_OPLOCK_LEVEL_NONE</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oplock_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">oplock_break_future</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_id</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">on_oplock_break</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cb</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Simple oplock break callback handler.</span>
+
+<span class="sd">        :type cb: Callable[[pike.smb2.OplockLevel], pike.smb2.OplockLevel])</span>
+<span class="sd">        :param cb: callback function is passed the</span>
+<span class="sd">            ``pike.smb2.OplockBreakNotification.oplock_level`` and must return</span>
+<span class="sd">            the desired :py:class:`pike.smb2.OplockLevel` to break to.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">simple_handle_break</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">smb_res</span><span class="p">,</span> <span class="n">cb_ctx</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            note that op is not used in this callback,</span>
+<span class="sd">            since it already closes over self</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">notify</span> <span class="o">=</span> <span class="n">smb_res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">oplock_level</span> <span class="o">!=</span> <span class="n">smb2</span><span class="o">.</span><span class="n">SMB2_OPLOCK_LEVEL_II</span><span class="p">:</span>
+                <span class="n">ack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">oplock_break_acknowledgement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smb_res</span><span class="p">)</span>
+                <span class="n">ack</span><span class="o">.</span><span class="n">oplock_level</span> <span class="o">=</span> <span class="n">cb</span><span class="p">(</span><span class="n">notify</span><span class="o">.</span><span class="n">oplock_level</span><span class="p">)</span>
+                <span class="n">ack_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">transceive</span><span class="p">(</span><span class="n">ack</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">ack</span><span class="o">.</span><span class="n">oplock_level</span> <span class="o">!=</span> <span class="n">smb2</span><span class="o">.</span><span class="n">SMB2_OPLOCK_LEVEL_NONE</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">arm_oplock_future</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">on_oplock_break</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">oplock_level</span> <span class="o">=</span> <span class="n">ack_res</span><span class="o">.</span><span class="n">oplock_level</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">oplock_level</span> <span class="o">=</span> <span class="n">notify</span><span class="o">.</span><span class="n">oplock_level</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_oplock_break_request</span><span class="p">(</span><span class="n">simple_handle_break</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">on_oplock_break_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cb</span><span class="p">,</span> <span class="n">cb_ctx</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Complex oplock break callback handler.</span>
+
+<span class="sd">        :type cb: Callable[[Open, pike.smb2.Smb2, Optional[Any]], Any])</span>
+<span class="sd">        :param cb: callback function is passed the file handle, the Smb2</span>
+<span class="sd">            :py:func:`~pike.smb2.OplockBreakNotification`, and an arbitrary</span>
+<span class="sd">            context and should handle breaking the oplock in some way. The</span>
+<span class="sd">            callback is also responsible for calling</span>
+<span class="sd">            :py:func:`arm_oplock_future` and and updating the ``.oplock_level``</span>
+<span class="sd">            (if changed)</span>
+<span class="sd">        :type cb_ctx: Optional[Any]</span>
+<span class="sd">        :param cb_ctx: arbitrary context passed to the callback</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">handle_break</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+            <span class="n">smb_res</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+            <span class="n">cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smb_res</span><span class="p">,</span> <span class="n">cb_ctx</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">oplock_future</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">handle_break</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">dispose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clear resources held by this object.</span>
+
+<span class="sd">        Called implicitly when the object is closed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lease</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lease</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lease</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Close the handle on the server.</span>
+
+<span class="sd">        If the channel or connection is unavailable, this is a no-op.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="c1"># If the underlying connection for the channel is closed explicitly</span>
+            <span class="c1"># open will not able to find an appropriate channel, to send close.</span>
+            <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># Helper operations call through to self.channel</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">query_directory_request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">query_directory_request</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">query_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">query_directory</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">enum_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">enum_directory</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">query_file_info_request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">query_file_info_request</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">query_file_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">query_file_info</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">set_file_info_request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">set_file_info_request</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">set_file_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">set_file_info</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">change_notify_request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">change_notify_request</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">change_notify</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">change_notify</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flush_request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">flush_request</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">flush</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lock_request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">lock_request</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">lock</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">set_symlink_request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">set_symlink_request</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">set_symlink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">set_symlink</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">get_symlink_request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">get_symlink_request</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">get_symlink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">get_symlink</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">CompatOpen</span><span class="p">(</span><span class="n">_Open</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    pike.model.Open compatible __init__ signature.</span>
+
+<span class="sd">    Please refactor code to use the new _Open constructor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">smb_res</span><span class="p">,</span> <span class="n">create_guid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prev</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CompatOpen</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">tree</span><span class="o">=</span><span class="n">tree</span><span class="p">,</span>
+            <span class="n">create_response</span><span class="o">=</span><span class="n">smb_res</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">create_guid</span><span class="o">=</span><span class="n">create_guid</span><span class="p">,</span>
+            <span class="n">previous_open</span><span class="o">=</span><span class="n">prev</span><span class="p">,</span>
+        <span class="p">)</span>
+
+
+<div class="viewcode-block" id="Open"><a class="viewcode-back" href="../../open.html#pike.io.Open">[docs]</a><span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
+<span class="k">class</span> <span class="nc">Open</span><span class="p">(</span><span class="n">_Open</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">RawIOBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents an open file handle on a remote SMB2 server.</span>
+
+<span class="sd">    Can be used as a contextmanager, which will automatically close</span>
+<span class="sd">    the file when the context block exits.</span>
+
+<span class="sd">    This class should not be instantiated directly. Use one of the following</span>
+<span class="sd">    methods to get an instance:</span>
+
+<span class="sd">        * :py:func:`pike.model.Channel.create`</span>
+<span class="sd">        * :py:func:`pike.path.PikePath.open`</span>
+
+<span class="sd">    This class provides a file-like interface with support for ``read``,</span>
+<span class="sd">    ``write``, ``seek``, ``flush``, and derivatives provided by ``RawIOBase``.</span>
+
+<span class="sd">    :vartype tree: pike.model.Tree</span>
+<span class="sd">    :ivar tree: the :py:class:`~pike.model.Tree` associated with this handle</span>
+<span class="sd">    :vartype create_request: pike.smb2.CreateRequest</span>
+<span class="sd">    :ivar create_request: the raw request sent to open this handle</span>
+<span class="sd">    :vartype create_response: pike.smb2.CreateResponse</span>
+<span class="sd">    :ivar create_response: the raw response returned by the server</span>
+<span class="sd">    :vartype create_guid: str</span>
+<span class="sd">    :ivar create_guid: the create_guid associated with the durable handle</span>
+<span class="sd">    :vartype oplock_level: pike.smb2.OplockLevel</span>
+<span class="sd">    :ivar oplock_level: the current Oplock level of the handle</span>
+<span class="sd">    :vartype lease: pike.model.Lease</span>
+<span class="sd">    :ivar lease: the current Lease state of the handle</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_offset</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">_end_of_file</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="nd">@_end_of_file</span><span class="o">.</span><span class="n">default</span>
+    <span class="k">def</span> <span class="nf">_init_end_of_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_response</span><span class="o">.</span><span class="n">end_of_file</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">end_of_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: Byte offset of the end of file as reported by the CREATE response</span>
+
+<span class="sd">        Note: this value is only updated by ``write`` and ``read``!</span>
+<span class="sd">              if other operations are performed directly or via other sessions</span>
+<span class="sd">              this value may get out of sync.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_of_file</span>
+
+<div class="viewcode-block" id="Open.seek"><a class="viewcode-back" href="../../open.html#pike.io.Open.seek">[docs]</a>    <span class="k">def</span> <span class="nf">seek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">whence</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change the stream position to the given byte offset.</span>
+
+<span class="sd">        offset is interpreted relative to the position indicated by whence.</span>
+
+<span class="sd">        The default value for whence is SEEK_SET. Values for whence are:</span>
+
+<span class="sd">            * ``io.SEEK_SET`` or ``0`` - start of the stream (the default);</span>
+<span class="sd">              offset should be zero or positive</span>
+<span class="sd">            * ``io.SEEK_CUR`` or ``1`` - current stream position; offset may be negative</span>
+<span class="sd">            * ``io.SEEK_END`` or ``2`` - end of the stream; offset is usually negative</span>
+
+<span class="sd">        :type offset: int</span>
+<span class="sd">        :type whence: int (see above)</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        :return: the new absolute position</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">whence</span> <span class="o">==</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="n">offset</span>
+        <span class="k">elif</span> <span class="n">whence</span> <span class="o">==</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">+=</span> <span class="n">offset</span>
+        <span class="k">elif</span> <span class="n">whence</span> <span class="o">==</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_of_file</span> <span class="o">+</span> <span class="n">offset</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span></div>
+
+<div class="viewcode-block" id="Open.seekable"><a class="viewcode-back" href="../../open.html#pike.io.Open.seekable">[docs]</a>    <span class="k">def</span> <span class="nf">seekable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: True if the stream supports random access.</span>
+
+<span class="sd">        All ``Open`` instances support random access.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Open.tell"><a class="viewcode-back" href="../../open.html#pike.io.Open.tell">[docs]</a>    <span class="k">def</span> <span class="nf">tell</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        :return: the absolute byte position within the file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span></div>
+
+<div class="viewcode-block" id="Open.truncate"><a class="viewcode-back" href="../../open.html#pike.io.Open.truncate">[docs]</a>    <span class="k">def</span> <span class="nf">truncate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resize the stream to the given size. NOT SUPPORTED.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;truncate() not supported&quot;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_has_access</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">access</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_request</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_request</span><span class="o">.</span><span class="n">desired_access</span> <span class="o">&amp;</span> <span class="n">access</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Open.readable"><a class="viewcode-back" href="../../open.html#pike.io.Open.readable">[docs]</a>    <span class="k">def</span> <span class="nf">readable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: True if the stream can be read from</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_has_access</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="p">(</span><span class="n">smb2</span><span class="o">.</span><span class="n">FILE_READ_DATA</span><span class="p">,</span> <span class="n">smb2</span><span class="o">.</span><span class="n">GENERIC_READ</span><span class="p">,</span> <span class="n">smb2</span><span class="o">.</span><span class="n">GENERIC_ALL</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_read_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read a range of bytes from the file.</span>
+
+<span class="sd">        Multiple requests will be made if necessary.</span>
+
+<span class="sd">        :type start: int</span>
+<span class="sd">        :param start: the beginning offset to read from</span>
+<span class="sd">        :type end: int or None</span>
+<span class="sd">        :param end: the end offset to read from. If None, read until</span>
+<span class="sd">            STATUS_END_OF_FILE is returned.</span>
+<span class="sd">        :rtype: bytes</span>
+<span class="sd">        :return: bytes read from the file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">max_read_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">negotiate_response</span><span class="o">.</span><span class="n">max_read_size</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">start</span>
+        <span class="n">response_buffers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">offset</span> <span class="o">&lt;</span> <span class="n">end</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">max_read_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">offset</span><span class="p">,</span> <span class="n">max_read_size</span><span class="p">)</span>
+            <span class="n">available</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">credits</span> <span class="o">*</span> <span class="n">smb2</span><span class="o">.</span><span class="n">BYTES_PER_CREDIT</span><span class="p">,</span>
+                <span class="n">max_read_size</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">read_resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">available</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+                <span class="n">response_buffers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">read_resp</span><span class="p">)</span>
+                <span class="n">offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">read_resp</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">ResponseError</span> <span class="k">as</span> <span class="n">re</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">ntstatus</span><span class="o">.</span><span class="n">STATUS_END_OF_FILE</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="k">raise</span>
+        <span class="n">read_buffer</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rb</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span> <span class="k">for</span> <span class="n">rb</span> <span class="ow">in</span> <span class="n">response_buffers</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">read_buffer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">read_buffer</span><span class="p">)</span>
+            <span class="c1"># update the EOF marker if we read past it</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_end_of_file</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_of_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">read_buffer</span>
+
+<div class="viewcode-block" id="Open.readall"><a class="viewcode-back" href="../../open.html#pike.io.Open.readall">[docs]</a>    <span class="k">def</span> <span class="nf">readall</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read all bytes from the current offset to EOF.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Open.readinto"><a class="viewcode-back" href="../../open.html#pike.io.Open.readinto">[docs]</a>    <span class="k">def</span> <span class="nf">readinto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read bytes into the preallocated buffer, b.</span>
+
+<span class="sd">        Note: this function performs extra copying and is inefficient.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">read_resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+        <span class="n">bytes_read</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">read_resp</span><span class="p">)</span>
+        <span class="n">b</span><span class="p">[:</span><span class="n">bytes_read</span><span class="p">]</span> <span class="o">=</span> <span class="n">read_resp</span>
+        <span class="k">return</span> <span class="n">bytes_read</span></div>
+
+    <span class="k">def</span> <span class="nf">_write_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">offset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write bytes to the file at the given offset.</span>
+
+<span class="sd">        Multiple requests will be made if necessary.</span>
+
+<span class="sd">        :type offset: int</span>
+<span class="sd">        :param offset: the beginning offset to read from</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        :return: count of bytes written</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_data</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">bytes_written</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">bytes_written</span> <span class="o">&lt;</span> <span class="n">n_data</span><span class="p">:</span>
+            <span class="n">available</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+                <span class="n">n_data</span> <span class="o">-</span> <span class="n">bytes_written</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">credits</span> <span class="o">*</span> <span class="n">smb2</span><span class="o">.</span><span class="n">BYTES_PER_CREDIT</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">negotiate_response</span><span class="o">.</span><span class="n">max_write_size</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">bytes_written</span> <span class="p">:</span> <span class="n">bytes_written</span> <span class="o">+</span> <span class="n">available</span><span class="p">]</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">bytes_written</span><span class="p">,</span> <span class="n">chunk</span><span class="p">)</span>
+            <span class="n">bytes_written</span> <span class="o">+=</span> <span class="n">count</span>
+        <span class="k">if</span> <span class="n">bytes_written</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">+=</span> <span class="n">bytes_written</span>
+            <span class="c1"># update the EOF marker if we write past it</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_end_of_file</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_of_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bytes_written</span>
+
+<div class="viewcode-block" id="Open.writable"><a class="viewcode-back" href="../../open.html#pike.io.Open.writable">[docs]</a>    <span class="k">def</span> <span class="nf">writable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: True if the stream can be written to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_has_access</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="n">smb2</span><span class="o">.</span><span class="n">FILE_WRITE_DATA</span><span class="p">,</span>
+                <span class="n">smb2</span><span class="o">.</span><span class="n">FILE_APPEND_DATA</span><span class="p">,</span>
+                <span class="n">smb2</span><span class="o">.</span><span class="n">GENERIC_WRITE</span><span class="p">,</span>
+                <span class="n">smb2</span><span class="o">.</span><span class="n">GENERIC_ALL</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Open.write"><a class="viewcode-back" href="../../open.html#pike.io.Open.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write bytes from the buffer, b.</span>
+
+<span class="sd">        Note: this function may perform extra copying and could be inefficient.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_at</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Open.flush"><a class="viewcode-back" href="../../open.html#pike.io.Open.flush">[docs]</a>    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Issue an SMB2 FLUSH request to the server.</span>
+
+<span class="sd">        This instructs the server to flush any intermediate buffers to disk.</span>
+
+<span class="sd">        The server may return a response before the data has been flushed.</span>
+
+<span class="sd">        For non-writable streams, this call is a no-op.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">writable</span><span class="p">():</span>
+            <span class="c1"># don&#39;t flush non-writable streams</span>
+            <span class="k">return</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Open</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

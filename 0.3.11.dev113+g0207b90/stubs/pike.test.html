@@ -1,0 +1,302 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pike.test &mdash; pike-smb2 0.3.11.dev113+g0207b90 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pike.transport" href="pike.transport.html" />
+    <link rel="prev" title="pike.smb2" href="pike.smb2.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pike-smb2
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../high_level.html">High-Level API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../autosummary.html">API Summary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pike.auth.html">pike.auth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.core.html">pike.core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.crypto.html">pike.crypto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.digest.html">pike.digest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.io.html">pike.io</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.model.html">pike.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.netbios.html">pike.netbios</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.ntlm.html">pike.ntlm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.ntstatus.html">pike.ntstatus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.nttime.html">pike.nttime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.path.html">pike.path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.pytest_support.html">pike.pytest_support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.smb2.html">pike.smb2</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pike.test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pike.transport.html">pike.transport</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../model.html">Implementation Details</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pike-smb2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../autosummary.html">API Summary</a> &raquo;</li>
+        
+      <li>pike.test</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/stubs/pike.test.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pike-test">
+<h1>pike.test<a class="headerlink" href="#pike-test" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">Functions</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_client</span></code>([signing])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">samba_suite</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">suite</span></code>([clz])</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../tree_connect.html#pike.test.Options" title="pike.test.Options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Options</span></code></a>(value)</p></td>
+<td><p>Provide default Client and Test options sourced from the following Environment Variables.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">PikeTest</span></code>(*args, **kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">PikeTestSuite</span></code>([tests])</p></td>
+<td><p>Custom test suite for easily patching in skip tests in downstream distributions of these test cases</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">RequireCapabilities</span></code>(value)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">RequireDialect</span></code>([minvalue, maxvalue])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">RequireShareCapabilities</span></code>(value)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SambaPikeTestSuite</span></code>([tests])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">TreeConnect</span></code>([client, server, port, creds, …])</p></td>
+<td><p>Combines a <a class="reference internal" href="../model.html#pike.model.Client" title="pike.model.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a>, <a class="reference internal" href="../model.html#pike.model.Connection" title="pike.model.Connection"><code class="xref py py-class docutils literal notranslate"><span class="pre">Connection</span></code></a>, <a class="reference internal" href="../model.html#pike.model.Channel" title="pike.model.Channel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Channel</span></code></a>, and <a class="reference internal" href="../model.html#pike.model.Tree" title="pike.model.Tree"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tree</span></code></a> for simple access to an SMB share.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Exceptions</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CapabilityMissing</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DialectMissing</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">MissingArgument</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceError</span></code></p></td>
+<td><p>Raised when calling TreeConnect helpers in the wrong state</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ShareCapabilityMissing</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestRequirementNotMet</span></code></p></td>
+<td><p>The test requires some dialect or capability that was not met</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="pike.transport.html" class="btn btn-neutral float-right" title="pike.transport" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pike.smb2.html" class="btn btn-neutral float-left" title="pike.smb2" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

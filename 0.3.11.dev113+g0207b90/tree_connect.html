@@ -1,0 +1,371 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>TreeConnect &mdash; pike-smb2 0.3.11.dev113+g0207b90 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="PikePath" href="path.html" />
+    <link rel="prev" title="High-Level API" href="high_level.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pike-smb2
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="high_level.html">High-Level API</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">TreeConnect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="path.html">PikePath</a></li>
+<li class="toctree-l2"><a class="reference internal" href="open.html">Open</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytest.html">Pytest Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="autosummary.html">API Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">Implementation Details</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pike-smb2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="high_level.html">High-Level API</a> &raquo;</li>
+        
+      <li><code class="docutils literal notranslate"><span class="pre">TreeConnect</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/tree_connect.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="treeconnect">
+<h1><code class="docutils literal notranslate"><span class="pre">TreeConnect</span></code><a class="headerlink" href="#treeconnect" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="pike.test.Options">
+<em class="property">class </em><code class="sig-prename descclassname">pike.test.</code><code class="sig-name descname">Options</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/test.html#Options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.test.Options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide default Client and Test options sourced from the following
+Environment Variables.</p>
+<dl class="py attribute">
+<dt id="pike.test.Options.PIKE_CREDS">
+<code class="sig-name descname">PIKE_CREDS</code><em class="property"> = 'PIKE_CREDS'</em><a class="headerlink" href="#pike.test.Options.PIKE_CREDS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Percent-delimited server credentials for NTLM authentication:
+<code class="docutils literal notranslate"><span class="pre">DOMAIN\User%Passwd</span></code>.</p>
+<p>If credentials are not specified and kerberos is available, attempt to use
+kerberos authentication.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pike.test.Options.PIKE_ENCRYPT">
+<code class="sig-name descname">PIKE_ENCRYPT</code><em class="property"> = 'PIKE_ENCRYPT'</em><a class="headerlink" href="#pike.test.Options.PIKE_ENCRYPT" title="Permalink to this definition">¶</a></dt>
+<dd><p>If ‘yes’ require packets to be encrypted (SMB3-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pike.test.Options.PIKE_LOGLEVEL">
+<code class="sig-name descname">PIKE_LOGLEVEL</code><em class="property"> = 'PIKE_LOGLEVEL'</em><a class="headerlink" href="#pike.test.Options.PIKE_LOGLEVEL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the console log level by name (<code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>, <code class="docutils literal notranslate"><span class="pre">INFO</span></code>, etc)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pike.test.Options.PIKE_MAX_DIALECT">
+<code class="sig-name descname">PIKE_MAX_DIALECT</code><em class="property"> = 'PIKE_MAX_DIALECT'</em><a class="headerlink" href="#pike.test.Options.PIKE_MAX_DIALECT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum dialect to negotiate (<code class="docutils literal notranslate"><span class="pre">DIALECT_SMB3_0</span></code>, <code class="docutils literal notranslate"><span class="pre">DIALECT_SMB3_1_1</span></code>,
+etc).</p>
+<p>See <a class="reference internal" href="model.html#pike.smb2.Dialect" title="pike.smb2.Dialect"><code class="xref py py-class docutils literal notranslate"><span class="pre">pike.smb2.Dialect</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pike.test.Options.PIKE_MIN_DIALECT">
+<code class="sig-name descname">PIKE_MIN_DIALECT</code><em class="property"> = 'PIKE_MIN_DIALECT'</em><a class="headerlink" href="#pike.test.Options.PIKE_MIN_DIALECT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum dialect to negotiate (<code class="docutils literal notranslate"><span class="pre">DIALECT_SMB2_1</span></code>, <code class="docutils literal notranslate"><span class="pre">DIALECT_SMB3_0</span></code>, etc).</p>
+<p>See <a class="reference internal" href="model.html#pike.smb2.Dialect" title="pike.smb2.Dialect"><code class="xref py py-class docutils literal notranslate"><span class="pre">pike.smb2.Dialect</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pike.test.Options.PIKE_SERVER">
+<code class="sig-name descname">PIKE_SERVER</code><em class="property"> = 'PIKE_SERVER'</em><a class="headerlink" href="#pike.test.Options.PIKE_SERVER" title="Permalink to this definition">¶</a></dt>
+<dd><p>SMB host name or IP address</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pike.test.Options.PIKE_SHARE">
+<code class="sig-name descname">PIKE_SHARE</code><em class="property"> = 'PIKE_SHARE'</em><a class="headerlink" href="#pike.test.Options.PIKE_SHARE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Share name to connect to</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pike.test.Options.PIKE_SIGN">
+<code class="sig-name descname">PIKE_SIGN</code><em class="property"> = 'PIKE_SIGN'</em><a class="headerlink" href="#pike.test.Options.PIKE_SIGN" title="Permalink to this definition">¶</a></dt>
+<dd><p>If ‘yes’ require packets to be signed</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pike.test.Options.PIKE_TRACE">
+<code class="sig-name descname">PIKE_TRACE</code><em class="property"> = 'PIKE_TRACE'</em><a class="headerlink" href="#pike.test.Options.PIKE_TRACE" title="Permalink to this definition">¶</a></dt>
+<dd><p>If ‘yes’ log full request/response payloads at DEBUG level</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pike.TreeConnect">
+<em class="property">class </em><code class="sig-prename descclassname">pike.</code><code class="sig-name descname">TreeConnect</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">client</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">server</span><span class="o">=</span><span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">port</span><span class="o">=</span><span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">creds</span><span class="o">=</span><span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">share</span><span class="o">=</span><span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">resume</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">signing</span><span class="o">=</span><span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">encryption</span><span class="o">=</span><span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">require_dialect</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">require_capabilities</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">require_share_capabilities</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/test.html#TreeConnect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.TreeConnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combines a <a class="reference internal" href="model.html#pike.model.Client" title="pike.model.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a>,
+<a class="reference internal" href="model.html#pike.model.Connection" title="pike.model.Connection"><code class="xref py py-class docutils literal notranslate"><span class="pre">Connection</span></code></a>, <a class="reference internal" href="model.html#pike.model.Channel" title="pike.model.Channel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Channel</span></code></a>, and
+<a class="reference internal" href="model.html#pike.model.Tree" title="pike.model.Tree"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tree</span></code></a> for simple access to an SMB share.</p>
+<p>May be used as a contextmanager: entering the context will establish the
+connection, session, and tree, and exiting the context will cleanly
+disconnect (if possible). Errors on disconnect are ignored.</p>
+<p>Any values not specified in the constructor will be drawn from the
+associated environment variables. At minimum the following should be
+specified explicitly or in the environment:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">server</span></code> (<code class="docutils literal notranslate"><span class="pre">PIKE_SERVER</span></code>) - server or hostname to connect to</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">creds</span></code> (<code class="docutils literal notranslate"><span class="pre">PIKE_CREDS</span></code>) - percent-delimited credential string</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">share</span></code> (<code class="docutils literal notranslate"><span class="pre">PIKE_SHARE</span></code>) - share name to connect to</p></li>
+</ul>
+</div></blockquote>
+<p>All other arguments are optional.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">TreeConnect</span></code> object can be used with the division operator, <code class="docutils literal notranslate"><span class="pre">/</span></code>,
+which returns a <a class="reference internal" href="path.html#pike.path.PikePath" title="pike.path.PikePath"><code class="xref py py-class docutils literal notranslate"><span class="pre">PikePath</span></code></a> instance representing the
+path extended from the share root. The tree connection will be established
+before returning the <a class="reference internal" href="path.html#pike.path.PikePath" title="pike.path.PikePath"><code class="xref py py-class docutils literal notranslate"><span class="pre">PikePath</span></code></a> if is is not already
+connected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conn</strong> (<a class="reference internal" href="model.html#pike.model.Connection" title="pike.model.Connection"><em>pike.model.Connection</em></a>) – the Connection object, or None if not connected</p></li>
+<li><p><strong>chan</strong> (<a class="reference internal" href="model.html#pike.model.Channel" title="pike.model.Channel"><em>pike.model.Channel</em></a>) – the Channel object, or None if no session is established</p></li>
+<li><p><strong>tree</strong> (<a class="reference internal" href="model.html#pike.model.Tree" title="pike.model.Tree"><em>pike.model.Tree</em></a>) – the Tree object, or None if no tree is connected</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="pike.TreeConnect.connect">
+<code class="sig-name descname">connect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/test.html#TreeConnect.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.TreeConnect.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Establish a connection to the server and complete SMB2 NEGOTIATE.</p>
+<p>If a require_dialect or require_capability is specified to __init__, then
+an exception will be raised if the server does not support the required dialect
+or does not advertise the required capability.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>connected pike.model.Connection</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.TreeConnect.session_setup">
+<code class="sig-name descname">session_setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/test.html#TreeConnect.session_setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.TreeConnect.session_setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Establish a session on the connection and complete SMB2 SESSION_SETUP.</p>
+<p>If resume is specified to __init__, the new session will include the resumed
+session as previous_session_id.</p>
+<p>If encryption is specified to __init__ (or with PIKE_ENCRYPT environment var)
+the new session will encrypt data by default.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>pike.model.Channel</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.TreeConnect.tree_connect">
+<code class="sig-name descname">tree_connect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/test.html#TreeConnect.tree_connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.TreeConnect.tree_connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Establish a tree connection on the session and complete SMB2 TREE_CONNECT.</p>
+<p>If require_share_capability is specified to __init__, then
+an exception will be raised if the share does not does not advertise the
+required capability.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>pike.model.Tree</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pike.TreeConnect.close">
+<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pike/test.html#TreeConnect.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pike.TreeConnect.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform de-initialization for all established objects. If any object has
+already been disconnected or set to None, then nothing will happen.</p>
+<p>For example, to perform SESSION_LOGOFF without first doing a TREE_DISCONNECT,
+simply set self.tree = None before calling close().</p>
+<p>Additionally, to disconnect without SESSION_LOGOFF, set self.chan = None.</p>
+<p>If the tree has already been disconnected or channel already closed, then
+errors related to cleaning up twice are suppressed.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="path.html" class="btn btn-neutral float-right" title="PikePath" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="high_level.html" class="btn btn-neutral float-left" title="High-Level API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
