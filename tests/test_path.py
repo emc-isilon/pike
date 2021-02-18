@@ -43,10 +43,12 @@ def test_is_file(pike_tmp_path):
     fname = pike_tmp_path / unique_id
     assert not fname.exists()
     assert not fname.is_file()
+    assert not fname.is_symlink()
     fname.touch()
     assert fname.exists()
     assert fname.is_file()
     assert not fname.is_dir()
+    assert not fname.is_symlink()
     fname.unlink()
 
 
@@ -55,10 +57,12 @@ def test_is_dir(pike_tmp_path):
     dname = pike_tmp_path / unique_id
     assert not dname.exists()
     assert not dname.is_dir()
+    assert not dname.is_symlink()
     dname.mkdir()
     assert dname.exists()
     assert dname.is_dir()
     assert not dname.is_file()
+    assert not dname.is_symlink()
     dname.rmdir()
 
 
