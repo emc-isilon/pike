@@ -170,9 +170,11 @@ class PikePath(PureWindowsPath):
     def home(cls):
         raise NotImplementedError("No concept of home for {!r}".format(cls))
 
-    def _create_follow(self, *args, **kwargs):
+    def _create(self, *args, **kwargs):
         """
         Call Channel.create with this Tree and path following symlinks.
+
+        :param _follow: if False, raise symlink errors instead of following
 
         Special kwarg, __RC_DEPTH, is used to track the recursion depth and
         will raise OSError if called more than MAX_SYMLINK_RECURSE times.
@@ -182,17 +184,18 @@ class PikePath(PureWindowsPath):
         depth = kwargs.pop("__RC_DEPTH", 0)
         if depth > MAX_SYMLINK_RECURSE:
             raise OSError("Maximum level of symbolic links exceeded")
+        follow = kwargs.pop("_follow", True)
         try:
             return self._channel.create(
                 self._tree, self._path, *args, **kwargs
             ).result()
         except model.ResponseError as re:
-            if re.response.status != ntstatus.STATUS_STOPPED_ON_SYMLINK:
+            if re.response.status != ntstatus.STATUS_STOPPED_ON_SYMLINK or not follow:
                 raise
             kwargs["__RC_DEPTH"] = depth + 1
             return self.join_from_root(
                 re.response[0][0].error_data.substitute_name
-            )._create_follow(*args, **kwargs)
+            )._create(*args, **kwargs)
 
     def stat(
         self,
@@ -213,7 +216,7 @@ class PikePath(PureWindowsPath):
         :return: single file info object corresponding to the
             file_information_class requested
         """
-        with self._create_follow(
+        with self._create(
             access=smb2.FILE_READ_ATTRIBUTES,
             disposition=smb2.FILE_OPEN,
             options=options,
@@ -263,7 +266,7 @@ class PikePath(PureWindowsPath):
         :return: True if this path exists
         """
         try:
-            with self._create_follow(
+            with self._create(
                 access=0,
                 disposition=smb2.FILE_OPEN,
                 options=options,
@@ -300,12 +303,11 @@ class PikePath(PureWindowsPath):
         :return: True if this path is a reparse point
         """
         try:
-            with self._channel.create(
-                self._tree,
-                self._path,
+            with self._create(
                 access=0,
                 disposition=smb2.FILE_OPEN,
-            ).result() as handle:
+                _follow=False,
+            ) as handle:
                 pass
         except model.ResponseError as re:
             if re.response.status == ntstatus.STATUS_STOPPED_ON_SYMLINK:
@@ -374,7 +376,7 @@ class PikePath(PureWindowsPath):
             raise ValueError(
                 "recursive glob, '**', is not supported by {!r}".format(type(self))
             )
-        with self._create_follow(
+        with self._create(
             access=smb2.GENERIC_READ,
             disposition=smb2.FILE_OPEN,
             options=smb2.FILE_DIRECTORY_FILE,
@@ -412,7 +414,7 @@ class PikePath(PureWindowsPath):
         if mode is not None:
             warnings.warn("`mode` argument is not handled at this time", stacklevel=2)
         try:
-            with self._create_follow(
+            with self._create(
                 access=smb2.GENERIC_WRITE,
                 disposition=smb2.FILE_CREATE,
                 options=smb2.FILE_DIRECTORY_FILE,
@@ -462,7 +464,7 @@ class PikePath(PureWindowsPath):
         elif "w" in mode:
             disposition = smb2.FILE_SUPERSEDE
 
-        handle = self._create_follow(
+        handle = self._create(
             access=access,
             disposition=disposition,
             options=smb2.FILE_NON_DIRECTORY_FILE,
@@ -505,7 +507,7 @@ class PikePath(PureWindowsPath):
 
         :rtype: PikePath
         """
-        with self._create_follow(
+        with self._create(
             access=smb2.READ_ATTRIBUTES,
             disposition=smb2.FILE_OPEN,
             options=smb2.FILE_NON_DIRECTORY_FILE | smb2.FILE_OPEN_REPARSE_POINT,
@@ -525,7 +527,7 @@ class PikePath(PureWindowsPath):
         """
         if not isinstance(target, type(self)):
             target = self.join_from_root(target)
-        with self._create_follow(
+        with self._create(
             access=smb2.DELETE,
             disposition=smb2.FILE_OPEN,
         ) as handle:
@@ -549,7 +551,7 @@ class PikePath(PureWindowsPath):
         SymbolicLinkErrorResponse during create, rather than explicitly
         reading the link target via IOCTL_GET_REPARSE_POINT.
         """
-        with self._create_follow(access=0, disposition=smb2.FILE_OPEN) as handle:
+        with self._create(access=0, disposition=smb2.FILE_OPEN) as handle:
             return self.join_from_root(handle.create_request.name)
 
     def rglob(self, pattern):
@@ -615,7 +617,7 @@ class PikePath(PureWindowsPath):
         if not isinstance(target, type(self)):
             target = self.join_from_root(target)
         options = smb2.FILE_DIRECTORY_FILE if target_is_directory else 0
-        with self._create_follow(
+        with self._create(
             access=smb2.GENERIC_WRITE,
             attributes=smb2.FILE_ATTRIBUTE_REPARSE_POINT,
             disposition=smb2.FILE_SUPERSEDE,
@@ -633,7 +635,7 @@ class PikePath(PureWindowsPath):
         if mode is not None:
             warnings.warn("`mode` argument is not handled at this time", stacklevel=2)
         disposition = smb2.FILE_OPEN_IF if exist_ok else smb2.FILE_CREATE
-        with self._create_follow(
+        with self._create(
             access=smb2.GENERIC_WRITE,
             disposition=disposition,
             options=smb2.FILE_NON_DIRECTORY_FILE,
@@ -649,7 +651,7 @@ class PikePath(PureWindowsPath):
         :param options: options passed to CREATE when opening the file
         """
         try:
-            with self._create_follow(
+            with self._create(
                 access=smb2.DELETE,
                 disposition=smb2.FILE_OPEN,
                 options=options | smb2.FILE_DELETE_ON_CLOSE,
