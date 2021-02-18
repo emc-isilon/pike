@@ -527,7 +527,7 @@ class Open(_Open, io.RawIOBase):
                 self.channel.connection.credits * smb2.BYTES_PER_CREDIT,
                 self.channel.connection.negotiate_response.max_write_size,
             )
-            chunk = data[offset + bytes_written : offset + bytes_written + available]
+            chunk = data[bytes_written : bytes_written + available]
             count = self.channel.write(self, offset + bytes_written, chunk)
             bytes_written += count
         if bytes_written:
