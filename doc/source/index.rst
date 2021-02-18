@@ -68,7 +68,9 @@ environment variables:
     - ``PIKE_CREDS`` (percent delimited)
     - ``PIKE_SHARE``
 
-Subsequent examples will not pass these variables explicitly
+Refer to :py:class:`pike.test.Options` for a complete list of variables.
+
+Subsequent examples will not pass arguments explicitly.
 
 Using the ``Pathlike`` interface
 ================================
