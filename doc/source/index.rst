@@ -75,7 +75,7 @@ Subsequent examples will not pass arguments explicitly.
 Using the ``Pathlike`` interface
 ================================
 
-the :py:class:`~pike.TreeConnect` object can be used with the division operator
+the :py:class:`~pike.TreeConnect` object can be used with the division operator ``/``
 to construct a ``Pathlike`` object, :py:class:`~pike.path.PikePath`. The
 returned instance is bound to the particular tree connect and session and can
 perform most common `Path <https://docs.python.org/3/library/pathlib.html#methods>`_
@@ -140,4 +140,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
