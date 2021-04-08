@@ -1,0 +1,14 @@
+[run]
+parallel = true
+concurrency = multiprocessing
+
+[paths]
+source =
+    pike/
+    */site-packages/pike/
+
+[report]
+ignore_errors = True
+omit =
+    tests/*
+    .tox/*

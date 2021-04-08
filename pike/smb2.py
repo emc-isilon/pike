@@ -38,6 +38,10 @@ from . import nttime
 from . import ntstatus
 
 
+# for credit cost calculations
+BYTES_PER_CREDIT = 64 * 1024
+
+
 # Dialects constants
 class Dialect(core.ValueEnum):
     DIALECT_SMB2_WILDCARD = 0x02FF
