@@ -1,35 +1,51 @@
-Pike
-====
+# Pike
 
 Pike is a (nearly) pure-Python framework for writing SMB2/3 protocol correctness tests.
 
-There is also (older) [API documentation from epydoc](http://emc-isilon.github.io/pike/api/index.html).
+---
 
-Prerequisites
-=============
+<!-- begin TOC -->
+- [Pike](#pike)
+  - [Prerequisites](#prerequisites)
+  - [Install](#install)
+  - [Build instructions](#build-instructions)
+  - [Running tests](#running-tests)
+  - [Kerberos Hints](#kerberos-hints)
+  - [Decoding BufferOverrun](#decoding-bufferoverrun)
+    - [With Pike](#with-pike)
+    - [With Wireshark](#with-wireshark)
+  - [License](#license)
+  - [Other](#other)
+
+<!-- end TOC -->
+
+---
+
+[![PyPI version](https://badge.fury.io/py/pike-smb2.svg)](https://badge.fury.io/py/pike-smb2)
+[![Commits since](https://img.shields.io/github/commits-since/emc-isilon/pike/latest.svg)](https://img.shields.io/github/commits-since/emc-isilon/pike/latest.svg)
+[![Python versions](https://img.shields.io/pypi/pyversions/pike-smb2?longCache=True)](https://pypi.org/project/pike-smb2/)
+[![License](https://img.shields.io/badge/License-BSD-blue.svg)](https://opensource.org/licenses/BSD-2-Clause)
+
+## Prerequisites
 
 Required for basic functionality:
 
-* Python 2.7, 3.6+
-* PyCryptodomex
+- Python 2.7, 3.6+
+- PyCryptodomex
 
 Required for building kerberos library:
 
-* Python development headers
-* MIT gssapi\_krb5 (plus devel headers)
-    * Ubuntu: krb5-user, libkrb5-dev
+- Python development headers
+- MIT `gssapi_krb5` (plus development headers)
+  - Ubuntu: `krb5-user`, `libkrb5-dev`
 
 Optional: epydoc for doc generation
 
-Install
-=======
+## Install
 
     $ python -m pip install pike-smb2
 
-[pike-smb2 on pypi.org](https://pypi.org/project/pike-smb2/).
-
-Build instructions
-==================
+## Build instructions
 
 Ubuntu 14.04 / 16.04
 
@@ -37,8 +53,7 @@ Ubuntu 14.04 / 16.04
     pip install setuptools pycryptodomex
     python setup.py install
 
-Running tests
-=============
+## Running tests
 
 The tests in the test subdirectory are ordinary Python unittest tests and
 can be run as usual.  The following environment variables are used by
@@ -71,8 +86,7 @@ To run an individual test case
 
     $ python -m unittest pike.test.echo.EchoTest.test_echo
 
-Kerberos Hints
-==============
+## Kerberos Hints
 
 Setting up MIT Kerberos as provided by many Linux distributions to interoperate
 with an existing Active Directory and Pike is relatively simple.
@@ -103,15 +117,12 @@ hostname in order for Kerberos to figure out which ticket to use.  If you
 get errors during session setup when using an IP address, this is probably
 the reason.
 
-
-Decoding BufferOverrun
-======================
+## Decoding BufferOverrun
 
 When pike encounters a buffer or boundary problem, `BufferOverrun` is
 raised with the full packet bytes. This can be used in two ways.
 
-With Pike
----------
+### With Pike
 
 For some problems, it may be necessary to run pike with a debugger
 while decoding the packet bytes to reproduce runtime parsing or decoding
@@ -124,9 +135,8 @@ issues.
     buf = array.array("B", unhexlify(b'00000114fe534d4240000000000000000000040001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000041000100110302008a8c2a17f5f24e5eb278dd8aaa90d42e1e0000000000010000001000000010006c52c4c7e53dd60166157c68c63dd60180005500d8000000605306062b0601050502a0493047a019301706092a864886f712010202060a2b06010401823702020aa32a3028a0261b246e6f745f646566696e65645f696e5f5246433431373840706c656173655f69676e6f72650000000100260000000000010020000100c93dfb463f3e99ed9030a66d28548c330a4ae9a65856237d00e61f68c14eb09f0000020004000000000001000200'))
     nb = pike.netbios.Netbios()
     nb.parse(buf)
-    
-With Wireshark
---------------
+
+### With Wireshark
 
 Other decoding problems may be easier to understand by looking at the packet
 with a pcap analysis tool.
@@ -137,16 +147,19 @@ with a pcap analysis tool.
       | text2pcap -i46 -T 445,445 - - \
       | tshark -P -V -r -
 
-* `xxd` decodes the ascii hex bytestream output from the `BufferOverrun` exception into binary
-* `od` dumps the output to a format [wireshark can read](https://www.wireshark.org/docs/wsug_html_chunked/ChIOImportSection.html)
-* `text2pcap` (wireshark) appends fake ethernet and IP headers to the SMB packet and writes a pcap file to stdout
-* `tshark` (wireshark) decodes the SMB packet and displays full packet details
+- `xxd` decodes the ascii hex bytestream output from the `BufferOverrun` exception into binary
+- `od` dumps the output to a format [wireshark can read](https://www.wireshark.org/docs/wsug_html_chunked/ChIOImportSection.html)
+- `text2pcap` (wireshark) appends fake ethernet and IP headers to the SMB packet and writes a pcap file to stdout
+- `tshark` (wireshark) decodes the SMB packet and displays full packet details
 
-License
-=======
+## License
 
 This project, _pike_ and _pike-smb2_, is released under a Simplified BSD License granted by Dell Inc.'s Open Source Project program,
 except code under `pykerb/` which is released under an Apache 2.0 License granted by Apple Inc.<br />
 All project contributions are entirely reflective of the respective author(s) and not of Dell Inc. or Apple Inc.
 
 See file [LICENSE](LICENSE) for licensing information.
+
+## Other
+
+There is older [API documentation from epydoc](http://emc-isilon.github.io/pike/api/index.html).

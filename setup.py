@@ -95,7 +95,10 @@ def run_setup(with_extensions):
     setup(
         name="pike-smb2",
         use_scm_version=True,
-        setup_requires=["setuptools_scm"],
+        setup_requires=[
+            'setuptools_scm==5.0.2; python_version ~= "2.7"',
+            'setuptools_scm; python_version >= "3.6"',
+        ],
         description="Pure python SMB client",
         long_description_content_type='text/markdown',
         long_description=long_description,
@@ -104,6 +107,11 @@ def run_setup(with_extensions):
         maintainer="Masen Furer",
         maintainer_email="Masen.Furer@dell.com",
         url="https://github.com/emc-isilon/pike",
+        project_urls={
+           "Source": "https://github.com/emc-isilon/pike",
+           "Bug Reports": "https://github.com/emc-isilon/pike/issues",
+        },
+        license="Simplified BSD License",
         packages=["pike", "pike.test"],
         entry_points={"pytest11": ["pike = pike.pytest_support",]},
         python_requires=">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*",
@@ -117,6 +125,7 @@ def run_setup(with_extensions):
         ext_modules=ext_modules,
         test_suite="setup.pike_suite",
         cmdclass=cmdclass,
+        # see https://pypi.org/classifiers/
         classifiers=[
             "Development Status :: 4 - Beta",
             "Intended Audience :: Developers",
@@ -127,10 +136,13 @@ def run_setup(with_extensions):
             "Programming Language :: Python :: 3",
             "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: Implementation :: CPython",
             "Operating System :: OS Independent",
             "Environment :: Console",
-            "License :: Other/Proprietary License",
+            "License :: OSI Approved :: BSD License",
         ],
         keywords='smb smb-testing smb-client',
     )
