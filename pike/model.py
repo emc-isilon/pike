@@ -1082,7 +1082,7 @@ class Connection(transport.Transport):
                 self.auth = auth.KerberosProvider(conn, creds)
             else:
                 raise ImportError(
-                    "Neither ntlm nor kerberos authentication " "methods are available"
+                    "Neither ntlm nor kerberos authentication methods are available"
                 )
 
             self._settings = {}
