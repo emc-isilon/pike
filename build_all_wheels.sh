@@ -14,19 +14,14 @@
 
 set -euo pipefail
 
-versions=(python2 python3.6 python3.7 python3.8 python3.9)
+# XXX: py3.9 not supported by internal artifactory
+versions=(python2 python3.6 python3.7 python3.8)
 
 for v in ${versions[@]}
 do
     rm -rf .build/$v && \
     virtualenv -p $v .build/$v && \
-    .build/$v/bin/pip install setuptools-scm && \
-    .build/$v/bin/python setup.py build &
-done
-
-wait
-
-for v in ${versions[@]}
-do
+    .build/$v/bin/pip install 'setuptools-scm<6' 'setuptools<40.6.0' && \
+    .build/$v/bin/python setup.py build && \
     .build/$v/bin/python setup.py bdist_wheel $*
 done
