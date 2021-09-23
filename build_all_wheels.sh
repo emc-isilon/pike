@@ -21,7 +21,7 @@ for v in ${versions[@]}
 do
     rm -rf .build/$v && \
     virtualenv -p $v .build/$v && \
-    .build/$v/bin/pip install 'setuptools-scm<6' 'setuptools<40.6.0' && \
-    .build/$v/bin/python setup.py build && \
+    .build/$v/bin/pip install 'build' && \
+    .build/$v/bin/python -m build && \
     .build/$v/bin/python setup.py bdist_wheel $*
 done
