@@ -145,7 +145,6 @@ def run_setup(with_extensions):
             "License :: OSI Approved :: BSD License",
         ],
         keywords='smb smb-testing smb-client',
-        options={"bdist_wheel": {"universal": True}},
     )
 
 

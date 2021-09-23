@@ -23,5 +23,5 @@ do
     virtualenv -p $v .build/$v && \
     .build/$v/bin/pip install 'build' && \
     .build/$v/bin/python -m build && \
-    .build/$v/bin/python setup.py bdist_wheel --universal $*
+    .build/$v/bin/python setup.py bdist_wheel $*
 done
