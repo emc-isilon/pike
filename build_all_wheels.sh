@@ -24,4 +24,9 @@ do
     .build/$v/bin/pip install 'build' && \
     .build/$v/bin/python -m build && \
     .build/$v/bin/python setup.py bdist_wheel $*
+    # FIXME: ISILONEAT-1456, ISILONQE-3348
+    # Code fix to let twine upload to local artifactory
+    #.build/$v/bin/python -m build --outdir dist/ .
+    #.build/$v/bin/pip install twine
+    #.build/$v/bin/twine $* dist/*
 done
