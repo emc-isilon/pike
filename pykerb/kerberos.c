@@ -21,7 +21,7 @@
  */
 
 #include <Python.h>
-
+#include <py3c.h>
 #include "kerberosbasic.h"
 #include "kerberospw.h"
 #include "kerberosgss.h"
@@ -475,15 +475,15 @@ static PyMethodDef KerberosMethods[] = {
 };
 
 static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "kerberos",
-        NULL,
-        sizeof(struct module_state),
-        KerberosMethods,
-        NULL,
-        myextension_traverse,
-        myextension_clear,
-        NULL
+        .m_base = PyModuleDef_HEAD_INIT,
+        .m_name = "kerberos",
+        .m_doc = NULL,
+        .m_size = sizeof(struct module_state),
+        .m_methods = KerberosMethods,
+        .m_slots = NULL,
+        .m_traverse = myextension_traverse,
+        .m_clear = myextension_clear,
+        .m_free = NULL
 };
 
 
@@ -493,7 +493,7 @@ PyMODINIT_FUNC PyInit_kerberos(void)
 
     m = PyModule_Create(&moduledef);
     if (m == NULL)
-	goto error;
+        goto error;
 
     d = PyModule_GetDict(m);
 
