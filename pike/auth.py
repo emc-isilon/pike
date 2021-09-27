@@ -27,7 +27,7 @@ import array
 import warnings
 
 try:
-    import kerberos
+    from . import kerberos
 except ImportError:
     kerberos = None
 try:
