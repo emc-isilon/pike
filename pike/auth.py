@@ -42,9 +42,9 @@ def split_credentials(creds):
             "Pass creds as unicode string, got {!r}".format(creds), UnicodeWarning
         )
         creds = creds.decode("utf-8")
-    user, password = creds.split("%")
+    user, password = creds.split("%", 1)
     if "\\" in user:
-        domain, user = user.split("\\")
+        domain, user = user.split("\\", 1)
     else:
         domain = "NONE"
     return (domain, user, password)
