@@ -48,6 +48,6 @@ jobs:
         PIKE_PORT: ${{ job.services.samba.ports[445] }}
         PIKE_SHARE: pike
         PIKE_CREDS: pike%GiThubCI123
-      run:
-        - python -m unittest -v pike.test.samba_suite
-        - python -m pytest --pyargs pike.test.internal
+      run: |
+        python -m unittest -v pike.test.samba_suite
+        python -m pytest --pyargs pike.test.internal
