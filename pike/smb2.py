@@ -1829,23 +1829,24 @@ class LeaseRequest(CreateRequestContext):
     # This class handles V2 requests as well.  Set
     # the lease_flags field to a non-None value
     # to enable the extended fields
-    def __init__(self, parent, do_v2_lease):
+    def __init__(self, parent, lease_flags_v2=None):
         CreateRequestContext.__init__(self, parent)
         self.lease_key = array.array("B", [0] * 16)
         self.lease_state = 0
         # V2 fields
-        self.lease_flags = LeaseFlags.SMB2_LEASE_FLAG_NONE
-        self.parent_lease_key = array.array("B", [0] * 16)
-        self.epoch = 0
-        if do_v2_lease:
-            self.isV2 = True
+        if lease_flags_v2 is not None:
+            self.lease_flags = lease_flags_v2
+            self.parent_lease_key = array.array("B", [0] * 16)
+            self.epoch = 0
         else:
-            self.isV2 = False
+            self.lease_flags = None
+            self.parent_lease_key = None
+            self.epoch = None 
 
     def _encode(self, cur):
         cur.encode_bytes(self.lease_key)
         cur.encode_uint32le(self.lease_state)
-        if self.isV2 :
+        if self.lease_flags is not None:
             # V2 variant
             cur.encode_uint32le(self.lease_flags)
             # LeaseDuration is reserved

@@ -1464,9 +1464,9 @@ class Channel(object):
         options=0,
         maximal_access=None,
         oplock_level=smb2.SMB2_OPLOCK_LEVEL_NONE,
-        v2_lease=False,
         lease_key=None,
         lease_state=None,
+        lease_flags_v2=None,
         durable=False,
         persistent=False,
         create_guid=None,
@@ -1499,7 +1499,7 @@ class Channel(object):
                 lease_key = crypto.random_bytes(16)
             if lease_state is None:
                 lease_state = smb2.SMB2_LEASE_RWH
-            lease_req = smb2.LeaseRequest(create_req, v2_lease)
+            lease_req = smb2.LeaseRequest(create_req, lease_flags_v2)
             lease_req.lease_key = lease_key
             lease_req.lease_state = lease_state
 
@@ -1583,9 +1583,9 @@ class Channel(object):
         options=0,
         maximal_access=None,
         oplock_level=smb2.SMB2_OPLOCK_LEVEL_NONE,
-        v2_lease=False,
         lease_key=None,
         lease_state=None,
+        lease_flags_v2=None,
         durable=False,
         persistent=False,
         create_guid=None,
@@ -1605,9 +1605,9 @@ class Channel(object):
                 options,
                 maximal_access,
                 oplock_level,
-                v2_lease,
                 lease_key,
                 lease_state,
+                lease_flags_v2,
                 durable,
                 persistent,
                 create_guid,
