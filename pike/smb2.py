@@ -1353,7 +1353,7 @@ SMB2_LEASE_RWH = SMB2_LEASE_RH | SMB2_LEASE_RW
 class LeaseFlags(core.FlagEnum):
     SMB2_LEASE_FLAG_NONE = 0x00
     SMB2_LEASE_FLAG_BREAK_IN_PROGRESS = 0x02
-
+    SMB2_LEASE_FLAG_PARENT_LEASE_KEY_SET = 0x04
 
 LeaseFlags.import_items(globals())
 
@@ -1829,14 +1829,19 @@ class LeaseRequest(CreateRequestContext):
     # This class handles V2 requests as well.  Set
     # the lease_flags field to a non-None value
     # to enable the extended fields
-    def __init__(self, parent):
+    def __init__(self, parent, lease_flags_v2=None):
         CreateRequestContext.__init__(self, parent)
         self.lease_key = array.array("B", [0] * 16)
         self.lease_state = 0
         # V2 fields
-        self.lease_flags = None
-        self.parent_lease_key = None
-        self.epoch = None
+        if lease_flags_v2 is not None:
+            self.lease_flags = lease_flags_v2
+            self.parent_lease_key = array.array("B", [0] * 16)
+            self.epoch = 0
+        else:
+            self.lease_flags = None
+            self.parent_lease_key = None
+            self.epoch = None 
 
     def _encode(self, cur):
         cur.encode_bytes(self.lease_key)

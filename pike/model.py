@@ -1466,6 +1466,7 @@ class Channel(object):
         oplock_level=smb2.SMB2_OPLOCK_LEVEL_NONE,
         lease_key=None,
         lease_state=None,
+        lease_flags_v2=None,
         durable=False,
         persistent=False,
         create_guid=None,
@@ -1498,7 +1499,7 @@ class Channel(object):
                 lease_key = crypto.random_bytes(16)
             if lease_state is None:
                 lease_state = smb2.SMB2_LEASE_RWH
-            lease_req = smb2.LeaseRequest(create_req)
+            lease_req = smb2.LeaseRequest(create_req, lease_flags_v2)
             lease_req.lease_key = lease_key
             lease_req.lease_state = lease_state
 
@@ -1584,6 +1585,7 @@ class Channel(object):
         oplock_level=smb2.SMB2_OPLOCK_LEVEL_NONE,
         lease_key=None,
         lease_state=None,
+        lease_flags_v2=None,
         durable=False,
         persistent=False,
         create_guid=None,
@@ -1605,6 +1607,7 @@ class Channel(object):
                 oplock_level,
                 lease_key,
                 lease_state,
+                lease_flags_v2,
                 durable,
                 persistent,
                 create_guid,
@@ -2332,6 +2335,7 @@ class Lease(object):
     def update(self, lease_res):
         self.lease_key = lease_res.lease_key
         self.lease_state = lease_res.lease_state
+        self.lease_epoch = lease_res.epoch
         if self.future is None:
             self.arm_future()
 
@@ -2363,6 +2367,7 @@ class Lease(object):
             since it already closes over self
             """
             notify = smb_res[0]
+            self.lease_epoch = notify.new_epoch
             if notify.flags & smb2.SMB2_NOTIFY_BREAK_LEASE_FLAG_ACK_REQUIRED:
                 chan = self.tree.session.first_channel()
                 ack = chan.lease_break_acknowledgement(self.tree, smb_res)
