@@ -15,7 +15,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [2.7, 3.6, 3.7, 3.8, 3.9, 3.10-dev]
+        python-version: [2.7, 3.6, 3.7, 3.8, 3.9, "3.10"]
 
     services:
       samba:
@@ -29,15 +29,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      if: "!endsWith(matrix.python-version, '-dev')"
+    - uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - uses: deadsnakes/action@v2.0.2
-      if: endsWith(matrix.python-version, '-dev')
-      with:
-        python-version: ${{ matrix.python-version }}
-    - run: python --version --version && which python
+    - run: python --version && which python
+    - run: pip install -U pip && pip --version && which pip
     - name: Install Pike
       run: pip install .
     - name: Install pytest
