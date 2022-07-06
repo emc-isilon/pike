@@ -32,7 +32,8 @@ jobs:
     - uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - run: python --version --version && which python
+    - run: python --version && which python
+    - run: pip install -U pip && pip --version && which pip
     - name: Install Pike
       run: pip install .
     - name: Install pytest
