@@ -95,10 +95,6 @@ def run_setup(with_extensions):
     setup(
         name="pike-smb2",
         use_scm_version=True,
-        setup_requires=[
-            'setuptools_scm==5.0.2; python_version ~= "2.7"',
-            'setuptools_scm; python_version >= "3.6"',
-        ],
         description="Pure python SMB client",
         long_description_content_type='text/markdown',
         long_description=long_description,
