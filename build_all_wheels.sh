@@ -13,8 +13,7 @@
 
 set -euo pipefail
 
-# XXX: py27 kerb support is broken
-versions=(python3.6 python3.7 python3.8 python3.9 python3.10)
+versions=(python2 python3.6 python3.7 python3.8 python3.9 python3.10)
 
 python3.10 -m pip install twine
 rm -rf .build dist
