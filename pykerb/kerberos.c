@@ -480,10 +480,12 @@ static struct PyModuleDef moduledef = {
         .m_doc = NULL,
         .m_size = sizeof(struct module_state),
         .m_methods = KerberosMethods,
+#if PY_MAJOR_VERSION >= 3
         .m_slots = NULL,
         .m_traverse = myextension_traverse,
         .m_clear = myextension_clear,
         .m_free = NULL
+#endif
 };
 
 
