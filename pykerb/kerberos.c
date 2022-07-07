@@ -20,11 +20,18 @@
  * Modified by EMC Corporation.
  */
 
+#define PY_SSIZE_T_CLEAN 1
 #include <Python.h>
 #include <py3c.h>
 #include "kerberosbasic.h"
 #include "kerberospw.h"
 #include "kerberosgss.h"
+
+#if PY_MAJOR_VERSION >= 3
+#define RO_BYTEARRAY "y#"
+#else
+#define RO_BYTEARRAY "s#"
+#endif
 
 PyObject *KrbException_class;
 PyObject *BasicAuthException_class;
@@ -161,7 +168,7 @@ static PyObject *authGSSClientStep(PyObject *self, PyObject *args)
 {
     gss_client_state *state;
     PyObject *pystate;
-    int challenge_length = 0;
+    Py_ssize_t challenge_length = 0;
     char *challenge;
     int result = 0;
 
@@ -201,7 +208,7 @@ static PyObject *authGSSClientResponse(PyObject *self, PyObject *args)
     if (state == NULL)
         return NULL;
 
-    return Py_BuildValue("y#", state->response, state->response_length);
+    return Py_BuildValue(RO_BYTEARRAY, state->response, (Py_ssize_t) state->response_length);
 }
 
 static PyObject *authGSSClientUserName(PyObject *self, PyObject *args)
@@ -228,7 +235,7 @@ static PyObject *authGSSClientUnwrap(PyObject *self, PyObject *args)
 {
 	gss_client_state *state;
 	PyObject *pystate;
-        int challenge_length = 0;
+        Py_ssize_t challenge_length = 0;
 	char *challenge;
 	int result = 0;
 
@@ -255,7 +262,7 @@ static PyObject *authGSSClientWrap(PyObject *self, PyObject *args)
 {
 	gss_client_state *state;
 	PyObject *pystate;
-        int challenge_length = 0;
+        Py_ssize_t challenge_length = 0;
 	char *challenge, *user = NULL;
 	int result = 0;
 
@@ -353,7 +360,7 @@ static PyObject *authGSSServerStep(PyObject *self, PyObject *args)
 {
     gss_server_state *state;
     PyObject *pystate;
-    int challenge_length = 0;
+    Py_ssize_t challenge_length = 0;
     char *challenge;
     int result = 0;
 
@@ -393,7 +400,7 @@ static PyObject *authGSSServerResponse(PyObject *self, PyObject *args)
     if (state == NULL)
         return NULL;
 
-    return Py_BuildValue("s#", state->response, state->response_length);
+    return Py_BuildValue(RO_BYTEARRAY, state->response, (Py_ssize_t) state->response_length);
 }
 
 static PyObject *authGSSServerUserName(PyObject *self, PyObject *args)
