@@ -489,7 +489,11 @@ static struct PyModuleDef moduledef = {
 };
 
 
+#if PY_MAJOR_VERSION >= 3
 PyMODINIT_FUNC PyInit_kerberos(void)
+#else
+PyMODINIT_FUNC initkerberos(void)
+#endif
 {
     PyObject *m,*d;
 
