@@ -22,7 +22,10 @@ from builtins import object
 import array
 import random
 
-from Cryptodome.Cipher import AES
+try:
+    from Crypto.Cipher import AES
+except ImportError:
+    from Cryptodome.Cipher import AES
 
 from . import core
 from . import digest

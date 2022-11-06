@@ -114,7 +114,7 @@ def run_setup(with_extensions):
         install_requires=[
             'enum34~=1.1.6;  python_version ~= "2.7"',
             "attrs >= 19.3",
-            "pycryptodomex",
+            "pycryptodome",
             "future",
             "six",
         ],
