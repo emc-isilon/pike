@@ -666,7 +666,7 @@ class Connection(transport.Transport):
     def next_mid(self):
         return self.next_range(1)
 
-    def reserve_mid(mid):
+    def reserve_mid(self, mid):
         self._mid_blacklist.add(mid)
 
     def handle_connect(self):
