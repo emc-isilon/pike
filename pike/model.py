@@ -1806,7 +1806,7 @@ class Channel(object):
     ):
         return self.connection.submit(
             self.change_notify_request(
-                handle, completion_filter, flags, buffer_length=4096
+                handle, completion_filter, flags, buffer_length=buffer_length,
             ).parent.parent
         )[0]
 
