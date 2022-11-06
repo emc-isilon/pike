@@ -2278,6 +2278,8 @@ class QueryInfoRequest(Request):
         self.flags = 0
         self.file_id = None
         self.output_buffer_length = 4096
+        # used for SMB2_QUERY_QUOTA_INFO and FILE_GET_EA_INFORMATION
+        self._entries = []
 
     def _log_str(self):
         components = [
@@ -2292,22 +2294,32 @@ class QueryInfoRequest(Request):
             components.append("({})".format(self.flags))
         return " ".join(components)
 
+    def _children(self):
+        return self._entries
+
+    def append(self, e):
+        self._entries.append(e)
+
     def _encode(self, cur):
         cur.encode_uint8le(self.info_type)
         cur.encode_uint8le(self.file_information_class)
         cur.encode_uint32le(self.output_buffer_length)
 
-        # We're not implementing the input buffer support right now
-        cur.encode_uint16le(0)
+        input_buffer_offset_hole = cur.hole.encode_uint16le(0)
         cur.encode_uint16le(0)  # Reserved
-
-        # We're not implementing the input buffer support right now
-        cur.encode_uint32le(0)
+        input_buffer_length_hole = cur.hole.encode_uint32le(0)
 
         cur.encode_uint32le(self.additional_information)
         cur.encode_uint32le(self.flags)
         cur.encode_uint64le(self.file_id[0])
         cur.encode_uint64le(self.file_id[1])
+
+        if self._entries:
+            buffer_start = cur.copy()
+            input_buffer_offset_hole(buffer_start - self.parent.start)
+            for info in self._entries:
+                info.encode(cur)
+            input_buffer_length_hole(cur - buffer_start)
 
 
 class QueryInfoResponse(Response):
@@ -2596,6 +2608,57 @@ class FileSecurityInformation(FileInformation):
             dacl_ofs(self.offset_dacl)
             self.dacl.encode(cur)
 
+class FileQuotaInformation(FileInformation):
+    file_information_class = 0
+    info_type = SMB2_0_INFO_QUOTA
+
+    def __init__(self, parent=None):
+        super(FileQuotaInformation, self).__init__(parent)
+        self.change_time = 0
+        self.quota_used = 0
+        self.quota_threshold = 0
+        self.quota_limit = 0
+        self.sid = None
+
+    def _decode(self, cur):
+        next_entry_offset = cur.decode_uint32le()
+        sid_length = cur.decode_uint32le()
+
+        self.change_time = cur.decode_uint64le()
+        self.quota_used = cur.decode_uint64le()
+        self.quota_threshold = cur.decode_uint64le()
+        self.quota_limit = cur.decode_uint64le()
+        self.sid = NT_SID()
+        with cur.bounded(cur, cur + sid_length):
+            self.sid.decode(cur)
+        if next_entry_offset:
+            cur.advanceto(self.start + next_entry_offset)
+            # recursively decode all quota info structs
+            FileQuotaInformation(self.parent).decode(cur)
+        else:
+            cur.advanceto(cur.upperbound)
+
+class QueryQuotaInfo(core.Frame):
+    def __init__(self, parent=None):
+        super(QueryQuotaInfo, self).__init__(parent)
+        if parent is not None:
+            parent.append(self)
+        self.return_single = False
+        self.restart_scan = False
+
+    def _encode(self, cur):
+        cur.encode_uint8le(self.return_single)
+        cur.encode_uint8le(self.restart_scan)
+        cur.encode_uint16le(0)      # reserved
+
+        # the following fields are not yet implemented, but allow the client
+        # to request quota information for particular SIDs
+        # setting these to zero indicates that ALL quota entries are queried
+        cur.encode_uint32le(0)      # sid_list_length
+        cur.encode_uint32le(0)      # start_sid_length
+        cur.encode_uint32le(0)      # start_sid_offset
+        # sid_buffer would be encoded here if it were included
+        # [MS-SMB2] 2.2.37.1 SMB2_QUERY_QUOTA_INFO
 
 class FileAccessInformation(FileInformation):
     file_information_class = FILE_ACCESS_INFORMATION
