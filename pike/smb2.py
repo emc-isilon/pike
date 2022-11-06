@@ -38,6 +38,10 @@ from . import nttime
 from . import ntstatus
 
 
+# for credit cost calculations
+BYTES_PER_CREDIT = 64 * 1024
+
+
 # Dialects constants
 class Dialect(core.ValueEnum):
     DIALECT_SMB2_WILDCARD = 0x02FF
@@ -123,8 +127,8 @@ class ShareFlags(core.FlagEnum):
 ShareFlags.import_items(globals())
 
 # Misc
-RELATED_FID = (2 ** 64 - 1, 2 ** 64 - 1)
-UNSOLICITED_MESSAGE_ID = 2 ** 64 - 1
+RELATED_FID = (2**64 - 1, 2**64 - 1)
+UNSOLICITED_MESSAGE_ID = 2**64 - 1
 
 
 class Smb2(core.Frame):
@@ -1082,7 +1086,12 @@ class CreateRequest(Request):
         self._create_contexts = []
 
     def _log_str(self):
-        return " ".join([super(CreateRequest, self)._log_str(), self.name,])
+        return " ".join(
+            [
+                super(CreateRequest, self)._log_str(),
+                self.name,
+            ]
+        )
 
     def _children(self):
         return self._create_contexts
@@ -1354,6 +1363,7 @@ class LeaseFlags(core.FlagEnum):
     SMB2_LEASE_FLAG_NONE = 0x00
     SMB2_LEASE_FLAG_BREAK_IN_PROGRESS = 0x02
     SMB2_LEASE_FLAG_PARENT_LEASE_KEY_SET = 0x04
+
 
 LeaseFlags.import_items(globals())
 
@@ -1841,7 +1851,7 @@ class LeaseRequest(CreateRequestContext):
         else:
             self.lease_flags = None
             self.parent_lease_key = None
-            self.epoch = None 
+            self.epoch = None
 
     def _encode(self, cur):
         cur.encode_bytes(self.lease_key)
@@ -2608,6 +2618,7 @@ class FileSecurityInformation(FileInformation):
             dacl_ofs(self.offset_dacl)
             self.dacl.encode(cur)
 
+
 class FileQuotaInformation(FileInformation):
     file_information_class = 0
     info_type = SMB2_0_INFO_QUOTA
@@ -2638,6 +2649,7 @@ class FileQuotaInformation(FileInformation):
         else:
             cur.advanceto(cur.upperbound)
 
+
 class QueryQuotaInfo(core.Frame):
     def __init__(self, parent=None):
         super(QueryQuotaInfo, self).__init__(parent)
@@ -2649,16 +2661,17 @@ class QueryQuotaInfo(core.Frame):
     def _encode(self, cur):
         cur.encode_uint8le(self.return_single)
         cur.encode_uint8le(self.restart_scan)
-        cur.encode_uint16le(0)      # reserved
+        cur.encode_uint16le(0)  # reserved
 
         # the following fields are not yet implemented, but allow the client
         # to request quota information for particular SIDs
         # setting these to zero indicates that ALL quota entries are queried
-        cur.encode_uint32le(0)      # sid_list_length
-        cur.encode_uint32le(0)      # start_sid_length
-        cur.encode_uint32le(0)      # start_sid_offset
+        cur.encode_uint32le(0)  # sid_list_length
+        cur.encode_uint32le(0)  # start_sid_length
+        cur.encode_uint32le(0)  # start_sid_offset
         # sid_buffer would be encoded here if it were included
         # [MS-SMB2] 2.2.37.1 SMB2_QUERY_QUOTA_INFO
+
 
 class FileAccessInformation(FileInformation):
     file_information_class = FILE_ACCESS_INFORMATION
@@ -3689,7 +3702,10 @@ class ReadResponse(Response):
 
     def _log_str(self):
         return " ".join(
-            [super(ReadResponse, self)._log_str(), "({})".format(self.length),]
+            [
+                super(ReadResponse, self)._log_str(),
+                "({})".format(self.length),
+            ]
         )
 
     def _decode(self, cur):

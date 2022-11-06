@@ -55,10 +55,21 @@ from . import smb2
 from . import transport
 from . import ntstatus
 from . import digest
+from .exceptions import (
+    CallbackError,
+    CreditError,
+    RequestError,
+    ResponseError,
+    StateError,
+    TimeoutError,
+)
+import pike.io
 
 default_credit_request = 10
 default_timeout = 30
+default_port = 445
 trace = False
+Open = pike.io.CompatOpen  # maintain the old __init__ signature of pike.model.Open
 
 
 def loop(timeout=None, count=None):
@@ -69,69 +80,6 @@ def loop(timeout=None, count=None):
     if timeout is None:
         timeout = default_timeout
     transport.loop(timeout=timeout, count=count)
-
-
-class TimeoutError(Exception):
-    """Future completion timed out"""
-
-    future = None
-
-    @classmethod
-    def with_future(cls, future, *args):
-        """
-        Instantiate TimeoutError from a given future.
-
-        :param future: Future that timed out
-        :param args: passed to Exception.__init__
-        :return: TimeoutError
-        """
-        ex = cls(*args)
-        ex.future = future
-        return ex
-
-    def __str__(self):
-        s = super(TimeoutError, self).__str__()
-        if self.future is not None:
-            if self.future.request is not None:
-                requests = [str(self.future.request)]
-                if not isinstance(self.future.request, (core.Frame, str, bytes)):
-                    # attempt to recursively str format other iterables
-                    try:
-                        requests = [str(r) for r in self.future.request]
-                    except TypeError:
-                        pass
-                s += "\nRequest: {}".format("\n".join(requests))
-            if self.future.interim_response is not None:
-                s += "\nInterim: {}".format(self.future.interim_response)
-        return s
-
-
-class StateError(Exception):
-    pass
-
-
-class CreditError(Exception):
-    pass
-
-
-class RequestError(Exception):
-    def __init__(self, request, message=None):
-        if message is None:
-            message = "Could not send {0}".format(repr(request))
-        Exception.__init__(self, message)
-        self.request = request
-
-
-class CallbackError(Exception):
-    """
-    the callback was not suitable
-    """
-
-
-class ResponseError(Exception):
-    def __init__(self, response):
-        Exception.__init__(self, response.command, response.status)
-        self.response = response
 
 
 class AssertNtstatusContext(object):
@@ -164,7 +112,7 @@ def pike_status(exp_status):
 
 
 class Events(core.ValueEnum):
-    """ Events used for callback functions """
+    """Events used for callback functions"""
 
     EV_REQ_PRE_SERIALIZE = 0x1  # cb expects Netbios frame
     EV_REQ_POST_SERIALIZE = 0x2  # cb expects Netbios frame
@@ -428,7 +376,7 @@ class Client(object):
             max_dialect = max(smb2.Dialect.values())
         self.dialects = [d for d in self.dialects if min_dialect <= d <= max_dialect]
 
-    def connect(self, server, port=445):
+    def connect(self, server, port=default_port):
         """
         Create a connection.
 
@@ -439,7 +387,7 @@ class Client(object):
         """
         return self.connect_submit(server, port).result()
 
-    def connect_submit(self, server, port=445):
+    def connect_submit(self, server, port=default_port):
         """
         Create a connection.
 
@@ -571,7 +519,7 @@ class Connection(transport.Transport):
     @ivar port: The server port
     """
 
-    def __init__(self, client, server, port=445):
+    def __init__(self, client, server, port=default_port):
         """
         Constructor.
 
@@ -692,6 +640,13 @@ class Connection(transport.Transport):
             else 0x0
         )
 
+    @property
+    def hostname(self):
+        port = ""
+        if self.port != default_port:
+            port = ":{}".format(self.port)
+        return self.server + port
+
     def next_mid_range(self, length):
         """
         multicredit requests must reserve 1 message id per credit charged.
@@ -711,7 +666,7 @@ class Connection(transport.Transport):
     def next_mid(self):
         return self.next_range(1)
 
-    def reserve_mid(mid):
+    def reserve_mid(self, mid):
         self._mid_blacklist.add(mid)
 
     def handle_connect(self):
@@ -828,12 +783,16 @@ class Connection(transport.Transport):
                 for cmd in req:
                     if isinstance(cmd, smb2.ReadRequest) and cmd.length > 0:
                         # special handling, 1 credit per 64k
-                        req.credit_charge, remainder = divmod(cmd.length, 2 ** 16)
+                        req.credit_charge, remainder = divmod(
+                            cmd.length, smb2.BYTES_PER_CREDIT
+                        )
                     elif isinstance(cmd, smb2.WriteRequest) and cmd.buffer is not None:
                         # special handling, 1 credit per 64k
                         if cmd.length is None:
                             cmd.length = len(cmd.buffer)
-                        req.credit_charge, remainder = divmod(cmd.length, 2 ** 16)
+                        req.credit_charge, remainder = divmod(
+                            cmd.length, smb2.BYTES_PER_CREDIT
+                        )
                     else:
                         remainder = 1  # assume 1 credit per command
                     if remainder > 0:
@@ -1503,7 +1462,7 @@ class Channel(object):
             lease_req.lease_key = lease_key
             lease_req.lease_state = lease_state
 
-        if isinstance(durable, Open):
+        if isinstance(durable, pike.io.Open):
             prev_open = durable
             if durable.durable_timeout is None:
                 durable_req = smb2.DurableHandleReconnectRequest(create_req)
@@ -1557,7 +1516,13 @@ class Channel(object):
         def finish(f):
             with open_future:
                 open_future(
-                    Open(tree, f.result(), create_guid=create_guid, prev=prev_open)
+                    pike.io.Open(
+                        tree,
+                        create_request=create_req,
+                        create_response=f.result()[0],
+                        create_guid=create_guid,
+                        previous_open=prev_open,
+                    )
                 )
 
         create_req.open_future = open_future
@@ -1783,11 +1748,8 @@ class Channel(object):
         self.connection.transceive(set_req.parent.parent)[0]
 
     def query_quota_info_request(
-            self,
-            handle,
-            return_single=False,
-            restart_scan=False,
-            output_buffer_length=4096):
+        self, handle, return_single=False, restart_scan=False, output_buffer_length=4096
+    ):
         smb_req = self.request(obj=handle)
         query_req = smb2.QueryInfoRequest(smb_req)
         quota_query_info = smb2.QueryQuotaInfo(query_req)
@@ -1801,18 +1763,16 @@ class Channel(object):
         return query_req
 
     def query_quota_info(
-            self,
-            handle,
-            return_single=False,
-            restart_scan=False,
-            output_buffer_length=4096):
+        self, handle, return_single=False, restart_scan=False, output_buffer_length=4096
+    ):
         return self.connection.transceive(
-                self.query_quota_info_request(
-                    handle,
-                    return_single=return_single,
-                    restart_scan=restart_scan,
-                    output_buffer_length=output_buffer_length
-                ).parent.parent)[0][0]
+            self.query_quota_info_request(
+                handle,
+                return_single=return_single,
+                restart_scan=restart_scan,
+                output_buffer_length=output_buffer_length,
+            ).parent.parent
+        )[0][0]
 
     def change_notify_request(
         self,
@@ -1838,7 +1798,10 @@ class Channel(object):
     ):
         return self.connection.submit(
             self.change_notify_request(
-                handle, completion_filter, flags, buffer_length=buffer_length,
+                handle,
+                completion_filter,
+                flags,
+                buffer_length=buffer_length,
             ).parent.parent
         )[0]
 
@@ -1859,7 +1822,7 @@ class Channel(object):
         return flush_req
 
     def flush(self, file):
-        self.connection.transceive(self.flush_request(file).parent.parent)
+        return self.connection.transceive(self.flush_request(file).parent.parent)[0]
 
     def read_request(self, file, length, offset, minimum_count=0, remaining_bytes=0):
         smb_req = self.request(obj=file)
@@ -1901,7 +1864,9 @@ class Channel(object):
                 UnicodeWarning,
             )
             buffer = buffer.encode("ascii")
-        if buffer is not None and not isinstance(buffer, (array.array, bytes)):
+        if buffer is not None and not isinstance(
+            buffer, (array.array, bytes, memoryview, bytearray)
+        ):
             raise TypeError(
                 "buffer must be a byte string or byte array, not {!r}".format(
                     type(buffer)
@@ -2007,8 +1972,8 @@ class Channel(object):
         def update_handle(resp_future):
             if resp_future.result().status == ntstatus.STATUS_SUCCESS:
                 # 3.3.5.15.9 Handling a Resiliency Request
-                file.is_durable = False
-                file.is_resilient = True
+                file._is_durable = False
+                file._is_resilient = True
 
         nrr_future = self.connection.submit(
             self.network_resiliency_request_request(file, timeout).parent.parent
@@ -2117,7 +2082,7 @@ class Channel(object):
         return self.enumerate_snapshots(fh, snap_request)[0][0].snapshots
 
     def zero_data(self, tree, src_offsets, dst_offsets, src_filename):
-        """ Send a FSCTL_SET_ZERO_DATA ioctl request """
+        """Send a FSCTL_SET_ZERO_DATA ioctl request"""
         fh_src = self.create(
             tree,
             src_filename,
@@ -2182,7 +2147,7 @@ class Channel(object):
 
         if isinstance(obj, Tree):
             smb_req.tree_id = obj.tree_id
-        elif isinstance(obj, Open):
+        elif isinstance(obj, pike.io.Open):
             smb_req.tree_id = obj.tree.tree_id
 
         # encryption unspecified, follow session/tree negotiation
@@ -2190,7 +2155,7 @@ class Channel(object):
             encrypt_data = self.session.encrypt_data
             if isinstance(obj, Tree):
                 encrypt_data |= obj.encrypt_data
-            elif isinstance(obj, Open):
+            elif isinstance(obj, pike.io.Open):
                 encrypt_data |= obj.tree.encrypt_data
 
         # a packet is either encrypted or signed
@@ -2223,128 +2188,6 @@ class Tree(object):
         if smb_res[0].share_flags & smb2.SMB2_SHAREFLAG_ENCRYPT_DATA:
             self.encrypt_data = True
         self.session._trees[self.tree_id] = self
-
-
-class Open(object):
-    def __init__(self, tree, smb_res, create_guid=None, prev=None):
-        self.create_response = smb_res[0]
-
-        self.tree = tree
-        self.file_id = self.create_response.file_id
-        self.oplock_level = self.create_response.oplock_level
-        self.lease = None
-        self.is_durable = False
-        self.is_resilient = False
-        self.is_persistent = False
-        self.durable_timeout = None
-        self.durable_flags = None
-        self.create_guid = create_guid
-
-        if prev is not None:
-            self.is_durable = prev.is_durable
-            self.is_resilient = prev.is_resilient
-            self.durable_timeout = prev.durable_timeout
-            self.durable_flags = prev.durable_flags
-
-        if self.oplock_level != smb2.SMB2_OPLOCK_LEVEL_NONE:
-            if self.oplock_level == smb2.SMB2_OPLOCK_LEVEL_LEASE:
-                lease_res = [
-                    c for c in self.create_response if isinstance(c, smb2.LeaseResponse)
-                ][0]
-                self.lease = tree.session.client.lease(tree, lease_res)
-            else:
-                self.arm_oplock_future()
-
-        durable_res = [
-            c for c in self.create_response if isinstance(c, smb2.DurableHandleResponse)
-        ]
-
-        if durable_res != []:
-            self.is_durable = True
-
-        durable_v2_res = [
-            c
-            for c in self.create_response
-            if isinstance(c, smb2.DurableHandleV2Response)
-        ]
-        if durable_v2_res != []:
-            self.durable_timeout = durable_v2_res[0].timeout
-            self.durable_flags = durable_v2_res[0].flags
-
-        if self.durable_flags is not None:
-            self.is_durable = True
-            if self.durable_flags & smb2.SMB2_DHANDLE_FLAG_PERSISTENT != 0:
-                self.is_persistent = True
-
-    def arm_oplock_future(self):
-        """
-        (Re)arm the oplock future for this open. This function should be called
-        when an oplock changes level to anything except SMB2_OPLOCK_LEVEL_NONE
-        """
-        self.oplock_future = self.tree.session.client.oplock_break_future(self.file_id)
-
-    def on_oplock_break(self, cb):
-        """
-        Simple oplock break callback handler.
-        @param cb: callable taking 1 parameter: the break request oplock level
-                   should return the desired oplock level to break to
-        """
-
-        def simple_handle_break(op, smb_res, cb_ctx):
-            """
-            note that op is not used in this callback,
-            since it already closes over self
-            """
-            notify = smb_res[0]
-            if self.oplock_level != smb2.SMB2_OPLOCK_LEVEL_II:
-                chan = self.tree.session.first_channel()
-                ack = chan.oplock_break_acknowledgement(self, smb_res)
-                ack.oplock_level = cb(notify.oplock_level)
-                ack_res = chan.connection.transceive(ack.parent.parent)[0][0]
-                if ack.oplock_level != smb2.SMB2_OPLOCK_LEVEL_NONE:
-                    self.arm_oplock_future()
-                    self.on_oplock_break(cb)
-                self.oplock_level = ack_res.oplock_level
-            else:
-                self.oplock_level = notify.oplock_level
-
-        self.on_oplock_break_request(simple_handle_break)
-
-    def on_oplock_break_request(self, cb, cb_ctx=None):
-        """
-        Complex oplock break callback handler.
-        @param cb: callable taking 3 parameters:
-                        L{Open}
-                        L{Smb2} containing the break request
-                        L{object} arbitrary context
-                   should handle breaking the oplock in some way
-                   callback is also responsible for re-arming the future
-                   and updating the oplock_level (if changed)
-        """
-
-        def handle_break(f):
-            smb_res = f.result()
-            cb(self, smb_res, cb_ctx)
-
-        self.oplock_future.then(handle_break)
-
-    def dispose(self):
-        self.tree = None
-        if self.lease is not None:
-            self.lease.dispose()
-            self.lease = None
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        try:
-            chan = self.tree.session.first_channel()
-            chan.close(self)
-        except StopIteration:
-            # If the underlying connection for the channel is closed explicitly
-            # open will not able to find an appropriate channel, to send close.
-            pass
 
 
 class RelatedOpen(object):

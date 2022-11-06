@@ -86,7 +86,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self.chan.logoff()
 
     def _create_and_write(self, filename, content):
-        """ create / overwrite filename with content """
+        """create / overwrite filename with content"""
         fh1 = self.chan.create(
             self.tree,
             filename,
@@ -192,7 +192,7 @@ class TestServerSideCopy(pike.test.PikeTest):
         self._create_and_write(src_filename, SIMPLE_CONTENT)
 
     def _read_big_file(self, file_handle, total_len, add_offset=0):
-        """ read large file and return in string """
+        """read large file and return in string"""
         max_read_size = self.chan.connection.negotiate_response.max_read_size
         reads = []
         this_offset = 0

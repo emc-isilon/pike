@@ -34,8 +34,9 @@ except ImportError:
 from . import core
 
 
-def sha256_hmac(key,message):
-    return array.array('B',
+def sha256_hmac(key, message):
+    return array.array(
+        "B",
         HMAC.new(
             key.tobytes(),
             message.tobytes(),

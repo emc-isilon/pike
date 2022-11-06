@@ -33,17 +33,12 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - run: python --version && which python
-    - run: pip install -U pip && pip --version && which pip
-    - name: Install Pike
-      run: pip install .
-    - name: Install pytest
-      run: pip install pytest
+    - name: Install dependencies
+      run: pip install tox tox-gh-actions
     - name: Test Pike
       env:
         PIKE_SERVER: 127.0.0.1
         PIKE_PORT: ${{ job.services.samba.ports[445] }}
         PIKE_SHARE: pike
         PIKE_CREDS: pike%GiThubCI123
-      run: |
-        python -m unittest -v pike.test.samba_suite
-        python -m pytest --pyargs pike.test.internal
+      run: tox
