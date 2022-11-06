@@ -112,7 +112,7 @@ def pike_status(exp_status):
 
 
 class Events(core.ValueEnum):
-    """ Events used for callback functions """
+    """Events used for callback functions"""
 
     EV_REQ_PRE_SERIALIZE = 0x1  # cb expects Netbios frame
     EV_REQ_POST_SERIALIZE = 0x2  # cb expects Netbios frame
@@ -1748,11 +1748,8 @@ class Channel(object):
         self.connection.transceive(set_req.parent.parent)[0]
 
     def query_quota_info_request(
-            self,
-            handle,
-            return_single=False,
-            restart_scan=False,
-            output_buffer_length=4096):
+        self, handle, return_single=False, restart_scan=False, output_buffer_length=4096
+    ):
         smb_req = self.request(obj=handle)
         query_req = smb2.QueryInfoRequest(smb_req)
         quota_query_info = smb2.QueryQuotaInfo(query_req)
@@ -1766,18 +1763,16 @@ class Channel(object):
         return query_req
 
     def query_quota_info(
-            self,
-            handle,
-            return_single=False,
-            restart_scan=False,
-            output_buffer_length=4096):
+        self, handle, return_single=False, restart_scan=False, output_buffer_length=4096
+    ):
         return self.connection.transceive(
-                self.query_quota_info_request(
-                    handle,
-                    return_single=return_single,
-                    restart_scan=restart_scan,
-                    output_buffer_length=output_buffer_length
-                ).parent.parent)[0][0]
+            self.query_quota_info_request(
+                handle,
+                return_single=return_single,
+                restart_scan=restart_scan,
+                output_buffer_length=output_buffer_length,
+            ).parent.parent
+        )[0][0]
 
     def change_notify_request(
         self,
@@ -1803,7 +1798,10 @@ class Channel(object):
     ):
         return self.connection.submit(
             self.change_notify_request(
-                handle, completion_filter, flags, buffer_length=buffer_length,
+                handle,
+                completion_filter,
+                flags,
+                buffer_length=buffer_length,
             ).parent.parent
         )[0]
 
@@ -2084,7 +2082,7 @@ class Channel(object):
         return self.enumerate_snapshots(fh, snap_request)[0][0].snapshots
 
     def zero_data(self, tree, src_offsets, dst_offsets, src_filename):
-        """ Send a FSCTL_SET_ZERO_DATA ioctl request """
+        """Send a FSCTL_SET_ZERO_DATA ioctl request"""
         fh_src = self.create(
             tree,
             src_filename,

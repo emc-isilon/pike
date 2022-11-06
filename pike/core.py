@@ -203,7 +203,7 @@ class Cursor(object):
         )
 
     def copy(self):
-        """ Create copy of cursor. """
+        """Create copy of cursor."""
         return Cursor(self.array, self.offset, self.bounds)
 
     def _expand_to(self, size):
@@ -212,7 +212,7 @@ class Cursor(object):
             self.array.extend([0] * (size - cur_size))
 
     def encode_bytes(self, val):
-        """ Encode bytes.  Accepts byte arrays, strings, and integer lists."""
+        """Encode bytes.  Accepts byte arrays, strings, and integer lists."""
         size = len(val)
         self._expand_to(self.offset + size)
         self.array[self.offset : self.offset + size] = array.array("B", val)

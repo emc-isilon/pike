@@ -262,7 +262,7 @@ class TransformHeader(core.Frame):
 
 
 class CryptoKeys300(object):
-    """ Key generation for SMB 0x300 and 0x302 """
+    """Key generation for SMB 0x300 and 0x302"""
 
     def __init__(self, session_key, *args, **kwds):
         self.encryption = digest.derive_key(session_key, b"SMB2AESCCM", b"ServerIn \0")[
@@ -274,7 +274,7 @@ class CryptoKeys300(object):
 
 
 class CryptoKeys311(object):
-    """ Key generation for SMB 0x311 + """
+    """Key generation for SMB 0x311 +"""
 
     def __init__(self, session_key, pre_auth_integrity_hash, *args, **kwds):
         self.encryption = digest.derive_key(

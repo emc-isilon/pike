@@ -29,15 +29,15 @@ import pike.smb2
 import pike.test
 
 # common size constants
-size_64k = 2 ** 16
-size_128k = 2 ** 17
+size_64k = 2**16
+size_128k = 2**17
 size_192k = size_64k + size_128k
-size_512k = 2 ** 19
+size_512k = 2**19
 size_960k = size_192k * 5
-size_1m = 2 ** 20
-size_2m = 2 ** 21
-size_4m = 2 ** 22
-size_8m = 2 ** 23
+size_1m = 2**20
+size_2m = 2**21
+size_4m = 2**22
+size_8m = 2**23
 
 share_all = (
     pike.smb2.FILE_SHARE_READ | pike.smb2.FILE_SHARE_WRITE | pike.smb2.FILE_SHARE_DELETE
@@ -579,9 +579,9 @@ class Generated_{name}_{tag}(pike.test.credit.CreditTest):
         name = "Mult64k"
         print(cls.header.format(**locals()))
         for ix in range(n_cases):
-            file_size = 2 ** 16 * random.randint(*size_range_multiple)
-            write_size = 2 ** 16 * random.randint(*write_range_multiple)
-            read_size = 2 ** 16 * random.randint(*read_range_multiple)
+            file_size = 2**16 * random.randint(*size_range_multiple)
+            write_size = 2**16 * random.randint(*write_range_multiple)
+            read_size = 2**16 * random.randint(*read_range_multiple)
             print(cls.template.format(**locals()))
         print(cls.footer.format(**locals()))
 
@@ -609,5 +609,5 @@ if __name__ == "__main__":
         )
     else:
         TestCaseGenerator.generate_arbitrary_test_cases(
-            "iter1", 32, (45 * 1024, 2 ** 23), (2 ** 15, 2 ** 20), (2 ** 15, 2 ** 20)
+            "iter1", 32, (45 * 1024, 2**23), (2**15, 2**20), (2**15, 2**20)
         )

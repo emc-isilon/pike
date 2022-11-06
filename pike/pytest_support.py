@@ -66,7 +66,8 @@ def pike_TreeConnect(request):
         # update requirements from markers
         for mark_name, default_value in marks:
             kwargs[mark_name] = kwargs.get(
-                mark_name, get_mark_value(request.node, mark_name, default_value),
+                mark_name,
+                get_mark_value(request.node, mark_name, default_value),
             )
         # special case dialect range (must be a 2-tuple)
         if not isinstance(kwargs["require_dialect"], tuple):

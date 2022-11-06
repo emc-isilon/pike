@@ -18,7 +18,7 @@ from distutils.command.build_py import build_py
 from distutils.errors import CCompilerError, DistutilsExecError, DistutilsPlatformError
 
 _HERED = os.path.abspath(os.path.dirname(__file__))
-_README = os.path.join(_HERED, 'README.md')
+_README = os.path.join(_HERED, "README.md")
 
 # attempt building the kerberos extension
 try_krb = True
@@ -82,7 +82,7 @@ def pike_suite():
 
 
 # Get the long description from the README.md file
-with open(_README, 'rb') as f_:
+with open(_README, "rb") as f_:
     long_description = f_.read().decode("utf-8")
 
 
@@ -96,7 +96,7 @@ def run_setup(with_extensions):
         name="pike-smb2",
         use_scm_version=True,
         description="Pure python SMB client",
-        long_description_content_type='text/markdown',
+        long_description_content_type="text/markdown",
         long_description=long_description,
         author="Brian Koropoff",
         author_email="Brian.Koropoff@emc.com",
@@ -104,12 +104,16 @@ def run_setup(with_extensions):
         maintainer_email="Masen.Furer@dell.com",
         url="https://github.com/emc-isilon/pike",
         project_urls={
-           "Source": "https://github.com/emc-isilon/pike",
-           "Bug Reports": "https://github.com/emc-isilon/pike/issues",
+            "Source": "https://github.com/emc-isilon/pike",
+            "Bug Reports": "https://github.com/emc-isilon/pike/issues",
         },
         license="Simplified BSD License",
         packages=["pike", "pike.test"],
-        entry_points={"pytest11": ["pike = pike.pytest_support",]},
+        entry_points={
+            "pytest11": [
+                "pike = pike.pytest_support",
+            ]
+        },
         python_requires=">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*",
         install_requires=[
             'enum34~=1.1.6;  python_version ~= "2.7"',
@@ -140,7 +144,7 @@ def run_setup(with_extensions):
             "Environment :: Console",
             "License :: OSI Approved :: BSD License",
         ],
-        keywords='smb smb-testing smb-client',
+        keywords="smb smb-testing smb-client",
     )
 
 
