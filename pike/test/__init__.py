@@ -64,16 +64,46 @@ class ShareCapabilityMissing(TestRequirementNotMet):
 
 
 class Options(enum.Enum):
+    """
+    Provide default Client and Test options sourced from the following
+    Environment Variables.
+    """
+
     PIKE_LOGLEVEL = "PIKE_LOGLEVEL"
+    """Set the console log level by name (``DEBUG``, ``INFO``, etc)"""
     PIKE_TRACE = "PIKE_TRACE"
+    """If 'yes' log full request/response payloads at DEBUG level"""
     PIKE_SERVER = "PIKE_SERVER"
+    """SMB host name or IP address"""
     PIKE_PORT = "PIKE_PORT"
+    """SMB port (default: {})""".format(model.default_port)
     PIKE_CREDS = "PIKE_CREDS"
+    """
+    Percent-delimited server credentials for NTLM authentication:
+    ``DOMAIN\\User%Passwd``.
+
+    If credentials are not specified and kerberos is available, attempt to use
+    kerberos authentication.
+    """
     PIKE_SHARE = "PIKE_SHARE"
+    """Share name to connect to"""
     PIKE_SIGN = "PIKE_SIGN"
+    """If 'yes' require packets to be signed"""
     PIKE_ENCRYPT = "PIKE_ENCRYPT"
+    """If 'yes' require packets to be encrypted (SMB3-only)"""
     PIKE_MIN_DIALECT = "PIKE_MIN_DIALECT"
+    """
+    Minimum dialect to negotiate (``DIALECT_SMB2_1``, ``DIALECT_SMB3_0``, etc).
+
+    See :py:class:`pike.smb2.Dialect`
+    """
     PIKE_MAX_DIALECT = "PIKE_MAX_DIALECT"
+    """
+    Maximum dialect to negotiate (``DIALECT_SMB3_0``, ``DIALECT_SMB3_1_1``,
+    etc).
+
+    See :py:class:`pike.smb2.Dialect`
+    """
 
     @classmethod
     def option(cls, name, default=None):
@@ -91,7 +121,15 @@ class Options(enum.Enum):
 
     @classmethod
     def booloption(cls, name, default="no"):
-        table = {"yes": True, "true": True, "no": False, "false": False, "": False}
+        table = {
+            "yes": True,
+            "true": True,
+            "1": True,
+            "no": False,
+            "false": False,
+            "": False,
+            "0": False,
+        }
         return table[cls.option(name, default=default).lower()]
 
     @classmethod
@@ -112,7 +150,7 @@ class Options(enum.Enum):
 
     @classmethod
     def port(cls):
-        return int(cls.option(cls.PIKE_PORT, default="445"))
+        return int(cls.option(cls.PIKE_PORT, default=model.default_port))
 
     @classmethod
     def creds(cls):
@@ -156,7 +194,36 @@ def default_client(signing=None):
 @attr.s
 class TreeConnect(object):
     """
-    Combines a Client, Connection, Channel, and Tree for simple access to an SMB share.
+    Combines a :py:class:`~pike.model.Client`,
+    :py:class:`~pike.model.Connection`, :py:class:`~pike.model.Channel`, and
+    :py:class:`~pike.model.Tree` for simple access to an SMB share.
+
+    May be used as a contextmanager: entering the context will establish the
+    connection, session, and tree, and exiting the context will cleanly
+    disconnect (if possible). Errors on disconnect are ignored.
+
+    Any values not specified in the constructor will be drawn from the
+    associated environment variables. At minimum the following should be
+    specified explicitly or in the environment:
+
+      * ``server`` (``PIKE_SERVER``) - server or hostname to connect to
+      * ``creds`` (``PIKE_CREDS``) - percent-delimited credential string
+      * ``share`` (``PIKE_SHARE``) - share name to connect to
+
+    All other arguments are optional.
+
+    The ``TreeConnect`` object can be used with the division operator, ``/``,
+    which returns a :py:class:`~pike.path.PikePath` instance representing the
+    path extended from the share root. The tree connection will be established
+    before returning the :py:class:`~pike.path.PikePath` if is is not already
+    connected.
+
+    :vartype conn: pike.model.Connection
+    :ivar conn: the Connection object, or None if not connected
+    :vartype chan: pike.model.Channel
+    :ivar chan: the Channel object, or None if no session is established
+    :vartype tree: pike.model.Tree
+    :ivar tree: the Tree object, or None if no tree is connected
     """
 
     _client = attr.ib(default=None)
@@ -368,6 +435,26 @@ class TreeConnect(object):
         Compatibility shim to mirror the previous return value of PikeTest.tree_connect
         """
         return tuple(self)[item]
+
+    # proxy Path-like interface onto the tree
+    @property
+    def __fspath__(self):
+        """
+        proxy to Tree.__fspath__, establishing the session and tree if needed.
+        """
+        tree = self.tree or self().tree
+        return tree.__fspath__
+
+    @property
+    def __truediv__(self):
+        """
+        proxy to Tree.__truediv__, establishing the session and tree if needed.
+        """
+        tree = self.tree or self().tree
+        return tree.__truediv__
+
+    if sys.version_info < (3,):
+        __div__ = __truediv__
 
 
 class PikeTest(unittest.TestCase):

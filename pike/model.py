@@ -1864,6 +1864,9 @@ class Channel(object):
                 UnicodeWarning,
             )
             buffer = buffer.encode("ascii")
+        if sys.version_info < (3,) and isinstance(buffer, memoryview):
+            # explicit bytes-cast required on py2
+            buffer = buffer.tobytes()
         if buffer is not None and not isinstance(
             buffer, (array.array, bytes, memoryview, bytearray)
         ):
@@ -2188,6 +2191,43 @@ class Tree(object):
         if smb_res[0].share_flags & smb2.SMB2_SHAREFLAG_ENCRYPT_DATA:
             self.encrypt_data = True
         self.session._trees[self.tree_id] = self
+
+    def close(self):
+        if self.tree_id is not None:
+            self.session.first_channel().tree_disconnect(self)
+            self.tree_id = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
+    def __fspath__(self):
+        """
+        Return the string path representation of the Tree.
+        """
+        return r"\\{}\{}".format(
+            self.session.first_channel().connection.hostname,
+            self.path.rpartition("\\")[2],
+        )
+
+    def __add__(self, other):
+        """
+        Concatenate from the string representation of the Tree.
+        """
+        return self.__fspath__() + other
+
+    def __truediv__(self, key):
+        """
+        Return a PikePath with the given key joined.
+        """
+        from . import path
+
+        return path.PikePath(self, key)
+
+    if sys.version_info < (3,):
+        __div__ = __truediv__
 
 
 class RelatedOpen(object):
