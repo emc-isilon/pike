@@ -168,6 +168,19 @@ class PikePath(PureWindowsPath):
     def home(cls):
         raise NotImplementedError("No concept of home for {!r}".format(cls))
 
+    @staticmethod
+    def _follow_link(link, reparse_data):
+        """Return the next target for link by following reparse_data."""
+        if reparse_data.unparsed_path_length > 0:
+            prefix = link.join_from_root(
+                link._path[: -reparse_data.unparsed_path_length // 2]
+            ).parent
+            unparsed_portion = link._path[-reparse_data.unparsed_path_length // 2 :]
+        else:
+            prefix = link.parent
+            unparsed_portion = ""
+        return prefix / (reparse_data.substitute_name + unparsed_portion)
+
     def _create(self, *args, **kwargs):
         """
         Call Channel.create with this Tree and path following symlinks.
@@ -182,17 +195,21 @@ class PikePath(PureWindowsPath):
         depth = kwargs.pop("__RC_DEPTH", 0)
         if depth > MAX_SYMLINK_RECURSE:
             raise OSError("Maximum level of symbolic links exceeded")
+        resolved_path = self
+        if ".." in self.parts or "." in self.parts:
+            resolved_path = self.resolve_relative()
         follow = kwargs.pop("_follow", True)
         try:
             return self._channel.create(
-                self._tree, self._path, *args, **kwargs
+                self._tree, resolved_path._path, *args, **kwargs
             ).result()
         except model.ResponseError as re:
             if re.response.status != ntstatus.STATUS_STOPPED_ON_SYMLINK or not follow:
                 raise
             kwargs["__RC_DEPTH"] = depth + 1
-            return self.join_from_root(
-                re.response[0][0].error_data.substitute_name
+            return self._follow_link(
+                link=resolved_path,
+                reparse_data=re.response[0][0].error_data,
             )._create(*args, **kwargs)
 
     def stat(
@@ -512,7 +529,10 @@ class PikePath(PureWindowsPath):
         ) as handle:
             # XXX: not making additional tree connects here, so absolute links
             # will only work across the same share
-            return self.join_from_root(handle.get_symlink()[0].substitute_name)
+            return self._follow_link(
+                link=self,
+                reparse_data=handle.get_symlink()[0][0][0],
+            )
 
     def rename(self, target, replace=True):
         """
@@ -539,6 +559,18 @@ class PikePath(PureWindowsPath):
         Same as rename, but with replace=True
         """
         return self.rename(target, replace=True)
+
+    def resolve_relative(self):
+        """Remove "." and ".." components from the path."""
+        path_components = []
+        for pc in self.parts[1:]:
+            if pc == ".":
+                continue
+            if pc == "..":
+                path_components.pop()
+                continue
+            path_components.append(pc)
+        return self.join_from_root(type(self)(*path_components))
 
     def resolve(self, strict=True):
         """
@@ -603,13 +635,25 @@ class PikePath(PureWindowsPath):
             raise
         return my_id.index_number == other_id.index_number
 
+    def relative_root(self):
+        """
+        Return a PureWindowsPath which joined to this path would be the root.
+        """
+        path_components = []
+        for pc in self.parts[1:]:
+            if pc == "..":
+                path_components.pop()
+                continue
+            path_components.append("..")
+        return PureWindowsPath(*path_components)
+
     def symlink_to(self, target, target_is_directory=False):
         """
         Make this path a symlink pointing to the given path.
 
         Note the order of arguments (self, target) is the reverse of os.symlink's.
 
-        Does not work for absolute links.
+        Does not work for absolute links (across servers).
 
         :type target: PikePath
         :param target: The link's target
@@ -617,6 +661,12 @@ class PikePath(PureWindowsPath):
         """
         if not isinstance(target, type(self)):
             target = self.join_from_root(target)
+        try:
+            substitute_path = target.relative_to(self.parent)._path
+        except ValueError:
+            # no common subpath, so relpath to the share root
+            substitute_path = str(self.parent.relative_root() / target._path)
+
         options = smb2.FILE_DIRECTORY_FILE if target_is_directory else 0
         with self._create(
             access=smb2.GENERIC_WRITE,
@@ -624,7 +674,7 @@ class PikePath(PureWindowsPath):
             disposition=smb2.FILE_SUPERSEDE,
             options=options | smb2.FILE_OPEN_REPARSE_POINT,
         ) as handle:
-            handle.set_symlink(target._path, flags=smb2.SYMLINK_FLAG_RELATIVE)
+            handle.set_symlink(substitute_path, flags=smb2.SYMLINK_FLAG_RELATIVE)
 
     def touch(self, mode=None, exist_ok=True):
         """
@@ -656,6 +706,7 @@ class PikePath(PureWindowsPath):
                 access=smb2.DELETE,
                 disposition=smb2.FILE_OPEN,
                 options=options | smb2.FILE_DELETE_ON_CLOSE,
+                _follow=False,
             ) as handle:
                 pass
         except model.ResponseError as re:

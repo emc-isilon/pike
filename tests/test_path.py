@@ -229,6 +229,70 @@ def test_symlink(pike_tmp_path):
     link.symlink_to(target)
     assert link.read_text() == buf
     assert link.resolve() == target
+    assert link.readlink()._path == target._path
+    link.unlink()
+    assert not link.exists()
+    assert target.exists()
+
+
+@pytest.mark.nosamba
+def test_symlink_dir(pike_tmp_path):
+    buf = "this is my content\n"
+    subdir = pike_tmp_path / "subdir"
+    subdir.mkdir()
+    target = subdir / "target"
+    target.write_text(buf)
+    link = pike_tmp_path / "link"
+    link.symlink_to(subdir)
+    assert (link / target.name).read_text() == buf
+    assert (link / target.name).resolve() == target
+    assert link.resolve() == subdir
+    assert link.readlink()._path == subdir._path
+
+
+@pytest.mark.nosamba
+def test_symlink_relative(pike_tmp_path):
+    buf = "this is my content\n"
+    subdir = pike_tmp_path / "subdir"
+    subdir.mkdir()
+    subdir_a2 = pike_tmp_path / "subdir2" / "a1" / "a2"
+    subdir_a2.mkdir(parents=True)
+    target = subdir / "target"
+    target.write_text(buf)
+    link = subdir_a2 / "link"
+    link.symlink_to(target)
+    assert link.read_text() == buf
+    assert link.resolve() == target
+    assert (
+        link.readlink()._path == link.parent._path + "\\..\\..\\..\\..\\" + target._path
+    )
+
+
+@pytest.mark.nosamba
+def test_symlink_chain(pike_tmp_path):
+    buf = "this is my content\n"
+    subdir = pike_tmp_path / "subdir"
+    subdir.mkdir()
+    subdir_a1 = pike_tmp_path / "subdir2" / "a1"
+    subdir_a1.mkdir(parents=True)
+    subdir_a2 = subdir_a1 / "a2"
+    subdir_a2.mkdir()
+    subdir_a3 = subdir_a2 / "a3"
+    subdir_a3.mkdir()
+    target = subdir / "target"
+    target.write_text(buf)
+    link = subdir_a3 / "link"
+    link.symlink_to(subdir)
+    link2 = subdir_a1 / "link2"
+    link2.symlink_to(link)
+    link = subdir_a2 / "link3"
+    link.symlink_to(link2)
+    link2 = subdir_a3 / "link4"
+    link2.symlink_to(link)
+    link = subdir_a1 / "link5"
+    link.symlink_to(link2)
+    assert (link / target.name).read_text() == buf
+    assert (link / target.name).resolve() == target
 
 
 def test_samefile(pike_tmp_path, pike_TreeConnect):
