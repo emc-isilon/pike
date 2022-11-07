@@ -2,6 +2,8 @@
 Exceptions used by multiple modules are defined here
 """
 
+from . import core
+
 
 class TimeoutError(Exception):
     """Future completion timed out"""
