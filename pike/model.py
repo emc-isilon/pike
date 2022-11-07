@@ -2223,6 +2223,7 @@ class Tree(object):
         Return a PikePath with the given key joined.
         """
         from . import path
+
         return path.PikePath(self, key)
 
     if sys.version_info < (3,):
