@@ -218,7 +218,7 @@ def test_join_from_root(pike_tmp_path, pike_TreeConnect):
                 print(from_root.read_text())
 
 
-@pytest.mark.skip("Doesn't work against samba")
+@pytest.mark.nosamba
 def test_symlink(pike_tmp_path):
     buf = "this is my content\n"
     subdir = pike_tmp_path / "subdir"
