@@ -265,7 +265,7 @@ class PikePath(PureWindowsPath):
         """
         try:
             with self._create(
-                access=0,
+                access=smb2.FILE_READ_ATTRIBUTES,
                 disposition=smb2.FILE_OPEN,
                 options=options,
             ) as handle:
@@ -302,7 +302,7 @@ class PikePath(PureWindowsPath):
         """
         try:
             with self._create(
-                access=0,
+                access=smb2.FILE_READ_ATTRIBUTES,
                 disposition=smb2.FILE_OPEN,
                 _follow=False,
             ) as handle:
@@ -506,7 +506,7 @@ class PikePath(PureWindowsPath):
         :rtype: PikePath
         """
         with self._create(
-            access=smb2.READ_ATTRIBUTES,
+            access=smb2.FILE_READ_ATTRIBUTES,
             disposition=smb2.FILE_OPEN,
             options=smb2.FILE_NON_DIRECTORY_FILE | smb2.FILE_OPEN_REPARSE_POINT,
         ) as handle:
@@ -549,7 +549,10 @@ class PikePath(PureWindowsPath):
         SymbolicLinkErrorResponse during create, rather than explicitly
         reading the link target via IOCTL_GET_REPARSE_POINT.
         """
-        with self._create(access=0, disposition=smb2.FILE_OPEN) as handle:
+        with self._create(
+            access=smb2.FILE_READ_ATTRIBUTES,
+            disposition=smb2.FILE_OPEN,
+        ) as handle:
             return self.join_from_root(handle.create_request.name)
 
     def rglob(self, pattern):
