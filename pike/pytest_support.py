@@ -126,6 +126,8 @@ def pike_tmp_path(pike_TreeConnect):
     share, however, via a separate SMB2 session.
     """
     with pike_TreeConnect() as tc:
-        test_root = tc / "pike_{}_{}".format(time.strftime("%Y-%m-%d_%H%M%S"), str(uuid.uuid4())[:5])
+        test_root = tc / "pike_{}_{}".format(
+            time.strftime("%Y-%m-%d_%H%M%S"), str(uuid.uuid4())[:5]
+        )
         test_root.mkdir()
         yield test_root
