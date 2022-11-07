@@ -2378,7 +2378,15 @@ class QueryInfoResponse(Response):
             else:
                 with cur.bounded(cur, end):
                     while cur < end:
-                        info_cls(self).decode(cur)
+                        try:
+                            info_cls(self).decode(cur)
+                        except core.BufferOverrun:
+                            if len(self) <= 1:
+                                raise
+                            # remove the overflowed entry and exit loop
+                            self._entries.pop()
+                            break
+
         else:
             Information(self, end).decode(cur)
 
