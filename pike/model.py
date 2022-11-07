@@ -268,16 +268,14 @@ class Future(object):
 
 class Client(object):
     """
-    Client
-
     Maintains all state associated with an SMB2/3 client.
 
-    @type dialects: [number]
-    @ivar dialects: A list of supported dialects
-    @ivar capabilities: Capabilities flags
-    @ivar security_mode: Security mode flags
-    @ivar client_guid: Client GUID
-    @ivar channel_sequence: Current channel sequence number
+    :type dialects: Sequence[pike.smb2.Dialect]
+    :ivar dialects: A list of supported dialects
+    :ivar capabilities: Capabilities flags
+    :ivar security_mode: Security mode flags
+    :ivar client_guid: Client GUID
+    :ivar channel_sequence: Current channel sequence number
     """
 
     def __init__(
@@ -293,17 +291,6 @@ class Client(object):
         security_mode=smb2.SMB2_NEGOTIATE_SIGNING_ENABLED,
         client_guid=None,
     ):
-        """
-        Constructor.
-
-        @type dialects: [number]
-        @param dialects: A list of supported dialects.
-        @param capabilities: Client capabilities flags
-        @param security_mode: Client security mode flags
-        @param client_guid: Client GUID.  If None, a new one will be generated at random.
-        """
-        object.__init__(self)
-
         if client_guid is None:
             client_guid = array.array("B", map(random.randint, [0] * 16, [255] * 16))
 
@@ -464,7 +451,7 @@ class Client(object):
         """
         Wait for and return oplock break notification.
 
-        Equivalent to L{oplock_break_future}(file_id).result()
+        Equivalent to ``oplock_break_future(file_id).result()``
         """
 
         return self.oplock_break_future(file_id).result()
@@ -473,7 +460,7 @@ class Client(object):
         """
         Wait for and return lease break notification.
 
-        Equivalent to L{lease_break_future}(lease_key).result()
+        Equivalent to ``lease_break_future(file_id).result()``
         """
 
         return self.lease_break_future(lease_key).result()
@@ -513,10 +500,10 @@ class Connection(transport.Transport):
     Represents a connection to a server and handles all socket operations
     and request/response dispatch.
 
-    @type client: Client
-    @ivar client: The Client object associated with this connection.
-    @ivar server: The server name or address
-    @ivar port: The server port
+    :type client: Client
+    :ivar client: The Client object associated with this connection.
+    :ivar server: The server name or address
+    :ivar port: The server port
     """
 
     def __init__(self, client, server, port=default_port):
@@ -1016,7 +1003,7 @@ class Connection(transport.Transport):
         Perform dialect negotiation.
 
         This must be performed before setting up a session with
-        L{Connection.session_setup}().
+        :py:func:`Connection.session_setup`.
         """
         self.negotiate_submit(
             self.negotiate_request(hash_algorithms, salt, ciphers)
@@ -1299,8 +1286,12 @@ class Connection(transport.Transport):
 
 
 class Session(object):
+    """
+    Represents an SMB2 session.
+
+    May contain one or more active channels (connections) or trees
+    """
     def __init__(self, client, session_id, session_key, encryption_context, smb_res):
-        object.__init__(self)
         self.client = client
         self.session_id = session_id
         self.session_key = session_key
@@ -1333,6 +1324,13 @@ class Session(object):
 
 
 class Channel(object):
+    """
+    SMB2 communication channel associated with an underlying
+    :py:class:`Connection` and :py:class:`Session`.
+
+    All post-authentication protocol commands have blocking and non-blocking
+    helper methods defined in this class.
+    """
     def __init__(self, connection, session, signing_key):
         object.__init__(self)
         self.connection = connection
@@ -2118,8 +2116,8 @@ class Channel(object):
     def lease_break_acknowledgement(self, tree, notify):
         """
         @param tree: L{Tree} which the lease is taken against
-        @param notify: L{Smb2} frame containing a LeaseBreakRequest
-        return a LeaseBreakAcknowledgement with some fields pre-populated
+        @param notify: L{Smb2} frame containing a L{LeaseBreakRequest}
+        @return: a L{LeaseBreakAcknowledgement} with some fields pre-populated
         """
         lease_break = notify[0]
         smb_req = self.request(obj=tree)
@@ -2131,8 +2129,8 @@ class Channel(object):
     def oplock_break_acknowledgement(self, fh, notify):
         """
         @param fh: Acknowledge break on this L{Open}
-        @param notify: L{Smb2} frame containing a OplockBreakRequest
-        return a OplockBreakAcknowledgement with some fields pre-populated
+        @param notify: L{Smb2} frame containing a L{OplockBreakRequest}
+        @return: an L{OplockBreakAcknowledgement} with some fields pre-populated
         """
         oplock_break = notify[0]
         smb_req = self.request(obj=fh)
@@ -2181,6 +2179,16 @@ class Channel(object):
 
 
 class Tree(object):
+    """
+    An SMB2 Tree object is associated with a :py:class:`Session`.
+
+    A Tree can be used as a contextmanager to automatically call
+    :py:func:`~Channel.tree_disconnect` after exiting the context block.
+
+    Using the division operator (``/``) against a :py:class:`Tree` returns a
+    :py:class:`~pike.path.PikePath` that can be used to perform ``Path``
+    operations on the share
+    """
     def __init__(self, session, path, smb_res):
         object.__init__(self)
         self.session = session
@@ -2242,6 +2250,10 @@ class RelatedOpen(object):
 
 
 class Lease(object):
+    """
+    SMB2 Lease state attached to a :py:class:`~pike.io.Open` with an active lease.
+    """
+
     def __init__(self, tree):
         self.tree = tree
         self.refs = 1
@@ -2272,8 +2284,11 @@ class Lease(object):
     def on_break(self, cb):
         """
         Simple lease break callback handler.
-        @param cb: callable taking 1 parameter: the break request lease state
-                   should return the desired lease state to break to
+
+        :type cb: Callable[[pike.smb2.LeaseState], pike.smb2.LeaseState])
+        :param cb: callback function is passed the
+            ``pike.smb2.LeaseBreakNotification.new_lease_state`` and must
+            return the desired :py:class:`pike.smb2.LeaseState` to break to.
         """
 
         def simple_handle_break(lease, smb_res, cb_ctx):
@@ -2300,13 +2315,15 @@ class Lease(object):
     def on_break_request(self, cb, cb_ctx=None):
         """
         Complex lease break callback handler.
-        @param cb: callable taking 3 parameters:
-                        L{Lease}
-                        L{Smb2} containing the break request
-                        L{object} arbitrary context
-                   should handle breaking the lease in some way
-                   callback is also responsible for re-arming the future
-                   and updating the lease_state (if changed)
+
+        :type cb: Callable[[Lease, pike.smb2.Smb2, Optional[Any]], Any])
+        :param cb: callback function is passed the lease object, the Smb2
+            :py:class:`pike.smb2.LeaseBreakNotification`, and an arbitrary
+            context and should handle breaking the lease in some way. The
+            callback is also responsible for calling :py:func:`arm_future` and
+            and updating the ``.lease_state`` (if changed)
+        :type cb_ctx: Optional[Any]
+        :param cb_ctx: arbitrary context passed to the callback
         """
 
         def handle_break(f):

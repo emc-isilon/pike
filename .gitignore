@@ -2,3 +2,4 @@
 build
 dist
 Pike.egg-info/
+doc/source/stubs
