@@ -1,5 +1,8 @@
 *.pyc
 build
 dist
-Pike.egg-info/
+*.egg-info/
 doc/source/stubs
+.tox
+__pycache__
+.coverage*

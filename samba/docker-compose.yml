@@ -1,0 +1,54 @@
+version: "3.1"
+
+services:
+  runner:
+    build: .
+    environment:
+      - HOST_IPV4
+      - SAMBA_REALM
+      - SAMBA_SERVER
+      - ADMIN_PASSWORD
+    command: /src/pike/samba/run_all.sh
+    volumes:
+      - ${PWD}/..:/src/pike
+  dc:
+    image: ${REGISTRY_URI:-instantlinux}/samba-dc:latest
+    restart: always
+    network_mode: host
+    cap_add:
+      - CAP_SYS_ADMIN
+    hostname: ${SAMBADC_HOSTNAME:-dc}
+    environment:
+      INTERFACES: ${SAMBADC_INTERFACES:-lo eth0}
+      REALM: ${SAMBA_REALM:-pike.local}
+      TZ: ${TZ:-UTC}
+      WORKGROUP: ${SAMBA_WORKGROUP:-PIKE}
+    volumes:
+      - etc:/etc/samba
+      - lib:/var/lib/samba
+      - ${PWD}/share.conf:/etc/samba/conf.d/share.conf
+      - ${PWD}/samba/s1:/srv/s1
+    ports:
+      - 53:53
+      - 53:53/udp
+      - 88:88
+      - 88:88/udp
+      - 135:135
+      - 137-138:137-138/udp
+      - 139:139
+      - 389:389
+      - 389:389/udp
+      - 445:445
+      - 464:464
+      - 464:464/udp
+      - 636:636
+      - 3268-3269:3268-3269
+      - 49152-65535
+    secrets:
+      - samba-admin-password
+volumes:
+  etc:
+  lib:
+secrets:
+  samba-admin-password:
+    file: ${PWD}/admin_password
