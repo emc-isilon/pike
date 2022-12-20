@@ -375,7 +375,10 @@ class TreeConnect(object):
         If the tree has already been disconnected or channel already closed, then
         errors related to cleaning up twice are suppressed.
         """
-        if not self.conn or not self.conn.connected:
+        session = None
+        if self.chan and self.conn:
+            session = self.conn.session(self.chan.session.session_id)
+        if not self.conn or not self.conn.connected or not session:
             self.conn = self.chan = self.tree = None
             return
         if self.tree and self.chan:
