@@ -1,7 +1,14 @@
-.coverage*
-.github
+__pycache__
+.coverage
+.coverage.*
+.idea
 .pytest_cache
 .tox
+
+*.pyc
+*.egg-info/
+
 build
 dist
+doc/source/stubs
 wheelhouse
