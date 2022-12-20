@@ -3,6 +3,9 @@ build
 dist
 *.egg-info/
 doc/source/stubs
+.idea
 .tox
 __pycache__
 .coverage*
+wheelhouse
+.pytest_cache
