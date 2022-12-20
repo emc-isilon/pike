@@ -3,23 +3,14 @@ version: "3.1"
 services:
   runner:
     build: .
-    entrypoint: /usr/bin/env bash -c
     environment:
-      - PIKE_SERVER=$SAMBA_SERVER
-      - PIKE_SHARE=s1
-    command:
-      - |
-        printf "$HOST_IPV4 $SAMBA_REALM\n$HOST_IPV4 $SAMBA_SERVER" >> /etc/hosts &&
-        pip install pytest /src/pike &&
-        sleep 30 &&
-        kinit administrator < /run/secrets/samba-admin-password && 
-        python3 -m unittest pike.test.samba_suite &&
-        pytest -ra /src/pike/tests
+      - HOST_IPV4
+      - SAMBA_REALM
+      - SAMBA_SERVER
+      - ADMIN_PASSWORD
+    command: /src/pike/samba/run_all.sh
     volumes:
       - ${PWD}/..:/src/pike
-      - ${PWD}/krb5.conf:/etc/krb5.conf
-    secrets:
-      - samba-admin-password
   dc:
     image: ${REGISTRY_URI:-instantlinux}/samba-dc:latest
     restart: always
@@ -36,7 +27,7 @@ services:
       - etc:/etc/samba
       - lib:/var/lib/samba
       - ${PWD}/share.conf:/etc/samba/conf.d/share.conf
-      - ${PWD}/s1:/srv/s1
+      - ${PWD}/samba/s1:/srv/s1
     ports:
       - 53:53
       - 53:53/udp
