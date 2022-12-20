@@ -1,3 +1,7 @@
+.coverage*
+.github
+.pytest_cache
 .tox
-dist
 build
+dist
+wheelhouse
