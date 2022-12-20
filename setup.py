@@ -5,12 +5,15 @@
 # See file LICENSE for licensing information.
 #
 import ctypes
+import os
 
 try:
     from setuptools import setup, Extension
 except ImportError:
     from distutils.core import setup, Extension
 from distutils.errors import CCompilerError, DistutilsExecError, DistutilsPlatformError
+
+_HERED = os.path.abspath(os.path.dirname(__file__))
 
 
 try:
@@ -31,6 +34,7 @@ try:
             "pykerb/kerberosgss.c",
             "pykerb/kerberospw.c",
         ],
+        include_dirs=[os.path.join(_HERED, "pykerb", "vendor")],
         libraries=["gssapi_krb5"],
         define_macros=defines,
     )
