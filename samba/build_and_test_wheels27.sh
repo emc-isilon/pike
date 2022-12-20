@@ -8,4 +8,4 @@ cd $SCRIPTPATH/..
 
 docker build -t pike-buildwheel -f buildwheel/Dockerfile .
 docker run -e HOST_IPV4 -e SAMBA_REALM -e SAMBA_SERVER -e ADMIN_PASSWORD \
-       -it -v $SCRIPTPATH/../wheelhouse:/src/pike/wheelhouse pike-buildwheel
+       -v $SCRIPTPATH/../wheelhouse:/wheelhouse pike-buildwheel
