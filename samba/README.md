@@ -20,7 +20,7 @@ Must run on linux; will use docker containers for the build.
 
 ```shell
 pip install --user cibuildwheel
-./samba/dc.sh ./samba/build_and_test_wheels.sh
+./samba/dc.sh ./build_and_test_wheels.sh
 ```
 
 After each wheel is built, it will be installed and used to establish a kerberos

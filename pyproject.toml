@@ -8,13 +8,7 @@ build-backend = "setuptools.build_meta"
 # skip x86 pypi since pycryptodome packages
 # are broken on these playforms (at least py37)
 skip = ["pp*-manylinux_i686"]
-before-test = [
-  "printf \"\n$HOST_IPV4 $SAMBA_REALM\n$HOST_IPV4 $SAMBA_SERVER\n\" >> /etc/hosts",
-  "printf \"[libdefaults]\n\tdefault_realm = $SAMBA_REALM\n[realms]\n\r$SAMBA_REALM = {\n\t\tkdc = $SAMBA_SERVER\n\t}\n\" > /etc/krb5.conf",
-  "cat /etc/hosts",
-  "cat /etc/krb5.conf",
-  "printf \"$ADMIN_PASSWORD\" | kinit administrator",
-]
+before-test = ["{project}/samba/krb5.conf.sh"]
 test-command = [
   "export PIKE_SERVER=$SAMBA_SERVER",
   "export PIKE_SHARE=s1",
@@ -22,7 +16,7 @@ test-command = [
 ]
 
 [tool.cibuildwheel.linux]
-environment-pass = ["HOST_IPV4", "SAMBA_REALM", "SAMBA_SERVER"]
+environment-pass = ["HOST_IPV4", "SAMBA_REALM", "SAMBA_SERVER", "ADMIN_PASSWORD"]
 before-all = "yum install -y krb5-devel krb5-workstation"
 
 [[tool.cibuildwheel.overrides]]
