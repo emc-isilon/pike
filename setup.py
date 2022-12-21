@@ -70,6 +70,7 @@ try:
             "pykerb/kerberosgss.c",
             "pykerb/kerberospw.c",
         ],
+        include_dirs=[os.path.join(_HERED, "pykerb", "vendor")],
         libraries=["gssapi_krb5"],
         define_macros=defines,
     )
