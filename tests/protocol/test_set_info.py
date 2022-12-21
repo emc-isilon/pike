@@ -154,29 +154,11 @@ def test_set_file_position_info(chan, open_file_rw_attributes):
             ],
         ),
         pytest.param(
-            pike.smb2.FILE_DELETE_ON_CLOSE,
-            marks=[
-                pytest.mark.skipif(
-                    samba_version(greater=(4, 16)),
-                    reason="STATUS_INVALID_PARAMETER on samba 4.16+",
-                ),
-            ],
-        ),
-        pytest.param(
-            pike.smb2.FILE_RANDOM_ACCESS,
-            marks=[
-                pytest.mark.skipif(
-                    samba_version(greater=(4, 16)),
-                    reason="STATUS_INVALID_PARAMETER on samba 4.16+",
-                ),
-            ],
-        ),
-        pytest.param(
             pike.smb2.FILE_WRITE_THROUGH,
             marks=[
                 pytest.mark.skipif(
                     samba_version(greater=(4, 16)),
-                    reason="Set mode not respected on samba 4.16+",
+                    reason="STATUS_INVALID_PARAMETER on samba 4.16+",
                 ),
             ],
         ),
