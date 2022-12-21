@@ -1313,7 +1313,6 @@ class Session(object):
         return channel
 
     def delchannel(self, conn):
-        del conn._sessions[self.session_id]
         del self._channels[id(conn)]
 
     def first_channel(self):
