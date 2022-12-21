@@ -49,7 +49,7 @@ Optional: epydoc for doc generation
 
 Ubuntu 14.04 / 16.04
 
-    apt-get install -y --no-install-recommends krb5-user libkrb5-dev python-dev build-essential python2.7 python-pip py3c-dev
+    apt-get install -y --no-install-recommends krb5-user libkrb5-dev python-dev build-essential python2.7 python-pip
     pip install setuptools pycryptodomex
     python setup.py install
 
