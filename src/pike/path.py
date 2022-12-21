@@ -181,7 +181,7 @@ class PikePath(PureWindowsPath):
             unparsed_portion = ""
         return prefix / (reparse_data.substitute_name + unparsed_portion)
 
-    def _create(self, *args, **kwargs):
+    def create(self, *args, **kwargs):
         """
         Call Channel.create with this Tree and path following symlinks.
 
@@ -210,7 +210,9 @@ class PikePath(PureWindowsPath):
             return self._follow_link(
                 link=resolved_path,
                 reparse_data=re.response[0][0].error_data,
-            )._create(*args, **kwargs)
+            ).create(*args, **kwargs)
+
+    _create = create  # TODO: fix previous "private" uses of this function
 
     def stat(
         self,
