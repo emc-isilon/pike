@@ -5,10 +5,70 @@
 #
 
 from __future__ import absolute_import
+
+import contextlib
+
+import attr
+
 from . import core
 
 
+def _seq_statuses_from_any(expected_ntstatus):
+    if expected_ntstatus is None:
+        expected_ntstatus = []
+    if not isinstance(expected_ntstatus, (list, tuple)):
+        expected_ntstatus = [expected_ntstatus]
+    return [Status.from_any(status) for status in expected_ntstatus] or [
+        Status.STATUS_SUCCESS
+    ]
+
+
+@attr.s
+class NtStatusRaisesContext(object):
+    # attributes
+    expected_ntstatus = attr.ib(converter=_seq_statuses_from_any)
+    exc = attr.ib(default=None)
+    status = attr.ib(default=None)
+
+
+@contextlib.contextmanager
+def raises(_expected_ntstatus):
+    """
+    Similar to pytest.raises, but checking for one or more ntstatus values in a
+    ResponseError.
+
+    Yields an NtStatusRaisesContext object for further inspection of the response
+    at `exc.response`.
+    """
+    from pike.exceptions import ResponseError
+
+    ctx = NtStatusRaisesContext(expected_ntstatus=_expected_ntstatus)
+    try:
+        yield ctx
+    except ResponseError as exc:
+        ctx.exc = exc
+        ctx.status = exc.response.status
+        assert (
+            ctx.status in ctx.expected_ntstatus
+        ), "Unexpected NTSTATUS on {!r}\nExpect: {!r}\nActual: {!r}".format(
+            exc.response.command, ctx.expected_ntstatus, ctx.status
+        )
+    else:
+        # if the operation succeeded, ensure that was expected
+        assert (
+            Status.STATUS_SUCCESS in ctx.expected_ntstatus
+        ), "Unexpected STATUS_SUCCESS\nExpect: {!r}".format(ctx.expected_ntstatus)
+
+
 class Status(core.ValueEnum):
+    @classmethod
+    def from_any(cls, obj):
+        if isinstance(obj, cls):
+            return obj
+        if isinstance(obj, str):
+            return getattr(cls, obj)
+        return cls(obj)
+
     STATUS_SUCCESS = 0x00000000
     # STATUS_WAIT_0 = 0x00000000
     STATUS_WAIT_1 = 0x00000001
