@@ -251,7 +251,9 @@ class TreeConnect(object):
 
     @property
     def client(self):
-        return self._client or default_client(signing=self.signing)
+        if self._client is None:
+            self._client = default_client(signing=self.signing)
+        return self._client
 
     def connect(self):
         """
