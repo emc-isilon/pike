@@ -114,7 +114,13 @@ def pike_TreeConnect(request):
 
 
 @pytest.fixture
-def pike_tmp_path(pike_TreeConnect):
+def pike_tree_connect(pike_TreeConnect):
+    with pike_TreeConnect() as tc:
+        yield tc
+
+
+@pytest.fixture
+def pike_tmp_path(pike_tree_connect):
     """
     Function-scope fixture reaturns a :py:class:`~pike.path.PikePath` rooted at
     a timestamped subdirectory of the share.
@@ -125,9 +131,8 @@ def pike_tmp_path(pike_TreeConnect):
     A function's :py:func:`pike_TreeConnect` fixture will access the same
     share, however, via a separate SMB2 session.
     """
-    with pike_TreeConnect() as tc:
-        test_root = tc / "pike_{}_{}".format(
-            time.strftime("%Y-%m-%d_%H%M%S"), str(uuid.uuid4())[:5]
-        )
-        test_root.mkdir()
-        yield test_root
+    test_root = pike_tree_connect / "pike_{}_{}".format(
+        time.strftime("%Y-%m-%d_%H%M%S"), str(uuid.uuid4())[:5]
+    )
+    test_root.mkdir()
+    yield test_root
