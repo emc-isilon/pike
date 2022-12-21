@@ -255,7 +255,7 @@ class TreeConnect(object):
             self._client = default_client(signing=self.signing)
         return self._client
 
-    def connect(self):
+    def connect(self, *args, **kwargs):
         """
         Establish a connection to the server and complete SMB2 NEGOTIATE.
 
@@ -271,7 +271,7 @@ class TreeConnect(object):
                     self.conn
                 )
             )
-        self.conn = self.client.connect(server=self.server, port=self.port).negotiate()
+        self.conn = self.client.connect(server=self.server, port=self.port).negotiate(*args, **kwargs)
         negotiated_dialect = self.conn.negotiate_response.dialect_revision
         if self.require_dialect and (
             negotiated_dialect < self.require_dialect[0]
