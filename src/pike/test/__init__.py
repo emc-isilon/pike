@@ -231,7 +231,6 @@ class TreeConnect(object):
     port = attr.ib(factory=Options.port)
     creds = attr.ib(factory=Options.creds)
     share = attr.ib(factory=Options.share)
-    resume = attr.ib(default=None)
     signing = attr.ib(factory=Options.signing)
     encryption = attr.ib(factory=Options.encryption)
     require_dialect = attr.ib(default=None)
@@ -271,7 +270,9 @@ class TreeConnect(object):
                     self.conn
                 )
             )
-        self.conn = self.client.connect(server=self.server, port=self.port).negotiate(*args, **kwargs)
+        self.conn = self.client.connect(server=self.server, port=self.port).negotiate(
+            *args, **kwargs
+        )
         negotiated_dialect = self.conn.negotiate_response.dialect_revision
         if self.require_dialect and (
             negotiated_dialect < self.require_dialect[0]
@@ -291,12 +292,9 @@ class TreeConnect(object):
             )
         return self.conn
 
-    def session_setup(self):
+    def session_setup(self, *args, **kwargs):
         """
         Establish a session on the connection and complete SMB2 SESSION_SETUP.
-
-        If resume is specified to __init__, the new session will include the resumed
-        session as previous_session_id.
 
         If encryption is specified to __init__ (or with PIKE_ENCRYPT environment var)
         the new session will encrypt data by default.
@@ -311,7 +309,7 @@ class TreeConnect(object):
                     self.chan
                 )
             )
-        self.chan = self.conn.session_setup(self.creds, resume=self.resume)
+        self.chan = self.conn.session_setup(self.creds, *args, **kwargs)
         if self.encryption:
             self.chan.session.encrypt_data = True
         return self.chan
@@ -349,7 +347,35 @@ class TreeConnect(object):
             )
         return self.tree
 
-    def __call__(self):
+    def multichannel(
+        self, connect_kwargs=None, session_setup_kwargs=None, **attr_evolve_kwargs
+    ):
+        """
+        Bind a new TreeConnect with independent channel to the current session.
+
+        Raises SequenceError if session_setup() has not been called.
+
+        connect_kwargs are passed to `connect()` for the new channel connection
+        session_setup_kwargs are passed to `session_setup()` for binding the new channel
+            (note: `bind` will be handled automatically if not present)
+        attr_evolve_kwargs are passed to `attr.evolve(self)` to create the new TreeConnect
+            instance (use this to override server or port).
+        """
+        if self.chan is None:
+            raise SequenceError(
+                "Channel not established for {!r}. Must call session_setup() "
+                "before multichannel()".format(self),
+            )
+        session_setup_kwargs = session_setup_kwargs or {}
+        session_setup_kwargs["bind"] = self.chan.session
+        mc = attr.evolve(self, **attr_evolve_kwargs)
+        mc.conn = mc.chan = None
+        return mc(
+            connect_kwargs=connect_kwargs,
+            session_setup_kwargs=session_setup_kwargs,
+        )
+
+    def __call__(self, connect_kwargs=None, session_setup_kwargs=None):
         """
         Perform all initialization steps (if needed). If the connection, channel, or
         tree is already established, this call is a no-op for those objects.
@@ -357,9 +383,9 @@ class TreeConnect(object):
         :return: the established TreeConnect instance
         """
         if not self.conn:
-            self.connect()
+            self.connect(**(connect_kwargs or {}))
         if not self.chan:
-            self.session_setup()
+            self.session_setup(**(session_setup_kwargs or {}))
         if not self.tree:
             self.tree_connect()
         return self
@@ -521,14 +547,13 @@ class PikeTest(unittest.TestCase):
             port=self.port,
             creds=self.creds,
             share=self.share,
-            resume=resume,
             encryption=self.encryption,
             require_dialect=self.required_dialect(),
             require_capabilities=self.required_capabilities(),
             require_share_capabilities=self.required_share_capabilities(),
         )
         try:
-            tc()
+            tc(session_setup_kwargs=dict(resume=resume))
         except TestRequirementNotMet as err:
             raise_from(unittest.SkipTest(str(err)), err)
         # save a reference to the TreeConnect object to avoid it being __del__'d
