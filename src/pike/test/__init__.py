@@ -348,14 +348,14 @@ class TreeConnect(object):
         return self.tree
 
     def multichannel(
-        self, connect_kwargs=None, session_setup_kwargs=None, **attr_evolve_kwargs
+        self, negotiate_kwargs=None, session_setup_kwargs=None, **attr_evolve_kwargs
     ):
         """
         Bind a new TreeConnect with independent channel to the current session.
 
         Raises SequenceError if session_setup() has not been called.
 
-        connect_kwargs are passed to `connect()` for the new channel connection
+        negotiate_kwargs are passed to `connect()` for the new channel connection
         session_setup_kwargs are passed to `session_setup()` for binding the new channel
             (note: `bind` will be handled automatically if not present)
         attr_evolve_kwargs are passed to `attr.evolve(self)` to create the new TreeConnect
@@ -371,11 +371,11 @@ class TreeConnect(object):
         mc = attr.evolve(self, **attr_evolve_kwargs)
         mc.conn = mc.chan = None
         return mc(
-            connect_kwargs=connect_kwargs,
+            negotiate_kwargs=negotiate_kwargs,
             session_setup_kwargs=session_setup_kwargs,
         )
 
-    def __call__(self, connect_kwargs=None, session_setup_kwargs=None):
+    def __call__(self, negotiate_kwargs=None, session_setup_kwargs=None):
         """
         Perform all initialization steps (if needed). If the connection, channel, or
         tree is already established, this call is a no-op for those objects.
@@ -383,7 +383,7 @@ class TreeConnect(object):
         :return: the established TreeConnect instance
         """
         if not self.conn:
-            self.connect(**(connect_kwargs or {}))
+            self.connect(**(negotiate_kwargs or {}))
         if not self.chan:
             self.session_setup(**(session_setup_kwargs or {}))
         if not self.tree:
