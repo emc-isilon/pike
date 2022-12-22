@@ -367,7 +367,9 @@ class TreeConnect(object):
                 "before multichannel()".format(self),
             )
         session_setup_kwargs = session_setup_kwargs or {}
-        session_setup_kwargs["bind"] = self.chan.session
+        session_setup_kwargs["bind"] = (
+            session_setup_kwargs.get("bind") or self.chan.session
+        )
         mc = attr.evolve(self, **attr_evolve_kwargs)
         mc.conn = mc.chan = None
         return mc(
