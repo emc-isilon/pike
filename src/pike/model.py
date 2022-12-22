@@ -1291,6 +1291,7 @@ class Session(object):
 
     May contain one or more active channels (connections) or trees
     """
+
     def __init__(self, client, session_id, session_key, encryption_context, smb_res):
         self.client = client
         self.session_id = session_id
@@ -1330,6 +1331,7 @@ class Channel(object):
     All post-authentication protocol commands have blocking and non-blocking
     helper methods defined in this class.
     """
+
     def __init__(self, connection, session, signing_key):
         object.__init__(self)
         self.connection = connection
@@ -1839,7 +1841,9 @@ class Channel(object):
             ).parent.parent
         )[0][0].data
 
-    def write_request(self, file, offset, buffer=None, remaining_bytes=0, flags=0):
+    def write_request(
+        self, file, offset, buffer=None, remaining_bytes=0, flags=0, **kwargs
+    ):
         """
         Create a pike.smb2.WriteRequest from the given parameters
 
@@ -1850,6 +1854,9 @@ class Channel(object):
         @param remaining_bytes:
         @param flags: L{pike.smb2.WriteFlags}
         """
+        _unicode_warning_stacklevel = (kwargs.pop("_unicode_warning_stacklevel", 2),)
+        if kwargs:
+            raise TypeError("Unexpected keyword arguments: {!r}".format(kwargs))
         if isinstance(buffer, array.array) and buffer.typecode != "B":
             raise ValueError(
                 "array.array must have typecode 'B', not {!r}".format(buffer.typecode)
@@ -1859,6 +1866,7 @@ class Channel(object):
                 "buffer must be bytes, got {!r}, casting as str and encoding "
                 "with 'ascii'".format(type(buffer)),
                 UnicodeWarning,
+                stacklevel=_unicode_warning_stacklevel,
             )
             buffer = buffer.encode("ascii")
         if sys.version_info < (3,) and isinstance(buffer, memoryview):
@@ -1885,7 +1893,12 @@ class Channel(object):
     def write(self, file, offset, buffer=None, remaining_bytes=0, flags=0):
         smb_res = self.connection.transceive(
             self.write_request(
-                file, offset, buffer, remaining_bytes, flags
+                file,
+                offset,
+                buffer,
+                remaining_bytes,
+                flags,
+                _unicode_warning_stacklevel=3,
             ).parent.parent
         )
 
@@ -2188,6 +2201,7 @@ class Tree(object):
     :py:class:`~pike.path.PikePath` that can be used to perform ``Path``
     operations on the share
     """
+
     def __init__(self, session, path, smb_res):
         object.__init__(self)
         self.session = session
