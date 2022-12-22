@@ -2257,9 +2257,12 @@ class RelatedOpen(object):
     from previous Create in the chain
     """
 
+    file_id = smb2.RELATED_FID
+    tree = None
+
     def __init__(self, tree=None):
-        self.tree_id = tree.tree_id
-        self.file_id = smb2.RELATED_FID
+        if tree is not None:
+            self.tree = tree
 
 
 class Lease(object):
