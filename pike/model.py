@@ -53,6 +53,7 @@ import logging
 import time
 import operator
 import contextlib
+import polling2
 
 import auth
 import core
@@ -329,7 +330,7 @@ class Client(object):
             return
         self.callbacks[ev].remove(cb)
 
-    def connect(self, server, port=445):
+    def connect(self, server, port=445, retry_limit=2):
         """
         Create a connection.
 
@@ -338,7 +339,15 @@ class Client(object):
         @param server: The server to connect to.
         @param port: The port to connect to.
         """
-        return self.connect_submit(server, port).result()
+        # Setting connection timeout to TCP default i.e. 120 secs
+        conn = polling2.poll(
+            lambda: self.connect_submit(server, port).result(timeout=default_timeout * 4),
+            ignore_exceptions=(ResponseError, TimeoutError,),
+            step=30,
+            max_tries=retry_limit,
+        )
+        return conn
+
 
     def connect_submit(self, server, port=445):
         """

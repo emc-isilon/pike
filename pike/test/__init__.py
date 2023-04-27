@@ -128,7 +128,7 @@ class PikeTest(unittest.TestCase):
             client.dialects = filter(
                 lambda d: d <= max_dialect, client.dialects)
 
-    def tree_connect(self, client=None, resume=None):
+    def tree_connect(self, client=None, resume=None, retry_limit=2):
         dialect_range = self.required_dialect()
         req_caps = self.required_capabilities()
         req_share_caps = self.required_share_capabilities()
@@ -136,7 +136,7 @@ class PikeTest(unittest.TestCase):
         if client is None:
             client = self.default_client
 
-        conn = client.connect(self.server, self.port).negotiate()
+        conn = client.connect(self.server, self.port, retry_limit=retry_limit).negotiate()
 
         if (conn.negotiate_response.dialect_revision < dialect_range[0] or
             conn.negotiate_response.dialect_revision > dialect_range[1]):
