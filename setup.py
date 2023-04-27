@@ -82,7 +82,10 @@ def run_setup(with_extensions):
           author_email='Brian.Koropoff@emc.com',
           url='https://github.com/emc-isilon/pike',
           packages=['pike', 'pike.test'],
-          install_requires=['pycryptodomex'],
+          install_requires=[
+              'pycryptodomex',
+              'polling2'
+          ],
           ext_modules=ext_modules,
           test_suite='setup.pike_suite',
           cmdclass=cmdclass,
