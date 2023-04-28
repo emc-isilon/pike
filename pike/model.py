@@ -330,7 +330,7 @@ class Client(object):
             return
         self.callbacks[ev].remove(cb)
 
-    def connect(self, server, port=445, retry_limit=2):
+    def connect(self, server, port=445, max_tries=2):
         """
         Create a connection.
 
@@ -344,7 +344,7 @@ class Client(object):
             lambda: self.connect_submit(server, port).result(timeout=default_timeout * 4),
             ignore_exceptions=(ResponseError, TimeoutError,),
             step=30,
-            max_tries=retry_limit,
+            max_tries=max_tries,
         )
         return conn
 
