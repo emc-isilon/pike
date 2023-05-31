@@ -4074,16 +4074,101 @@ class ValidateNegotiateInfoResponse(IoctlOutput):
         self.security_mode = SecurityMode(cur.decode_uint16le())
         self.dialect = Dialect(cur.decode_uint16le())
 
+class AddressFamily(core.ValueEnum):
+    IPv4 = 0x0002
+    IPv6 = 0x0017
+
+AddressFamily.import_items(globals())
+
+
+class Capability(core.FlagEnum):
+     RSS_CAPABLE    = 0x00000001
+     RDMA_CAPABLE   = 0x00000002
+
+Capability.import_items(globals())
+
+class SockaddrIn(object):
+    def __init__(self):
+        self.port = array.array("B", [0] * 2)
+        self.ip = array.array("B", [0] * 4)
+        self.reserved = array.array("B", [0] * 8)
+    def decode(self, cur):
+        self.port = cur.decode_uint16le()
+        self.ip = ".".join(str(byte) for byte in cur.decode_bytes(4))
+        self.reserved = cur.decode_uint64le()
+
+class SockaddrIn6(object):
+    def __init__(self):
+        self.port = array.array("B", [0] * 2)
+        self.flowinfo = array.array("B", [0] * 4)
+        self.ip = array.array("B", [0] * 16)
+        self.scopeid = array.array("B", [0] * 4)
+    def decode(self, cur):
+        self.port = cur.decode_uint16le()
+        self.flowinfo = cur.decode_uint32le()
+        ip_hex_raw = bytes(cur.decode_bytes(16)).hex()
+        self.ip = ':'.join(str(ip_hex_raw[i:i+4]) for i in range(0, len(ip_hex_raw), 4))
+        self.scopeid = cur.decode_uint32le()
+
+class SockaddrStorage(core.Frame):
+    def __init__(self, parent, sockaddr=None):
+        core.Frame.__init__(self, parent)
+        self.family = array.array("B", [0] * 2)
+        self.buffer = SockaddrIn()
+        self.reserved = array.array("B")
+        if sockaddr is not None:
+            if isinstance(sockaddr, SockaddrIn):
+                self.family = AddressFamily.IPv4
+                self.buffer = sockaddr
+                self.reserved = array.array("B", [0] * (112))
+            elif isinstance(sockaddr, SockaddrIn6):
+                self.family = AddressFamily.IPv6
+                self.buffer = sockaddr
+                self.reserved = array.array("B", [0] * (100))
+
+    def decode(self, cur):
+        self.family = AddressFamily(cur.decode_uint16le())
+        if self.family == IPv4:
+            sockaddr = SockaddrIn()
+            sockaddr.decode(cur)
+            self.buffer = sockaddr
+            self.reserved = cur.decode_bytes(112)
+        elif self.family == IPv6:
+            sockaddr = SockaddrIn6()
+            sockaddr.decode(cur)
+            self.buffer = sockaddr
+            self.reserved = cur.decode_bytes(100)
+
+class NetworkInterfaceInfo(core.Frame):
+    def __init__(self, parent):
+        core.Frame.__init__(self, parent)
+        self.if_index = 0
+        self.capability = 0
+        self.reserved = 0 
+        self.link_speed = 0
+        self.sockadd = SockaddrStorage(self)
+    def decode(self, cur):
+        self.if_index =  cur.decode_uint32le()
+        self.capability = Capability(cur.decode_uint32le())
+        self.reserved =  cur.decode_uint32le()
+        self.link_speed = cur.decode_uint64le()
+        self.sockadd.decode(cur)
 
 class QueryNetworkInterfaceInfoResponse(IoctlOutput):
     ioctl_ctl_code = FSCTL_QUERY_NETWORK_INTERFACE_INFO
 
     def __init__(self, parent):
         IoctlOutput.__init__(self, parent)
+        self.ninfo = []
 
     def _decode(self, cur):
-        pass
-
+        while True:
+            next_loc = cur.decode_uint32le()
+            net_info = NetworkInterfaceInfo(self)
+            net_info.decode(cur)
+            self.ninfo.append(net_info)
+            if next_loc == 0:
+                break
 
 class RequestResumeKeyResponse(IoctlOutput):
     ioctl_ctl_code = FSCTL_SRV_REQUEST_RESUME_KEY
