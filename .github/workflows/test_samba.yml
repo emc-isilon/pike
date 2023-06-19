@@ -15,7 +15,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: ["2.7.18", "3.6.15", 3.7, 3.8, 3.9, "3.10", "3.11"]
+        python-version: ["3.6.15", 3.7, 3.8, 3.9, "3.10", "3.11"]
 
     services:
       samba:
@@ -24,8 +24,8 @@ jobs:
           USER: pike;GiThubCI123
           SHARE: pike;/share;;no;no;;pike;;
         ports:
-        # will assign a random free host port
-        - 445/tcp
+          # will assign a random free host port
+          - 445/tcp
 
     steps:
     - uses: actions/checkout@v2
@@ -42,3 +42,32 @@ jobs:
         PIKE_SHARE: pike
         PIKE_CREDS: pike%GiThubCI123
       run: tox -- -m 'not nosamba'
+
+  # python2.7 is no longer supported by actions/setup-python
+  build_legacy:
+
+    runs-on: ubuntu-20.04
+
+    services:
+      samba:
+        image: dperson/samba@sha256:2d94eb73e10402751afff19af10d3ad91014b137843bdd960bb39f4188acdcfa
+        env:
+          USER: pike;GiThubCI123
+          SHARE: pike;/share;;no;no;;pike;;
+        ports:
+          # will assign a random free host port
+          - 445/tcp
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: "Install python2.7"
+      run: sudo apt-get update && sudo apt-get install python2.7 && curl https://bootstrap.pypa.io/pip/2.7/get-pip.py | python2.7
+    - name: Install dependencies
+      run: python2 -m pip install tox
+    - name: Test Pike
+      env:
+        PIKE_SERVER: 127.0.0.1
+        PIKE_PORT: ${{ job.services.samba.ports[445] }}
+        PIKE_SHARE: pike
+        PIKE_CREDS: pike%GiThubCI123
+      run: tox -e py27 -- -m 'not nosamba'
