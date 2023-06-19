@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - run: sudo apt-get update && sudo apt-get install python2.7
       - name: Build wheels
         run: ./samba/dc.sh ./build_and_test_wheels27.sh
       - uses: actions/upload-artifact@v3
