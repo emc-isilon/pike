@@ -148,7 +148,7 @@ class Persistent(test.PikeTest):
     def test_resiliency_reconnect_before_timeout(self):
         handle1 = self.create_persistent()
         self.assertTrue(handle1.is_persistent)
-        timeout = 4000
+        timeout = 10000
         wait_time = timeout / 1000.0 * 0.5
         a = self.channel.network_resiliency_request(handle1, timeout=timeout)
         self.assertTrue(handle1.is_resilient)
