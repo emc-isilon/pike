@@ -1,4 +1,5 @@
-FROM quay.io/pypa/manylinux2010_x86_64
+#FROM quay.io/pypa/manylinux2010_x86_64
+FROM quay.io/pypa/manylinux2010_x86_64:2022-08-05-4535177
 COPY . /src/pike
 RUN yum clean all && \
     yum -d 10 update -y yum && \
