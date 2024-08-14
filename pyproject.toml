@@ -17,9 +17,7 @@ test-command = [
 
 [tool.cibuildwheel.linux]
 environment-pass = ["HOST_IPV4", "SAMBA_REALM", "SAMBA_SERVER", "ADMIN_PASSWORD"]
-before-all = """sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*; 
-                sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*;
-                yum install -y krb5-devel krb5-workstation"""
+before-all = "yum install -y krb5-devel krb5-workstation"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-musllinux*"
