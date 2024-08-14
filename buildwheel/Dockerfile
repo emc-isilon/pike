@@ -1,10 +1,10 @@
 FROM quay.io/pypa/manylinux2010_x86_64
 COPY . /src/pike
-RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && \
+RUN "sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && \
     sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-* && \
     yum install -y krb5-devel krb5-workstation python27 && \
     source /opt/rh/python27/enable && \
     python2.7 -m pip install -U 'pip<21' && \
-    python2.7 -m pip install build
+    python2.7 -m pip install build"
 
 CMD /src/pike/buildwheel/wheel27.sh
