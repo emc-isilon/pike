@@ -7,6 +7,9 @@ RUN source /opt/rh/python27/enable
 RUN export PATH=$PATH:/opt/rh/python27/root/usr/bin
 RUN ls /opt/rh/python27/root/usr/bin/python2.7
 RUN whereis libpython2.7.so.1.0
+RUN export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/rh/python27/root/usr/lib64
+RUN echo /opt/rh/python27/root/usr/lib64 >> /etc/ld.so.conf
+RUN ldconfig
 RUN /opt/rh/python27/root/usr/bin/python2.7 -m pip install -U 'pip<21'
 RUN /opt/rh/python27/root/usr/bin/python2.7 -m pip install build
 
