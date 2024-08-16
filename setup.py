@@ -6,7 +6,6 @@
 #
 import ctypes
 import os
-import subprocess
 
 try:
     from setuptools import setup, Extension
@@ -16,9 +15,6 @@ from distutils.errors import CCompilerError, DistutilsExecError, DistutilsPlatfo
 
 _HERED = os.path.abspath(os.path.dirname(__file__))
 
-val = subprocess.Popen("git describe", stdout=subprocess.PIPE, shell=True)
-out, err = val.communicate()
-tag = out.decode('utf-8').strip("\n")
 try:
     libgssapi_krb5 = ctypes.CDLL("libgssapi_krb5.so")
     defines = [
@@ -41,7 +37,7 @@ try:
         libraries=["gssapi_krb5"],
         define_macros=defines,
     )
-    setup(ext_modules=[lw_krb_module], version=tag)
+    setup(ext_modules=[lw_krb_module])
 except (OSError, CCompilerError, DistutilsExecError, DistutilsPlatformError):
     print("libgssapi_krb5 not available, skipping kerberos module")
-    setup(version=tag)
+    setup()
