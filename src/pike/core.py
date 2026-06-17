@@ -251,8 +251,10 @@ class Cursor(object):
     def encode_int64le(self, val):
         self.encode_struct("<q", val)
 
+
     def encode_utf16le(self, val):
-        self.encode_bytes(str(val).encode("utf-16le"))
+        self.encode_bytes(str(val).encode("utf-16le", errors="surrogatepass"))
+
 
     def trunc(self):
         self._expand_to(self.offset)
@@ -311,7 +313,7 @@ class Cursor(object):
         return self.decode_struct("<q")[0]
 
     def decode_utf16le(self, size):
-        return self.decode_bytes(size).tobytes().decode("utf-16le")
+        return self.decode_bytes(size).tobytes().decode("utf-16le", errors="surrogatepass")
 
     def align(self, base, val):
         assert self.array is base.array
